@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "ES2018",
+        "module": "commonjs",
+        "strict": true,
+        "importHelpers": false,
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "removeComments": true,
+        "noImplicitAny": false,
+        "baseUrl": "./",
+        "outDir": "./dist/",
+        "lib": ["ES2016", "DOM", "DOM.Iterable"],
+        "declaration": true,
+        "stripInternal": true
+    }
+}
