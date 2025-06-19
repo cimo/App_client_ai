@@ -1,4 +1,11 @@
 .DS_Store
+MANIFEST
+__pycache__
+.coverage
+.tox/
+*.egg-info
+*.pot
+*.py[co]
 
 # Log files
 npm-debug.log*
@@ -16,5 +23,7 @@ pnpm-debug.log*
 # cimo +
 build
 dist
+file
+log
 node_modules
 package-lock.json
