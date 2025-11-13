@@ -49,7 +49,7 @@
         "sass": "1.57.1",
         "typescript": "4.9.4",
         "nodemon": "2.0.21",
-        "electron": "26.2.0",
+        "electron": "35.7.5",
         "electron-builder": "24.6.4"
     },
     "resolutions": {
