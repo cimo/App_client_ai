@@ -1,5 +1,0 @@
-{
-    "ext": "ts",
-    "watch": ["src"],
-    "exec": "NODE_OPTIONS= && tsc --build -clean && tsc --build tsconfig.build.json && npx electron . --no-sandbox --disable-gpu"
-}

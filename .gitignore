@@ -21,9 +21,6 @@ pnpm-debug.log*
 *.sw?
 
 # cimo +
-build
 dist
-file
-log
 node_modules
 package-lock.json

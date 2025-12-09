@@ -1,59 +1,43 @@
 {
-    "name": "@cimo/jidou",
+    "name": "app_jidou",
     "version": "1.0.0",
-    "description": "Automatic interaction system.",
+    "description": "Example app with rust and tauri package.",
     "author": "cimo",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/cimo/jidou.git"
+        "url": "git+https://github.com/cimo/App_jidou.git"
     },
+    "type": "module",
     "scripts": {
-        "preinstall": "([ ! -f package-lock.json ] && npm install --package-lock-only --ignore-scripts --no-audit); npx --yes npm-force-resolutions",
-        "sass": "sass --watch ./src/style/main.scss ./public/css/main.css",
-        "check": "eslint . --fix",
-        "execute": "nodemon --config nodemon.json",
-        "start": "npx electron . --no-sandbox",
-        "build": "npm run check && tsc --build -clean && tsc --build tsconfig.build.json && npx electron-builder --dir --windows --x64"
-    },
-    "appId": "com.cimo.jidou",
-    "productName": "Runtime Broker",
-    "main": "./dist/index.js",
-    "build": {
-        "directories": {
-            "buildResources": "./public/",
-            "output": "./build/"
-        },
-        "files": [
-            "./public/**/*",
-            "./dist/**/*"
-        ],
-        "linux": {
-            "icon": "./public/image/logo.png"
-        },
-        "win": {
-            "icon": "./public/image/logo.ico"
-        }
+        "preinstall": "npx npm-force-resolutions",
+        "remove_dist": "node -e \"const fs = require('fs'); try{ fs.rmdirSync('./dist/', { recursive: true }) } catch{}; process.exit(0);\"",
+        "check": "eslint --no-cache --config eslint.config.js",
+        "sass": "sass ./src/style/main.scss ./src/main.css",
+        "build_tsc": "npm run remove_dist && tsc --build tsconfig.tsc.json",
+        "vite_dev": "npm audit && npm run build_tsc && npm run check && npm run sass && vite",
+        "vite_preview": "npm audit && npm run build_tsc && npm run check && npm run sass && vite preview",
+        "vite_build": "npm audit && npm run build_tsc && npm run check && npm run sass && tsc --noEmit --project tsconfig.json && vite build --config vite.config.ts",
+        "tauri_dev": "tauri dev",
+        "tauri_build_linux": "tauri build",
+        "tauri_build_windows_x86_64": "tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc",
+        "tauri_build_windows_aarch64": "tauri build --runner cargo-xwin --target aarch64-pc-windows-msvc"
     },
     "dependencies": {
-        "@nut-tree/nut-js": "3.1.2"
+        "@tauri-apps/api": "2.9.1",
+        "@tauri-apps/plugin-opener": "2.5.2"
     },
     "devDependencies": {
-        "@types/node": "18.14.4",
-        "@typescript-eslint/eslint-plugin": "5.54.0",
-        "@typescript-eslint/parser": "5.54.0",
-        "eslint": "8.35.0",
-        "eslint-config-prettier": "8.8.0",
-        "eslint-plugin-prettier": "4.2.1",
-        "prettier": "2.8.7",
-        "sass": "1.57.1",
-        "typescript": "4.9.4",
-        "nodemon": "2.0.21",
-        "electron": "35.7.5",
-        "electron-builder": "24.6.4"
+        "typescript": "5.7.2",
+        "eslint": "9.31.0",
+        "@typescript-eslint/parser": "8.24.1",
+        "@typescript-eslint/eslint-plugin": "8.24.1",
+        "eslint-plugin-prettier": "5.2.1",
+        "prettier": "3.4.2",
+        "@types/node": "22.10.2",
+        "sass": "1.83.0",
+        "@tauri-apps/cli": "2.9.5",
+        "vite": "6.4.1"
     },
-    "resolutions": {
-        "node-fetch": "2.6.7",
-        "**/node-fetch": "2.6.7"
-    }
+    "resolutions": {}
 }

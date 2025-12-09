@@ -1,9 +1,47 @@
-# Jidou_input
+# App_jidou
 
-Automatic interaction system.
-
-Move mouse after the setted time, possible to customize the setting and will run in hide mode (shortcut key are available).
+App example for rust and tauri package.
 
 ## Info:
 
--   Cross platform (Windows, Linux)
+This is the example app, for understanding how to use the rust and tauri framework.
+
+## Installation
+
+1. Write on terminal:
+
+```
+npm install
+```
+
+2. For development write on terminal:
+
+```
+npm run tauri_dev
+```
+
+3. For build write on terminal:
+
+- 64-bit (AppImage, deb, rpm):
+```
+npm run tauri_build_linux
+```
+
+- 64-bit (Exe, nsis):
+```
+npm run tauri_build_windows_x86_64
+```
+
+- 64-bit ARM (Exe, nsis):
+```
+npm run tauri_build_windows_aarch64
+```
+
+## Reset
+
+1. Remove this from the root:
+
+    - node_modules
+    - package-lock.json
+
+2. Follow the "Installation" instructions.
