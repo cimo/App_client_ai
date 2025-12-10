@@ -16,7 +16,6 @@
         "sass": "sass ./src/style/main.scss ./src/main.css",
         "build_tsc": "npm run remove_dist && tsc --build tsconfig.tsc.json",
         "vite_dev": "npm audit && npm run build_tsc && npm run check && npm run sass && vite",
-        "vite_preview": "npm audit && npm run build_tsc && npm run check && npm run sass && vite preview",
         "vite_build": "npm audit && npm run build_tsc && npm run check && npm run sass && tsc --noEmit --project tsconfig.json && vite build --config vite.config.ts",
         "tauri_dev": "tauri dev",
         "tauri_build_linux": "tauri build",

@@ -3,17 +3,11 @@
     "productName": "app_jidou",
     "version": "1.0.0",
     "identifier": "com.node.app-jidou",
-    "build": {
-        "devUrl": "http://localhost:30001",
-        "beforeDevCommand": "npm run vite_dev",
-        "beforeBuildCommand": "npm run vite_build",
-        "frontendDist": "../dist"
-    },
     "app": {
         "withGlobalTauri": true,
         "windows": [
             {
-                "title": "app_jidou",
+                "title": "Jidou",
                 "width": 800,
                 "height": 600
             }
@@ -21,6 +15,12 @@
         "security": {
             "csp": null
         }
+    },
+    "build": {
+        "frontendDist": "../dist",
+        "devUrl": "http://localhost:30001",
+        "beforeDevCommand": "npm run vite_dev",
+        "beforeBuildCommand": "npm run vite_build"
     },
     "bundle": {
         "active": true,
@@ -33,7 +33,7 @@
             "icons/icon.ico"
         ],
         "windows": {
-            "signCommand": "bash /home/app/script/tauri_windows_sign.sh app_jidou {{target}}"
+            "signCommand": "bash /home/app/script/tauri_windows_sign.sh"
         }
     }
 }
