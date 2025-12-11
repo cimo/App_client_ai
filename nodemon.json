@@ -1,0 +1,6 @@
+{
+    "ext": "ts,tsx,js,jsx,scss",
+    "watch": ["src"],
+    "ignore": [],
+    "exec": "npm run build && webpack serve --config webpack.build.js --port 30000 --no-hot --no-live-reload --no-client-overlay"
+}

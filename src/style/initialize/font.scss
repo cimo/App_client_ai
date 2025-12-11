@@ -1,0 +1,26 @@
+@font-face {
+    font-family: "roboto-regular";
+    font-style: normal;
+    font-weight: 100;
+    src:
+        url("../font/roboto-regular.woff2") format("woff2"),
+        url("../font/roboto-regular.woff") format("woff"),
+        url("../font/roboto-regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "material-icon-rounded";
+    font-style: normal;
+    font-weight: 100 700;
+    font-display: block;
+    src:
+        url("../font/material-icon-rounded.woff2") format("woff2"),
+        url("../font/material-icon-rounded.woff") format("woff");
+}
+
+body {
+    *:not(.cls_icon) {
+        font-family: "roboto-regular" !important;
+        font-size: 15px !important;
+    }
+}

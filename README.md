@@ -1,10 +1,10 @@
 # App_jidou
 
-App example for rust and tauri package.
+App example with tauri and Npm_jsMvcFw package.
 
 ## Info:
 
-This is the example app, for understanding how to use the rust and tauri framework.
+Example app to demonstrate how to use the tauri framework.
 
 ## Installation
 

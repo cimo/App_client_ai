@@ -1,0 +1,99 @@
+html,
+body,
+#jsmvcfw_app,
+.full,
+.page_container {
+    width: 100%;
+    height: 100%;
+}
+
+:root {
+    color: #0f0f0f;
+    background-color: #f6f6f6;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+.logo {
+    height: 120px;
+    padding: 10px;
+    will-change: filter;
+
+    &.cimo {
+        &:hover {
+            filter: drop-shadow(0 0 2em #0b539b);
+        }
+    }
+
+    &.typescript {
+        &:hover {
+            filter: drop-shadow(0 0 2em #2d79c7);
+        }
+    }
+
+    &.tauri {
+        &:hover {
+            filter: drop-shadow(0 0 2em #24c8db);
+        }
+    }
+}
+
+.page_container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+
+    input,
+    button {
+        border-radius: 8px;
+        border: 1px solid transparent;
+        padding: 5px;
+        color: #0f0f0f;
+        background-color: #ffffff;
+        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+        outline: none;
+        align-self: center;
+    }
+
+    button {
+        margin: 10px;
+        cursor: pointer;
+
+        &:hover {
+            border-color: #396cd8;
+        }
+
+        &:active {
+            border-color: #396cd8;
+            background-color: #e8e8e8;
+        }
+    }
+
+    p {
+        margin: auto 0;
+    }
+
+    .row {
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color: #f6f6f6;
+        background-color: #2f2f2f;
+    }
+
+    input,
+    button {
+        color: #ffffff;
+        background-color: #0f0f0f98;
+    }
+}

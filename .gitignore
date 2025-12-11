@@ -22,5 +22,14 @@ pnpm-debug.log*
 
 # cimo +
 dist
+log/*
+!log/.gitkeep
 node_modules
+public/file/*
+!public/file/.gitkeep
+public/asset/js/*
+!public/asset/js/.gitkeep
+public/asset/style/*
+!public/asset/style/.gitkeep
+public/index.html
 package-lock.json
