@@ -24,17 +24,12 @@ npm run tauri_dev
 
 - 64-bit (AppImage, deb, rpm):
 ```
-npm run tauri_build_linux
+npm run tauri_build_linux_x86_64
 ```
 
 - 64-bit (Exe, nsis):
 ```
 npm run tauri_build_windows_x86_64
-```
-
-- 64-bit ARM (Exe, nsis):
-```
-npm run tauri_build_windows_aarch64
 ```
 
 ## Reset

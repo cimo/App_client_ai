@@ -1,5 +1,5 @@
 [package]
-name = "app_jidou"
+name = "Jidou"
 version = "1.0.0"
 description = "App example for rust and tauri package."
 authors = ["cimo"]

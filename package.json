@@ -18,9 +18,8 @@
         "vite_dev": "npm audit && npm run build_tsc && npm run check && npm run sass && vite",
         "vite_build": "npm audit && npm run build_tsc && npm run check && npm run sass && tsc --noEmit --project tsconfig.json && vite build --config vite.config.ts",
         "tauri_dev": "tauri dev",
-        "tauri_build_linux": "tauri build",
-        "tauri_build_windows_x86_64": "tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc",
-        "tauri_build_windows_aarch64": "tauri build --runner cargo-xwin --target aarch64-pc-windows-msvc"
+        "tauri_build_linux_x86_64": "tauri build --target x86_64-unknown-linux-gnu",
+        "tauri_build_windows_x86_64": "tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc"
     },
     "dependencies": {
         "@tauri-apps/api": "2.9.1",

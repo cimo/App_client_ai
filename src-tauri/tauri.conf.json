@@ -1,6 +1,6 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
-    "productName": "app_jidou",
+    "productName": "app-jidou",
     "version": "1.0.0",
     "identifier": "com.node.app-jidou",
     "app": {
@@ -17,9 +17,9 @@
         }
     },
     "build": {
-        "frontendDist": "../dist",
         "devUrl": "http://localhost:30001",
         "beforeDevCommand": "npm run vite_dev",
+        "frontendDist": "../dist",
         "beforeBuildCommand": "npm run vite_build"
     },
     "bundle": {
@@ -31,9 +31,6 @@
             "icons/128x128@2x.png",
             "icons/icon.icns",
             "icons/icon.ico"
-        ],
-        "windows": {
-            "signCommand": "bash /home/app/script/tauri_windows_sign.sh"
-        }
+        ]
     }
 }
