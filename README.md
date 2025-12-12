@@ -1,10 +1,10 @@
-# App_jidou
+# App_client_ai
 
-App example with tauri and Npm_jsMvcFw package.
+App client ai with Npm_jsMvcFw package.
 
 ## Info:
 
-Example app to demonstrate how to use the tauri framework.
+AI client application for communicating with a model hosted on a server.
 
 ## Installation
 

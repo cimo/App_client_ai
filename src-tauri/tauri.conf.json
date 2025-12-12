@@ -1,13 +1,13 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
-    "productName": "app-jidou",
+    "productName": "client-ai",
     "version": "1.0.0",
-    "identifier": "com.node.app-jidou",
+    "identifier": "com.node.client-ai",
     "app": {
         "withGlobalTauri": true,
         "windows": [
             {
-                "title": "Jidou",
+                "title": "Client ai",
                 "width": 800,
                 "height": 600
             }

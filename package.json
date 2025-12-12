@@ -1,12 +1,12 @@
 {
-    "name": "app_jidou",
+    "name": "app_client_ai",
     "version": "1.0.0",
-    "description": "Example app to demonstrate how to use the tauri framework.",
+    "description": "AI client application for communicating with a model hosted on a server.",
     "author": "cimo",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/cimo/App_jidou.git"
+        "url": "git+https://github.com/cimo/App_client_ai.git"
     },
     "type": "module",
     "scripts": {
