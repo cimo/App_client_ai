@@ -1,7 +1,6 @@
 html,
 body,
 #jsmvcfw_app,
-.full,
 .page_container {
     width: 100%;
     height: 100%;
@@ -10,17 +9,11 @@ body,
 :root {
     color: #0f0f0f;
     background-color: #f6f6f6;
-
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-text-size-adjust: 100%;
 }
 
 .logo {
     height: 120px;
-    padding: 10px;
+    margin: 10px 25px;
     will-change: filter;
 
     &.cimo {
@@ -66,11 +59,6 @@ body,
 
         &:hover {
             border-color: #396cd8;
-        }
-
-        &:active {
-            border-color: #396cd8;
-            background-color: #e8e8e8;
         }
     }
 

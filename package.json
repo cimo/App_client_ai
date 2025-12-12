@@ -10,7 +10,7 @@
     },
     "type": "module",
     "scripts": {
-        "preinstall": "npx npm-force-resolutions",
+        "preinstall": "npx -y npm-force-resolutions",
         "remove_dist": "node -e \"const fs = require('fs'); try{ fs.rmdirSync('./dist/', { recursive: true }) } catch{}; process.exit(0);\"",
         "remove_public_js": "node -e \"const fs = require('fs'); try{ fs.rmdirSync('./public/asset/js/', { recursive: true }) } catch{}; process.exit(0);\"",
         "remove_public_style": "node -e \"const fs = require('fs'); try{ fs.rmdirSync('./public/asset/style/', { recursive: true }) } catch{}; process.exit(0);\"",
