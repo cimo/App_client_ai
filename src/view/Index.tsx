@@ -40,7 +40,17 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                 </button>
             </div>
             <div class="row">
-                <p jsmvcfw-elementHookName="elementResultMessage"></p>
+                <ul>
+                    {(() => {
+                        const result: IvirtualNode[] = [];
+
+                        for (const [key, value] of Object.entries(variableObject.modelList.state)) {
+                            result.push(<li key={key}>{value.id}</li>);
+                        }
+
+                        return result;
+                    })()}
+                </ul>
             </div>
         </div>
     );
