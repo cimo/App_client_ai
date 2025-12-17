@@ -1,3 +1,12 @@
+/*
+Call "send_message" from frontend.
+
+const result: string = await invoke("send_message", {
+    message: this.hookObject.elementInputMessage.value
+});
+
+this.hookObject.elementResultMessage.innerText = result;*/
+
 #[tauri::command]
 fn send_message(message: &str) -> String {
     format!("Your message is: {}", message)

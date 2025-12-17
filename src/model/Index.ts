@@ -14,12 +14,10 @@ export interface IresponseBody {
 }
 
 export interface Ivariable {
-    count: IvariableBind<number>;
     modelList: IvariableBind<IlmStudioModel[]>;
 }
 
 export interface Imethod {
-    onClickCount: () => void;
     onClickButton: () => void;
 }
 

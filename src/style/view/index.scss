@@ -7,32 +7,12 @@ body,
 }
 
 :root {
-    color: #0f0f0f;
-    background-color: #f6f6f6;
+    color: #f6f6f6;
+    background-color: #2f2f2f;
 }
 
-.logo {
-    height: 120px;
-    margin: 10px 25px;
-    will-change: filter;
-
-    &.cimo {
-        &:hover {
-            filter: drop-shadow(0 0 2em #0b539b);
-        }
-    }
-
-    &.typescript {
-        &:hover {
-            filter: drop-shadow(0 0 2em #2d79c7);
-        }
-    }
-
-    &.tauri {
-        &:hover {
-            filter: drop-shadow(0 0 2em #24c8db);
-        }
-    }
+.sendMessage {
+    background-color: rgba(117, 117, 117, 0.13);
 }
 
 .page_container {
@@ -41,13 +21,14 @@ body,
     justify-content: center;
     text-align: center;
 
+    textarea,
     input,
     button {
         border-radius: 8px;
         border: 1px solid transparent;
         padding: 5px;
-        color: #0f0f0f;
-        background-color: #ffffff;
+        color: #ffffff;
+        background-color: #0f0f0f98;
         box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
         outline: none;
         align-self: center;
@@ -73,15 +54,16 @@ body,
     }
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
     :root {
-        color: #f6f6f6;
-        background-color: #2f2f2f;
+        color: #0f0f0f;
+        background-color: #f6f6f6;
     }
 
+    textarea,
     input,
     button {
-        color: #ffffff;
-        background-color: #0f0f0f98;
+        color: #0f0f0f;
+        background-color: #ffffff;
     }
 }

@@ -36,17 +36,7 @@ export default class Index implements Icontroller {
         });
     };
 
-    private onClickCount = (): void => {
-        this.variableObject.count.state += 1;
-    };
-
     private onClickButton = (): void => {
-        /*const result: string = await invoke("send_message", {
-            message: this.hookObject.elementInputMessage.value
-        });
-        
-        this.hookObject.elementResultMessage.innerText = result;*/
-
         this.apiModel();
     };
 
@@ -60,14 +50,12 @@ export default class Index implements Icontroller {
     variable(): void {
         this.variableObject = variableBind(
             {
-                count: 0,
                 modelList: []
             },
             this.constructor.name
         );
 
         this.methodObject = {
-            onClickCount: this.onClickCount,
             onClickButton: this.onClickButton
         };
     }
