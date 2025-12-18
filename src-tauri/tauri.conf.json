@@ -8,8 +8,9 @@
         "windows": [
             {
                 "title": "Client ai",
-                "width": 800,
-                "height": 600
+                "width": 450,
+                "height": 600,
+                "theme": "Dark"
             }
         ],
         "security": {
