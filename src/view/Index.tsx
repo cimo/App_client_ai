@@ -7,23 +7,6 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
     return (
         <div class="page_container view_index" jsmvcfw-controllerName="Index">
             <div class="row">
-                <label for="messageSend">Message to send</label>
-                <textarea
-                    jsmvcfw-elementHookName="elementInputMessage"
-                    id="messageSend"
-                    name="messageSend"
-                    class="cls_textarea field_value"
-                    rows="4"
-                ></textarea>
-                <button
-                    onclick={() => {
-                        methodObject.onClickButton();
-                    }}
-                >
-                    Send
-                </button>
-            </div>
-            <div class="row">
                 <ul>
                     {(() => {
                         const result: IvirtualNode[] = [];
@@ -35,6 +18,35 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                         return result;
                     })()}
                 </ul>
+            </div>
+
+            <div class="container_messageReceive row">
+                {(() => {
+                    const result: IvirtualNode[] = [];
+
+                    if (variableObject.modelResponseThink.state) {
+                        result.push(
+                            <details>
+                                <summary>Show reasoning</summary>
+                                <pre>{variableObject.modelResponseThink.state}</pre>
+                            </details>
+                        );
+                    }
+
+                    return result;
+                })()}
+                <pre>{variableObject.modelResponse.state}</pre>
+            </div>
+            <div class="container_messageSend row">
+                <label for="messageSend"></label>
+                <textarea jsmvcfw-elementHookName="elementInputMessageSend" id="messageSend" name="messageSend" rows="4"></textarea>
+                <button
+                    onclick={() => {
+                        methodObject.onClickButtonMessageSend();
+                    }}
+                >
+                    Send
+                </button>
             </div>
         </div>
     );

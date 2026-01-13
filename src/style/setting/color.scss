@@ -1,0 +1,149 @@
+// Blue Medium
+$blueMedium: #005eb8;
+$blueMedium100: #e0f0ff;
+$blueMedium200: #bddeff;
+$blueMedium300: #99cdff;
+$blueMedium400: #66b4ff;
+$blueMedium500: #2594ff;
+$blueMedium600: #005eb8;
+$blueMedium700: #00498f;
+$blueMedium800: #002a52;
+
+// Blue Light
+$blueLight: #0091da;
+$blueLight100: #dbf3ff;
+$blueLight200: #ade4ff;
+$blueLight300: #75d1ff;
+$blueLight400: #3bbdff;
+$blueLight500: #0091da;
+$blueLight600: #006699;
+$blueLight700: #00476b;
+$blueLight800: #003047;
+
+// Green
+$green: #33b215;
+$green100: #e4fbdf;
+$green200: #d5f9cd;
+$green300: #abf39b;
+$green400: #7eed64;
+$green500: #40df1a;
+$green600: #33b215;
+$green700: #278910;
+$green800: #1b600b;
+
+// Grey
+$grey100: #f0f2f6;
+$grey200: #e6e9f0;
+$grey300: #d9dee8;
+$grey400: #ccd3e0;
+$grey500: #b9c2d5;
+$grey600: #a6b2c9;
+$grey700: #99a7c2;
+$grey800: #7f90b3;
+$grey900: #7083a9;
+$grey1000: #56698f;
+$grey1100: #435270;
+$grey1200: #303a50;
+$grey1300: #262f40;
+$grey1400: #191e29;
+
+// Orange
+$orange: #eaaa00;
+$orange100: #fff1cc;
+$orange200: #ffe9ad;
+$orange300: #ffd566;
+$orange400: #ffc429;
+$orange500: #eaaa00;
+$orange600: #d19800;
+$orange700: #a87a00;
+$orange800: #856000;
+
+// Pink
+$pink: #c6007e;
+$pink100: #ffdbf2;
+$pink200: #ffc7eb;
+$pink300: #ffa3de;
+$pink400: #ff66c7;
+$pink500: #ff2eb3;
+$pink600: #c6007e;
+$pink700: #990061;
+$pink800: #660040;
+
+// Purple
+$purple: #470a68;
+$purple100: #ecd1fa;
+$purple200: #e0b5f8;
+$purple300: #cb82f2;
+$purple400: #b64fed;
+$purple500: #9f16e9;
+$purple600: #7210a8;
+$purple700: #470a68;
+$purple800: #300746;
+
+// Purple Light
+$purpleLight: #6d2077;
+$purpleLight100: #f1d7f4;
+$purpleLight200: #e4b3ea;
+$purpleLight300: #d486df;
+$purpleLight400: #c14ed0;
+$purpleLight500: #932ba1;
+$purpleLight600: #6d2077;
+$purpleLight700: #4d1655;
+$purpleLight800: #330f39;
+
+// Red
+$red: #dc003d;
+$red100: #ffe5ec;
+$red200: #ffc2d3;
+$red300: #ff80a2;
+$red400: #ff3d72;
+$red500: #dc003d;
+$red600: #ad0030;
+$red700: #850025;
+$red800: #61001b;
+
+// Teal
+$teal: #00a3a1;
+$teal100: #e5ffff;
+$teal200: #c2fffe;
+$teal300: #8afffd;
+$teal400: #00ebe7;
+$teal500: #00ccc9;
+$teal600: #00a3a1;
+$teal700: #007a79;
+$teal800: #005251;
+
+// Yellow
+$yellow: #ffea00;
+$yellow100: #fffcd6;
+$yellow200: #fff8a8;
+$yellow300: #fff25c;
+$yellow400: #ffea00;
+$yellow500: #ebd700;
+$yellow600: #ccbb00;
+$yellow700: #9e9100;
+$yellow800: #706700;
+
+// Generic
+$white: #ffffff;
+$black: #000000;
+$blackRgba: rgba(0, 0, 0, 0.4);
+
+// Button
+$buttonPrimary: $green600;
+$buttonPrimaryHover: $green500;
+$buttonSecondary: $blueMedium600;
+$buttonSecondaryHover: $blueMedium500;
+$buttonFlat: $blueMedium600;
+$buttonFlatHover: $grey100;
+$buttonDanger: $red500;
+$buttonDangerHover: $red400;
+$buttonDisabled: $grey1000;
+
+// Background
+$backgroundLight: $grey100;
+$backgroundSuccess: $green100;
+$backgroundFail: $red100;
+
+//Shadow
+$boxShadow: 0 1px 6px 0 $blackRgba;
