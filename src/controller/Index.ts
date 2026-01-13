@@ -11,6 +11,21 @@ export default class Index implements Icontroller {
     private methodObject: modelIndex.Imethod;
 
     // Method
+    private dataDone = (contentPending: string, isThinking: boolean, responseThink: string, responseNoThink: string): void => {
+        if (contentPending) {
+            if (isThinking) {
+                responseThink += contentPending;
+            } else {
+                responseNoThink += contentPending;
+            }
+
+            contentPending = "";
+        }
+
+        this.variableObject.modelResponseThink.state = responseThink.trim();
+        this.variableObject.modelResponseNoThink.state = responseNoThink.trim();
+    };
+
     private apiLogin = (): void => {
         fetch("https://172.20.0.1:1046/login", {
             method: "GET",
@@ -36,13 +51,15 @@ export default class Index implements Icontroller {
     };
 
     private apiChatCompletions = (): void => {
+        this.variableObject.messageSendCopy.state = this.hookObject.elementInputMessageSend.value;
+
         this.variableObject.modelResponseThink.state = "";
-        this.variableObject.modelResponse.state = "";
+        this.variableObject.modelResponseNoThink.state = "";
 
         let isThinking = false;
-        let pending = "";
-        let visibleText = "";
-        let thinkText = "";
+        let contentPending = "";
+        let responseThink = "";
+        let responseNoThink = "";
 
         fetch("https://172.20.0.1:1046/api/v1/chat/completions", {
             method: "POST",
@@ -79,18 +96,7 @@ export default class Index implements Icontroller {
                 const { value, done } = await reader.read();
 
                 if (done) {
-                    if (pending) {
-                        if (isThinking) {
-                            thinkText += pending;
-                        } else {
-                            visibleText += pending;
-                        }
-
-                        pending = "";
-                    }
-
-                    this.variableObject.modelResponseThink.state = thinkText.trim();
-                    this.variableObject.modelResponse.state = visibleText.trim();
+                    this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
 
                     break;
                 }
@@ -104,18 +110,7 @@ export default class Index implements Icontroller {
                         const data = line.slice(5).trim();
 
                         if (data === "[DONE]") {
-                            if (pending) {
-                                if (isThinking) {
-                                    thinkText += pending;
-                                } else {
-                                    visibleText += pending;
-                                }
-
-                                pending = "";
-                            }
-
-                            this.variableObject.modelResponseThink.state = thinkText.trim();
-                            this.variableObject.modelResponse.state = visibleText.trim();
+                            this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
 
                             return;
                         }
@@ -128,44 +123,45 @@ export default class Index implements Icontroller {
                             const content = json.choices[0].delta.content;
 
                             if (content) {
-                                pending += content;
+                                contentPending += content;
 
                                 while (true) {
-                                    const openIdx = pending.indexOf("<think>");
-                                    const closeIdx = pending.indexOf("</think>");
+                                    const thinkTagOpen = contentPending.indexOf("<think>");
+                                    const thinkTagClose = contentPending.indexOf("</think>");
 
                                     if (!isThinking) {
-                                        if (openIdx === -1) {
-                                            // No opening tag: all pending is visible
-                                            visibleText += pending;
-                                            pending = "";
+                                        if (thinkTagOpen === -1) {
+                                            responseNoThink += contentPending;
+
+                                            contentPending = "";
+
                                             break;
                                         } else {
-                                            // Visible part before <think>
-                                            visibleText += pending.slice(0, openIdx);
-                                            // Enter think
-                                            pending = pending.slice(openIdx + "<think>".length);
+                                            responseNoThink += contentPending.slice(0, thinkTagOpen);
+
+                                            contentPending = contentPending.slice(thinkTagOpen + "<think>".length);
+
                                             isThinking = true;
-                                            // Continue loop to look for close
                                         }
                                     } else {
-                                        if (closeIdx === -1) {
-                                            // Inside think, no close yet: all pending goes to think
-                                            thinkText += pending;
-                                            pending = "";
+                                        if (thinkTagClose === -1) {
+                                            responseThink += contentPending;
+
+                                            contentPending = "";
+
                                             break;
                                         } else {
-                                            // Inside think, close found
-                                            thinkText += pending.slice(0, closeIdx);
-                                            pending = pending.slice(closeIdx + "</think>".length);
+                                            responseThink += contentPending.slice(0, thinkTagClose);
+
+                                            contentPending = contentPending.slice(thinkTagClose + "</think>".length);
+
                                             isThinking = false;
-                                            // Continue loop: there may be more visible/think portions
                                         }
                                     }
                                 }
 
-                                this.variableObject.modelResponseThink.state = thinkText.trim();
-                                this.variableObject.modelResponse.state = visibleText.trim();
+                                this.variableObject.modelResponseThink.state = responseThink.trim();
+                                this.variableObject.modelResponseNoThink.state = responseNoThink.trim();
                             }
                         }
                     }
@@ -190,7 +186,8 @@ export default class Index implements Icontroller {
             {
                 modelList: [],
                 modelResponseThink: "",
-                modelResponse: ""
+                modelResponseNoThink: "",
+                messageSendCopy: ""
             },
             this.constructor.name
         );

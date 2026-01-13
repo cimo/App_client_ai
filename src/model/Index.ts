@@ -34,7 +34,8 @@ export interface IresponseBody {
 export interface Ivariable {
     modelList: IvariableBind<IlmStudioModel[]>;
     modelResponseThink: IvariableBind<string>;
-    modelResponse: IvariableBind<string>;
+    modelResponseNoThink: IvariableBind<string>;
+    messageSendCopy: IvariableBind<string>;
 }
 
 export interface Imethod {

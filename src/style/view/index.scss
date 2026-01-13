@@ -47,10 +47,31 @@ body,
         flex-direction: column;
         align-items: flex-start;
 
+        .messageSend_copy {
+            align-self: end;
+            margin: 5px 0;
+            border-radius: 8px;
+            border: 1px solid color.$grey700;
+            padding: 10px;
+        }
+
         details {
             background-color: #555555;
             padding: 5px;
             margin-bottom: 5px;
+
+            summary {
+                &::before {
+                    content: "\e749";
+                    font-family: "material-icon-rounded";
+                    margin-right: 5px;
+                    font-size: 20px;
+                    vertical-align: bottom;
+                }
+
+                cursor: pointer;
+                list-style: none;
+            }
 
             pre {
                 margin-top: 5px;

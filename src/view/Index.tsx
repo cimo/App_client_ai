@@ -19,8 +19,8 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     })()}
                 </ul>
             </div>
-
             <div class="container_messageReceive row">
+                <pre class="messageSend_copy">{variableObject.messageSendCopy.state}</pre>
                 {(() => {
                     const result: IvirtualNode[] = [];
 
@@ -35,7 +35,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
 
                     return result;
                 })()}
-                <pre>{variableObject.modelResponse.state}</pre>
+                <pre>{variableObject.modelResponseNoThink.state}</pre>
             </div>
             <div class="container_messageSend row">
                 <label for="messageSend"></label>
