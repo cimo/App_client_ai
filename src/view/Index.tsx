@@ -6,7 +6,7 @@ import * as modelIndex from "../model/Index";
 const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelIndex.Imethod): IvirtualNode => {
     return (
         <div class="page_container view_index" jsmvcfw-controllerName="Index">
-            <div class="row">
+            {/*<div class="row">
                 <ul>
                     {(() => {
                         const result: IvirtualNode[] = [];
@@ -18,36 +18,33 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                         return result;
                     })()}
                 </ul>
-            </div>
-            <div class="container_messageReceive row">
+            </div>*/}
+            <div jsmvcfw-elementHookName="elementContainerMessageReceive" class="container_message_receive">
                 {(() => {
                     const result: IvirtualNode[] = [];
 
-                    if (variableObject.messageSendCopy.state) {
+                    for (const [key, value] of Object.entries(variableObject.chatMessage.state)) {
                         result.push(
-                            <div class="container_messageSend_copy">
-                                <p>{variableObject.messageSendCopyTime.state}</p>
-                                <pre>{variableObject.messageSendCopy.state}</pre>
+                            <div key={key}>
+                                <div class="container_chat">
+                                    <p>{value.time}</p>
+                                    <pre>{value.user}</pre>
+                                </div>
+                                <details>
+                                    <summary>Show reasoning</summary>
+                                    <pre>{value.assistantThink}</pre>
+                                </details>
+                                <pre>{value.assistantNoThink}</pre>
                             </div>
-                        );
-                    }
-
-                    if (variableObject.modelResponseThink.state) {
-                        result.push(
-                            <details>
-                                <summary>Show reasoning</summary>
-                                <pre>{variableObject.modelResponseThink.state}</pre>
-                            </details>
                         );
                     }
 
                     return result;
                 })()}
-                <pre>{variableObject.modelResponseNoThink.state}</pre>
+                <div jsmvcfw-elementHookName="elementBottomLimit" class="bottom_limit"></div>
             </div>
-            <div class="container_messageSend row">
-                <label for="messageSend"></label>
-                <textarea jsmvcfw-elementHookName="elementInputMessageSend" id="messageSend" name="messageSend" rows="4"></textarea>
+            <div class="container_message_send">
+                <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
                 <button
                     onclick={() => {
                         methodObject.onClickButtonMessageSend();

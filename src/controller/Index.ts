@@ -12,6 +12,26 @@ export default class Index implements Icontroller {
     private methodObject: modelIndex.Imethod;
 
     // Method
+    private autoscroll = (isAuto: boolean): void => {
+        const elementContainerMessageReceive = this.hookObject.elementContainerMessageReceive;
+        const elementBottomLimit = this.hookObject.elementBottomLimit;
+
+        const difference =
+            elementContainerMessageReceive.scrollHeight - (elementContainerMessageReceive.scrollTop + elementContainerMessageReceive.clientHeight);
+        const threshold = 50;
+        const isAtBottom = difference <= threshold;
+
+        elementContainerMessageReceive.dataset["autoScroll"] = isAtBottom ? "true" : "false";
+
+        requestAnimationFrame(() => {
+            if (elementContainerMessageReceive.dataset["autoScroll"] === "false" && isAuto) {
+                return;
+            }
+
+            elementBottomLimit.scrollIntoView({ block: "end", inline: "nearest" });
+        });
+    };
+
     private dataDone = (contentPending: string, isThinking: boolean, responseThink: string, responseNoThink: string): void => {
         if (contentPending) {
             if (isThinking) {
@@ -23,12 +43,22 @@ export default class Index implements Icontroller {
             contentPending = "";
         }
 
-        this.variableObject.modelResponseThink.state = responseThink.trim();
-        this.variableObject.modelResponseNoThink.state = responseNoThink.trim();
+        this.variableObject.chatHistory.state.push({
+            role: "assistant",
+            content: responseNoThink.trim()
+        });
+
+        const index = this.variableObject.chatMessage.state.length - 1;
+
+        this.variableObject.chatMessage.state[index] = {
+            ...this.variableObject.chatMessage.state[index],
+            assistantThink: responseThink.trim(),
+            assistantNoThink: responseNoThink.trim()
+        };
     };
 
     private apiLogin = (): void => {
-        fetch("https://172.20.0.1:1046/login", {
+        fetch(`${helperSrc.URL_ENDPOINT}/login`, {
             method: "GET",
             danger: {
                 acceptInvalidCerts: true,
@@ -38,7 +68,7 @@ export default class Index implements Icontroller {
     };
 
     private apiModel = (): void => {
-        fetch("https://172.20.0.1:1046/api/v1/models", {
+        fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
             method: "GET",
             danger: {
                 acceptInvalidCerts: true,
@@ -51,129 +81,144 @@ export default class Index implements Icontroller {
         });
     };
 
-    private apiChatCompletions = (): void => {
-        this.variableObject.messageSendCopy.state = this.hookObject.elementInputMessageSend.value;
-        this.variableObject.messageSendCopyTime.state = helperSrc.localeFormat(new Date()) as string;
+    private apiChatCompletion = (): void => {
+        if (this.hookObject.elementInputMessageSend.value) {
+            this.variableObject.chatHistory.state.push({
+                role: "user",
+                content: this.hookObject.elementInputMessageSend.value
+            });
 
-        this.variableObject.modelResponseThink.state = "";
-        this.variableObject.modelResponseNoThink.state = "";
+            this.variableObject.chatMessage.state.push({
+                time: helperSrc.localeFormat(new Date()) as string,
+                user: this.hookObject.elementInputMessageSend.value,
+                assistantThink: "",
+                assistantNoThink: ""
+            });
 
-        let isThinking = false;
-        let contentPending = "";
-        let responseThink = "";
-        let responseNoThink = "";
+            this.autoscroll(false);
 
-        fetch("https://172.20.0.1:1046/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: "qwen3-1.7b",
-                messages: [
-                    { role: "system", content: "" },
-                    //{ role: "system", content: "/no_think" },
-                    { role: "user", content: this.hookObject.elementInputMessageSend.value }
-                ],
-                temperature: 0,
-                max_tokens: 512,
-                stream: true
-            }),
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        }).then(async (result) => {
-            const contentType = (result.headers.get("content-type") || "").toLowerCase();
+            let isThinking = false;
+            let contentPending = "";
+            let responseThink = "";
+            let responseNoThink = "";
 
-            if (!contentType.includes("text/event-stream")) {
-                return;
-            }
+            fetch(`${helperSrc.URL_ENDPOINT}/api/v1/chat/completions`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "qwen3-1.7b",
+                    messages: this.variableObject.chatHistory.state,
+                    temperature: 0.1,
+                    max_tokens: 512,
+                    stream: true
+                }),
+                danger: {
+                    acceptInvalidCerts: true,
+                    acceptInvalidHostnames: true
+                }
+            }).then(async (result) => {
+                const contentType = (result.headers.get("content-type") || "").toLowerCase();
 
-            const reader = result.body!.getReader();
-            const decoder = new TextDecoder("utf-8");
-            let buffer = "";
-
-            while (true) {
-                const { value, done } = await reader.read();
-
-                if (done) {
-                    this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
-
-                    break;
+                if (!contentType.includes("text/event-stream")) {
+                    return;
                 }
 
-                buffer += decoder.decode(value, { stream: true });
-                const lineList = buffer.split(/\r?\n/);
-                buffer = lineList.pop() || "";
+                const reader = result.body!.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let buffer = "";
 
-                for (const line of lineList) {
-                    if (line.startsWith("data:")) {
-                        const data = line.slice(5).trim();
+                while (true) {
+                    const { value, done } = await reader.read();
 
-                        if (data === "[DONE]") {
-                            this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
+                    if (done) {
+                        this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
 
-                            return;
-                        }
+                        break;
+                    }
 
-                        const dataTrim = data.trim();
+                    buffer += decoder.decode(value, { stream: true });
+                    const lineList = buffer.split(/\r?\n/);
+                    buffer = lineList.pop() || "";
 
-                        if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
-                            const json = JSON.parse(dataTrim) as modelIndex.IlmStudioChatCompletion;
+                    for (const line of lineList) {
+                        if (line.startsWith("data:")) {
+                            const data = line.slice(5).trim();
 
-                            const content = json.choices[0].delta.content;
+                            if (data === "[DONE]") {
+                                this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
 
-                            if (content) {
-                                contentPending += content;
+                                return;
+                            }
 
-                                while (true) {
-                                    const thinkTagOpen = contentPending.indexOf("<think>");
-                                    const thinkTagClose = contentPending.indexOf("</think>");
+                            const dataTrim = data.trim();
 
-                                    if (!isThinking) {
-                                        if (thinkTagOpen === -1) {
-                                            responseNoThink += contentPending;
+                            if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
+                                const json = JSON.parse(dataTrim) as modelIndex.IlmStudioChatCompletion;
 
-                                            contentPending = "";
+                                const content = json.choices[0].delta.content;
 
-                                            break;
+                                if (content) {
+                                    contentPending += content;
+
+                                    while (true) {
+                                        const thinkTagOpen = contentPending.indexOf("<think>");
+                                        const thinkTagClose = contentPending.indexOf("</think>");
+
+                                        if (!isThinking) {
+                                            if (thinkTagOpen === -1) {
+                                                responseNoThink += contentPending;
+
+                                                contentPending = "";
+
+                                                break;
+                                            } else {
+                                                responseNoThink += contentPending.slice(0, thinkTagOpen);
+
+                                                contentPending = contentPending.slice(thinkTagOpen + "<think>".length);
+
+                                                isThinking = true;
+                                            }
                                         } else {
-                                            responseNoThink += contentPending.slice(0, thinkTagOpen);
+                                            if (thinkTagClose === -1) {
+                                                responseThink += contentPending;
 
-                                            contentPending = contentPending.slice(thinkTagOpen + "<think>".length);
+                                                contentPending = "";
 
-                                            isThinking = true;
-                                        }
-                                    } else {
-                                        if (thinkTagClose === -1) {
-                                            responseThink += contentPending;
+                                                break;
+                                            } else {
+                                                responseThink += contentPending.slice(0, thinkTagClose);
 
-                                            contentPending = "";
+                                                contentPending = contentPending.slice(thinkTagClose + "</think>".length);
 
-                                            break;
-                                        } else {
-                                            responseThink += contentPending.slice(0, thinkTagClose);
-
-                                            contentPending = contentPending.slice(thinkTagClose + "</think>".length);
-
-                                            isThinking = false;
+                                                isThinking = false;
+                                            }
                                         }
                                     }
-                                }
 
-                                this.variableObject.modelResponseThink.state = responseThink.trim();
-                                this.variableObject.modelResponseNoThink.state = responseNoThink.trim();
+                                    const index = this.variableObject.chatMessage.state.length - 1;
+
+                                    this.variableObject.chatMessage.state[index] = {
+                                        ...this.variableObject.chatMessage.state[index],
+                                        assistantThink: responseThink.trim(),
+                                        assistantNoThink: responseNoThink.trim()
+                                    };
+
+                                    this.autoscroll(true);
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+
+            this.hookObject.elementInputMessageSend.value = "";
+        }
     };
 
     private onClickButtonMessageSend = (): void => {
-        this.apiChatCompletions();
+        this.apiChatCompletion();
     };
 
     constructor() {
@@ -187,10 +232,8 @@ export default class Index implements Icontroller {
         this.variableObject = variableBind(
             {
                 modelList: [],
-                modelResponseThink: "",
-                modelResponseNoThink: "",
-                messageSendCopy: "",
-                messageSendCopyTime: ""
+                chatHistory: [{ role: "system", content: "" }],
+                chatMessage: [] as modelIndex.IchatMessage[]
             },
             this.constructor.name
         );

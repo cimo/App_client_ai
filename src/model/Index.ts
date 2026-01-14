@@ -24,6 +24,18 @@ export interface IlmStudioChatCompletion {
     system_fingerprint: string;
 }
 
+export interface IlmStudioChatHistory {
+    role: string;
+    content: string;
+}
+
+export interface IchatMessage {
+    time: string;
+    user: string;
+    assistantThink: string;
+    assistantNoThink: string;
+}
+
 export interface IresponseBody {
     response: {
         stdout: string;
@@ -33,10 +45,8 @@ export interface IresponseBody {
 
 export interface Ivariable {
     modelList: IvariableBind<IlmStudioModel[]>;
-    modelResponseThink: IvariableBind<string>;
-    modelResponseNoThink: IvariableBind<string>;
-    messageSendCopy: IvariableBind<string>;
-    messageSendCopyTime: IvariableBind<string>;
+    chatHistory: IvariableBind<IlmStudioChatHistory[]>;
+    chatMessage: IvariableBind<IchatMessage[]>;
 }
 
 export interface Imethod {
@@ -45,4 +55,6 @@ export interface Imethod {
 
 export interface IelementHook extends Record<string, Element | Element[]> {
     elementInputMessageSend: HTMLInputElement;
+    elementContainerMessageReceive: HTMLElement;
+    elementBottomLimit: HTMLElement;
 }

@@ -22,8 +22,6 @@ pnpm-debug.log*
 
 # cimo +
 dist
-log/*
-!log/.gitkeep
 node_modules
 public/file/*
 !public/file/.gitkeep

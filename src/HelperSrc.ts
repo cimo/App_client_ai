@@ -4,7 +4,7 @@ export const PATH_ROOT = "/home/app/" as string;
 export const IS_DEBUG = "false" as string;
 export const PATH_LOG = "log/" as string;
 export const LOCALE = "jp" as string;
-export const URL_ENDPOINT = "https://172.20.0.1:1046" as string;
+export const URL_ENDPOINT = "https://host.docker.internal:1046" as string;
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {
     // Asia

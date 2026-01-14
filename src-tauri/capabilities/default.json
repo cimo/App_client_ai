@@ -10,10 +10,10 @@
             "identifier": "http:default",
             "allow": [
                 {
-                    "url": "http://172.20.0.1:1046/*"
+                    "url": "http://host.docker.internal:1046/*"
                 },
                 {
-                    "url": "https://172.20.0.1:1046/*"
+                    "url": "https://host.docker.internal:1046/*"
                 }
             ],
             "deny": []

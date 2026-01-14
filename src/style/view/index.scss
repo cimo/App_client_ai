@@ -28,68 +28,77 @@ body,
         text-align: center;
     }
 
-    p {
-        margin: auto 0;
-    }
-
-    .row {
-        display: flex;
-        padding: 10px;
-    }
-
-    .container_messageReceive {
+    .container_message_receive {
         position: fixed;
         top: 20px;
         left: 20px;
         right: 20px;
         bottom: 190px;
+        padding: 0 20px;
         overflow-y: scroll;
-        flex-direction: column;
-        align-items: flex-start;
+        overscroll-behavior: contain;
+        scroll-behavior: auto;
 
-        .container_messageSend_copy {
-            align-self: end;
-
+        > div {
             pre {
-                margin: 5px 0;
-                border-radius: 8px;
-                border: 1px solid color.$grey700;
-                padding: 10px;
+                white-space: break-spaces;
+                margin: 0;
             }
-        }
 
-        details {
-            background-color: #555555;
-            padding: 5px;
-            margin-bottom: 5px;
+            .container_chat {
+                margin-top: 20px;
+                display: flex;
+                flex-direction: column;
 
-            summary {
-                &::before {
-                    content: "\e749";
-                    font-family: "material-icon-rounded";
-                    margin-right: 5px;
-                    font-size: 20px;
-                    position: relative;
-                    top: 5px;
-                    line-height: 0;
+                p {
+                    align-self: end;
+                    width: fit-content;
                 }
 
-                cursor: pointer;
-                list-style: none;
+                pre {
+                    margin: 5px 0;
+                    border-radius: 8px;
+                    border: 1px solid color.$grey700;
+                    padding: 10px;
+                    align-self: end;
+                    width: fit-content;
+                    text-align: right;
+                }
             }
 
-            pre {
-                margin-top: 5px;
+            details {
+                background-color: #555555;
+                padding: 5px;
+                margin-bottom: 5px;
+                width: fit-content;
+
+                summary {
+                    &::before {
+                        content: "\e749";
+                        font-family: "material-icon-rounded";
+                        margin-right: 5px;
+                        font-size: 20px;
+                        position: relative;
+                        top: 5px;
+                        line-height: 0;
+                    }
+
+                    cursor: pointer;
+                    list-style: none;
+                }
+
+                pre {
+                    margin-top: 5px;
+                }
             }
         }
 
-        pre {
-            white-space: break-spaces;
-            margin: 0;
+        .bottom_limit {
+            height: 1px;
         }
     }
 
-    .container_messageSend {
+    .container_message_send {
         position: fixed;
         bottom: 20px;
         left: 20px;
