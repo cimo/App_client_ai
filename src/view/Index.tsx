@@ -20,9 +20,17 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                 </ul>
             </div>
             <div class="container_messageReceive row">
-                <pre class="messageSend_copy">{variableObject.messageSendCopy.state}</pre>
                 {(() => {
                     const result: IvirtualNode[] = [];
+
+                    if (variableObject.messageSendCopy.state) {
+                        result.push(
+                            <div class="container_messageSend_copy">
+                                <p>{variableObject.messageSendCopyTime.state}</p>
+                                <pre>{variableObject.messageSendCopy.state}</pre>
+                            </div>
+                        );
+                    }
 
                     if (variableObject.modelResponseThink.state) {
                         result.push(

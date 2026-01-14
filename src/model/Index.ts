@@ -36,6 +36,7 @@ export interface Ivariable {
     modelResponseThink: IvariableBind<string>;
     modelResponseNoThink: IvariableBind<string>;
     messageSendCopy: IvariableBind<string>;
+    messageSendCopyTime: IvariableBind<string>;
 }
 
 export interface Imethod {

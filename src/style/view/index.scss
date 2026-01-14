@@ -47,12 +47,15 @@ body,
         flex-direction: column;
         align-items: flex-start;
 
-        .messageSend_copy {
+        .container_messageSend_copy {
             align-self: end;
-            margin: 5px 0;
-            border-radius: 8px;
-            border: 1px solid color.$grey700;
-            padding: 10px;
+
+            pre {
+                margin: 5px 0;
+                border-radius: 8px;
+                border: 1px solid color.$grey700;
+                padding: 10px;
+            }
         }
 
         details {
@@ -66,7 +69,9 @@ body,
                     font-family: "material-icon-rounded";
                     margin-right: 5px;
                     font-size: 20px;
-                    vertical-align: bottom;
+                    position: relative;
+                    top: 5px;
+                    line-height: 0;
                 }
 
                 cursor: pointer;

@@ -2,6 +2,7 @@ import { Icontroller, IvariableEffect, IvirtualNode, variableBind } from "@cimo/
 import { fetch } from "@tauri-apps/plugin-http";
 
 // Source
+import * as helperSrc from "../HelperSrc";
 import * as modelIndex from "../model/Index";
 import viewIndex from "../view/Index";
 
@@ -52,6 +53,7 @@ export default class Index implements Icontroller {
 
     private apiChatCompletions = (): void => {
         this.variableObject.messageSendCopy.state = this.hookObject.elementInputMessageSend.value;
+        this.variableObject.messageSendCopyTime.state = helperSrc.localeFormat(new Date()) as string;
 
         this.variableObject.modelResponseThink.state = "";
         this.variableObject.modelResponseNoThink.state = "";
@@ -187,7 +189,8 @@ export default class Index implements Icontroller {
                 modelList: [],
                 modelResponseThink: "",
                 modelResponseNoThink: "",
-                messageSendCopy: ""
+                messageSendCopy: "",
+                messageSendCopyTime: ""
             },
             this.constructor.name
         );
