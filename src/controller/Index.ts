@@ -10,6 +10,7 @@ export default class Index implements Icontroller {
     // Variable
     private variableObject: modelIndex.Ivariable;
     private methodObject: modelIndex.Imethod;
+    private modelNameSelected: string;
 
     // Method
     private autoscroll = (isAuto: boolean): void => {
@@ -67,22 +68,8 @@ export default class Index implements Icontroller {
         }).then(async () => {});
     };
 
-    private apiModel = (): void => {
-        fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
-            method: "GET",
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        }).then(async (result) => {
-            const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-            this.variableObject.modelList.state = JSON.parse(resultJson.response.stdout);
-        });
-    };
-
     private apiChatCompletion = (): void => {
-        if (this.hookObject.elementInputMessageSend.value) {
+        if (this.hookObject.elementInputMessageSend.value && this.modelNameSelected !== "") {
             this.variableObject.chatHistory.state.push({
                 role: "user",
                 content: this.hookObject.elementInputMessageSend.value
@@ -108,7 +95,7 @@ export default class Index implements Icontroller {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "qwen3-1.7b",
+                    model: this.modelNameSelected,
                     messages: this.variableObject.chatHistory.state,
                     temperature: 0.1,
                     max_tokens: 512,
@@ -221,9 +208,32 @@ export default class Index implements Icontroller {
         this.apiChatCompletion();
     };
 
+    private onClickButtonModelList = (): void => {
+        fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
+            method: "GET",
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        }).then(async (result) => {
+            const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+            this.variableObject.modelList.state = JSON.parse(resultJson.response.stdout);
+
+            this.variableObject.isOpenDialogModelList.state = !this.variableObject.isOpenDialogModelList.state;
+        });
+    };
+
+    private onClickModelName = (name: string): void => {
+        this.modelNameSelected = name;
+
+        this.variableObject.isOpenDialogModelList.state = false;
+    };
+
     constructor() {
         this.variableObject = {} as modelIndex.Ivariable;
         this.methodObject = {} as modelIndex.Imethod;
+        this.modelNameSelected = "qwen3-1.7b";
     }
 
     hookObject = {} as modelIndex.IelementHook;
@@ -233,13 +243,16 @@ export default class Index implements Icontroller {
             {
                 modelList: [],
                 chatHistory: [{ role: "system", content: "" }],
-                chatMessage: [] as modelIndex.IchatMessage[]
+                chatMessage: [] as modelIndex.IchatMessage[],
+                isOpenDialogModelList: false
             },
             this.constructor.name
         );
 
         this.methodObject = {
-            onClickButtonMessageSend: this.onClickButtonMessageSend
+            onClickButtonMessageSend: this.onClickButtonMessageSend,
+            onClickButtonModelList: this.onClickButtonModelList,
+            onClickModelName: this.onClickModelName
         };
     }
 

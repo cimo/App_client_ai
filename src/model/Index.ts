@@ -47,10 +47,13 @@ export interface Ivariable {
     modelList: IvariableBind<IlmStudioModel[]>;
     chatHistory: IvariableBind<IlmStudioChatHistory[]>;
     chatMessage: IvariableBind<IchatMessage[]>;
+    isOpenDialogModelList: IvariableBind<boolean>;
 }
 
 export interface Imethod {
     onClickButtonMessageSend: () => void;
+    onClickButtonModelList: () => void;
+    onClickModelName: (name: string) => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

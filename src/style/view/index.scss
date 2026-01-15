@@ -1,4 +1,5 @@
 @use "../setting/color.scss" as color;
+@use "../setting/parameter.scss" as parameter;
 
 html,
 body,
@@ -16,16 +17,45 @@ body,
     textarea,
     input,
     button {
+        border: 1px solid transparent;
         border-radius: 8px;
         padding: 5px;
         outline: none;
         align-self: center;
+        background-color: transparent;
     }
 
     button {
         margin: 10px;
         cursor: pointer;
         text-align: center;
+    }
+
+    .container_actionBar {
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        z-index: parameter.$zIndexActionBar;
+
+        .selector_model {
+            align-self: end;
+            cursor: pointer;
+            position: relative;
+
+            .dialog {
+                position: absolute;
+                right: 0;
+                margin-top: 5px;
+                padding: 10px;
+
+                ul {
+                    li {
+                        cursor: pointer;
+                        padding: 5px;
+                    }
+                }
+            }
+        }
     }
 
     .container_message_receive {
@@ -58,7 +88,6 @@ body,
                 pre {
                     margin: 5px 0;
                     border-radius: 8px;
-                    border: 1px solid color.$grey700;
                     padding: 10px;
                     align-self: end;
                     width: fit-content;
@@ -67,7 +96,6 @@ body,
             }
 
             details {
-                background-color: #555555;
                 padding: 5px;
                 margin-bottom: 5px;
                 width: fit-content;
@@ -77,9 +105,9 @@ body,
                         content: "\e749";
                         font-family: "material-icon-rounded";
                         margin-right: 5px;
-                        font-size: 20px;
+                        font-size: parameter.$fontSizeNormalPlus;
                         position: relative;
-                        top: 5px;
+                        top: 7px;
                         line-height: 0;
                     }
 
@@ -105,7 +133,6 @@ body,
         right: 20px;
         height: 150px;
         border-radius: 8px;
-        border: 1px solid color.$grey700;
 
         textarea {
             position: absolute;
@@ -113,7 +140,6 @@ body,
             left: 5px;
             right: 5px;
             height: 100px;
-            background-color: transparent !important;
         }
 
         button {
@@ -127,40 +153,88 @@ body,
 
 @media (prefers-color-scheme: Dark) {
     :root {
-        color: #f6f6f6;
-        background-color: #2f2f2f;
-    }
-
-    textarea,
-    input,
-    button {
-        color: #ffffff;
-        background-color: #0f0f0f98;
+        color: color.$darkRootText;
+        background-color: color.$darkRootBackground;
     }
 
     button {
+        background-color: color.$darkButtonBackground !important;
+
         &:hover {
-            border-color: #396cd8;
+            border: 1px solid color.$darkButtonBorderHover !important;
         }
+    }
+
+    .container_actionBar {
+        .selector_model {
+            .dialog {
+                background: color.$darkActionBarDialogBackground;
+                box-shadow: color.$darkBoxShadow;
+            }
+        }
+    }
+
+    .container_message_receive {
+        > div {
+            .container_chat {
+                pre {
+                    border: 1px solid color.$darkMessageBorder;
+                }
+            }
+
+            details {
+                color: color.$darkThinkColor;
+                background-color: color.$darkThinkBackground;
+            }
+        }
+    }
+
+    .container_message_send {
+        border: 1px solid color.$darkMessageBorder;
+        box-shadow: color.$darkMessageSendBoxShadow;
     }
 }
 
 @media (prefers-color-scheme: Light) {
     :root {
-        color: #2f2f2f;
-        background-color: #f6f6f6;
-    }
-
-    textarea,
-    input,
-    button {
-        color: #0f0f0f98;
-        background-color: #ffffff;
+        color: color.$lightRootText;
+        background-color: color.$lightRootBackground;
     }
 
     button {
+        background-color: color.$lightButtonBackground !important;
+
         &:hover {
-            border-color: #396cd8;
+            border: 1px solid color.$lightButtonBorderHover !important;
         }
+    }
+
+    .container_actionBar {
+        .selector_model {
+            .dialog {
+                background: color.$lightActionBarDialogBackground;
+                box-shadow: color.$lightBoxShadow;
+            }
+        }
+    }
+
+    .container_message_receive {
+        > div {
+            .container_chat {
+                pre {
+                    border: 1px solid color.$lightMessageBorder;
+                }
+            }
+
+            details {
+                color: color.$lightThinkColor;
+                background-color: color.$lightThinkBackground;
+            }
+        }
+    }
+
+    .container_message_send {
+        border: 1px solid color.$lightMessageBorder;
+        box-shadow: color.$lightMessageSendBoxShadow;
     }
 }

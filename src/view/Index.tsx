@@ -6,19 +6,39 @@ import * as modelIndex from "../model/Index";
 const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelIndex.Imethod): IvirtualNode => {
     return (
         <div class="page_container view_index" jsmvcfw-controllerName="Index">
-            {/*<div class="row">
-                <ul>
-                    {(() => {
-                        const result: IvirtualNode[] = [];
+            <div class="container_actionBar">
+                <div class="selector_model">
+                    <div
+                        onclick={() => {
+                            methodObject.onClickButtonModelList();
+                        }}
+                    >
+                        ...
+                    </div>
+                    <pre class={`dialog ${!variableObject.isOpenDialogModelList.state ? "none" : ""}`}>
+                        <ul>
+                            {(() => {
+                                const result: IvirtualNode[] = [];
 
-                        for (const [key, value] of Object.entries(variableObject.modelList.state)) {
-                            result.push(<li key={key}>{value.id}</li>);
-                        }
+                                for (const [key, value] of Object.entries(variableObject.modelList.state)) {
+                                    result.push(
+                                        <li
+                                            key={key}
+                                            onClick={() => {
+                                                methodObject.onClickModelName(value.id);
+                                            }}
+                                        >
+                                            {value.id}
+                                        </li>
+                                    );
+                                }
 
-                        return result;
-                    })()}
-                </ul>
-            </div>*/}
+                                return result;
+                            })()}
+                        </ul>
+                    </pre>
+                </div>
+            </div>
             <div jsmvcfw-elementHookName="elementContainerMessageReceive" class="container_message_receive">
                 {(() => {
                     const result: IvirtualNode[] = [];
