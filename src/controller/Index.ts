@@ -65,7 +65,13 @@ export default class Index implements Icontroller {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
             }
-        }).then(async () => {});
+        })
+            .then(async () => {
+                this.variableObject.isOffline.state = false;
+            })
+            .catch(() => {
+                this.variableObject.isOffline.state = true;
+            });
     };
 
     private apiChatCompletion = (): void => {
@@ -105,129 +111,330 @@ export default class Index implements Icontroller {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
                 }
-            }).then(async (result) => {
-                const contentType = (result.headers.get("content-type") || "").toLowerCase();
+            })
+                .then(async (result) => {
+                    this.variableObject.isOffline.state = false;
 
-                if (!contentType.includes("text/event-stream")) {
-                    return;
-                }
+                    const contentType = (result.headers.get("content-type") || "").toLowerCase();
 
-                const reader = result.body!.getReader();
-                const decoder = new TextDecoder("utf-8");
-                let buffer = "";
-
-                while (true) {
-                    const { value, done } = await reader.read();
-
-                    if (done) {
-                        this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
-
-                        break;
+                    if (!contentType.includes("text/event-stream")) {
+                        return;
                     }
 
-                    buffer += decoder.decode(value, { stream: true });
-                    const lineList = buffer.split(/\r?\n/);
-                    buffer = lineList.pop() || "";
+                    const reader = result.body!.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    let buffer = "";
 
-                    for (const line of lineList) {
-                        if (line.startsWith("data:")) {
-                            const data = line.slice(5).trim();
+                    while (true) {
+                        const { value, done } = await reader.read();
 
-                            if (data === "[DONE]") {
-                                this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
+                        if (done) {
+                            this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
 
-                                return;
-                            }
+                            break;
+                        }
 
-                            const dataTrim = data.trim();
+                        buffer += decoder.decode(value, { stream: true });
+                        const lineList = buffer.split(/\r?\n/);
+                        buffer = lineList.pop() || "";
 
-                            if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
-                                const json = JSON.parse(dataTrim) as modelIndex.IlmStudioChatCompletion;
+                        for (const line of lineList) {
+                            if (line.startsWith("data:")) {
+                                const data = line.slice(5).trim();
 
-                                const content = json.choices[0].delta.content;
+                                if (data === "[DONE]") {
+                                    this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
 
-                                if (content) {
-                                    contentPending += content;
+                                    return;
+                                }
 
-                                    while (true) {
-                                        const thinkTagOpen = contentPending.indexOf("<think>");
-                                        const thinkTagClose = contentPending.indexOf("</think>");
+                                const dataTrim = data.trim();
 
-                                        if (!isThinking) {
-                                            if (thinkTagOpen === -1) {
-                                                responseNoThink += contentPending;
+                                if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
+                                    const json = JSON.parse(dataTrim) as modelIndex.IlmStudioChatCompletion;
 
-                                                contentPending = "";
+                                    const content = json.choices[0].delta.content;
 
-                                                break;
+                                    if (content) {
+                                        contentPending += content;
+
+                                        while (true) {
+                                            const thinkTagOpen = contentPending.indexOf("<think>");
+                                            const thinkTagClose = contentPending.indexOf("</think>");
+
+                                            if (!isThinking) {
+                                                if (thinkTagOpen === -1) {
+                                                    responseNoThink += contentPending;
+
+                                                    contentPending = "";
+
+                                                    break;
+                                                } else {
+                                                    responseNoThink += contentPending.slice(0, thinkTagOpen);
+
+                                                    contentPending = contentPending.slice(thinkTagOpen + "<think>".length);
+
+                                                    isThinking = true;
+                                                }
                                             } else {
-                                                responseNoThink += contentPending.slice(0, thinkTagOpen);
+                                                if (thinkTagClose === -1) {
+                                                    responseThink += contentPending;
 
-                                                contentPending = contentPending.slice(thinkTagOpen + "<think>".length);
+                                                    contentPending = "";
 
-                                                isThinking = true;
-                                            }
-                                        } else {
-                                            if (thinkTagClose === -1) {
-                                                responseThink += contentPending;
+                                                    break;
+                                                } else {
+                                                    responseThink += contentPending.slice(0, thinkTagClose);
 
-                                                contentPending = "";
+                                                    contentPending = contentPending.slice(thinkTagClose + "</think>".length);
 
-                                                break;
-                                            } else {
-                                                responseThink += contentPending.slice(0, thinkTagClose);
-
-                                                contentPending = contentPending.slice(thinkTagClose + "</think>".length);
-
-                                                isThinking = false;
+                                                    isThinking = false;
+                                                }
                                             }
                                         }
+
+                                        const index = this.variableObject.chatMessage.state.length - 1;
+
+                                        this.variableObject.chatMessage.state[index] = {
+                                            ...this.variableObject.chatMessage.state[index],
+                                            assistantThink: responseThink.trim(),
+                                            assistantNoThink: responseNoThink.trim()
+                                        };
+
+                                        this.autoscroll(true);
                                     }
-
-                                    const index = this.variableObject.chatMessage.state.length - 1;
-
-                                    this.variableObject.chatMessage.state[index] = {
-                                        ...this.variableObject.chatMessage.state[index],
-                                        assistantThink: responseThink.trim(),
-                                        assistantNoThink: responseNoThink.trim()
-                                    };
-
-                                    this.autoscroll(true);
                                 }
                             }
                         }
                     }
-                }
-            });
+                })
+                .catch(() => {
+                    this.variableObject.isOffline.state = true;
+                });
 
             this.hookObject.elementInputMessageSend.value = "";
         }
     };
 
-    private onClickButtonMessageSend = (): void => {
-        this.apiChatCompletion();
+    private apiResponse = (): void => {
+        if (this.hookObject.elementInputMessageSend.value && this.modelNameSelected !== "") {
+            this.variableObject.chatHistory.state.push({
+                role: "user",
+                content: this.hookObject.elementInputMessageSend.value
+            });
+
+            this.variableObject.chatMessage.state.push({
+                time: helperSrc.localeFormat(new Date()) as string,
+                user: this.hookObject.elementInputMessageSend.value,
+                assistantThink: "",
+                assistantNoThink: "",
+                mcpTool: {} as modelIndex.IlmStudioResponseItem
+            });
+
+            this.autoscroll(false);
+
+            let responseThink = "";
+            let responseNoThink = "";
+            let responseMcpTool = {} as modelIndex.IlmStudioResponseItem;
+
+            const input: modelIndex.IchatHistory[] = [];
+
+            for (const chatHistory of this.variableObject.chatHistory.state) {
+                if (chatHistory.role === "system" || chatHistory.role === "user") {
+                    input.push({
+                        role: chatHistory.role,
+                        content: [{ type: "input_text", text: chatHistory.content as string }]
+                    });
+                } else {
+                    input.push({
+                        role: chatHistory.role,
+                        content: [{ type: "output_text", text: chatHistory.content as string }]
+                    });
+                }
+            }
+
+            fetch(`${helperSrc.URL_ENDPOINT}/api/v1/responses`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: this.modelNameSelected,
+                    input,
+                    temperature: 0.1,
+                    max_output_tokens: 512,
+                    stream: true,
+                    tools: [
+                        {
+                            type: "mcp",
+                            server_label: helperSrc.MCP_SERVER_LABEL,
+                            server_url: helperSrc.MCP_SERVER_URL,
+                            allowed_tools: helperSrc.MCP_SERVER_TOOL
+                        }
+                    ]
+                }),
+                danger: {
+                    acceptInvalidCerts: true,
+                    acceptInvalidHostnames: true
+                }
+            })
+                .then(async (result) => {
+                    this.variableObject.isOffline.state = false;
+
+                    const contentType = (result.headers.get("content-type") || "").toLowerCase();
+
+                    if (!contentType.includes("text/event-stream")) {
+                        return;
+                    }
+
+                    const reader = result.body!.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    let buffer = "";
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+
+                        if (done) {
+                            break;
+                        }
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lineList = buffer.split(/\r?\n/);
+                        buffer = lineList.pop() || "";
+
+                        for (const line of lineList) {
+                            if (line.startsWith("data:")) {
+                                const data = line.slice(5).trim();
+
+                                if (data === "[DONE]") {
+                                    return;
+                                }
+
+                                const dataTrim = data.trim();
+
+                                if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
+                                    const json = JSON.parse(dataTrim) as modelIndex.IlmStudioResponse;
+
+                                    if (json.type === "response.reasoning_text.delta") {
+                                        const content = json.delta as string;
+
+                                        if (content) {
+                                            responseThink += content;
+
+                                            const index = this.variableObject.chatMessage.state.length - 1;
+
+                                            this.variableObject.chatMessage.state[index] = {
+                                                ...this.variableObject.chatMessage.state[index],
+                                                assistantThink: responseThink.trim()
+                                            };
+
+                                            this.autoscroll(true);
+                                        }
+                                    }
+
+                                    if (json.type === "response.output_text.delta") {
+                                        const content = json.delta as string;
+
+                                        if (content) {
+                                            responseNoThink += content;
+
+                                            const index = this.variableObject.chatMessage.state.length - 1;
+
+                                            this.variableObject.chatMessage.state[index] = {
+                                                ...this.variableObject.chatMessage.state[index],
+                                                assistantNoThink: responseNoThink.trim()
+                                            };
+
+                                            this.autoscroll(true);
+                                        }
+                                    }
+
+                                    if (json.type === "response.output_item.done") {
+                                        const item = json.item;
+
+                                        if (item && item.type === "mcp_call") {
+                                            responseMcpTool = {
+                                                name: item.name,
+                                                arguments: item.arguments,
+                                                output: item.output
+                                            };
+
+                                            const index = this.variableObject.chatMessage.state.length - 1;
+
+                                            this.variableObject.chatMessage.state[index] = {
+                                                ...this.variableObject.chatMessage.state[index],
+                                                mcpTool: responseMcpTool
+                                            };
+
+                                            this.autoscroll(true);
+                                        }
+                                    }
+
+                                    if (json.type === "response.completed") {
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+                .catch(() => {
+                    this.variableObject.isOffline.state = true;
+                });
+
+            this.hookObject.elementInputMessageSend.value = "";
+        }
     };
 
-    private onClickButtonModelList = (): void => {
+    private apiModelList = (): void => {
         fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
             method: "GET",
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
             }
-        }).then(async (result) => {
-            const resultJson = (await result.json()) as modelIndex.IresponseBody;
+        })
+            .then(async (result) => {
+                this.variableObject.isOffline.state = false;
 
-            this.variableObject.modelList.state = JSON.parse(resultJson.response.stdout);
+                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+                const jsonParse = JSON.parse(resultJson.response.stdout) as modelIndex.IlmStudioModel[];
+                const resultCleaned = [];
 
-            this.variableObject.isOpenDialogModelList.state = !this.variableObject.isOpenDialogModelList.state;
-        });
+                for (const value of jsonParse) {
+                    if (value.id.toLowerCase().includes("embedding")) {
+                        continue;
+                    }
+
+                    resultCleaned.push(value);
+                }
+
+                this.variableObject.modelList.state = resultCleaned;
+
+                this.variableObject.isOpenDialogModelList.state = !this.variableObject.isOpenDialogModelList.state;
+            })
+            .catch(() => {
+                this.variableObject.isOffline.state = true;
+            });
+    };
+
+    private onClickButtonMessageSend = (): void => {
+        //this.apiChatCompletion();
+        this.apiResponse();
+    };
+
+    private onClickButtonModelList = (): void => {
+        this.apiModelList();
     };
 
     private onClickModelName = (name: string): void => {
         this.modelNameSelected = name;
 
-        this.variableObject.isOpenDialogModelList.state = false;
+        this.variableObject.chatHistory.state = [{ role: "system", content: "" }];
+    };
+
+    private onClickRefreshPage = (): void => {
+        window.location.reload();
     };
 
     constructor() {
@@ -244,7 +451,8 @@ export default class Index implements Icontroller {
                 modelList: [],
                 chatHistory: [{ role: "system", content: "" }],
                 chatMessage: [] as modelIndex.IchatMessage[],
-                isOpenDialogModelList: false
+                isOpenDialogModelList: false,
+                isOffline: false
             },
             this.constructor.name
         );
@@ -252,7 +460,8 @@ export default class Index implements Icontroller {
         this.methodObject = {
             onClickButtonMessageSend: this.onClickButtonMessageSend,
             onClickButtonModelList: this.onClickButtonModelList,
-            onClickModelName: this.onClickModelName
+            onClickModelName: this.onClickModelName,
+            onClickRefreshPage: this.onClickRefreshPage
         };
     }
 
@@ -264,7 +473,13 @@ export default class Index implements Icontroller {
         return viewIndex(this.variableObject, this.methodObject);
     }
 
-    event(): void {}
+    event(): void {
+        document.addEventListener("click", () => {
+            if (this.variableObject.isOpenDialogModelList.state) {
+                this.variableObject.isOpenDialogModelList.state = false;
+            }
+        });
+    }
 
     subControllerList(): Icontroller[] {
         const resultList: Icontroller[] = [];

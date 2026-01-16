@@ -1,10 +1,13 @@
 import Fs from "fs";
 
-export const PATH_ROOT = "/home/app/" as string;
-export const IS_DEBUG = "false" as string;
-export const PATH_LOG = "log/" as string;
-export const LOCALE = "jp" as string;
-export const URL_ENDPOINT = "https://host.docker.internal:1046" as string;
+export const PATH_ROOT = "/home/app/";
+export const IS_DEBUG = false;
+export const PATH_LOG = "log/";
+export const LOCALE = "jp";
+export const URL_ENDPOINT = "https://host.docker.internal:1046";
+export const MCP_SERVER_LABEL = "Tool server";
+export const MCP_SERVER_URL = "http://localhost:8080/mcp";
+export const MCP_SERVER_TOOL = ["tool_sum"];
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {
     // Asia
@@ -79,7 +82,7 @@ export const localeFormat = (value: number | Date, isMonth = true, isDay = true,
 };
 
 export const writeLog = (tag: string, value: string | Record<string, unknown> | Error): void => {
-    if (IS_DEBUG === "true") {
+    if (IS_DEBUG) {
         const text = `Time: ${localeFormat(new Date())} - ${tag}: `;
 
         if (typeof process !== "undefined") {

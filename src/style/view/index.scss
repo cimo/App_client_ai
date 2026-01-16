@@ -21,7 +21,6 @@ body,
         border-radius: 8px;
         padding: 5px;
         outline: none;
-        align-self: center;
         background-color: transparent;
     }
 
@@ -34,19 +33,26 @@ body,
     .container_actionBar {
         display: flex;
         flex-direction: column;
+        height: 40px;
         padding: 10px;
         z-index: parameter.$zIndexActionBar;
 
         .selector_model {
             align-self: end;
-            cursor: pointer;
             position: relative;
+
+            .cls_icon {
+                cursor: pointer !important;
+            }
 
             .dialog {
                 position: absolute;
                 right: 0;
                 margin-top: 5px;
-                padding: 10px;
+
+                .title {
+                    margin: 5px;
+                }
 
                 ul {
                     li {
@@ -60,7 +66,7 @@ body,
 
     .container_message_receive {
         position: fixed;
-        top: 20px;
+        top: 40px;
         left: 20px;
         right: 20px;
         bottom: 190px;
@@ -101,18 +107,16 @@ body,
                 width: fit-content;
 
                 summary {
-                    &::before {
-                        content: "\e749";
-                        font-family: "material-icon-rounded";
-                        margin-right: 5px;
-                        font-size: parameter.$fontSizeNormalPlus;
-                        position: relative;
-                        top: 7px;
-                        line-height: 0;
-                    }
-
                     cursor: pointer;
                     list-style: none;
+
+                    .cls_icon {
+                        margin-right: 5px !important;
+                        font-size: parameter.$fontSizeNormalPlus !important;
+                        position: relative !important;
+                        top: 7px !important;
+                        line-height: 0 !important;
+                    }
                 }
 
                 pre {
@@ -123,6 +127,26 @@ body,
 
         .bottom_limit {
             height: 1px;
+        }
+    }
+
+    .container_offline {
+        position: fixed;
+        top: 40px;
+        left: 20px;
+        right: 20px;
+        bottom: 170px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 20px;
+        cursor: pointer;
+
+        .cls_icon {
+            font-size: parameter.$fontSizeVeryBig !important;
+            display: flex !important;
+            align-items: center !important;
         }
     }
 
@@ -166,10 +190,20 @@ body,
     }
 
     .container_actionBar {
+        background: color.$darkActionBarBackground;
+
         .selector_model {
             .dialog {
-                background: color.$darkActionBarDialogBackground;
+                background: color.$darkActionBarBackground;
                 box-shadow: color.$darkBoxShadow;
+
+                ul {
+                    li {
+                        &:hover {
+                            background-color: color.$darkActionBarDialogHover;
+                        }
+                    }
+                }
             }
         }
     }
@@ -210,10 +244,20 @@ body,
     }
 
     .container_actionBar {
+        background: color.$lightActionBarBackground;
+
         .selector_model {
             .dialog {
-                background: color.$lightActionBarDialogBackground;
+                background: color.$lightActionBarBackground;
                 box-shadow: color.$lightBoxShadow;
+
+                ul {
+                    li {
+                        &:hover {
+                            background-color: color.$lightActionBarDialogHover;
+                        }
+                    }
+                }
             }
         }
     }

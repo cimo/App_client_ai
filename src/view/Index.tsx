@@ -9,13 +9,15 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
             <div class="container_actionBar">
                 <div class="selector_model">
                     <div
+                        class="cls_icon"
                         onclick={() => {
                             methodObject.onClickButtonModelList();
                         }}
                     >
-                        ...
+                        schema
                     </div>
                     <pre class={`dialog ${!variableObject.isOpenDialogModelList.state ? "none" : ""}`}>
+                        <p class="title">Model list:</p>
                         <ul>
                             {(() => {
                                 const result: IvirtualNode[] = [];
@@ -39,7 +41,10 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     </pre>
                 </div>
             </div>
-            <div jsmvcfw-elementHookName="elementContainerMessageReceive" class="container_message_receive">
+            <div
+                jsmvcfw-elementHookName="elementContainerMessageReceive"
+                class={`container_message_receive ${variableObject.isOffline.state ? "none" : ""}`}
+            >
                 {(() => {
                     const result: IvirtualNode[] = [];
 
@@ -50,9 +55,32 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                     <p>{value.time}</p>
                                     <pre>{value.user}</pre>
                                 </div>
-                                <details>
-                                    <summary>Show reasoning</summary>
+                                <i class={`cls_icon ${value.assistantThink || value.assistantNoThink ? "none" : ""}`}>update</i>
+                                <details class={!value.assistantThink ? "none" : ""}>
+                                    <summary>
+                                        <i class="cls_icon">generating_tokens</i>Show reasoning
+                                    </summary>
                                     <pre>{value.assistantThink}</pre>
+                                </details>
+                                <details class={value.mcpTool && value.mcpTool.name === "" ? "none" : ""}>
+                                    <summary>
+                                        <i class="cls_icon">handyman</i>Show tool
+                                    </summary>
+                                    {(() => {
+                                        const result: IvirtualNode[] = [];
+
+                                        if (value.mcpTool) {
+                                            result.push(
+                                                <div>
+                                                    <p>Name: {value.mcpTool["name"]}</p>
+                                                    <p>Argument: {value.mcpTool["arguments"]}</p>
+                                                    <p>Output: {value.mcpTool["output"]}</p>
+                                                </div>
+                                            );
+                                        }
+
+                                        return result;
+                                    })()}
                                 </details>
                                 <pre>{value.assistantNoThink}</pre>
                             </div>
@@ -62,6 +90,15 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     return result;
                 })()}
                 <div jsmvcfw-elementHookName="elementBottomLimit" class="bottom_limit"></div>
+            </div>
+            <div
+                class={`container_offline ${!variableObject.isOffline.state ? "none" : ""}`}
+                onclick={() => {
+                    methodObject.onClickRefreshPage();
+                }}
+            >
+                <i class="cls_icon">report_off</i>
+                <p>Click here for re-connect.</p>
             </div>
             <div class="container_message_send">
                 <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
