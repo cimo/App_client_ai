@@ -32,7 +32,7 @@ body,
 
     .container_actionBar {
         display: flex;
-        flex-direction: column;
+        justify-content: space-between;
         height: 40px;
         padding: 10px;
         z-index: parameter.$zIndexActionBar;
@@ -78,7 +78,7 @@ body,
         > div {
             pre {
                 white-space: break-spaces;
-                margin: 0;
+                margin: 5px 0 0 0;
             }
 
             .container_chat {
@@ -119,8 +119,11 @@ body,
                     }
                 }
 
-                pre {
-                    margin-top: 5px;
+                pre,
+                > div {
+                    p {
+                        margin-top: 5px;
+                    }
                 }
             }
         }

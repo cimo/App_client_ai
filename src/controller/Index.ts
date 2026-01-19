@@ -10,7 +10,6 @@ export default class Index implements Icontroller {
     // Variable
     private variableObject: modelIndex.Ivariable;
     private methodObject: modelIndex.Imethod;
-    private modelNameSelected: string;
 
     // Method
     private autoscroll = (isAuto: boolean): void => {
@@ -33,31 +32,6 @@ export default class Index implements Icontroller {
         });
     };
 
-    private dataDone = (contentPending: string, isThinking: boolean, responseThink: string, responseNoThink: string): void => {
-        if (contentPending) {
-            if (isThinking) {
-                responseThink += contentPending;
-            } else {
-                responseNoThink += contentPending;
-            }
-
-            contentPending = "";
-        }
-
-        this.variableObject.chatHistory.state.push({
-            role: "assistant",
-            content: responseNoThink.trim()
-        });
-
-        const index = this.variableObject.chatMessage.state.length - 1;
-
-        this.variableObject.chatMessage.state[index] = {
-            ...this.variableObject.chatMessage.state[index],
-            assistantThink: responseThink.trim(),
-            assistantNoThink: responseNoThink.trim()
-        };
-    };
-
     private apiLogin = (): void => {
         fetch(`${helperSrc.URL_ENDPOINT}/login`, {
             method: "GET",
@@ -74,150 +48,8 @@ export default class Index implements Icontroller {
             });
     };
 
-    private apiChatCompletion = (): void => {
-        if (this.hookObject.elementInputMessageSend.value && this.modelNameSelected !== "") {
-            this.variableObject.chatHistory.state.push({
-                role: "user",
-                content: this.hookObject.elementInputMessageSend.value
-            });
-
-            this.variableObject.chatMessage.state.push({
-                time: helperSrc.localeFormat(new Date()) as string,
-                user: this.hookObject.elementInputMessageSend.value,
-                assistantThink: "",
-                assistantNoThink: ""
-            });
-
-            this.autoscroll(false);
-
-            let isThinking = false;
-            let contentPending = "";
-            let responseThink = "";
-            let responseNoThink = "";
-
-            fetch(`${helperSrc.URL_ENDPOINT}/api/v1/chat/completions`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: this.modelNameSelected,
-                    messages: this.variableObject.chatHistory.state,
-                    temperature: 0.1,
-                    max_tokens: 512,
-                    stream: true
-                }),
-                danger: {
-                    acceptInvalidCerts: true,
-                    acceptInvalidHostnames: true
-                }
-            })
-                .then(async (result) => {
-                    this.variableObject.isOffline.state = false;
-
-                    const contentType = (result.headers.get("content-type") || "").toLowerCase();
-
-                    if (!contentType.includes("text/event-stream")) {
-                        return;
-                    }
-
-                    const reader = result.body!.getReader();
-                    const decoder = new TextDecoder("utf-8");
-                    let buffer = "";
-
-                    while (true) {
-                        const { value, done } = await reader.read();
-
-                        if (done) {
-                            this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
-
-                            break;
-                        }
-
-                        buffer += decoder.decode(value, { stream: true });
-                        const lineList = buffer.split(/\r?\n/);
-                        buffer = lineList.pop() || "";
-
-                        for (const line of lineList) {
-                            if (line.startsWith("data:")) {
-                                const data = line.slice(5).trim();
-
-                                if (data === "[DONE]") {
-                                    this.dataDone(contentPending, isThinking, responseThink, responseNoThink);
-
-                                    return;
-                                }
-
-                                const dataTrim = data.trim();
-
-                                if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
-                                    const json = JSON.parse(dataTrim) as modelIndex.IlmStudioChatCompletion;
-
-                                    const content = json.choices[0].delta.content;
-
-                                    if (content) {
-                                        contentPending += content;
-
-                                        while (true) {
-                                            const thinkTagOpen = contentPending.indexOf("<think>");
-                                            const thinkTagClose = contentPending.indexOf("</think>");
-
-                                            if (!isThinking) {
-                                                if (thinkTagOpen === -1) {
-                                                    responseNoThink += contentPending;
-
-                                                    contentPending = "";
-
-                                                    break;
-                                                } else {
-                                                    responseNoThink += contentPending.slice(0, thinkTagOpen);
-
-                                                    contentPending = contentPending.slice(thinkTagOpen + "<think>".length);
-
-                                                    isThinking = true;
-                                                }
-                                            } else {
-                                                if (thinkTagClose === -1) {
-                                                    responseThink += contentPending;
-
-                                                    contentPending = "";
-
-                                                    break;
-                                                } else {
-                                                    responseThink += contentPending.slice(0, thinkTagClose);
-
-                                                    contentPending = contentPending.slice(thinkTagClose + "</think>".length);
-
-                                                    isThinking = false;
-                                                }
-                                            }
-                                        }
-
-                                        const index = this.variableObject.chatMessage.state.length - 1;
-
-                                        this.variableObject.chatMessage.state[index] = {
-                                            ...this.variableObject.chatMessage.state[index],
-                                            assistantThink: responseThink.trim(),
-                                            assistantNoThink: responseNoThink.trim()
-                                        };
-
-                                        this.autoscroll(true);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                })
-                .catch(() => {
-                    this.variableObject.isOffline.state = true;
-                });
-
-            this.hookObject.elementInputMessageSend.value = "";
-        }
-    };
-
     private apiResponse = (): void => {
-        if (this.hookObject.elementInputMessageSend.value && this.modelNameSelected !== "") {
+        if (this.hookObject.elementInputMessageSend.value && this.variableObject.modelSelected.state !== "") {
             this.variableObject.chatHistory.state.push({
                 role: "user",
                 content: this.hookObject.elementInputMessageSend.value
@@ -226,16 +58,16 @@ export default class Index implements Icontroller {
             this.variableObject.chatMessage.state.push({
                 time: helperSrc.localeFormat(new Date()) as string,
                 user: this.hookObject.elementInputMessageSend.value,
-                assistantThink: "",
-                assistantNoThink: "",
-                mcpTool: {} as modelIndex.IlmStudioResponseItem
+                assistantReasoning: "",
+                assistantNoReasoning: "",
+                mcpTool: {} as modelIndex.IlmStudioApiResponseItem
             });
 
             this.autoscroll(false);
 
-            let responseThink = "";
-            let responseNoThink = "";
-            let responseMcpTool = {} as modelIndex.IlmStudioResponseItem;
+            let responseReasoning = "";
+            let responseNoReasoning = "";
+            let responseMcpTool = {} as modelIndex.IlmStudioApiResponseItem;
 
             const input: modelIndex.IchatHistory[] = [];
 
@@ -259,7 +91,7 @@ export default class Index implements Icontroller {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: this.modelNameSelected,
+                    model: this.variableObject.modelSelected.state,
                     input,
                     temperature: 0.1,
                     max_output_tokens: 512,
@@ -313,19 +145,19 @@ export default class Index implements Icontroller {
                                 const dataTrim = data.trim();
 
                                 if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
-                                    const json = JSON.parse(dataTrim) as modelIndex.IlmStudioResponse;
+                                    const json = JSON.parse(dataTrim) as modelIndex.IlmStudioApiResponse;
 
                                     if (json.type === "response.reasoning_text.delta") {
                                         const content = json.delta as string;
 
                                         if (content) {
-                                            responseThink += content;
+                                            responseReasoning += content;
 
                                             const index = this.variableObject.chatMessage.state.length - 1;
 
                                             this.variableObject.chatMessage.state[index] = {
                                                 ...this.variableObject.chatMessage.state[index],
-                                                assistantThink: responseThink.trim()
+                                                assistantReasoning: responseReasoning.trim()
                                             };
 
                                             this.autoscroll(true);
@@ -336,13 +168,13 @@ export default class Index implements Icontroller {
                                         const content = json.delta as string;
 
                                         if (content) {
-                                            responseNoThink += content;
+                                            responseNoReasoning += content;
 
                                             const index = this.variableObject.chatMessage.state.length - 1;
 
                                             this.variableObject.chatMessage.state[index] = {
                                                 ...this.variableObject.chatMessage.state[index],
-                                                assistantNoThink: responseNoThink.trim()
+                                                assistantNoReasoning: responseNoReasoning.trim()
                                             };
 
                                             this.autoscroll(true);
@@ -398,7 +230,7 @@ export default class Index implements Icontroller {
                 this.variableObject.isOffline.state = false;
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
-                const jsonParse = JSON.parse(resultJson.response.stdout) as modelIndex.IlmStudioModel[];
+                const jsonParse = JSON.parse(resultJson.response.stdout) as modelIndex.IlmStudioApiModel[];
                 const resultCleaned = [];
 
                 for (const value of jsonParse) {
@@ -409,7 +241,7 @@ export default class Index implements Icontroller {
                     resultCleaned.push(value);
                 }
 
-                this.variableObject.modelList.state = resultCleaned;
+                this.variableObject.modelList.state = [...resultCleaned].sort((a, b) => a.id.localeCompare(b.id));
 
                 this.variableObject.isOpenDialogModelList.state = !this.variableObject.isOpenDialogModelList.state;
             })
@@ -419,7 +251,6 @@ export default class Index implements Icontroller {
     };
 
     private onClickButtonMessageSend = (): void => {
-        //this.apiChatCompletion();
         this.apiResponse();
     };
 
@@ -428,7 +259,7 @@ export default class Index implements Icontroller {
     };
 
     private onClickModelName = (name: string): void => {
-        this.modelNameSelected = name;
+        this.variableObject.modelSelected.state = name;
 
         this.variableObject.chatHistory.state = [{ role: "system", content: "" }];
     };
@@ -440,7 +271,6 @@ export default class Index implements Icontroller {
     constructor() {
         this.variableObject = {} as modelIndex.Ivariable;
         this.methodObject = {} as modelIndex.Imethod;
-        this.modelNameSelected = "qwen3-1.7b";
     }
 
     hookObject = {} as modelIndex.IelementHook;
@@ -449,6 +279,7 @@ export default class Index implements Icontroller {
         this.variableObject = variableBind(
             {
                 modelList: [],
+                modelSelected: helperSrc.MODEL_DEFAULT,
                 chatHistory: [{ role: "system", content: "" }],
                 chatMessage: [] as modelIndex.IchatMessage[],
                 isOpenDialogModelList: false,

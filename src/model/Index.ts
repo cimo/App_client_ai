@@ -1,40 +1,22 @@
 import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 
-interface IlmStudioChatCompletionChoices {
-    delta: {
-        content: string;
-    };
-    finish_reason: string;
-    index: number;
-    logprobs: string;
-}
-
-export interface IlmStudioModel {
+export interface IlmStudioApiModel {
     id: string;
     object: string;
     owned_by: string;
 }
 
-export interface IlmStudioChatCompletion {
-    choices: IlmStudioChatCompletionChoices[];
-    created: number;
-    id: string;
-    model: string;
-    object: string;
-    system_fingerprint: string;
-}
-
-export interface IlmStudioResponseItem {
+export interface IlmStudioApiResponseItem {
     type?: string;
     name: string;
     arguments: string;
     output: string;
 }
 
-export interface IlmStudioResponse {
+export interface IlmStudioApiResponse {
     type: string;
     delta: string;
-    item: IlmStudioResponseItem;
+    item: IlmStudioApiResponseItem;
 }
 
 export interface IchatHistory {
@@ -45,9 +27,9 @@ export interface IchatHistory {
 export interface IchatMessage {
     time: string;
     user: string;
-    assistantThink: string;
-    assistantNoThink: string;
-    mcpTool?: IlmStudioResponseItem;
+    assistantReasoning: string;
+    assistantNoReasoning: string;
+    mcpTool?: IlmStudioApiResponseItem;
 }
 
 export interface IresponseBody {
@@ -58,7 +40,8 @@ export interface IresponseBody {
 }
 
 export interface Ivariable {
-    modelList: IvariableBind<IlmStudioModel[]>;
+    modelList: IvariableBind<IlmStudioApiModel[]>;
+    modelSelected: IvariableBind<string>;
     chatHistory: IvariableBind<IchatHistory[]>;
     chatMessage: IvariableBind<IchatMessage[]>;
     isOpenDialogModelList: IvariableBind<boolean>;

@@ -7,6 +7,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
     return (
         <div class="page_container view_index" jsmvcfw-controllerName="Index">
             <div class="container_actionBar">
+                <p>Model selected: {variableObject.modelSelected.state}</p>
                 <div class="selector_model">
                     <div
                         class="cls_icon"
@@ -55,14 +56,14 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                     <p>{value.time}</p>
                                     <pre>{value.user}</pre>
                                 </div>
-                                <i class={`cls_icon ${value.assistantThink || value.assistantNoThink ? "none" : ""}`}>update</i>
-                                <details class={!value.assistantThink ? "none" : ""}>
+                                <i class={`cls_icon ${value.assistantReasoning || value.assistantNoReasoning ? "none" : ""}`}>update</i>
+                                <details class={!value.assistantReasoning ? "none" : ""}>
                                     <summary>
                                         <i class="cls_icon">generating_tokens</i>Show reasoning
                                     </summary>
-                                    <pre>{value.assistantThink}</pre>
+                                    <pre>{value.assistantReasoning}</pre>
                                 </details>
-                                <details class={value.mcpTool && value.mcpTool.name === "" ? "none" : ""}>
+                                <details class={value.mcpTool && !value.mcpTool.name ? "none" : ""}>
                                     <summary>
                                         <i class="cls_icon">handyman</i>Show tool
                                     </summary>
@@ -82,7 +83,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                         return result;
                                     })()}
                                 </details>
-                                <pre>{value.assistantNoThink}</pre>
+                                <pre>{value.assistantNoReasoning}</pre>
                             </div>
                         );
                     }
