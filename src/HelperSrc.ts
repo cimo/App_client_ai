@@ -5,10 +5,10 @@ export const IS_DEBUG = false;
 export const PATH_LOG = "log/";
 export const LOCALE = "jp";
 export const URL_ENDPOINT = "https://host.docker.internal:1046";
-export const MODEL_DEFAULT = "qwen3-1.7b";
+export const MCP_SERVER_URL = "http://localhost:5678/mcp";
 export const MCP_SERVER_LABEL = "Tool server";
-export const MCP_SERVER_URL = "http://localhost:8080/mcp";
 export const MCP_SERVER_TOOL = ["tool_sum"];
+export const MODEL_DEFAULT = "qwen3-1.7b";
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {
     // Asia

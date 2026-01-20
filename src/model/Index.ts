@@ -27,8 +27,8 @@ export interface IchatHistory {
 export interface IchatMessage {
     time: string;
     user: string;
-    assistantReasoning: string;
-    assistantNoReasoning: string;
+    assistantReason: string;
+    assistantNoReason: string;
     mcpTool?: IlmStudioApiResponseItem;
 }
 
@@ -50,7 +50,7 @@ export interface Ivariable {
 
 export interface Imethod {
     onClickButtonMessageSend: () => void;
-    onClickButtonModelList: () => void;
+    onClickButtonModel: () => void;
     onClickModelName: (name: string) => void;
     onClickRefreshPage: () => void;
 }

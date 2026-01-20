@@ -12,7 +12,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     <div
                         class="cls_icon"
                         onclick={() => {
-                            methodObject.onClickButtonModelList();
+                            methodObject.onClickButtonModel();
                         }}
                     >
                         schema
@@ -56,12 +56,12 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                     <p>{value.time}</p>
                                     <pre>{value.user}</pre>
                                 </div>
-                                <i class={`cls_icon ${value.assistantReasoning || value.assistantNoReasoning ? "none" : ""}`}>update</i>
-                                <details class={!value.assistantReasoning ? "none" : ""}>
+                                <i class={`cls_icon ${value.assistantReason || value.assistantNoReason ? "none" : ""}`}>update</i>
+                                <details class={!value.assistantReason ? "none" : ""}>
                                     <summary>
-                                        <i class="cls_icon">generating_tokens</i>Show reasoning
+                                        <i class="cls_icon">generating_tokens</i>Show reason
                                     </summary>
-                                    <pre>{value.assistantReasoning}</pre>
+                                    <pre>{value.assistantReason}</pre>
                                 </details>
                                 <details class={value.mcpTool && !value.mcpTool.name ? "none" : ""}>
                                     <summary>
@@ -83,7 +83,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                         return result;
                                     })()}
                                 </details>
-                                <pre>{value.assistantNoReasoning}</pre>
+                                <pre>{value.assistantNoReason}</pre>
                             </div>
                         );
                     }

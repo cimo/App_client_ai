@@ -48,6 +48,38 @@ export default class Index implements Icontroller {
             });
     };
 
+    private apiModel = (): void => {
+        fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
+            method: "GET",
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (result) => {
+                this.variableObject.isOffline.state = false;
+
+                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+                const jsonParse = JSON.parse(resultJson.response.stdout) as modelIndex.IlmStudioApiModel[];
+                const resultCleaned = [];
+
+                for (const value of jsonParse) {
+                    if (value.id.toLowerCase().includes("embedding")) {
+                        continue;
+                    }
+
+                    resultCleaned.push(value);
+                }
+
+                this.variableObject.modelList.state = [...resultCleaned].sort((a, b) => a.id.localeCompare(b.id));
+
+                this.variableObject.isOpenDialogModelList.state = !this.variableObject.isOpenDialogModelList.state;
+            })
+            .catch(() => {
+                this.variableObject.isOffline.state = true;
+            });
+    };
+
     private apiResponse = (): void => {
         if (this.hookObject.elementInputMessageSend.value && this.variableObject.modelSelected.state !== "") {
             this.variableObject.chatHistory.state.push({
@@ -58,15 +90,15 @@ export default class Index implements Icontroller {
             this.variableObject.chatMessage.state.push({
                 time: helperSrc.localeFormat(new Date()) as string,
                 user: this.hookObject.elementInputMessageSend.value,
-                assistantReasoning: "",
-                assistantNoReasoning: "",
+                assistantReason: "",
+                assistantNoReason: "",
                 mcpTool: {} as modelIndex.IlmStudioApiResponseItem
             });
 
             this.autoscroll(false);
 
-            let responseReasoning = "";
-            let responseNoReasoning = "";
+            let responseReason = "";
+            let responseNoReason = "";
             let responseMcpTool = {} as modelIndex.IlmStudioApiResponseItem;
 
             const input: modelIndex.IchatHistory[] = [];
@@ -151,13 +183,13 @@ export default class Index implements Icontroller {
                                         const content = json.delta as string;
 
                                         if (content) {
-                                            responseReasoning += content;
+                                            responseReason += content;
 
                                             const index = this.variableObject.chatMessage.state.length - 1;
 
                                             this.variableObject.chatMessage.state[index] = {
                                                 ...this.variableObject.chatMessage.state[index],
-                                                assistantReasoning: responseReasoning.trim()
+                                                assistantReason: responseReason.trim()
                                             };
 
                                             this.autoscroll(true);
@@ -168,13 +200,13 @@ export default class Index implements Icontroller {
                                         const content = json.delta as string;
 
                                         if (content) {
-                                            responseNoReasoning += content;
+                                            responseNoReason += content;
 
                                             const index = this.variableObject.chatMessage.state.length - 1;
 
                                             this.variableObject.chatMessage.state[index] = {
                                                 ...this.variableObject.chatMessage.state[index],
-                                                assistantNoReasoning: responseNoReasoning.trim()
+                                                assistantNoReason: responseNoReason.trim()
                                             };
 
                                             this.autoscroll(true);
@@ -218,44 +250,12 @@ export default class Index implements Icontroller {
         }
     };
 
-    private apiModelList = (): void => {
-        fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
-            method: "GET",
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (result) => {
-                this.variableObject.isOffline.state = false;
-
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-                const jsonParse = JSON.parse(resultJson.response.stdout) as modelIndex.IlmStudioApiModel[];
-                const resultCleaned = [];
-
-                for (const value of jsonParse) {
-                    if (value.id.toLowerCase().includes("embedding")) {
-                        continue;
-                    }
-
-                    resultCleaned.push(value);
-                }
-
-                this.variableObject.modelList.state = [...resultCleaned].sort((a, b) => a.id.localeCompare(b.id));
-
-                this.variableObject.isOpenDialogModelList.state = !this.variableObject.isOpenDialogModelList.state;
-            })
-            .catch(() => {
-                this.variableObject.isOffline.state = true;
-            });
-    };
-
     private onClickButtonMessageSend = (): void => {
         this.apiResponse();
     };
 
-    private onClickButtonModelList = (): void => {
-        this.apiModelList();
+    private onClickButtonModel = (): void => {
+        this.apiModel();
     };
 
     private onClickModelName = (name: string): void => {
@@ -290,7 +290,7 @@ export default class Index implements Icontroller {
 
         this.methodObject = {
             onClickButtonMessageSend: this.onClickButtonMessageSend,
-            onClickButtonModelList: this.onClickButtonModelList,
+            onClickButtonModel: this.onClickButtonModel,
             onClickModelName: this.onClickModelName,
             onClickRefreshPage: this.onClickRefreshPage
         };
