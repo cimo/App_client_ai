@@ -76,7 +76,9 @@ export default {
         ]
     },
     plugins: [
-        new webpack.DefinePlugin({}),
+        new webpack.DefinePlugin({
+            IS_DEPLOY_DEV: JSON.stringify(process.env.IS_DEPLOY_DEV)
+        }),
         new HtmlWebpackPlugin({
             template: Path.resolve(__dirname, "template_index.html"),
             filename: Path.resolve(__dirname, "public/index.html"),

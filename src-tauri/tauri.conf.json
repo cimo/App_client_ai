@@ -18,10 +18,10 @@
         }
     },
     "build": {
-        "devUrl": "http://localhost:30000",
-        "beforeDevCommand": "npm run execute",
         "frontendDist": "../public",
-        "beforeBuildCommand": "npm run build"
+        "devUrl": "http://localhost:30000",
+        "beforeDevCommand": "IS_DEPLOY_DEV=true npm run execute",
+        "beforeBuildCommand": "IS_DEPLOY_DEV=false npm run build"
     },
     "bundle": {
         "active": true,

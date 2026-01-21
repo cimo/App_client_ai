@@ -1,6 +1,6 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 import { fetch } from "@tauri-apps/plugin-http";
-import { invoke } from "@tauri-apps/api/core";
+//import { invoke } from "@tauri-apps/api/core";
 
 // Source
 import * as helperSrc from "../HelperSrc";
@@ -50,11 +50,11 @@ export default class Index implements Icontroller {
     };
 
     private apiModel = async (): Promise<void> => {
-        const base64 = await invoke("screen_capture_take_image");
+        //const base64 = await invoke("screen_capture_take_image");
 
-        this.hookObject.elementContainerMessageReceive.textContent = base64 as string;
+        //this.variableObject.modelSelected.state = base64 as string;
 
-        /*fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
+        fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
             method: "GET",
             danger: {
                 acceptInvalidCerts: true,
@@ -82,7 +82,7 @@ export default class Index implements Icontroller {
             })
             .catch(() => {
                 this.variableObject.isOffline.state = true;
-            });*/
+            });
     };
 
     private apiResponse = (): void => {

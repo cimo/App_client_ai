@@ -1,11 +1,13 @@
 import Fs from "fs";
 
+declare const IS_DEPLOY_DEV: string;
+
 export const PATH_ROOT = "/home/app/";
-export const IS_DEBUG = false;
+export const IS_DEBUG = IS_DEPLOY_DEV;
 export const PATH_LOG = "log/";
 export const LOCALE = "jp";
-export const URL_ENDPOINT = "https://host.docker.internal:1046";
-export const MCP_SERVER_URL = "http://localhost:5678/mcp";
+export const URL_ENDPOINT = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
+export const MCP_SERVER_URL = IS_DEPLOY_DEV === "true" ? "http://host.docker.internal:5678/mcp" : "http://localhost:5678/mcp";
 export const MCP_SERVER_LABEL = "Tool server";
 export const MCP_SERVER_TOOL = ["tool_sum"];
 export const MODEL_DEFAULT = "qwen3-1.7b";
@@ -83,7 +85,7 @@ export const localeFormat = (value: number | Date, isMonth = true, isDay = true,
 };
 
 export const writeLog = (tag: string, value: string | Record<string, unknown> | Error): void => {
-    if (IS_DEBUG) {
+    if (IS_DEBUG === "true") {
         const text = `Time: ${localeFormat(new Date())} - ${tag}: `;
 
         if (typeof process !== "undefined") {

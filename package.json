@@ -49,8 +49,5 @@
         "esbuild-loader": "4.3.0",
         "@tauri-apps/cli": "2.9.5"
     },
-    "resolutions": {
-        "qs": "6.14.1",
-        "**/qs": "6.14.1"
-    }
+    "resolutions": {}
 }

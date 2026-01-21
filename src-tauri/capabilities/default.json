@@ -14,6 +14,12 @@
                 },
                 {
                     "url": "https://host.docker.internal:1046/*"
+                },
+                {
+                    "url": "http://localhost:1046/*"
+                },
+                {
+                    "url": "https://localhost:1046/*"
                 }
             ],
             "deny": []
