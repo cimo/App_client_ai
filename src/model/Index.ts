@@ -21,7 +21,7 @@ export interface IlmStudioApiResponse {
 
 export interface IchatHistory {
     role: string;
-    content: string | Array<{ type: string; text: string }>;
+    content: string | Array<{ type: string; text?: string; image_url?: string }>;
 }
 
 export interface IchatMessage {
