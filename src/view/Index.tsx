@@ -108,7 +108,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                         methodObject.onClickButtonMessageSend();
                     }}
                 >
-                    Send
+                    <i class="cls_icon">play_arrow</i>
                 </button>
             </div>
         </div>

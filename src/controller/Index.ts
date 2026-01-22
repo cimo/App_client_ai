@@ -12,7 +12,21 @@ export default class Index implements Icontroller {
     private variableObject: modelIndex.Ivariable;
     private methodObject: modelIndex.Imethod;
 
+    private responseId: string;
+    private responseReason: string;
+    private responseNoReason: string;
+    private responseMcpTool: modelIndex.IopenAiApiResponseItem;
+
+    private abortController: AbortController | null;
+
     // Method
+    private resetModelResponse = (): void => {
+        this.responseId = "";
+        this.responseReason = "";
+        this.responseNoReason = "";
+        this.responseMcpTool = {} as modelIndex.IopenAiApiResponseItem;
+    };
+
     private autoscroll = (isAuto: boolean): void => {
         const elementContainerMessageReceive = this.hookObject.elementContainerMessageReceive;
         const elementBottomLimit = this.hookObject.elementBottomLimit;
@@ -65,7 +79,7 @@ export default class Index implements Icontroller {
                 this.variableObject.isOffline.state = false;
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
-                const jsonParse = JSON.parse(resultJson.response.stdout) as modelIndex.IlmStudioApiModel[];
+                const jsonParse = JSON.parse(resultJson.response.stdout) as modelIndex.IopenAiApiModel[];
                 const resultCleaned = [];
 
                 for (const value of jsonParse) {
@@ -87,6 +101,10 @@ export default class Index implements Icontroller {
 
     private apiResponse = (): void => {
         if (this.hookObject.elementInputMessageSend.value && this.variableObject.modelSelected.state !== "") {
+            this.abortController = new AbortController();
+
+            this.resetModelResponse();
+
             this.variableObject.chatHistory.state.push({
                 role: "user",
                 content: this.hookObject.elementInputMessageSend.value
@@ -95,16 +113,12 @@ export default class Index implements Icontroller {
             this.variableObject.chatMessage.state.push({
                 time: helperSrc.localeFormat(new Date()) as string,
                 user: this.hookObject.elementInputMessageSend.value,
-                assistantReason: "",
-                assistantNoReason: "",
-                mcpTool: {} as modelIndex.IlmStudioApiResponseItem
+                assistantReason: this.responseReason,
+                assistantNoReason: this.responseNoReason,
+                mcpTool: this.responseMcpTool
             });
 
             this.autoscroll(false);
-
-            let responseReason = "";
-            let responseNoReason = "";
-            let responseMcpTool = {} as modelIndex.IlmStudioApiResponseItem;
 
             const input: modelIndex.IchatHistory[] = [];
 
@@ -142,6 +156,7 @@ export default class Index implements Icontroller {
                         }
                     ]
                 }),
+                signal: this.abortController.signal,
                 danger: {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
@@ -164,6 +179,8 @@ export default class Index implements Icontroller {
                         const { value, done } = await reader.read();
 
                         if (done) {
+                            this.resetModelResponse();
+
                             break;
                         }
 
@@ -176,70 +193,87 @@ export default class Index implements Icontroller {
                                 const data = line.slice(5).trim();
 
                                 if (data === "[DONE]") {
+                                    this.resetModelResponse();
+
                                     return;
                                 }
 
                                 const dataTrim = data.trim();
 
                                 if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
-                                    const json = JSON.parse(dataTrim) as modelIndex.IlmStudioApiResponse;
+                                    const json = JSON.parse(dataTrim) as modelIndex.IopenAiApiResponse;
 
-                                    if (json.type === "response.reasoning_text.delta") {
-                                        const content = json.delta as string;
-
-                                        if (content) {
-                                            responseReason += content;
-
-                                            const index = this.variableObject.chatMessage.state.length - 1;
-
-                                            this.variableObject.chatMessage.state[index] = {
-                                                ...this.variableObject.chatMessage.state[index],
-                                                assistantReason: responseReason.trim()
-                                            };
-
-                                            this.autoscroll(true);
-                                        }
-                                    }
-
-                                    if (json.type === "response.output_text.delta") {
-                                        const content = json.delta as string;
+                                    if (json.type === "error") {
+                                        const content = json.error;
 
                                         if (content) {
-                                            responseNoReason += content;
+                                            const idx = this.variableObject.chatMessage.state.length - 1;
+
+                                            this.variableObject.chatMessage.state[idx] = {
+                                                ...this.variableObject.chatMessage.state[idx],
+                                                assistantNoReason: content.message
+                                            };
+
+                                            this.autoscroll(true);
+                                        }
+                                    } else if (json.type === "response.created") {
+                                        const content = json.response;
+
+                                        if (content) {
+                                            this.responseId = content.id;
+                                        }
+                                    } else if (json.type === "response.reasoning_text.delta") {
+                                        const content = json.delta;
+
+                                        if (content) {
+                                            this.responseReason += content;
 
                                             const index = this.variableObject.chatMessage.state.length - 1;
 
                                             this.variableObject.chatMessage.state[index] = {
                                                 ...this.variableObject.chatMessage.state[index],
-                                                assistantNoReason: responseNoReason.trim()
+                                                assistantReason: this.responseReason.trim()
                                             };
 
                                             this.autoscroll(true);
                                         }
-                                    }
+                                    } else if (json.type === "response.output_text.delta") {
+                                        const content = json.delta;
 
-                                    if (json.type === "response.output_item.done") {
-                                        const item = json.item;
+                                        if (content) {
+                                            this.responseNoReason += content;
 
-                                        if (item && item.type === "mcp_call") {
-                                            responseMcpTool = {
-                                                name: item.name,
-                                                arguments: item.arguments,
-                                                output: item.output
+                                            const index = this.variableObject.chatMessage.state.length - 1;
+
+                                            this.variableObject.chatMessage.state[index] = {
+                                                ...this.variableObject.chatMessage.state[index],
+                                                assistantNoReason: this.responseNoReason.trim()
+                                            };
+
+                                            this.autoscroll(true);
+                                        }
+                                    } else if (json.type === "response.output_item.done") {
+                                        const content = json.item;
+
+                                        if (content && content.type === "mcp_call") {
+                                            this.responseMcpTool = {
+                                                name: content.name,
+                                                arguments: content.arguments,
+                                                output: content.output
                                             };
 
                                             const index = this.variableObject.chatMessage.state.length - 1;
 
                                             this.variableObject.chatMessage.state[index] = {
                                                 ...this.variableObject.chatMessage.state[index],
-                                                mcpTool: responseMcpTool
+                                                mcpTool: this.responseMcpTool
                                             };
 
                                             this.autoscroll(true);
                                         }
-                                    }
+                                    } else if (json.type === "response.completed") {
+                                        this.resetModelResponse();
 
-                                    if (json.type === "response.completed") {
                                         return;
                                     }
                                 }
@@ -247,8 +281,12 @@ export default class Index implements Icontroller {
                         }
                     }
                 })
-                .catch(() => {
-                    this.variableObject.isOffline.state = true;
+                .catch((error: string) => {
+                    if (error !== "Request cancelled") {
+                        this.variableObject.isOffline.state = true;
+                    }
+
+                    this.resetModelResponse();
                 });
 
             this.hookObject.elementInputMessageSend.value = "";
@@ -256,7 +294,12 @@ export default class Index implements Icontroller {
     };
 
     private onClickButtonMessageSend = (): void => {
-        this.apiResponse();
+        if (this.abortController && this.responseId) {
+            this.abortController.abort();
+            this.abortController = null;
+        } else {
+            this.apiResponse();
+        }
     };
 
     private onClickButtonModel = (): void => {
@@ -276,6 +319,13 @@ export default class Index implements Icontroller {
     constructor() {
         this.variableObject = {} as modelIndex.Ivariable;
         this.methodObject = {} as modelIndex.Imethod;
+
+        this.responseId = "";
+        this.responseReason = "";
+        this.responseNoReason = "";
+        this.responseMcpTool = {} as modelIndex.IopenAiApiResponseItem;
+
+        this.abortController = null;
     }
 
     hookObject = {} as modelIndex.IelementHook;

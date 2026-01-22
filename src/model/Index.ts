@@ -1,22 +1,32 @@
 import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 
-export interface IlmStudioApiModel {
+export interface IopenAiApiModel {
     id: string;
     object: string;
     owned_by: string;
 }
 
-export interface IlmStudioApiResponseItem {
+export interface IopenAiApiResponseItem {
     type?: string;
     name: string;
     arguments: string;
     output: string;
 }
 
-export interface IlmStudioApiResponse {
+export interface IopenAiApiResponse {
     type: string;
+    sequence_number: number;
     delta: string;
-    item: IlmStudioApiResponseItem;
+    item: IopenAiApiResponseItem;
+    response: {
+        id: string;
+    };
+    error: {
+        code: string;
+        message: string;
+        param: string;
+        type: string;
+    };
 }
 
 export interface IchatHistory {
@@ -29,7 +39,7 @@ export interface IchatMessage {
     user: string;
     assistantReason: string;
     assistantNoReason: string;
-    mcpTool?: IlmStudioApiResponseItem;
+    mcpTool?: IopenAiApiResponseItem;
 }
 
 export interface IresponseBody {
@@ -40,7 +50,7 @@ export interface IresponseBody {
 }
 
 export interface Ivariable {
-    modelList: IvariableBind<IlmStudioApiModel[]>;
+    modelList: IvariableBind<IopenAiApiModel[]>;
     modelSelected: IvariableBind<string>;
     chatHistory: IvariableBind<IchatHistory[]>;
     chatMessage: IvariableBind<IchatMessage[]>;
