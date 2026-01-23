@@ -56,6 +56,7 @@ export interface Ivariable {
     chatMessage: IvariableBind<IchatMessage[]>;
     isOpenDialogModelList: IvariableBind<boolean>;
     isOffline: IvariableBind<boolean>;
+    adUrl: IvariableBind<string>;
 }
 
 export interface Imethod {
@@ -63,6 +64,7 @@ export interface Imethod {
     onClickButtonModel: () => void;
     onClickModelName: (name: string) => void;
     onClickRefreshPage: () => void;
+    onClickAd: () => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

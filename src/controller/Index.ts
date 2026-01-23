@@ -55,8 +55,16 @@ export default class Index implements Icontroller {
                 acceptInvalidHostnames: true
             }
         })
-            .then(async () => {
-                this.variableObject.isOffline.state = false;
+            .then(async (result) => {
+                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+                if (resultJson) {
+                    this.variableObject.isOffline.state = false;
+
+                    this.variableObject.adUrl.state = resultJson.response.stdout;
+                } else {
+                    this.variableObject.isOffline.state = true;
+                }
             })
             .catch(() => {
                 this.variableObject.isOffline.state = true;
@@ -316,6 +324,10 @@ export default class Index implements Icontroller {
         window.location.reload();
     };
 
+    private onClickAd = (): void => {
+        window.location.href = this.variableObject.adUrl.state;
+    };
+
     constructor() {
         this.variableObject = {} as modelIndex.Ivariable;
         this.methodObject = {} as modelIndex.Imethod;
@@ -338,7 +350,8 @@ export default class Index implements Icontroller {
                 chatHistory: [{ role: "system", content: "" }],
                 chatMessage: [] as modelIndex.IchatMessage[],
                 isOpenDialogModelList: false,
-                isOffline: false
+                isOffline: false,
+                adUrl: ""
             },
             this.constructor.name
         );
@@ -347,7 +360,8 @@ export default class Index implements Icontroller {
             onClickButtonMessageSend: this.onClickButtonMessageSend,
             onClickButtonModel: this.onClickButtonModel,
             onClickModelName: this.onClickModelName,
-            onClickRefreshPage: this.onClickRefreshPage
+            onClickRefreshPage: this.onClickRefreshPage,
+            onClickAd: this.onClickAd
         };
     }
 

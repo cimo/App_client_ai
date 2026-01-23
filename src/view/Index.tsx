@@ -93,13 +93,22 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                 <div jsmvcfw-elementHookName="elementBottomLimit" class="bottom_limit"></div>
             </div>
             <div
-                class={`container_offline ${!variableObject.isOffline.state ? "none" : ""}`}
+                class={`container_main_icon ${!variableObject.isOffline.state ? "none" : ""}`}
                 onclick={() => {
                     methodObject.onClickRefreshPage();
                 }}
             >
                 <i class="cls_icon">report_off</i>
                 <p>Click here for re-connect.</p>
+            </div>
+            <div
+                class={`container_main_icon ${variableObject.adUrl.state === "" ? "none" : ""}`}
+                onclick={() => {
+                    methodObject.onClickAd();
+                }}
+            >
+                <i class="cls_icon">login</i>
+                <p>Click here for connect to AD.</p>
             </div>
             <div class="container_message_send">
                 <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
