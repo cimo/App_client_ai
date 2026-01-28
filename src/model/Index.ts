@@ -64,7 +64,7 @@ export interface Imethod {
     onClickButtonModel: () => void;
     onClickModelName: (name: string) => void;
     onClickRefreshPage: () => void;
-    onClickAd: () => void;
+    onClickAd: (event: Event) => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

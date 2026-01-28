@@ -103,8 +103,8 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
             </div>
             <div
                 class={`container_main_icon ${variableObject.adUrl.state === "" ? "none" : ""}`}
-                onclick={() => {
-                    methodObject.onClickAd();
+                onclick={(event: Event) => {
+                    methodObject.onClickAd(event);
                 }}
             >
                 <i class="cls_icon">login</i>

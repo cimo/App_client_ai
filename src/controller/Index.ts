@@ -1,11 +1,14 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { fetch } from "@tauri-apps/plugin-http";
-//import { invoke } from "@tauri-apps/api/core";
+import { invoke } from "@tauri-apps/api/core";
 
 // Source
 import * as helperSrc from "../HelperSrc";
 import * as modelIndex from "../model/Index";
 import viewIndex from "../view/Index";
+
+const autoTool = new Set(["tool_ocr", "tool_automate_mouse_click_right"]);
 
 export default class Index implements Icontroller {
     // Variable
@@ -47,6 +50,27 @@ export default class Index implements Icontroller {
         });
     };
 
+    private postToolOutput = async (previousResponseId: string, toolCallId: string, outputObj: string | { ok: boolean }) => {
+        await fetch(`${helperSrc.URL_ENDPOINT}/api/v1/responses`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+
+            body: JSON.stringify({
+                previous_response_id: previousResponseId,
+                tool_outputs: [
+                    {
+                        tool_call_id: toolCallId,
+                        output: typeof outputObj === "string" ? outputObj : JSON.stringify(outputObj)
+                    }
+                ]
+            }),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        });
+    };
+
     private apiLogin = (): void => {
         fetch(`${helperSrc.URL_ENDPOINT}/login`, {
             method: "GET",
@@ -75,6 +99,8 @@ export default class Index implements Icontroller {
         //const base64 = await invoke("screen_capture_take_image");
 
         //this.variableObject.modelSelected.state = base64 as string;
+
+        await invoke("test");
 
         fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
             method: "GET",
@@ -278,6 +304,15 @@ export default class Index implements Icontroller {
                                             };
 
                                             this.autoscroll(true);
+
+                                            if (autoTool.has(content.name)) {
+                                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                                const toolCallId = (content as any).tool_call_id || (content as any).id;
+
+                                                if (this.responseId && toolCallId) {
+                                                    await this.postToolOutput(this.responseId, toolCallId, content.output);
+                                                }
+                                            }
                                         }
                                     } else if (json.type === "response.completed") {
                                         this.resetModelResponse();
@@ -324,8 +359,14 @@ export default class Index implements Icontroller {
         window.location.reload();
     };
 
-    private onClickAd = (): void => {
-        window.location.href = this.variableObject.adUrl.state;
+    private onClickAd = (event: Event): void => {
+        event.preventDefault();
+
+        if (helperSrc.IS_DEBUG) {
+            this.variableObject.adUrl.state = "";
+        } else {
+            openUrl(this.variableObject.adUrl.state);
+        }
     };
 
     constructor() {
@@ -347,7 +388,21 @@ export default class Index implements Icontroller {
             {
                 modelList: [],
                 modelSelected: helperSrc.MODEL_DEFAULT,
-                chatHistory: [{ role: "system", content: "" }],
+                chatHistory: [
+                    {
+                        role: "system",
+                        content:
+                            "You are an autonomous Windows GUI Control Agent.\n" +
+                            "Goal: follow the user's instruction end-to-end WITHOUT asking between steps.\n" +
+                            "You can use these MCP tools: 'tool_ocr', 'tool_automate_mouse_click_right'.\n" +
+                            "General policy:\n" +
+                            " - Open apps using keyboard (Win key, type app name, Enter) when needed.\n" +
+                            " - Use OCR to locate on-screen targets when text labels are mentioned (e.g., 'Login').\n" +
+                            " - Move the mouse to the target region and click.\n" +
+                            " - Use multiple tool calls as needed, until the task is complete.\n" +
+                            " - Do not ask for confirmation. When the goal is achieved, reply with the single word: DONE."
+                    }
+                ],
                 chatMessage: [] as modelIndex.IchatMessage[],
                 isOpenDialogModelList: false,
                 isOffline: false,
