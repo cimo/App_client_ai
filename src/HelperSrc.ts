@@ -9,7 +9,7 @@ export const LOCALE = "jp";
 export const URL_ENDPOINT = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
 export const MCP_SERVER_URL = "http://localhost:5678/mcp";
 export const MCP_SERVER_LABEL = "Tool server";
-export const MCP_SERVER_TOOL = ["tool_math_expression", "tool_ocr", "tool_automate_mouse_move", "tool_automate_mouse_click_right"];
+export const MCP_SERVER_TOOL = ["tool_math_expression", "tool_ocr", "tool_automate_mouse_move", "tool_automate_mouse_click"];
 export const MODEL_DEFAULT = "qwen3-1.7b";
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {

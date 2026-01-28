@@ -1,14 +1,14 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { fetch } from "@tauri-apps/plugin-http";
-import { invoke } from "@tauri-apps/api/core";
+//import { invoke } from "@tauri-apps/api/core";
 
 // Source
 import * as helperSrc from "../HelperSrc";
 import * as modelIndex from "../model/Index";
 import viewIndex from "../view/Index";
 
-const autoTool = new Set(["tool_ocr", "tool_automate_mouse_click_right"]);
+const autoTool = new Set(["tool_ocr", "tool_automate_mouse_move", "tool_automate_mouse_click"]);
 
 export default class Index implements Icontroller {
     // Variable
@@ -50,17 +50,20 @@ export default class Index implements Icontroller {
         });
     };
 
-    private postToolOutput = async (previousResponseId: string, toolCallId: string, outputObj: string | { ok: boolean }) => {
+    private toolAutoCall = async (previousResponseId: string, toolCallId: string, toolOutput: string) => {
         await fetch(`${helperSrc.URL_ENDPOINT}/api/v1/responses`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
 
             body: JSON.stringify({
+                model: this.variableObject.modelSelected.state,
+                input: "",
+                temperature: 0,
                 previous_response_id: previousResponseId,
                 tool_outputs: [
                     {
                         tool_call_id: toolCallId,
-                        output: typeof outputObj === "string" ? outputObj : JSON.stringify(outputObj)
+                        output: toolOutput
                     }
                 ]
             }),
@@ -97,10 +100,9 @@ export default class Index implements Icontroller {
 
     private apiModel = async (): Promise<void> => {
         //const base64 = await invoke("screen_capture_take_image");
-
         //this.variableObject.modelSelected.state = base64 as string;
 
-        await invoke("test");
+        //await invoke("test");
 
         fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
             method: "GET",
@@ -139,11 +141,6 @@ export default class Index implements Icontroller {
 
             this.resetModelResponse();
 
-            this.variableObject.chatHistory.state.push({
-                role: "user",
-                content: this.hookObject.elementInputMessageSend.value
-            });
-
             this.variableObject.chatMessage.state.push({
                 time: helperSrc.localeFormat(new Date()) as string,
                 user: this.hookObject.elementInputMessageSend.value,
@@ -154,9 +151,14 @@ export default class Index implements Icontroller {
 
             this.autoscroll(false);
 
+            /*this.variableObject.chatHistory.state.push({
+                role: "user",
+                content: this.hookObject.elementInputMessageSend.value
+            });*/
+
             const input: modelIndex.IchatHistory[] = [];
 
-            for (const chatHistory of this.variableObject.chatHistory.state) {
+            /*for (const chatHistory of this.variableObject.chatHistory.state) {
                 if (chatHistory.role === "system" || chatHistory.role === "user") {
                     input.push({
                         role: chatHistory.role,
@@ -168,7 +170,30 @@ export default class Index implements Icontroller {
                         content: [{ type: "output_text", text: chatHistory.content as string }]
                     });
                 }
-            }
+            }*/
+
+            input.push({
+                role: "system",
+                content: [
+                    {
+                        type: "input_text",
+                        text:
+                            "You are an autonomous Windows GUI control agent.\n" +
+                            "Goal: follow the user's instruction end-to-end WITHOUT asking between steps.\n" +
+                            "General policy:\n" +
+                            " - Use OCR to locate on-screen targets.\n" +
+                            " - Open apps using keyboard when needed.\n" +
+                            " - Move the mouse to the target region and click when needed.\n" +
+                            " - Use multiple tool calls as needed, until the task is complete.\n" +
+                            " - Do not ask for confirmation. When the goal is achieved, reply with the single word: DONE."
+                    }
+                ]
+            });
+
+            input.push({
+                role: "user",
+                content: [{ type: "input_text", text: this.hookObject.elementInputMessageSend.value }]
+            });
 
             fetch(`${helperSrc.URL_ENDPOINT}/api/v1/responses`, {
                 method: "POST",
@@ -178,8 +203,7 @@ export default class Index implements Icontroller {
                 body: JSON.stringify({
                     model: this.variableObject.modelSelected.state,
                     input,
-                    temperature: 0.1,
-                    max_output_tokens: 512,
+                    temperature: 0,
                     stream: true,
                     tools: [
                         {
@@ -305,12 +329,18 @@ export default class Index implements Icontroller {
 
                                             this.autoscroll(true);
 
+                                            // eslint-disable-next-line no-console
+                                            console.log("cimo1", content.name);
+
                                             if (autoTool.has(content.name)) {
                                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                                 const toolCallId = (content as any).tool_call_id || (content as any).id;
 
                                                 if (this.responseId && toolCallId) {
-                                                    await this.postToolOutput(this.responseId, toolCallId, content.output);
+                                                    // eslint-disable-next-line no-console
+                                                    console.log("cimo2", this.responseId, toolCallId, content.output);
+
+                                                    //await this.toolAutoCall(this.responseId, toolCallId, content.output);
                                                 }
                                             }
                                         }
@@ -394,7 +424,6 @@ export default class Index implements Icontroller {
                         content:
                             "You are an autonomous Windows GUI Control Agent.\n" +
                             "Goal: follow the user's instruction end-to-end WITHOUT asking between steps.\n" +
-                            "You can use these MCP tools: 'tool_ocr', 'tool_automate_mouse_click_right'.\n" +
                             "General policy:\n" +
                             " - Open apps using keyboard (Win key, type app name, Enter) when needed.\n" +
                             " - Use OCR to locate on-screen targets when text labels are mentioned (e.g., 'Login').\n" +
