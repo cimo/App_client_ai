@@ -7,6 +7,7 @@ export interface IopenAiApiModel {
 }
 
 export interface IopenAiApiResponseItem {
+    tool_call_id: string;
     type?: string;
     name: string;
     arguments: string;

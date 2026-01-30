@@ -10,7 +10,9 @@
                 "title": "Client ai",
                 "width": 450,
                 "height": 600,
-                "theme": "Dark"
+                "theme": "Dark",
+                "resizable": false,
+                "decorations": true
             }
         ],
         "security": {

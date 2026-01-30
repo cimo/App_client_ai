@@ -49,6 +49,7 @@ pub fn run() {
             )
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_http::init())
+        
         .invoke_handler(tauri::generate_handler![test, screen_capture_take_image])
         .run(tauri::generate_context!())
         .expect("Error: execution failed!");
