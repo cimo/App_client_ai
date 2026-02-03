@@ -30,7 +30,7 @@ export interface IopenAiApiResponse {
     };
 }
 
-export interface IchatHistory {
+export interface IchatInput {
     role: string;
     content: string | Array<{ type: string; text?: string; image_url?: string }>;
 }
@@ -53,7 +53,7 @@ export interface IresponseBody {
 export interface Ivariable {
     modelList: IvariableBind<IopenAiApiModel[]>;
     modelSelected: IvariableBind<string>;
-    chatHistory: IvariableBind<IchatHistory[]>;
+    chatHistory: IvariableBind<IchatInput[]>;
     chatMessage: IvariableBind<IchatMessage[]>;
     isOpenDialogModelList: IvariableBind<boolean>;
     isOffline: IvariableBind<boolean>;

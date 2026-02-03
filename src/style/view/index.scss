@@ -10,286 +10,6 @@ body,
     user-select: none;
 }
 
-/*.page_container {
-    display: flex;
-    flex-direction: column;
-
-    textarea,
-    input,
-    button {
-        border: 1px solid transparent;
-        border-radius: 8px;
-        padding: 5px;
-        outline: none;
-        background-color: transparent;
-    }
-
-    button {
-        margin: 10px;
-        cursor: pointer;
-        text-align: center;
-    }
-
-    .container_actionBar {
-        display: flex;
-        justify-content: space-between;
-        height: 40px;
-        padding: 10px;
-        z-index: parameter.$zIndexActionBar;
-
-        .selector_model {
-            align-self: end;
-            position: relative;
-
-            .cls_icon {
-                cursor: pointer !important;
-            }
-
-            .dialog {
-                position: absolute;
-                right: 0;
-                margin-top: 5px;
-
-                .title {
-                    margin: 5px;
-                }
-
-                ul {
-                    li {
-                        cursor: pointer;
-                        padding: 5px;
-                    }
-                }
-            }
-        }
-    }
-
-    .container_message_receive {
-        position: fixed;
-        top: 40px;
-        left: 20px;
-        right: 20px;
-        bottom: 190px;
-        padding: 0 20px;
-        overflow-y: scroll;
-        overscroll-behavior: contain;
-        scroll-behavior: auto;
-
-        > div {
-            pre {
-                white-space: break-spaces;
-                margin: 5px 0 0 0;
-            }
-
-            .container_chat {
-                margin-top: 20px;
-                display: flex;
-                flex-direction: column;
-
-                p {
-                    align-self: end;
-                    width: fit-content;
-                }
-
-                pre {
-                    margin: 5px 0;
-                    border-radius: 8px;
-                    padding: 10px;
-                    align-self: end;
-                    width: fit-content;
-                    text-align: right;
-                }
-            }
-
-            details {
-                padding: 5px;
-                margin-bottom: 5px;
-                width: fit-content;
-
-                summary {
-                    cursor: pointer;
-                    list-style: none;
-
-                    .cls_icon {
-                        margin-right: 5px !important;
-                        font-size: parameter.$fontSizeNormalPlus !important;
-                        position: relative !important;
-                        top: 7px !important;
-                        line-height: 0 !important;
-                    }
-                }
-
-                pre,
-                > div {
-                    p {
-                        margin-top: 5px;
-                    }
-                }
-            }
-        }
-
-        .bottom_limit {
-            height: 1px;
-        }
-    }
-
-    .container_main_icon {
-        position: fixed;
-        top: 40px;
-        left: 20px;
-        right: 20px;
-        bottom: 170px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        gap: 20px;
-        cursor: pointer;
-
-        .cls_icon {
-            font-size: parameter.$fontSizeVeryBig !important;
-            display: flex !important;
-            align-items: center !important;
-        }
-    }
-
-    .container_message_send {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        right: 20px;
-        height: 150px;
-        border-radius: 8px;
-
-        textarea {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            right: 5px;
-            height: 100px;
-        }
-
-        button {
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    }
-}
-
-@media (prefers-color-scheme: Dark) {
-    :root {
-        color: color.$darkRootText;
-        background-color: color.$darkRootBackground;
-    }
-
-    button {
-        background-color: color.$darkButtonBackground !important;
-
-        &:hover {
-            border: 1px solid color.$darkButtonBorderHover !important;
-        }
-    }
-
-    .container_actionBar {
-        background: color.$darkActionBarBackground;
-
-        .selector_model {
-            .dialog {
-                background: color.$darkActionBarBackground;
-                box-shadow: color.$darkBoxShadow;
-
-                ul {
-                    li {
-                        &:hover {
-                            background-color: color.$darkActionBarDialogHover;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    .container_message_receive {
-        > div {
-            .container_chat {
-                pre {
-                    border: 1px solid color.$darkMessageBorder;
-                }
-            }
-
-            details {
-                color: color.$darkReasonColor;
-                background-color: color.$darkReasonBackground;
-            }
-        }
-    }
-
-    .container_message_send {
-        border: 1px solid color.$darkMessageBorder;
-        box-shadow: color.$darkMessageSendBoxShadow;
-    }
-}
-
-@media (prefers-color-scheme: Light) {
-    :root {
-        color: color.$lightRootText;
-        background-color: color.$lightRootBackground;
-    }
-
-    button {
-        background-color: color.$lightButtonBackground !important;
-
-        &:hover {
-            border: 1px solid color.$lightButtonBorderHover !important;
-        }
-    }
-
-    .container_actionBar {
-        background: color.$lightActionBarBackground;
-
-        .selector_model {
-            .dialog {
-                background: color.$lightActionBarBackground;
-                box-shadow: color.$lightBoxShadow;
-
-                ul {
-                    li {
-                        &:hover {
-                            background-color: color.$lightActionBarDialogHover;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    .container_message_receive {
-        > div {
-            .container_chat {
-                pre {
-                    border: 1px solid color.$lightMessageBorder;
-                }
-            }
-
-            details {
-                color: color.$lightReasonColor;
-                background-color: color.$lightReasonBackground;
-            }
-        }
-    }
-
-    .container_message_send {
-        border: 1px solid color.$lightMessageBorder;
-        box-shadow: color.$lightMessageSendBoxShadow;
-    }
-}*/
-
 textarea,
 input,
 button {
@@ -441,77 +161,6 @@ pre {
         }
     }
 
-    /*
-    .container_message_receive {
-        position: fixed;
-        top: 40px;
-        left: 20px;
-        right: 20px;
-        bottom: 190px;
-        padding: 0 20px;
-        overflow-y: scroll;
-        overscroll-behavior: contain;
-        scroll-behavior: auto;
-
-        > div {
-            pre {
-                white-space: break-spaces;
-                margin: 5px 0 0 0;
-            }
-
-            .container_chat {
-                margin-top: 20px;
-                display: flex;
-                flex-direction: column;
-
-                p {
-                    align-self: end;
-                    width: fit-content;
-                }
-
-                pre {
-                    margin: 5px 0;
-                    border-radius: 8px;
-                    padding: 10px;
-                    align-self: end;
-                    width: fit-content;
-                    text-align: right;
-                }
-            }
-
-            details {
-                padding: 5px;
-                margin-bottom: 5px;
-                width: fit-content;
-
-                summary {
-                    cursor: pointer;
-                    list-style: none;
-
-                    .cls_icon {
-                        margin-right: 5px !important;
-                        font-size: parameter.$fontSizeNormalPlus !important;
-                        position: relative !important;
-                        top: 7px !important;
-                        line-height: 0 !important;
-                    }
-                }
-
-                pre,
-                > div {
-                    p {
-                        margin-top: 5px;
-                    }
-                }
-            }
-        }
-
-        .bottom_limit {
-            height: 1px;
-        }
-    }
-    */
-
     .container_message_send {
         display: flex;
         flex-direction: column;
@@ -532,6 +181,10 @@ pre {
                 height: 40px;
             }
         }
+    }
+
+    .bottom_limit {
+        height: 1px;
     }
 }
 
@@ -555,6 +208,7 @@ pre {
 
     .container_actionBar {
         background: color.$darkActionBarBackground;
+        box-shadow: color.$darkBoxShadow;
 
         .dialog {
             background: color.$darkActionBarBackground;
@@ -573,8 +227,8 @@ pre {
     .container_message_receive {
         > div {
             details {
-                color: color.$darkReasonColor;
-                background-color: color.$darkReasonBackground;
+                color: color.$darkAssistantBoxColor;
+                background-color: color.$darkAssistantBoxBackground;
             }
 
             .container_chat_user {
@@ -595,5 +249,55 @@ pre {
     :root {
         color: color.$lightRootText;
         background-color: color.$lightRootBackground;
+    }
+
+    button {
+        background-color: color.$lightButtonBackground !important;
+
+        &:hover {
+            border: 1px solid color.$lightButtonBorderHover !important;
+        }
+    }
+
+    .container_over {
+        background-color: color.$lightRootBackground;
+    }
+
+    .container_actionBar {
+        background: color.$lightActionBarBackground;
+        box-shadow: color.$lightBoxShadow;
+
+        .dialog {
+            background: color.$lightActionBarBackground;
+            box-shadow: color.$lightBoxShadow;
+
+            ul {
+                li {
+                    &:hover {
+                        background-color: color.$lightActionBarDialogHover;
+                    }
+                }
+            }
+        }
+    }
+
+    .container_message_receive {
+        > div {
+            details {
+                color: color.$lightAssistantBoxColor;
+                background-color: color.$lightAssistantBoxBackground;
+            }
+
+            .container_chat_user {
+                pre {
+                    border: 1px solid color.$lightMessageBorder;
+                }
+            }
+        }
+    }
+
+    .container_message_send {
+        border: 1px solid color.$lightMessageBorder;
+        box-shadow: color.$lightMessageSendBoxShadow;
     }
 }

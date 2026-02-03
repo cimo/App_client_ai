@@ -73,11 +73,6 @@ export default class Index implements Icontroller {
     };
 
     private apiModel = async (): Promise<void> => {
-        //const base64 = await invoke("screen_capture_take_image");
-        //this.variableObject.modelSelected.state = base64 as string;
-
-        //await invoke("test");
-
         fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
             method: "GET",
             danger: {
@@ -110,6 +105,11 @@ export default class Index implements Icontroller {
     };
 
     private apiResponse = (): void => {
+        //const base64 = await invoke("screen_capture_take_image");
+        //this.variableObject.modelSelected.state = base64 as string;
+
+        //await invoke("test");
+
         if (this.hookObject.elementInputMessageSend.value && this.variableObject.modelSelected.state !== "") {
             this.abortController = new AbortController();
 
@@ -130,7 +130,7 @@ export default class Index implements Icontroller {
                 content: this.hookObject.elementInputMessageSend.value
             });*/
 
-            const input: modelIndex.IchatHistory[] = [];
+            const input: modelIndex.IchatInput[] = [];
 
             /*for (const chatHistory of this.variableObject.chatHistory.state) {
                 if (chatHistory.role === "system" || chatHistory.role === "user") {
@@ -152,13 +152,15 @@ export default class Index implements Icontroller {
                     {
                         type: "input_text",
                         text:
-                            "You are an autonomous GUI control agent.\n" +
-                            "Follow the user's instruction end-to-end WITHOUT asking between steps.\n" +
+                            "You are an autonomous GUI control agent that need talk only in english.\n" +
+                            "Follow the user instruction end-to-end WITHOUT asking between steps.\n" +
                             "General policy:\n" +
-                            " - Wait tool_automate_ocr response before using the next tool.\n" +
-                            " - Never guess the response for all tools. Always wait for the previous tool output before proceeding with the next tool, then pass the response to the next tool and proceed with the task.\n" +
-                            " - If you have a problem with some tool, just stop the reasoning and reply with the single word: FAIL.\n" +
-                            " - If all tools will be okay, just reply with the single word: DONE."
+                            " - If you will receive a request for check the GUI wait 'tool_automate_ocr' response before using the next tool.\n" +
+                            " - Never guess the response for all tools. Always wait for the previous tool output before proceeding with next step.\n" +
+                            " - If you need use a multi tool use it in order, wait the response and only when you have the response proceed with next toll call.\n" +
+                            " - You don't need verify and confirm the result of the tool call, you need just use the response for your next step if necessary.\n" +
+                            " - If you have a problem with some tool, just reply with the single word in the user response: FAIL.\n" +
+                            " - If all tools will be okay, just reply with the single word in the user response: DONE."
                     }
                 ]
             });
@@ -373,7 +375,7 @@ export default class Index implements Icontroller {
             {
                 modelList: [],
                 modelSelected: helperSrc.MODEL_DEFAULT,
-                chatHistory: [] as modelIndex.IchatHistory[],
+                chatHistory: [] as modelIndex.IchatInput[],
                 chatMessage: [] as modelIndex.IchatMessage[],
                 isOpenDialogModelList: false,
                 isOffline: false,

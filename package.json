@@ -20,7 +20,7 @@
         "build_app": "npm run remove_public_js && npm run remove_public_style && npm run sass && tsc --noEmit --project tsconfig.json && webpack --config webpack.build.js",
         "build": "npm audit && npm run build_tsc && npm run check && npm run build_app",
         "execute": "nodemon --config nodemon.json",
-        "tauri_dev": "XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir tauri dev",
+        "tauri_dev": "tauri dev",
         "tauri_build_linux_x86_64": "tauri build --target x86_64-unknown-linux-gnu",
         "tauri_build_windows_x86_64": "tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc"
     },
