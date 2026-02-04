@@ -25,7 +25,7 @@
         "tauri_build_windows_x86_64": "tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc"
     },
     "dependencies": {
-        "@cimo/jsmvcfw": "1.4.30",
+        "@cimo/jsmvcfw": "1.4.31",
         "@tauri-apps/api": "2.9.1",
         "@tauri-apps/plugin-log": "2.8.0",
         "@tauri-apps/plugin-opener": "2.5.2",
