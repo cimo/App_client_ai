@@ -8,7 +8,7 @@ export const PATH_LOG = "log/";
 export const LOCALE = "jp";
 export const URL_ENDPOINT = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
 export const MCP_SERVER_URL = "http://localhost:5678/mcp";
-export const MCP_SERVER_LABEL = "Tool server";
+export const MCP_SERVER_LABEL = "Microservice mcp";
 export const MCP_SERVER_TOOL = ["tool_math_expression", "tool_automate_ocr", "tool_automate_mouse_move", "tool_automate_mouse_click"];
 export const MODEL_DEFAULT = "qwen3-1.7b";
 
@@ -98,4 +98,11 @@ export const writeLog = (tag: string, value: string | Record<string, unknown> | 
             console.log(`WriteLog => ${text}`, value);
         }
     }
+};
+
+export const generateUniqueId = (): string => {
+    const timestamp = Date.now().toString(36);
+    const randomPart = crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
+
+    return `${timestamp}-${randomPart}`;
 };

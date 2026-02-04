@@ -20,6 +20,8 @@ export default class Index implements Icontroller {
 
     private abortController: AbortController | null;
 
+    private uniqueId: string;
+
     // Method
     private resetModelResponse = (): void => {
         this.responseId = "";
@@ -48,9 +50,20 @@ export default class Index implements Icontroller {
         });
     };
 
+    private generateUniqueId = (): string => {
+        const timestamp = Date.now().toString(36);
+        const randomPart = crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
+
+        return `${timestamp}-${randomPart}`;
+    };
+
     private apiLogin = (): void => {
         fetch(`${helperSrc.URL_ENDPOINT}/login`, {
-            method: "GET",
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.uniqueId}`
+            },
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
@@ -70,6 +83,22 @@ export default class Index implements Icontroller {
             .catch(() => {
                 this.variableObject.isOffline.state = true;
             });
+    };
+
+    private apiLogout = (): void => {
+        fetch(`${helperSrc.URL_ENDPOINT}/logout`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.uniqueId}`
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        }).catch(() => {
+            this.variableObject.isOffline.state = true;
+        });
     };
 
     private apiModel = async (): Promise<void> => {
@@ -366,6 +395,8 @@ export default class Index implements Icontroller {
         this.responseMcpTool = {} as modelIndex.IopenAiApiResponseItem;
 
         this.abortController = null;
+
+        this.uniqueId = this.generateUniqueId();
     }
 
     hookObject = {} as modelIndex.IelementHook;
@@ -419,5 +450,7 @@ export default class Index implements Icontroller {
         this.apiLogin();
     }
 
-    destroy(): void {}
+    destroy(): void {
+        this.apiLogout();
+    }
 }
