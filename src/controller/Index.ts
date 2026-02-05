@@ -1,6 +1,8 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { fetch } from "@tauri-apps/plugin-http";
+
+//import { getCurrentWindow, type Window, type CloseRequestedEvent } from "@tauri-apps/api/window";
 //import { invoke } from "@tauri-apps/api/core";
 
 // Source
@@ -21,6 +23,8 @@ export default class Index implements Icontroller {
     private abortController: AbortController | null;
 
     private uniqueId: string;
+
+    //private appWindow: Window;
 
     // Method
     private resetModelResponse = (): void => {
@@ -85,8 +89,8 @@ export default class Index implements Icontroller {
             });
     };
 
-    private apiLogout = (): void => {
-        fetch(`${helperSrc.URL_ENDPOINT}/logout`, {
+    private apiLogout = (): Promise<void | Response> => {
+        return fetch(`${helperSrc.URL_ENDPOINT}/logout`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -397,6 +401,8 @@ export default class Index implements Icontroller {
         this.abortController = null;
 
         this.uniqueId = this.generateUniqueId();
+
+        //this.appWindow = getCurrentWindow();
     }
 
     hookObject = {} as modelIndex.IelementHook;
@@ -438,6 +444,22 @@ export default class Index implements Icontroller {
                 this.variableObject.isOpenDialogModelList.state = false;
             }
         });
+
+        /*this.appWindow.onCloseRequested(async (event: CloseRequestedEvent) => {
+            event.preventDefault();
+
+            try {
+                await this.apiLogout();
+            } catch (err) {
+                // eslint-disable-next-line no-console
+                console.log("Logout fallito:", err);
+            } finally {
+                // eslint-disable-next-line no-console
+                console.log("Bye bye");
+
+                await this.appWindow.close();
+            }
+        });*/
     }
 
     subControllerList(): Icontroller[] {
@@ -450,7 +472,5 @@ export default class Index implements Icontroller {
         this.apiLogin();
     }
 
-    destroy(): void {
-        this.apiLogout();
-    }
+    destroy(): void {}
 }

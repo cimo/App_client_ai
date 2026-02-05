@@ -7,6 +7,7 @@
         "withGlobalTauri": true,
         "windows": [
             {
+                "label": "main",
                 "title": "Client ai",
                 "width": 450,
                 "height": 600,
