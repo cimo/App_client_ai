@@ -9,11 +9,13 @@
             {
                 "label": "main",
                 "title": "Client ai",
-                "width": 450,
-                "height": 600,
                 "theme": "Dark",
-                "resizable": false,
-                "decorations": true
+                "decorations": true,
+                "resizable": true,
+                "width": 550,
+                "height": 700,
+                "minWidth": 550,
+                "minHeight": 700
             }
         ],
         "security": {

@@ -3,7 +3,7 @@ use xcap::Monitor;
 use xcap::image::ImageFormat;
 use base64::{engine::general_purpose, Engine as _};
 
-pub fn take_image() -> Result<String, String> {
+pub fn screenshot() -> Result<String, String> {
     let monitors = Monitor::all().map_err(|e| e.to_string())?;
 
     let monitor = monitors

@@ -1,9 +1,8 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
+import { getCurrentWindow, CloseRequestedEvent, type Window } from "@tauri-apps/api/window";
+//import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { fetch } from "@tauri-apps/plugin-http";
-
-//import { getCurrentWindow, type Window, type CloseRequestedEvent } from "@tauri-apps/api/window";
-//import { invoke } from "@tauri-apps/api/core";
 
 // Source
 import * as helperSrc from "../HelperSrc";
@@ -20,11 +19,12 @@ export default class Index implements Icontroller {
     private responseNoReason: string;
     private responseMcpTool: modelIndex.IopenAiApiResponseItem;
 
-    private abortController: AbortController | null;
+    private abortControllerApiResponse: AbortController | null;
 
     private uniqueId: string;
 
-    //private appWindow: Window;
+    private appWindow: Window;
+    private appIsClosing: boolean;
 
     // Method
     private resetModelResponse = (): void => {
@@ -84,7 +84,9 @@ export default class Index implements Icontroller {
                     this.variableObject.isOffline.state = true;
                 }
             })
-            .catch(() => {
+            .catch((error: Error) => {
+                helperSrc.writeLog("Index.ts - apiLogin() - catch()", error);
+
                 this.variableObject.isOffline.state = true;
             });
     };
@@ -100,7 +102,9 @@ export default class Index implements Icontroller {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
             }
-        }).catch(() => {
+        }).catch((error: Error) => {
+            helperSrc.writeLog("Index.ts - apiLogout() - catch()", error);
+
             this.variableObject.isOffline.state = true;
         });
     };
@@ -132,19 +136,21 @@ export default class Index implements Icontroller {
 
                 this.variableObject.isOpenDialogModelList.state = !this.variableObject.isOpenDialogModelList.state;
             })
-            .catch(() => {
+            .catch((error: Error) => {
+                helperSrc.writeLog("Index.ts - apiModel() - catch()", error);
+
                 this.variableObject.isOffline.state = true;
             });
     };
 
     private apiResponse = (): void => {
-        //const base64 = await invoke("screen_capture_take_image");
+        //const base64 = await invoke("test_screenshot");
         //this.variableObject.modelSelected.state = base64 as string;
 
         //await invoke("test");
 
         if (this.hookObject.elementInputMessageSend.value && this.variableObject.modelSelected.state !== "") {
-            this.abortController = new AbortController();
+            this.abortControllerApiResponse = new AbortController();
 
             this.resetModelResponse();
 
@@ -222,7 +228,7 @@ export default class Index implements Icontroller {
                         }
                     ]
                 }),
-                signal: this.abortController.signal,
+                signal: this.abortControllerApiResponse.signal,
                 danger: {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
@@ -348,7 +354,9 @@ export default class Index implements Icontroller {
                         }
                     }
                 })
-                .catch(() => {
+                .catch((error: Error) => {
+                    helperSrc.writeLog("Index.ts - apiResponse() - catch()", error);
+
                     this.variableObject.isOffline.state = true;
 
                     this.resetModelResponse();
@@ -359,9 +367,9 @@ export default class Index implements Icontroller {
     };
 
     private onClickButtonMessageSend = (): void => {
-        if (this.abortController && this.responseId) {
-            this.abortController.abort();
-            this.abortController = null;
+        if (this.abortControllerApiResponse && this.responseId) {
+            this.abortControllerApiResponse.abort();
+            this.abortControllerApiResponse = null;
         } else {
             this.apiResponse();
         }
@@ -398,11 +406,12 @@ export default class Index implements Icontroller {
         this.responseNoReason = "";
         this.responseMcpTool = {} as modelIndex.IopenAiApiResponseItem;
 
-        this.abortController = null;
+        this.abortControllerApiResponse = null;
 
         this.uniqueId = this.generateUniqueId();
 
-        //this.appWindow = getCurrentWindow();
+        this.appWindow = getCurrentWindow();
+        this.appIsClosing = false;
     }
 
     hookObject = {} as modelIndex.IelementHook;
@@ -445,21 +454,19 @@ export default class Index implements Icontroller {
             }
         });
 
-        /*this.appWindow.onCloseRequested(async (event: CloseRequestedEvent) => {
+        this.appWindow.onCloseRequested(async (event: CloseRequestedEvent) => {
+            if (this.appIsClosing) {
+                return;
+            }
+
             event.preventDefault();
 
-            try {
-                await this.apiLogout();
-            } catch (err) {
-                // eslint-disable-next-line no-console
-                console.log("Logout fallito:", err);
-            } finally {
-                // eslint-disable-next-line no-console
-                console.log("Bye bye");
+            this.appIsClosing = true;
 
-                await this.appWindow.close();
-            }
-        });*/
+            await this.apiLogout();
+
+            await this.appWindow.close();
+        });
     }
 
     subControllerList(): Icontroller[] {
@@ -472,5 +479,7 @@ export default class Index implements Icontroller {
         this.apiLogin();
     }
 
-    destroy(): void {}
+    destroy(): void {
+        this.apiLogout();
+    }
 }

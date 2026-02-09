@@ -5,11 +5,16 @@ use log::LevelFilter;
 use enigo::{Enigo, Mouse, Settings, Coordinate::{Abs, Rel}};
 
 // Source
-mod screen_capture;
-use screen_capture::take_image;
+mod display;
+use display::screenshot;
 
 #[tauri::command]
-fn test() -> Result<(), String> {
+fn test_screenshot() -> Result<String, String> {
+    screenshot()
+}
+
+#[tauri::command]
+fn test_mouse() -> Result<(), String> {
     #[cfg(target_os = "windows")]
     enigo::set_dpi_awareness().unwrap();
 
@@ -31,11 +36,6 @@ fn test() -> Result<(), String> {
     Ok(())
 }
 
-#[tauri::command]
-fn screen_capture_take_image() -> Result<String, String> {
-    take_image()
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -49,8 +49,7 @@ pub fn run() {
             )
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_http::init())
-        
-        .invoke_handler(tauri::generate_handler![test, screen_capture_take_image])
+        .invoke_handler(tauri::generate_handler![test_screenshot, test_mouse])
         .run(tauri::generate_context!())
         .expect("Error: execution failed!");
 }
