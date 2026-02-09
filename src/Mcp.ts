@@ -33,7 +33,7 @@ export default class Mcp {
                 true
             )
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - connection() - Error", error);
+                helperSrc.writeLog("Mcp.ts - connection() - catch()", error);
             });
     };
 }
