@@ -62,7 +62,7 @@ export default class Index implements Icontroller {
     };
 
     private apiLogin = (): void => {
-        fetch(`${helperSrc.URL_ENDPOINT}/login`, {
+        fetch(`${helperSrc.URL_AI}/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -92,7 +92,7 @@ export default class Index implements Icontroller {
     };
 
     private apiLogout = (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_ENDPOINT}/logout`, {
+        return fetch(`${helperSrc.URL_AI}/logout`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export default class Index implements Icontroller {
     };
 
     private apiModel = async (): Promise<void> => {
-        fetch(`${helperSrc.URL_ENDPOINT}/api/v1/models`, {
+        fetch(`${helperSrc.URL_AI}/api/v1/models`, {
             method: "GET",
             danger: {
                 acceptInvalidCerts: true,
@@ -209,7 +209,7 @@ export default class Index implements Icontroller {
                 content: [{ type: "input_text", text: this.hookObject.elementInputMessageSend.value }]
             });
 
-            fetch(`${helperSrc.URL_ENDPOINT}/api/v1/responses`, {
+            fetch(`${helperSrc.URL_AI}/api/v1/responses`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -223,7 +223,7 @@ export default class Index implements Icontroller {
                         {
                             type: "mcp",
                             server_label: helperSrc.MCP_SERVER_LABEL,
-                            server_url: helperSrc.MCP_SERVER_URL,
+                            server_url: helperSrc.URL_MCP,
                             allowed_tools: helperSrc.MCP_SERVER_TOOL
                         }
                     ]

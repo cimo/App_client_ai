@@ -6,16 +6,10 @@ export const PATH_ROOT = "/home/app/";
 export const IS_DEBUG = IS_DEPLOY_DEV;
 export const PATH_LOG = "log/";
 export const LOCALE = "jp";
-export const URL_ENDPOINT = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
-export const MCP_SERVER_URL = "http://localhost:5678/mcp";
+export const URL_AI = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
+export const URL_MCP = IS_DEPLOY_DEV === "true" ? "http://host.docker.internal:1047" : "http://localhost:1047";
 export const MCP_SERVER_LABEL = "Microservice mcp";
-export const MCP_SERVER_TOOL = [
-    "tool_math_expression",
-    "tool_automate_ocr",
-    "tool_automate_browser",
-    "tool_automate_mouse_move",
-    "tool_automate_mouse_click"
-];
+export const MCP_SERVER_TOOL = ["tool_math_expression", "tool_automate_screenshot", "tool_automate_browser"];
 export const MODEL_DEFAULT = "qwen3-1.7b";
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {
