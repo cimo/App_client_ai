@@ -1,12 +1,12 @@
 import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 
-export interface IopenAiApiModel {
+export interface IapiAiModel {
     id: string;
     object: string;
     owned_by: string;
 }
 
-export interface IopenAiApiResponseItem {
+export interface IapiAiResponseItem {
     tool_call_id: string;
     type?: string;
     name: string;
@@ -14,11 +14,11 @@ export interface IopenAiApiResponseItem {
     output: string;
 }
 
-export interface IopenAiApiResponse {
+export interface IapiAiResponse {
     type: string;
     sequence_number: number;
     delta: string;
-    item: IopenAiApiResponseItem;
+    item: IapiAiResponseItem;
     response: {
         id: string;
     };
@@ -40,7 +40,7 @@ export interface IchatMessage {
     user: string;
     assistantReason: string;
     assistantNoReason: string;
-    mcpTool?: IopenAiApiResponseItem;
+    mcpTool?: IapiAiResponseItem;
 }
 
 export interface IresponseBody {
@@ -51,7 +51,7 @@ export interface IresponseBody {
 }
 
 export interface Ivariable {
-    modelList: IvariableBind<IopenAiApiModel[]>;
+    modelList: IvariableBind<IapiAiModel[]>;
     modelSelected: IvariableBind<string>;
     chatHistory: IvariableBind<IchatInput[]>;
     chatMessage: IvariableBind<IchatMessage[]>;

@@ -2,8 +2,6 @@
 
 App client ai with Npm_jsMvcFw package.
 
-## Info:
-
 AI client application for communicating with a model hosted on a server.
 
 ## Installation
