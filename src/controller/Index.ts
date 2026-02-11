@@ -227,8 +227,12 @@ export default class Index implements Icontroller {
                         {
                             type: "mcp",
                             server_label: helperSrc.MCP_SERVER_LABEL,
-                            server_url: `${helperSrc.URL_MCP_ENGINE}/main`,
-                            allowed_tools: helperSrc.MCP_SERVER_TOOL
+                            server_url: helperSrc.URL_MCP_ENGINE,
+                            allowed_tools: helperSrc.MCP_SERVER_TOOL,
+                            headers: {
+                                "x-api": "tool-call",
+                                "mcp-session-id": this.sessionId
+                            }
                         }
                     ]
                 }),
@@ -241,9 +245,9 @@ export default class Index implements Icontroller {
                 .then(async (result) => {
                     this.variableObject.isOfflineAi.state = false;
 
-                    const contentType = (result.headers.get("content-type") || "").toLowerCase();
+                    const contentType = result.headers.get("Content-Type") as string;
 
-                    if (!contentType.includes("text/event-stream")) {
+                    if (!contentType.toLowerCase().includes("text/event-stream")) {
                         return;
                     }
 
