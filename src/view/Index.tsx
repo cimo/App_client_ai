@@ -6,9 +6,11 @@ import * as modelIndex from "../model/Index";
 const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelIndex.Imethod): IvirtualNode => {
     return (
         <div class="page_container" jsmvcfw-controllerName="Index">
-            <div class={`container_over ${variableObject.isOffline.state || variableObject.adUrl.state !== "" ? "" : "none"}`}>
+            <div
+                class={`container_over ${variableObject.isOfflineAi.state || variableObject.isOfflineMcp.state || variableObject.adUrl.state !== "" ? "" : "none"}`}
+            >
                 <div
-                    class={variableObject.isOffline.state ? "" : "none"}
+                    class={variableObject.isOfflineAi.state && variableObject.isOfflineMcp.state ? "" : "none"}
                     onclick={() => {
                         methodObject.onClickRefreshPage();
                     }}
@@ -17,7 +19,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     <p>Click here for re-connect.</p>
                 </div>
                 <div
-                    class={!variableObject.isOffline.state && variableObject.adUrl.state !== "" ? "" : "none"}
+                    class={!variableObject.isOfflineAi.state && !variableObject.isOfflineMcp.state && variableObject.adUrl.state !== "" ? "" : "none"}
                     onclick={(event: Event) => {
                         methodObject.onClickAd(event);
                     }}

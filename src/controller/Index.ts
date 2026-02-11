@@ -66,7 +66,6 @@ export default class Index implements Icontroller {
         fetch(`${helperSrc.URL_AI}/login`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 Authorization: `Bearer ${this.uniqueId}`
             },
             danger: {
@@ -75,16 +74,16 @@ export default class Index implements Icontroller {
             }
         })
             .then(async (result) => {
-                this.variableObject.isOffline.state = false;
+                this.variableObject.isOfflineAi.state = false;
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
                 this.variableObject.adUrl.state = resultJson.response.stdout;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiAiLogin() - URL_AI - catch()", error);
+                helperSrc.writeLog("Index.ts - apiAiLogin() - fetch() - catch()", error);
 
-                this.variableObject.isOffline.state = true;
+                this.variableObject.isOfflineAi.state = true;
             });
     };
 
@@ -92,7 +91,6 @@ export default class Index implements Icontroller {
         fetch(`${helperSrc.URL_AI}/user-info`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
                 Authorization: `Bearer ${this.uniqueId}`
             },
             danger: {
@@ -101,7 +99,7 @@ export default class Index implements Icontroller {
             }
         })
             .then(async (result) => {
-                this.variableObject.isOffline.state = false;
+                this.variableObject.isOfflineAi.state = false;
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
@@ -109,31 +107,13 @@ export default class Index implements Icontroller {
                 console.log("cimo - apiAiUserInfo()", resultJson);
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiAiUserInfo() - catch()", error);
+                helperSrc.writeLog("Index.ts - apiAiUserInfo() - fetch() - catch()", error);
 
-                this.variableObject.isOffline.state = true;
+                this.variableObject.isOfflineAi.state = true;
             });
     };
 
-    private apiAiLogout = (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_AI}/logout`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${this.uniqueId}`
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        }).catch((error: Error) => {
-            helperSrc.writeLog("Index.ts - apiAiLogout() - catch()", error);
-
-            this.variableObject.isOffline.state = true;
-        });
-    };
-
-    private apiAiModel = async (): Promise<void> => {
+    private apiAiModel = (): void => {
         fetch(`${helperSrc.URL_AI}/api/model`, {
             method: "GET",
             danger: {
@@ -142,7 +122,7 @@ export default class Index implements Icontroller {
             }
         })
             .then(async (result) => {
-                this.variableObject.isOffline.state = false;
+                this.variableObject.isOfflineAi.state = false;
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
                 const jsonParse = JSON.parse(resultJson.response.stdout) as modelIndex.IapiAiModel[];
@@ -161,9 +141,9 @@ export default class Index implements Icontroller {
                 this.variableObject.isOpenDialogModelList.state = !this.variableObject.isOpenDialogModelList.state;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiAiModel() - catch()", error);
+                helperSrc.writeLog("Index.ts - apiAiModel() - fetch() - catch()", error);
 
-                this.variableObject.isOffline.state = true;
+                this.variableObject.isOfflineAi.state = true;
             });
     };
 
@@ -247,7 +227,7 @@ export default class Index implements Icontroller {
                         {
                             type: "mcp",
                             server_label: helperSrc.MCP_SERVER_LABEL,
-                            server_url: helperSrc.URL_MCP,
+                            server_url: `${helperSrc.URL_MCP_ENGINE}/main`,
                             allowed_tools: helperSrc.MCP_SERVER_TOOL
                         }
                     ]
@@ -259,7 +239,7 @@ export default class Index implements Icontroller {
                 }
             })
                 .then(async (result) => {
-                    this.variableObject.isOffline.state = false;
+                    this.variableObject.isOfflineAi.state = false;
 
                     const contentType = (result.headers.get("content-type") || "").toLowerCase();
 
@@ -379,9 +359,9 @@ export default class Index implements Icontroller {
                     }
                 })
                 .catch((error: Error) => {
-                    helperSrc.writeLog("Index.ts - apiAiResponse() - catch()", error);
+                    helperSrc.writeLog("Index.ts - apiAiResponse() - fetch() - catch()", error);
 
-                    this.variableObject.isOffline.state = true;
+                    this.variableObject.isOfflineAi.state = true;
 
                     this.resetModelResponse();
                 });
@@ -390,30 +370,48 @@ export default class Index implements Icontroller {
         }
     };
 
-    private apiMcpLogin = (): void => {
-        fetch(`${helperSrc.URL_MCP}/login`, {
-            method: "GET",
+    private apiAiLogout = (): Promise<void | Response> => {
+        return fetch(`${helperSrc.URL_AI}/logout`, {
+            method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                Authorization: `Bearer ${this.uniqueId}`
             },
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
             }
         })
+            .then(() => {
+                this.uniqueId = "";
+
+                this.variableObject.isOfflineAi.state = true;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Index.ts - apiAiLogout() - fetch() - catch()", error);
+
+                this.variableObject.isOfflineAi.state = true;
+            });
+    };
+
+    private apiMcpLogin = (): void => {
+        fetch(`${helperSrc.URL_MCP}/login`, {
+            method: "GET",
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
             .then(async (result) => {
-                this.variableObject.isOffline.state = false;
+                this.variableObject.isOfflineMcp.state = false;
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
                 this.sessionId = resultJson.response.stdout;
-
-                this.variableObject.adUrl.state = resultJson.response.stdout;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiLogin() - URL_MCP - catch()", error);
+                helperSrc.writeLog("Index.ts - apiMcpLogin() - fetch() - catch()", error);
 
-                this.variableObject.isOffline.state = true;
+                this.variableObject.isOfflineMcp.state = true;
             });
     };
 
@@ -421,7 +419,6 @@ export default class Index implements Icontroller {
         return fetch(`${helperSrc.URL_MCP}/logout`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
                 "mcp-session-id": this.sessionId
             },
             danger: {
@@ -431,11 +428,13 @@ export default class Index implements Icontroller {
         })
             .then(() => {
                 this.sessionId = "";
+
+                this.variableObject.isOfflineMcp.state = true;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiMcpLogout() - catch()", error);
+                helperSrc.writeLog("Index.ts - apiMcpLogout() - fetch() - catch()", error);
 
-                this.variableObject.isOffline.state = true;
+                this.variableObject.isOfflineMcp.state = true;
             });
     };
 
@@ -498,7 +497,8 @@ export default class Index implements Icontroller {
                 chatHistory: [] as modelIndex.IchatInput[],
                 chatMessage: [] as modelIndex.IchatMessage[],
                 isOpenDialogModelList: false,
-                isOffline: false,
+                isOfflineAi: false,
+                isOfflineMcp: false,
                 adUrl: ""
             },
             this.constructor.name
@@ -538,6 +538,8 @@ export default class Index implements Icontroller {
             this.appIsClosing = true;
 
             await this.apiAiLogout();
+
+            await this.apiMcpLogout();
 
             await this.appWindow.close();
         });

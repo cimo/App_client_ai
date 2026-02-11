@@ -56,7 +56,8 @@ export interface Ivariable {
     chatHistory: IvariableBind<IchatInput[]>;
     chatMessage: IvariableBind<IchatMessage[]>;
     isOpenDialogModelList: IvariableBind<boolean>;
-    isOffline: IvariableBind<boolean>;
+    isOfflineAi: IvariableBind<boolean>;
+    isOfflineMcp: IvariableBind<boolean>;
     adUrl: IvariableBind<string>;
 }
 
