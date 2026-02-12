@@ -231,7 +231,7 @@ export default class Index implements Icontroller {
                             allowed_tools: helperSrc.MCP_SERVER_TOOL,
                             headers: {
                                 "x-api": "tool-call",
-                                "mcp-session-id": this.sessionId
+                                "x-mcp-session-id": this.sessionId
                             }
                         }
                     ]
@@ -374,7 +374,7 @@ export default class Index implements Icontroller {
         }
     };
 
-    private apiAiLogout = (): Promise<void | Response> => {
+    private apiAiLogout = async (): Promise<void | Response> => {
         return fetch(`${helperSrc.URL_AI}/logout`, {
             method: "POST",
             headers: {
@@ -419,11 +419,11 @@ export default class Index implements Icontroller {
             });
     };
 
-    private apiMcpLogout = (): Promise<void | Response> => {
+    private apiMcpLogout = async (): Promise<void | Response> => {
         return fetch(`${helperSrc.URL_MCP}/logout`, {
             method: "GET",
             headers: {
-                "mcp-session-id": this.sessionId
+                "x-mcp-session-id": this.sessionId
             },
             danger: {
                 acceptInvalidCerts: true,
