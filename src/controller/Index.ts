@@ -70,6 +70,10 @@ export default class Index implements Icontroller {
             headers: {
                 Authorization: `Bearer ${this.aiBearerToken}`,
                 Cookie: this.aiCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
             }
         })
             .then(async (result) => {
@@ -94,6 +98,10 @@ export default class Index implements Icontroller {
             headers: {
                 Authorization: `Bearer ${this.aiBearerToken}`,
                 Cookie: this.aiCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
             }
         })
             .then(async (result) => {
@@ -116,6 +124,10 @@ export default class Index implements Icontroller {
             method: "GET",
             headers: {
                 Cookie: this.aiCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
             }
         })
             .then(async (result) => {
@@ -217,15 +229,15 @@ export default class Index implements Icontroller {
                     Cookie: this.aiCookie
                 },
                 body: JSON.stringify({
-                    model: this.variableObject.modelSelected.state,
                     input,
+                    model: this.variableObject.modelSelected.state,
                     temperature: 0,
                     stream: true,
                     tools: [
                         {
                             type: "mcp",
                             server_label: helperSrc.MCP_SERVER_LABEL,
-                            server_url: `${helperSrc.URL_MCP_ENGINE}/rcp`,
+                            server_url: helperSrc.URL_MCP_ENGINE,
                             allowed_tools: helperSrc.MCP_SERVER_TOOL,
                             headers: {
                                 Cookie: this.mcpCookie
@@ -233,7 +245,11 @@ export default class Index implements Icontroller {
                         }
                     ]
                 }),
-                signal: this.abortControllerApiAiResponse.signal
+                signal: this.abortControllerApiAiResponse.signal,
+                danger: {
+                    acceptInvalidCerts: true,
+                    acceptInvalidHostnames: true
+                }
             })
                 .then(async (result) => {
                     this.variableObject.isOfflineAi.state = false;
@@ -373,6 +389,10 @@ export default class Index implements Icontroller {
             headers: {
                 Authorization: `Bearer ${this.aiBearerToken}`,
                 Cookie: this.aiCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
             }
         })
             .then(() => {
@@ -393,6 +413,10 @@ export default class Index implements Icontroller {
             method: "GET",
             headers: {
                 Cookie: this.mcpCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
             }
         })
             .then(async (result) => {
@@ -417,6 +441,10 @@ export default class Index implements Icontroller {
             headers: {
                 Cookie: this.mcpCookie,
                 "mcp-session-id": this.mcpSessionId
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
             }
         })
             .then(() => {
@@ -537,7 +565,7 @@ export default class Index implements Icontroller {
 
             await this.apiMcpLogout();
 
-            //await this.appWindow.close();
+            await this.appWindow.close();
         });
     }
 
@@ -548,7 +576,7 @@ export default class Index implements Icontroller {
     }
 
     rendered(): void {
-        //this.apiAiLogin();
+        this.apiAiLogin();
 
         //this.apiAiUserInfo();
 
@@ -557,7 +585,7 @@ export default class Index implements Icontroller {
 
     destroy(): void {
         (async () => {
-            //await this.apiAiLogout();
+            await this.apiAiLogout();
 
             await this.apiMcpLogout();
         })();
