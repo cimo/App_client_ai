@@ -68,11 +68,8 @@ export default class Index implements Icontroller {
         fetch(`${helperSrc.URL_AI}/login`, {
             method: "POST",
             headers: {
-                Authorization: `Bearer ${this.aiBearerToken}`
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
+                Authorization: `Bearer ${this.aiBearerToken}`,
+                Cookie: this.aiCookie
             }
         })
             .then(async (result) => {
@@ -95,11 +92,8 @@ export default class Index implements Icontroller {
         fetch(`${helperSrc.URL_AI}/user-info`, {
             method: "GET",
             headers: {
-                Authorization: `Bearer ${this.aiBearerToken}`
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
+                Authorization: `Bearer ${this.aiBearerToken}`,
+                Cookie: this.aiCookie
             }
         })
             .then(async (result) => {
@@ -120,9 +114,8 @@ export default class Index implements Icontroller {
     private apiAiModel = (): void => {
         fetch(`${helperSrc.URL_AI}/api/model`, {
             method: "GET",
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
+            headers: {
+                Cookie: this.aiCookie
             }
         })
             .then(async (result) => {
@@ -217,13 +210,11 @@ export default class Index implements Icontroller {
                 content: [{ type: "input_text", text: this.hookObject.elementInputMessageSend.value }]
             });
 
-            // eslint-disable-next-line no-console
-            console.log("cimo", this.mcpCookie);
-
             fetch(`${helperSrc.URL_AI}/api/response`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    Cookie: this.aiCookie
                 },
                 body: JSON.stringify({
                     model: this.variableObject.modelSelected.state,
@@ -234,19 +225,15 @@ export default class Index implements Icontroller {
                         {
                             type: "mcp",
                             server_label: helperSrc.MCP_SERVER_LABEL,
-                            server_url: `${helperSrc.URL_MCP}/rcp`,
+                            server_url: `${helperSrc.URL_MCP_ENGINE}/rcp`,
                             allowed_tools: helperSrc.MCP_SERVER_TOOL,
                             headers: {
-                                cookie: this.mcpCookie
+                                Cookie: this.mcpCookie
                             }
                         }
                     ]
                 }),
-                signal: this.abortControllerApiAiResponse.signal,
-                danger: {
-                    acceptInvalidCerts: true,
-                    acceptInvalidHostnames: true
-                }
+                signal: this.abortControllerApiAiResponse.signal
             })
                 .then(async (result) => {
                     this.variableObject.isOfflineAi.state = false;
@@ -384,18 +371,15 @@ export default class Index implements Icontroller {
         return fetch(`${helperSrc.URL_AI}/logout`, {
             method: "POST",
             headers: {
-                Authorization: `Bearer ${this.aiBearerToken}`
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
+                Authorization: `Bearer ${this.aiBearerToken}`,
+                Cookie: this.aiCookie
             }
         })
             .then(() => {
+                this.variableObject.isOfflineAi.state = true;
+
                 this.aiBearerToken = "";
                 this.aiCookie = "";
-
-                this.variableObject.isOfflineAi.state = true;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Index.ts - apiAiLogout() - fetch() - catch()", error);
@@ -407,9 +391,8 @@ export default class Index implements Icontroller {
     private apiMcpLogin = (): void => {
         fetch(`${helperSrc.URL_MCP}/login`, {
             method: "GET",
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
+            headers: {
+                Cookie: this.mcpCookie
             }
         })
             .then(async (result) => {
@@ -432,18 +415,15 @@ export default class Index implements Icontroller {
         return fetch(`${helperSrc.URL_MCP}/logout`, {
             method: "GET",
             headers: {
+                Cookie: this.mcpCookie,
                 "mcp-session-id": this.mcpSessionId
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
             }
         })
             .then(() => {
+                this.variableObject.isOfflineMcp.state = true;
+
                 this.mcpCookie = "";
                 this.mcpSessionId = "";
-
-                this.variableObject.isOfflineMcp.state = true;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Index.ts - apiMcpLogout() - fetch() - catch()", error);
@@ -557,7 +537,7 @@ export default class Index implements Icontroller {
 
             await this.apiMcpLogout();
 
-            await this.appWindow.close();
+            //await this.appWindow.close();
         });
     }
 
@@ -568,7 +548,7 @@ export default class Index implements Icontroller {
     }
 
     rendered(): void {
-        this.apiAiLogin();
+        //this.apiAiLogin();
 
         //this.apiAiUserInfo();
 
@@ -576,8 +556,10 @@ export default class Index implements Icontroller {
     }
 
     destroy(): void {
-        this.apiAiLogout();
+        (async () => {
+            //await this.apiAiLogout();
 
-        this.apiMcpLogout();
+            await this.apiMcpLogout();
+        })();
     }
 }
