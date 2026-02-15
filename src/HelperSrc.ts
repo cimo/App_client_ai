@@ -8,7 +8,7 @@ export const PATH_LOG = "log/";
 export const LOCALE = "jp";
 export const URL_AI = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
 export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
-export const URL_MCP_ENGINE = "https://host.docker.internal:1047/rcp";
+export const URL_MCP_ENGINE = "https://localhost:1047/rcp";
 export const MCP_SERVER_LABEL = "Microservice mcp";
 export const MCP_SERVER_TOOL = ["tool_math_expression", "tool_automate_screenshot", "tool_automate_browser"];
 export const MODEL_DEFAULT = "qwen3-1.7b";

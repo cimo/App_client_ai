@@ -30,4 +30,5 @@ public/asset/js/*
 public/asset/style/*
 !public/asset/style/.gitkeep
 public/index.html
+src-tauri/Cargo.lock
 package-lock.json
