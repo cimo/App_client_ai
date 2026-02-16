@@ -66,7 +66,7 @@ export default class Index implements Icontroller {
 
     private apiAiLogin = (): void => {
         fetch(`${helperSrc.URL_AI}/login`, {
-            method: "POST",
+            method: "GET",
             headers: {
                 Authorization: `Bearer ${this.aiBearerToken}`,
                 Cookie: this.aiCookie
@@ -123,6 +123,7 @@ export default class Index implements Icontroller {
         fetch(`${helperSrc.URL_AI}/api/model`, {
             method: "GET",
             headers: {
+                Authorization: `Bearer ${this.aiBearerToken}`,
                 Cookie: this.aiCookie
             },
             danger: {
@@ -226,6 +227,7 @@ export default class Index implements Icontroller {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.aiBearerToken}`,
                     Cookie: this.aiCookie
                 },
                 body: JSON.stringify({
@@ -385,7 +387,7 @@ export default class Index implements Icontroller {
 
     private apiAiLogout = async (): Promise<void | Response> => {
         return fetch(`${helperSrc.URL_AI}/logout`, {
-            method: "POST",
+            method: "GET",
             headers: {
                 Authorization: `Bearer ${this.aiBearerToken}`,
                 Cookie: this.aiCookie
@@ -578,7 +580,7 @@ export default class Index implements Icontroller {
     rendered(): void {
         this.apiAiLogin();
 
-        //this.apiAiUserInfo();
+        this.apiAiUserInfo();
 
         this.apiMcpLogin();
     }
