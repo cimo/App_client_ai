@@ -64,8 +64,8 @@ export default class Index implements Icontroller {
         return `${timestamp}-${randomPart}`;
     };
 
-    private apiAiLogin = (): void => {
-        fetch(`${helperSrc.URL_AI}/login`, {
+    private apiAiLogin = async (): Promise<void | Response> => {
+        return fetch(`${helperSrc.URL_AI}/login`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${this.aiBearerToken}`,
@@ -92,8 +92,8 @@ export default class Index implements Icontroller {
             });
     };
 
-    private apiAiUserInfo = (): void => {
-        fetch(`${helperSrc.URL_AI}/user-info`, {
+    private apiAiUserInfo = async (): Promise<void | Response> => {
+        return fetch(`${helperSrc.URL_AI}/user-info`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${this.aiBearerToken}`,
@@ -410,8 +410,8 @@ export default class Index implements Icontroller {
             });
     };
 
-    private apiMcpLogin = (): void => {
-        fetch(`${helperSrc.URL_MCP}/login`, {
+    private apiMcpLogin = async (): Promise<void | Response> => {
+        return fetch(`${helperSrc.URL_MCP}/login`, {
             method: "GET",
             headers: {
                 Cookie: this.mcpCookie
@@ -578,11 +578,13 @@ export default class Index implements Icontroller {
     }
 
     rendered(): void {
-        this.apiAiLogin();
+        (async () => {
+            await this.apiAiLogin();
 
-        this.apiAiUserInfo();
+            await this.apiAiUserInfo();
 
-        this.apiMcpLogin();
+            await this.apiMcpLogin();
+        })();
     }
 
     destroy(): void {
