@@ -10,7 +10,14 @@ export const URL_AI = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1
 export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
 export const URL_MCP_ENGINE = "https://localhost:1047/rcp";
 export const MCP_SERVER_LABEL = "Microservice mcp";
-export const MCP_SERVER_TOOL = ["tool_math_expression", "tool_automate_screenshot", "tool_automate_browser"];
+export const MCP_SERVER_TOOL = [
+    "math_expression",
+    "automate_screenshot",
+    "automate_mouse_move",
+    "automate_mouse_click",
+    "chrome_execute",
+    "document_parse"
+];
 export const MODEL_DEFAULT = "qwen3-1.7b";
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {
