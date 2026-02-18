@@ -16,7 +16,8 @@ export const MCP_SERVER_TOOL = [
     "automate_mouse_move",
     "automate_mouse_click",
     "chrome_execute",
-    "document_parse"
+    "document_parse",
+    "ocr_execute"
 ];
 export const MODEL_DEFAULT = "qwen3-1.7b";
 

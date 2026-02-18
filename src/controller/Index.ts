@@ -77,9 +77,11 @@ export default class Index implements Icontroller {
             }
         })
             .then(async (result) => {
+                const cookie = result.headers.get("set-cookie");
+
                 this.variableObject.isOfflineAi.state = false;
 
-                this.aiCookie = result.headers.get("set-cookie") as string;
+                this.aiCookie = cookie ? cookie : "";
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
@@ -256,9 +258,9 @@ export default class Index implements Icontroller {
                 .then(async (result) => {
                     this.variableObject.isOfflineAi.state = false;
 
-                    const contentType = result.headers.get("Content-Type") as string;
+                    const contentType = result.headers.get("Content-Type");
 
-                    if (!contentType.toLowerCase().includes("text/event-stream")) {
+                    if (!contentType || !contentType.toLowerCase().includes("text/event-stream")) {
                         return;
                     }
 
@@ -422,9 +424,11 @@ export default class Index implements Icontroller {
             }
         })
             .then(async (result) => {
+                const cookie = result.headers.get("set-cookie");
+
                 this.variableObject.isOfflineMcp.state = false;
 
-                this.mcpCookie = result.headers.get("set-cookie") as string;
+                this.mcpCookie = cookie ? cookie : "";
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
