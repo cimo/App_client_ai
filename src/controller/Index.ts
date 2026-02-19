@@ -29,6 +29,8 @@ export default class Index implements Icontroller {
     private appWindow: Window;
     private appIsClosing: boolean;
 
+    private agentMode: string;
+
     // Method
     private resetModelResponse = (): void => {
         this.responseId = "";
@@ -201,21 +203,49 @@ export default class Index implements Icontroller {
                 }
             }*/
 
+            let inputSystem = "";
+            let inputToolList: modelIndex.Itool[] = [];
+
+            if (this.agentMode === "tool") {
+                inputSystem =
+                    "You are a tool router and you only need to decide which tool to call and prepare the arguments.\n" +
+                    "You must NOT solve problems.\n" +
+                    "You MUST NOT invent new actions.\n" +
+                    "You MUST NOT explain nothing.\n" +
+                    "If you have a problem, just reply with: FAIL\n" +
+                    "If all will be okay, just reply with tool response.";
+
+                inputToolList = [
+                    {
+                        type: "mcp",
+                        server_label: helperSrc.MCP_SERVER_LABEL,
+                        server_url: helperSrc.URL_MCP_ENGINE,
+                        allowed_tools: helperSrc.MCP_SERVER_TOOL,
+                        headers: {
+                            Cookie: this.mcpCookie
+                        }
+                    }
+                ];
+            } else if (this.agentMode === "task") {
+                inputSystem =
+                    "You are a computer control planner, transofrm the user request in a ordered list of actions for task execution.\n" +
+                    "You MUST use only the following actions: chrome_execute, automate_mouse_move, automate_mouse_click.\n" +
+                    'You MUST return ONLY valid JSON with this format: { "stepList": [ { "action": "action_name", "argumentList": { /* empty if the user NOT specify it */, ... } }, ... ] }\n' +
+                    "You must NOT solve problems.\n" +
+                    "You MUST NOT invent new actions.\n" +
+                    "You MUST NOT explain nothing.\n" +
+                    'If you have a problem, just reply with: { "stepList": [ { "action": "FAIL" } ] }\n' +
+                    'If all will be okay, just reply with: { "stepList": [ { "action": "DONE" } ] }';
+
+                inputToolList = [];
+            }
+
             input.push({
                 role: "system",
                 content: [
                     {
                         type: "input_text",
-                        text:
-                            "You are an autonomous GUI control agent that need talk only in english.\n" +
-                            "Follow the user instruction end-to-end WITHOUT asking between steps.\n" +
-                            "General policy:\n" +
-                            " - If you will receive a request for check the GUI wait 'tool_automate_ocr' response before using the next tool.\n" +
-                            " - Never guess the response for all tools. Always wait for the previous tool output before proceeding with next step.\n" +
-                            " - If you need use a multi tool use it in order, wait the response and only when you have the response proceed with next toll call.\n" +
-                            " - You don't need verify and confirm the result of the tool call, you need just use the response for your next step if necessary.\n" +
-                            " - If you have a problem with some tool, just reply with the single word in the user response: FAIL.\n" +
-                            " - If all tools will be okay, just reply with the single word in the user response: DONE."
+                        text: inputSystem
                     }
                 ]
             });
@@ -230,24 +260,16 @@ export default class Index implements Icontroller {
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${this.aiBearerToken}`,
-                    Cookie: this.aiCookie
+                    Cookie: this.aiCookie,
+                    "x-cookie": this.mcpCookie,
+                    "mcp-session-id": this.mcpSessionId
                 },
                 body: JSON.stringify({
                     input,
                     model: this.variableObject.modelSelected.state,
                     temperature: 0,
                     stream: true,
-                    tools: [
-                        {
-                            type: "mcp",
-                            server_label: helperSrc.MCP_SERVER_LABEL,
-                            server_url: helperSrc.URL_MCP_ENGINE,
-                            allowed_tools: helperSrc.MCP_SERVER_TOOL,
-                            headers: {
-                                Cookie: this.mcpCookie
-                            }
-                        }
-                    ]
+                    tools: inputToolList
                 }),
                 signal: this.abortControllerApiAiResponse.signal,
                 danger: {
@@ -260,7 +282,7 @@ export default class Index implements Icontroller {
 
                     const contentType = result.headers.get("Content-Type");
 
-                    if (!contentType || !contentType.toLowerCase().includes("text/event-stream")) {
+                    if (!contentType || !contentType.includes("text/event-stream")) {
                         return;
                     }
 
@@ -285,16 +307,13 @@ export default class Index implements Icontroller {
                             if (line.startsWith("data:")) {
                                 const data = line.slice(5).trim();
 
-                                if (data === "[DONE]") {
-                                    this.resetModelResponse();
-
-                                    return;
-                                }
-
                                 const dataTrim = data.trim();
 
                                 if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
                                     const json = JSON.parse(dataTrim) as modelIndex.IapiAiResponse;
+
+                                    // eslint-disable-next-line no-console
+                                    console.log("cimo", json.type);
 
                                     if (json.type === "error") {
                                         const content = json.error;
@@ -365,10 +384,21 @@ export default class Index implements Icontroller {
 
                                             this.autoscroll(true);
                                         }
+                                    } else if (json.type === "task_done") {
+                                        const content = json.response;
+
+                                        if (content) {
+                                            const index = this.variableObject.chatMessage.state.length - 1;
+
+                                            this.variableObject.chatMessage.state[index] = {
+                                                ...this.variableObject.chatMessage.state[index],
+                                                assistantNoReason: content.message
+                                            };
+                                        }
+
+                                        this.autoscroll(true);
                                     } else if (json.type === "response.completed") {
                                         this.resetModelResponse();
-
-                                        return;
                                     }
                                 }
                             }
@@ -515,6 +545,8 @@ export default class Index implements Icontroller {
 
         this.appWindow = getCurrentWindow();
         this.appIsClosing = false;
+
+        this.agentMode = "task";
     }
 
     hookObject = {} as modelIndex.IelementHook;

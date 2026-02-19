@@ -12,12 +12,12 @@ export const URL_MCP_ENGINE = "https://localhost:1047/rcp";
 export const MCP_SERVER_LABEL = "Microservice mcp";
 export const MCP_SERVER_TOOL = [
     "math_expression",
-    "automate_screenshot",
+    "document_parse"
+    /*"automate_screenshot",
     "automate_mouse_move",
     "automate_mouse_click",
     "chrome_execute",
-    "document_parse",
-    "ocr_execute"
+    "ocr_execute"*/
 ];
 export const MODEL_DEFAULT = "qwen3-1.7b";
 

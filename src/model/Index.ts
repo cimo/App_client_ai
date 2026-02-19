@@ -21,6 +21,7 @@ export interface IapiAiResponse {
     item: IapiAiResponseItem;
     response: {
         id: string;
+        message: string;
     };
     error: {
         code: string;
@@ -41,6 +42,16 @@ export interface IchatMessage {
     assistantReason: string;
     assistantNoReason: string;
     mcpTool?: IapiAiResponseItem;
+}
+
+export interface Itool {
+    type: string;
+    server_label: string;
+    server_url: string;
+    allowed_tools: string[];
+    headers: {
+        Cookie: string;
+    };
 }
 
 export interface IresponseBody {
