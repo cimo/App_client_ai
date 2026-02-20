@@ -8,17 +8,9 @@ export const PATH_LOG = "log/";
 export const LOCALE = "jp";
 export const URL_AI = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
 export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
-export const URL_MCP_ENGINE = "https://localhost:1047/rcp";
-export const MCP_SERVER_LABEL = "Microservice mcp";
-export const MCP_SERVER_TOOL = [
-    "math_expression",
-    "document_parse"
-    /*"automate_screenshot",
-    "automate_mouse_move",
-    "automate_mouse_click",
-    "chrome_execute",
-    "ocr_execute"*/
-];
+export const TOOL_SERVER_LABEL = "Microservice mcp";
+export const TOOL_SERVER_URL = `https://localhost:${URL_MCP.match(/:(\d+)(?:\/|$)/)?.[1]}/rcp`;
+export const TOOL_SERVER_ALLOWED = ["math_expression", "document_parse"];
 export const MODEL_DEFAULT = "qwen3-1.7b";
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {

@@ -206,35 +206,35 @@ export default class Index implements Icontroller {
             let inputSystem = "";
             let inputToolList: modelIndex.Itool[] = [];
 
-            if (this.agentMode === "tool") {
+            if (this.agentMode === "tool-call") {
                 inputSystem =
                     "You are a tool router and you only need to decide which tool to call and prepare the arguments.\n" +
                     "You must NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
                     "You MUST NOT explain nothing.\n" +
-                    "If you have a problem, just reply with: FAIL\n" +
+                    "If you have a problem or are not sure, just reply with: FAIL\n" +
                     "If all will be okay, just reply with tool response.";
 
                 inputToolList = [
                     {
                         type: "mcp",
-                        server_label: helperSrc.MCP_SERVER_LABEL,
-                        server_url: helperSrc.URL_MCP_ENGINE,
-                        allowed_tools: helperSrc.MCP_SERVER_TOOL,
+                        server_label: helperSrc.TOOL_SERVER_LABEL,
+                        server_url: helperSrc.TOOL_SERVER_URL,
+                        allowed_tools: helperSrc.TOOL_SERVER_ALLOWED,
                         headers: {
                             Cookie: this.mcpCookie
                         }
                     }
                 ];
-            } else if (this.agentMode === "task") {
+            } else if (this.agentMode === "tool-task") {
                 inputSystem =
                     "You are a computer control planner, transofrm the user request in a ordered list of actions for task execution.\n" +
                     "You MUST use only the following actions: chrome_execute, automate_mouse_move, automate_mouse_click.\n" +
-                    'You MUST return ONLY valid JSON with this format: { "stepList": [ { "action": "action_name", "argumentList": { /* empty if the user NOT specify it */, ... } }, ... ] }\n' +
+                    'You MUST return ONLY valid JSON with this format: { "stepList": [ { "action": "action_name", "argumentList": [ {/* empty if the user NOT specify it */, ... } ] }, ... ] }\n' +
                     "You must NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
                     "You MUST NOT explain nothing.\n" +
-                    'If you have a problem, just reply with: { "stepList": [ { "action": "FAIL" } ] }\n' +
+                    'If you have a problem or are not sure, just reply with: { "stepList": [ { "action": "FAIL" } ] }\n' +
                     'If all will be okay, just reply with: { "stepList": [ { "action": "DONE" } ] }';
 
                 inputToolList = [];
@@ -310,35 +310,32 @@ export default class Index implements Icontroller {
                                 const dataTrim = data.trim();
 
                                 if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
-                                    const json = JSON.parse(dataTrim) as modelIndex.IapiAiResponse;
+                                    const dataTrimParse = JSON.parse(dataTrim) as modelIndex.IapiAiResponse;
 
-                                    // eslint-disable-next-line no-console
-                                    console.log("cimo", json.type);
+                                    if (dataTrimParse.type === "error") {
+                                        const dataError = dataTrimParse.error;
 
-                                    if (json.type === "error") {
-                                        const content = json.error;
-
-                                        if (content) {
+                                        if (dataError) {
                                             const idx = this.variableObject.chatMessage.state.length - 1;
 
                                             this.variableObject.chatMessage.state[idx] = {
                                                 ...this.variableObject.chatMessage.state[idx],
-                                                assistantNoReason: content.message
+                                                assistantNoReason: dataError.message
                                             };
 
                                             this.autoscroll(true);
                                         }
-                                    } else if (json.type === "response.created") {
-                                        const content = json.response;
+                                    } else if (dataTrimParse.type === "response.created") {
+                                        const dataResponse = dataTrimParse.response;
 
-                                        if (content) {
-                                            this.responseId = content.id;
+                                        if (dataResponse) {
+                                            this.responseId = dataResponse.id;
                                         }
-                                    } else if (json.type === "response.reasoning_text.delta") {
-                                        const content = json.delta;
+                                    } else if (dataTrimParse.type === "response.reasoning_text.delta") {
+                                        const dataDelta = dataTrimParse.delta;
 
-                                        if (content) {
-                                            this.responseReason += content;
+                                        if (dataDelta) {
+                                            this.responseReason += dataDelta;
 
                                             const index = this.variableObject.chatMessage.state.length - 1;
 
@@ -349,11 +346,11 @@ export default class Index implements Icontroller {
 
                                             this.autoscroll(true);
                                         }
-                                    } else if (json.type === "response.output_text.delta") {
-                                        const content = json.delta;
+                                    } else if (dataTrimParse.type === "response.output_text.delta") {
+                                        const dataDelta = dataTrimParse.delta;
 
-                                        if (content) {
-                                            this.responseNoReason += content;
+                                        if (dataDelta) {
+                                            this.responseNoReason += dataDelta;
 
                                             const index = this.variableObject.chatMessage.state.length - 1;
 
@@ -364,15 +361,16 @@ export default class Index implements Icontroller {
 
                                             this.autoscroll(true);
                                         }
-                                    } else if (json.type === "response.output_item.done") {
-                                        const content = json.item;
+                                    } else if (dataTrimParse.type === "response.output_item.done") {
+                                        const dataItem = dataTrimParse.item;
 
-                                        if (content && content.type === "mcp_call") {
+                                        if (dataItem && dataItem.type === "mcp_call") {
                                             this.responseMcpTool = {
-                                                tool_call_id: content.tool_call_id,
-                                                name: content.name,
-                                                arguments: content.arguments,
-                                                output: content.output
+                                                tool_call_id: dataItem.tool_call_id,
+                                                type: dataItem.type,
+                                                name: dataItem.name,
+                                                arguments: dataItem.arguments,
+                                                output: dataItem.output
                                             };
 
                                             const index = this.variableObject.chatMessage.state.length - 1;
@@ -384,21 +382,21 @@ export default class Index implements Icontroller {
 
                                             this.autoscroll(true);
                                         }
-                                    } else if (json.type === "task_done") {
-                                        const content = json.response;
+                                    } else if (dataTrimParse.type === "response.completed") {
+                                        this.resetModelResponse();
+                                    } else if (dataTrimParse.type === "task_response") {
+                                        const dataResponse = dataTrimParse.response;
 
-                                        if (content) {
+                                        if (dataResponse) {
                                             const index = this.variableObject.chatMessage.state.length - 1;
 
                                             this.variableObject.chatMessage.state[index] = {
                                                 ...this.variableObject.chatMessage.state[index],
-                                                assistantNoReason: content.message
+                                                assistantNoReason: dataResponse.message
                                             };
                                         }
 
                                         this.autoscroll(true);
-                                    } else if (json.type === "response.completed") {
-                                        this.resetModelResponse();
                                     }
                                 }
                             }
@@ -546,7 +544,7 @@ export default class Index implements Icontroller {
         this.appWindow = getCurrentWindow();
         this.appIsClosing = false;
 
-        this.agentMode = "task";
+        this.agentMode = "tool-task";
     }
 
     hookObject = {} as modelIndex.IelementHook;

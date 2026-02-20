@@ -8,7 +8,7 @@ export interface IapiAiModel {
 
 export interface IapiAiResponseItem {
     tool_call_id: string;
-    type?: string;
+    type: string;
     name: string;
     arguments: string;
     output: string;
@@ -16,6 +16,7 @@ export interface IapiAiResponseItem {
 
 export interface IapiAiResponse {
     type: string;
+    output_index: number;
     sequence_number: number;
     delta: string;
     item: IapiAiResponseItem;
