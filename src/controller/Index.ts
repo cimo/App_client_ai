@@ -208,12 +208,12 @@ export default class Index implements Icontroller {
 
             if (this.agentMode === "tool-call") {
                 inputSystem =
-                    "You are a tool router and you only need to decide which tool to call and prepare the arguments.\n" +
+                    "You are a tool router and you only need to decide which tool to call.\n" +
                     "You must NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
                     "You MUST NOT explain nothing.\n" +
-                    "If you have a problem or are not sure, just reply with: FAIL\n" +
-                    "If all will be okay, just reply with tool response.";
+                    "If you can NOT read the action response, just reply with: FAIL\n" +
+                    "If you can read the action response, just reply with the tool response.";
 
                 inputToolList = [
                     {
@@ -228,14 +228,13 @@ export default class Index implements Icontroller {
                 ];
             } else if (this.agentMode === "tool-task") {
                 inputSystem =
-                    "You are a computer control planner, transofrm the user request in a ordered list of actions for task execution.\n" +
-                    "You MUST use only the following actions: chrome_execute, automate_mouse_move, automate_mouse_click.\n" +
-                    'You MUST return ONLY valid JSON with this format: { "stepList": [ { "action": "action_name", "argumentList": [ {/* empty if the user NOT specify it */, ... } ] }, ... ] }\n' +
-                    "You must NOT solve problems.\n" +
+                    "You are a computer control planner, transform the user request in a ordered list of actions for task execution.\n" +
+                    "You MUST use ONLY the following actions: chrome_execute.\n" +
+                    'For chrome_execute you MUST return ONLY valid JSON with this format: { "stepList": [ { "action": "chrome_execute", "argumentObject": { "url": "..." } } ] }\n' +
+                    "You MUST NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
                     "You MUST NOT explain nothing.\n" +
-                    'If you have a problem or are not sure, just reply with: { "stepList": [ { "action": "FAIL" } ] }\n' +
-                    'If all will be okay, just reply with: { "stepList": [ { "action": "DONE" } ] }';
+                    "If no action is executed, just reply with: No task to execute.";
 
                 inputToolList = [];
             }
@@ -261,7 +260,7 @@ export default class Index implements Icontroller {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${this.aiBearerToken}`,
                     Cookie: this.aiCookie,
-                    "x-cookie": this.mcpCookie,
+                    "cookie-mcp": this.mcpCookie,
                     "mcp-session-id": this.mcpSessionId
                 },
                 body: JSON.stringify({
