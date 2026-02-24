@@ -9,7 +9,7 @@ export const LOCALE = "jp";
 export const URL_AI = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
 export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
 export const TOOL_SERVER_LABEL = "Microservice mcp";
-export const TOOL_SERVER_URL = `https://localhost:${URL_MCP.match(/:(\d+)(?:\/|$)/)?.[1]}/rcp`;
+export const TOOL_SERVER_URL = `https://localhost:${URL_MCP.match(/:(\d+)(?:\/|$)/)?.[1]}/rpc`;
 export const TOOL_SERVER_ALLOWED = ["math_expression", "document_parse"];
 export const MODEL_DEFAULT = "qwen3-1.7b";
 
