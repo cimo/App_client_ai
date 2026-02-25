@@ -47,8 +47,10 @@ pub fn run() {
                     Target::new(TargetKind::Webview)
                 ]).build()
             )
-        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![test_screenshot, test_mouse])
         .run(tauri::generate_context!())
         .expect("Error: execution failed!");

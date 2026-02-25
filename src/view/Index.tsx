@@ -10,7 +10,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                 class={`container_over ${variableObject.isOfflineAi.state || variableObject.isOfflineMcp.state || variableObject.adUrl.state !== "" ? "" : "none"}`}
             >
                 <div
-                    class={variableObject.isOfflineAi.state && variableObject.isOfflineMcp.state ? "" : "none"}
+                    class={variableObject.isOfflineAi.state || variableObject.isOfflineMcp.state ? "" : "none"}
                     onclick={() => {
                         methodObject.onClickRefreshPage();
                     }}
@@ -118,13 +118,40 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
             <div class="container_message_send">
                 <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
                 <div class="container_action">
-                    <button
-                        onclick={() => {
-                            methodObject.onClickButtonMessageSend();
-                        }}
-                    >
-                        <i class="cls_icon">play_arrow</i>
-                    </button>
+                    <div class="left">
+                        <button
+                            onclick={() => {
+                                methodObject.onClickButtonUpload();
+                            }}
+                        >
+                            <i class="cls_icon">upload_file</i>
+                        </button>
+                        <button
+                            class={variableObject.agentMode.state === "tool-call" ? "active" : ""}
+                            onclick={() => {
+                                methodObject.onClickButtonToolCall();
+                            }}
+                        >
+                            <i class="cls_icon">construction</i>
+                        </button>
+                        <button
+                            class={variableObject.agentMode.state === "tool-task" ? "active" : ""}
+                            onclick={() => {
+                                methodObject.onClickButtonToolTask();
+                            }}
+                        >
+                            <i class="cls_icon">assignment</i>
+                        </button>
+                    </div>
+                    <div class="right">
+                        <button
+                            onclick={() => {
+                                methodObject.onClickButtonMessageSend();
+                            }}
+                        >
+                            <i class="cls_icon">play_arrow</i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

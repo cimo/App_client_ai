@@ -8,6 +8,13 @@
         "core:window:allow-destroy",
         "core:window:allow-close",
         "log:default",
+        "dialog:allow-open",
+        "dialog:default",
+        "fs:allow-read-file",
+        "fs:allow-document-read",
+        "fs:allow-picture-read",
+        "fs:allow-video-read",
+        "fs:allow-audio-read",
         "opener:default",
         {
             "identifier": "http:default",

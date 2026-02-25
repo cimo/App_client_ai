@@ -1,8 +1,10 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 import { getCurrentWindow, CloseRequestedEvent, type Window } from "@tauri-apps/api/window";
 //import { invoke } from "@tauri-apps/api/core";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { open } from "@tauri-apps/plugin-dialog";
+import { readFile } from "@tauri-apps/plugin-fs";
 import { fetch } from "@tauri-apps/plugin-http";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 // Source
 import * as helperSrc from "../HelperSrc";
@@ -28,8 +30,6 @@ export default class Index implements Icontroller {
 
     private appWindow: Window;
     private appIsClosing: boolean;
-
-    private agentMode: string;
 
     // Method
     private resetModelResponse = (): void => {
@@ -182,14 +182,14 @@ export default class Index implements Icontroller {
 
             this.autoscroll(false);
 
+            const input: modelIndex.IchatInput[] = [];
+
             /*this.variableObject.chatHistory.state.push({
                 role: "user",
                 content: this.hookObject.elementInputMessageSend.value
-            });*/
-
-            const input: modelIndex.IchatInput[] = [];
-
-            /*for (const chatHistory of this.variableObject.chatHistory.state) {
+            });
+            
+            for (const chatHistory of this.variableObject.chatHistory.state) {
                 if (chatHistory.role === "system" || chatHistory.role === "user") {
                     input.push({
                         role: chatHistory.role,
@@ -206,14 +206,21 @@ export default class Index implements Icontroller {
             let inputSystem = "";
             let inputToolList: modelIndex.Itool[] = [];
 
-            if (this.agentMode === "tool-call") {
+            if (this.variableObject.agentMode.state === "chat") {
                 inputSystem =
-                    "You are a tool router and you only need to decide which tool to call.\n" +
-                    "You must NOT solve problems.\n" +
+                    "You are a multilingual agent that needs to speak in the user's input language.\n" +
+                    "You MUST need to reason step by step and give a answer to the user question.\n" +
+                    "You MUST NOT use tools.";
+
+                inputToolList = [];
+            } else if (this.variableObject.agentMode.state === "tool-call") {
+                inputSystem =
+                    "You are a agent tool and you only need to decide which single tool to call.\n" +
+                    "You MUST NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
                     "You MUST NOT explain nothing.\n" +
-                    "If you can NOT read the action response, just reply with: FAIL\n" +
-                    "If you can read the action response, just reply with the tool response.";
+                    "If no action is executed, you MUST reply with: No tool to execute.\n" +
+                    "If you can read the action response, you MUST reply with the tool response.";
 
                 inputToolList = [
                     {
@@ -226,15 +233,15 @@ export default class Index implements Icontroller {
                         }
                     }
                 ];
-            } else if (this.agentMode === "tool-task") {
+            } else if (this.variableObject.agentMode.state === "tool-task") {
                 inputSystem =
-                    "You are a computer control planner, transform the user request in a ordered list of actions for task execution.\n" +
+                    "You are a agent control planner, transform the user request in a ordered list of actions for task execution.\n" +
                     "You MUST use ONLY the following actions: chrome_execute.\n" +
                     'For chrome_execute you MUST return ONLY valid JSON with this format: { "stepList": [ { "action": "chrome_execute", "argumentObject": { "url": "..." } } ] }\n' +
                     "You MUST NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
                     "You MUST NOT explain nothing.\n" +
-                    "If no action is executed, just reply with: No task to execute.";
+                    "If no action is executed, you MUST reply with: No task to execute.";
 
                 inputToolList = [];
             }
@@ -281,11 +288,11 @@ export default class Index implements Icontroller {
 
                     const contentType = result.headers.get("Content-Type");
 
-                    if (!contentType || !contentType.includes("text/event-stream")) {
+                    if (!contentType || !contentType.includes("text/event-stream") || !result.body) {
                         return;
                     }
 
-                    const reader = result.body!.getReader();
+                    const reader = result.body.getReader();
                     const decoder = new TextDecoder("utf-8");
                     let buffer = "";
 
@@ -468,6 +475,46 @@ export default class Index implements Icontroller {
             });
     };
 
+    private apiMcpUpload = async (): Promise<void | Response> => {
+        const path = await open({
+            multiple: false,
+            directory: false
+        });
+
+        if (path) {
+            const file = await readFile(path);
+            const mimeType = helperSrc.readMimeType(file);
+            const blob = new Blob([file], { type: mimeType.content });
+            const fileName = path.split(/[/\\]/).pop() || "file";
+
+            const formData = new FormData();
+            formData.append("file", blob, `${fileName}`);
+
+            return fetch(`${helperSrc.URL_MCP}/api/upload`, {
+                method: "POST",
+                headers: {
+                    Cookie: this.mcpCookie
+                },
+                body: formData,
+                danger: {
+                    acceptInvalidCerts: true,
+                    acceptInvalidHostnames: true
+                }
+            })
+                .then(async (result) => {
+                    const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+                    // eslint-disable-next-line no-console
+                    console.log("cimo", resultJson);
+                })
+                .catch((error: Error) => {
+                    helperSrc.writeLog("Index.ts - apiMcpUpload() - fetch() - catch()", error);
+
+                    this.variableObject.isOfflineMcp.state = true;
+                });
+        }
+    };
+
     private apiMcpLogout = async (): Promise<void | Response> => {
         return fetch(`${helperSrc.URL_MCP}/logout`, {
             method: "GET",
@@ -491,6 +538,18 @@ export default class Index implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = true;
             });
+    };
+
+    private onClickButtonUpload = async (): Promise<void> => {
+        await this.apiMcpUpload();
+    };
+
+    private onClickButtonToolCall = (): void => {
+        this.variableObject.agentMode.state = this.variableObject.agentMode.state === "tool-call" ? "chat" : "tool-call";
+    };
+
+    private onClickButtonToolTask = (): void => {
+        this.variableObject.agentMode.state = this.variableObject.agentMode.state === "tool-task" ? "chat" : "tool-task";
     };
 
     private onClickButtonMessageSend = (): void => {
@@ -542,8 +601,6 @@ export default class Index implements Icontroller {
 
         this.appWindow = getCurrentWindow();
         this.appIsClosing = false;
-
-        this.agentMode = "tool-task";
     }
 
     hookObject = {} as modelIndex.IelementHook;
@@ -558,12 +615,16 @@ export default class Index implements Icontroller {
                 isOpenDialogModelList: false,
                 isOfflineAi: false,
                 isOfflineMcp: false,
-                adUrl: ""
+                adUrl: "",
+                agentMode: "chat"
             },
             this.constructor.name
         );
 
         this.methodObject = {
+            onClickButtonUpload: this.onClickButtonUpload,
+            onClickButtonToolCall: this.onClickButtonToolCall,
+            onClickButtonToolTask: this.onClickButtonToolTask,
             onClickButtonMessageSend: this.onClickButtonMessageSend,
             onClickButtonModel: this.onClickButtonModel,
             onClickModelName: this.onClickModelName,

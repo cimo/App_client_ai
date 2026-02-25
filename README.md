@@ -36,5 +36,6 @@ npm run tauri_build_windows_x86_64
 
     - node_modules
     - package-lock.json
+    - Cargo.lock
 
 2. Follow the "Installation" instructions.

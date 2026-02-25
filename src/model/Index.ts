@@ -71,9 +71,13 @@ export interface Ivariable {
     isOfflineAi: IvariableBind<boolean>;
     isOfflineMcp: IvariableBind<boolean>;
     adUrl: IvariableBind<string>;
+    agentMode: IvariableBind<string>;
 }
 
 export interface Imethod {
+    onClickButtonUpload: () => void;
+    onClickButtonToolCall: () => void;
+    onClickButtonToolTask: () => void;
     onClickButtonMessageSend: () => void;
     onClickButtonModel: () => void;
     onClickModelName: (name: string) => void;

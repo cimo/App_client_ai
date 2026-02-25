@@ -171,7 +171,17 @@ pre {
         .container_action {
             display: flex;
             flex-direction: row;
-            justify-content: flex-end;
+            justify-content: space-between;
+
+            .left {
+                display: flex;
+                align-items: flex-start;
+            }
+
+            .right {
+                display: flex;
+                align-items: flex-end;
+            }
 
             button {
                 display: flex;
@@ -199,6 +209,10 @@ pre {
 
         &:hover {
             border: 1px solid color.$darkButtonBorderHover !important;
+        }
+
+        &.active {
+            border: 1px solid color.$darkButtonBorderActive !important;
         }
     }
 
@@ -256,6 +270,10 @@ pre {
 
         &:hover {
             border: 1px solid color.$lightButtonBorderHover !important;
+        }
+
+        &.active {
+            border: 1px solid color.$lightButtonBorderActive !important;
         }
     }
 
