@@ -13,7 +13,7 @@ export const URL_AI = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1
 export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
 export const TOOL_SERVER_LABEL = "Microservice mcp";
 export const TOOL_SERVER_URL = `https://localhost:${URL_MCP.match(/:(\d+)(?:\/|$)/)?.[1]}/rpc`;
-export const TOOL_SERVER_ALLOWED = ["math_expression", "document_parse", "ocr_execute"];
+export const TOOL_SERVER_ALLOWED = ["math_expression", "document_parse", "ocr_execute", "rag_search"];
 export const MODEL_DEFAULT = "qwen3-1.7b";
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {

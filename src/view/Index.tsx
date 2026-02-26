@@ -73,7 +73,25 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                             <div key={key}>
                                 <div class="container_chat_user">
                                     <p class="time">{value.time}</p>
-                                    <pre class="message">{value.user}</pre>
+                                    <pre class={`message ${value.user ? "" : "none"}`}>{value.user}</pre>
+                                    <ul class={`message file ${value.file ? "" : "none"}`}>
+                                        {(() => {
+                                            const result: IvirtualNode[] = [];
+
+                                            const fileList = value.file.split(", ");
+
+                                            for (const [keyFile, valueFile] of fileList.entries()) {
+                                                result.push(
+                                                    <li key={keyFile}>
+                                                        <p>{valueFile}</p>
+                                                        <i class="cls_icon">file_present</i>
+                                                    </li>
+                                                );
+                                            }
+
+                                            return result;
+                                        })()}
+                                    </ul>
                                 </div>
                                 <div class="container_chat_assistant">
                                     <details class={value.mcpTool && value.mcpTool.name ? "" : "none"}>
@@ -97,7 +115,6 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                             return result;
                                         })()}
                                     </details>
-                                    <i class={`cls_icon ${value.assistantReason || value.assistantNoReason ? "none" : ""}`}>update</i>
                                     <details class={value.assistantReason ? "" : "none"}>
                                         <summary>
                                             <i class="cls_icon">generating_tokens</i>
@@ -105,7 +122,17 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                         </summary>
                                         <pre>{value.assistantReason}</pre>
                                     </details>
-                                    <pre>{value.assistantNoReason}</pre>
+                                    {(() => {
+                                        const result: IvirtualNode[] = [];
+
+                                        if (value.assistantNoReason === "") {
+                                            result.push(<i class={`cls_icon ${value.assistantReason ? "" : "none"}`}>update</i>);
+                                        } else {
+                                            result.push(<pre>{value.assistantNoReason}</pre>);
+                                        }
+
+                                        return result;
+                                    })()}
                                 </div>
                             </div>
                         );

@@ -90,7 +90,7 @@ export default class Index implements Icontroller {
                 this.variableObject.adUrl.state = resultJson.response.stdout;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiAiLogin() - fetch() - catch()", error);
+                helperSrc.writeLog("Index.ts - apiAiLogin() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineAi.state = true;
             });
@@ -117,7 +117,7 @@ export default class Index implements Icontroller {
                 console.log("cimo - apiAiUserInfo()", resultJson);
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiAiUserInfo() - fetch() - catch()", error);
+                helperSrc.writeLog("Index.ts - apiAiUserInfo() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineAi.state = true;
             });
@@ -155,7 +155,7 @@ export default class Index implements Icontroller {
                 this.variableObject.isOpenDialogModelList.state = !this.variableObject.isOpenDialogModelList.state;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiAiModel() - fetch() - catch()", error);
+                helperSrc.writeLog("Index.ts - apiAiModel() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineAi.state = true;
             });
@@ -177,7 +177,8 @@ export default class Index implements Icontroller {
                 user: this.hookObject.elementInputMessageSend.value,
                 assistantReason: this.responseReason,
                 assistantNoReason: this.responseNoReason,
-                mcpTool: this.responseMcpTool
+                mcpTool: this.responseMcpTool,
+                file: ""
             });
 
             this.autoscroll(false);
@@ -289,6 +290,8 @@ export default class Index implements Icontroller {
                     const contentType = result.headers.get("Content-Type");
 
                     if (!contentType || !contentType.includes("text/event-stream") || !result.body) {
+                        helperSrc.writeLog("Index.ts - apiAiResponse() - fetch() - Error", "Missing or invalid headers.");
+
                         return;
                     }
 
@@ -329,7 +332,7 @@ export default class Index implements Icontroller {
                                                 assistantNoReason: dataError.message
                                             };
 
-                                            this.autoscroll(true);
+                                            this.autoscroll(false);
                                         }
                                     } else if (dataTrimParse.type === "response.created") {
                                         const dataResponse = dataTrimParse.response;
@@ -389,7 +392,7 @@ export default class Index implements Icontroller {
                                             this.autoscroll(true);
                                         }
                                     } else if (dataTrimParse.type === "response.completed") {
-                                        this.resetModelResponse();
+                                        this.autoscroll(false);
                                     } else if (dataTrimParse.type === "task_response") {
                                         const dataResponse = dataTrimParse.response;
 
@@ -402,7 +405,7 @@ export default class Index implements Icontroller {
                                             };
                                         }
 
-                                        this.autoscroll(true);
+                                        this.autoscroll(false);
                                     }
                                 }
                             }
@@ -410,7 +413,7 @@ export default class Index implements Icontroller {
                     }
                 })
                 .catch((error: Error) => {
-                    helperSrc.writeLog("Index.ts - apiAiResponse() - fetch() - catch()", error);
+                    helperSrc.writeLog("Index.ts - apiAiResponse() - fetch() - catch()", error.message);
 
                     this.variableObject.isOfflineAi.state = true;
 
@@ -440,7 +443,7 @@ export default class Index implements Icontroller {
                 this.aiCookie = "";
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiAiLogout() - fetch() - catch()", error);
+                helperSrc.writeLog("Index.ts - apiAiLogout() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineAi.state = true;
             });
@@ -469,49 +472,65 @@ export default class Index implements Icontroller {
                 this.mcpSessionId = resultJson.response.stdout;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiMcpLogin() - fetch() - catch()", error);
+                helperSrc.writeLog("Index.ts - apiMcpLogin() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
             });
     };
 
-    private apiMcpUpload = async (): Promise<void | Response> => {
-        const path = await open({
-            multiple: false,
+    private apiMcpUpload = async (): Promise<void> => {
+        let resultList: string[] = [];
+
+        const filePathList = await open({
+            multiple: true,
             directory: false
         });
 
-        if (path) {
-            const file = await readFile(path);
-            const mimeType = helperSrc.readMimeType(file);
-            const blob = new Blob([file], { type: mimeType.content });
-            const fileName = path.split(/[/\\]/).pop() || "file";
+        if (filePathList) {
+            for (const filePath of filePathList) {
+                const file = await readFile(filePath);
+                const mimeType = helperSrc.readMimeType(file);
+                const blob = new Blob([file], { type: mimeType.content });
+                const fileName = filePath.split(/[/\\]/).pop() || "file";
 
-            const formData = new FormData();
-            formData.append("file", blob, `${fileName}`);
+                const formData = new FormData();
+                formData.append("file", blob, `${fileName}`);
 
-            return fetch(`${helperSrc.URL_MCP}/api/upload`, {
-                method: "POST",
-                headers: {
-                    Cookie: this.mcpCookie
-                },
-                body: formData,
-                danger: {
-                    acceptInvalidCerts: true,
-                    acceptInvalidHostnames: true
-                }
-            })
-                .then(async (result) => {
-                    const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                    // eslint-disable-next-line no-console
-                    console.log("cimo", resultJson);
+                await fetch(`${helperSrc.URL_MCP}/api/upload`, {
+                    method: "POST",
+                    headers: {
+                        Cookie: this.mcpCookie,
+                        "mcp-session-id": this.mcpSessionId
+                    },
+                    body: formData,
+                    danger: {
+                        acceptInvalidCerts: true,
+                        acceptInvalidHostnames: true
+                    }
                 })
-                .catch((error: Error) => {
-                    helperSrc.writeLog("Index.ts - apiMcpUpload() - fetch() - catch()", error);
+                    .then(async (result) => {
+                        const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
-                    this.variableObject.isOfflineMcp.state = true;
-                });
+                        resultList.push(resultJson.response.stdout);
+                    })
+                    .catch((error: Error) => {
+                        helperSrc.writeLog("Index.ts - apiMcpUpload() - fetch() - catch()", error.message);
+
+                        this.variableObject.isOfflineMcp.state = true;
+                    });
+            }
+        }
+
+        if (resultList.length > 0) {
+            const index = this.variableObject.chatMessage.state.length - 1;
+
+            this.variableObject.chatMessage.state.push({
+                ...this.variableObject.chatMessage.state[index],
+                time: helperSrc.localeFormat(new Date()) as string,
+                file: resultList.join(", ")
+            });
+
+            this.autoscroll(false);
         }
     };
 
@@ -534,14 +553,14 @@ export default class Index implements Icontroller {
                 this.mcpSessionId = "";
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiMcpLogout() - fetch() - catch()", error);
+                helperSrc.writeLog("Index.ts - apiMcpLogout() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
             });
     };
 
-    private onClickButtonUpload = async (): Promise<void> => {
-        await this.apiMcpUpload();
+    private onClickButtonUpload = (): void => {
+        this.apiMcpUpload();
     };
 
     private onClickButtonToolCall = (): void => {

@@ -43,6 +43,7 @@ export interface IchatMessage {
     assistantReason: string;
     assistantNoReason: string;
     mcpTool?: IapiAiResponseItem;
+    file: string;
 }
 
 export interface Itool {

@@ -113,6 +113,29 @@ pre {
                     margin: 5px 0;
                     padding: 10px;
                     width: fit-content;
+
+                    &.file {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-end;
+                        list-style: none;
+
+                        li {
+                            display: flex;
+                            align-items: center;
+
+                            p {
+                                margin-right: 5px;
+                                display: flex;
+                                align-items: center;
+                            }
+
+                            .cls_icon {
+                                font-size: parameter.$fontSizeNormalPlus !important;
+                                height: 1em !important;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -131,7 +154,6 @@ pre {
                         display: flex;
                         flex-direction: row;
                         cursor: pointer;
-                        list-style: none;
 
                         .cls_icon {
                             font-size: parameter.$fontSizeNormalPlus !important;
@@ -246,7 +268,7 @@ pre {
             }
 
             .container_chat_user {
-                pre {
+                .message {
                     border: 1px solid color.$darkMessageBorder;
                 }
             }
@@ -307,7 +329,7 @@ pre {
             }
 
             .container_chat_user {
-                pre {
+                .message {
                     border: 1px solid color.$lightMessageBorder;
                 }
             }
