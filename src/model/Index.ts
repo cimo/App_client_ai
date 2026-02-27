@@ -68,11 +68,13 @@ export interface Ivariable {
     modelSelected: IvariableBind<string>;
     chatHistory: IvariableBind<IchatInput[]>;
     chatMessage: IvariableBind<IchatMessage[]>;
-    isOpenDialogModelList: IvariableBind<boolean>;
+    isOpenDropdownModelList: IvariableBind<boolean>;
+    isOpenDropdownToolList: IvariableBind<boolean>;
     isOfflineAi: IvariableBind<boolean>;
     isOfflineMcp: IvariableBind<boolean>;
     adUrl: IvariableBind<string>;
     agentMode: IvariableBind<string>;
+    toolList: IvariableBind<string[]>;
 }
 
 export interface Imethod {
@@ -80,8 +82,9 @@ export interface Imethod {
     onClickButtonToolCall: () => void;
     onClickButtonToolTask: () => void;
     onClickButtonMessageSend: () => void;
-    onClickButtonModel: () => void;
+    onClickDropdownModel: () => void;
     onClickModelName: (name: string) => void;
+    onClickChipTool: () => void;
     onClickRefreshPage: () => void;
     onClickAd: (event: Event) => void;
 }

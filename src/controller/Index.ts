@@ -152,7 +152,7 @@ export default class Index implements Icontroller {
 
                 this.variableObject.modelList.state = [...resultCleaned].sort((a, b) => a.id.localeCompare(b.id));
 
-                this.variableObject.isOpenDialogModelList.state = !this.variableObject.isOpenDialogModelList.state;
+                this.variableObject.isOpenDropdownModelList.state = !this.variableObject.isOpenDropdownModelList.state;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Index.ts - apiAiModel() - fetch() - catch()", error.message);
@@ -580,12 +580,16 @@ export default class Index implements Icontroller {
         }
     };
 
-    private onClickButtonModel = (): void => {
+    private onClickDropdownModel = (): void => {
         this.apiAiModel();
     };
 
     private onClickModelName = (name: string): void => {
         this.variableObject.modelSelected.state = name;
+    };
+
+    private onClickChipTool = (): void => {
+        this.variableObject.isOpenDropdownToolList.state = !this.variableObject.isOpenDropdownToolList.state;
     };
 
     private onClickRefreshPage = (): void => {
@@ -631,11 +635,13 @@ export default class Index implements Icontroller {
                 modelSelected: helperSrc.MODEL_DEFAULT,
                 chatHistory: [] as modelIndex.IchatInput[],
                 chatMessage: [] as modelIndex.IchatMessage[],
-                isOpenDialogModelList: false,
+                isOpenDropdownModelList: false,
+                isOpenDropdownToolList: false,
                 isOfflineAi: false,
                 isOfflineMcp: false,
                 adUrl: "",
-                agentMode: "chat"
+                agentMode: "chat",
+                toolList: helperSrc.TOOL_SERVER_ALLOWED
             },
             this.constructor.name
         );
@@ -645,8 +651,9 @@ export default class Index implements Icontroller {
             onClickButtonToolCall: this.onClickButtonToolCall,
             onClickButtonToolTask: this.onClickButtonToolTask,
             onClickButtonMessageSend: this.onClickButtonMessageSend,
-            onClickButtonModel: this.onClickButtonModel,
+            onClickDropdownModel: this.onClickDropdownModel,
             onClickModelName: this.onClickModelName,
+            onClickChipTool: this.onClickChipTool,
             onClickRefreshPage: this.onClickRefreshPage,
             onClickAd: this.onClickAd
         };
@@ -662,8 +669,8 @@ export default class Index implements Icontroller {
 
     event(): void {
         document.addEventListener("click", () => {
-            if (this.variableObject.isOpenDialogModelList.state) {
-                this.variableObject.isOpenDialogModelList.state = false;
+            if (this.variableObject.isOpenDropdownModelList.state) {
+                this.variableObject.isOpenDropdownModelList.state = false;
             }
         });
 

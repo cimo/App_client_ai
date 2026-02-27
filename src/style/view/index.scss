@@ -34,13 +34,68 @@ pre {
     flex-direction: column;
     justify-content: space-between;
 
+    .bottom_limit {
+        height: 1px;
+    }
+
+    .cls_icon {
+        display: block !important;
+        height: 1em !important;
+    }
+
+    .dropdown {
+        position: relative;
+
+        .cls_icon {
+            cursor: pointer !important;
+            font-size: parameter.$fontSizeNormalPlus !important;
+        }
+
+        .menu {
+            position: absolute;
+            margin-top: 5px;
+            z-index: parameter.$zIndexInteraction;
+
+            .title {
+                margin: 5px;
+            }
+
+            ul {
+                li {
+                    padding: 5px;
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+
+    .chip {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        cursor: pointer !important;
+        padding: 5px;
+        border-radius: 10px;
+
+        i {
+            font-size: parameter.$fontSizeNormalPlus !important;
+            height: 1em !important;
+        }
+
+        p {
+            display: flex;
+            align-items: center;
+            margin-left: 5px;
+        }
+    }
+
     .container_over {
         display: grid;
         place-items: center;
         position: fixed;
         width: 100%;
         height: 100%;
-        z-index: parameter.$overZindex;
+        z-index: parameter.$zIndexOver;
 
         div {
             display: flex;
@@ -51,42 +106,18 @@ pre {
 
             .cls_icon {
                 font-size: parameter.$fontSizeVeryBig !important;
-                height: 1em !important;
             }
         }
     }
 
-    .container_actionBar {
+    .container_header {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        height: parameter.$actionBarHeight;
+        height: 40px;
         padding: 10px;
-        z-index: parameter.$actionBarZindex;
-
-        .selector_model {
-            .cls_icon {
-                cursor: pointer !important;
-            }
-
-            .dialog {
-                position: absolute;
-                right: 0;
-                margin-top: 5px;
-
-                .title {
-                    margin: 5px;
-                }
-
-                ul {
-                    li {
-                        padding: 5px;
-                        cursor: pointer;
-                    }
-                }
-            }
-        }
+        z-index: parameter.$zIndexInteraction;
     }
 
     .container_message_receive {
@@ -132,7 +163,6 @@ pre {
 
                             .cls_icon {
                                 font-size: parameter.$fontSizeNormalPlus !important;
-                                height: 1em !important;
                             }
                         }
                     }
@@ -157,7 +187,6 @@ pre {
 
                         .cls_icon {
                             font-size: parameter.$fontSizeNormalPlus !important;
-                            height: 1em !important;
                         }
 
                         p {
@@ -181,6 +210,12 @@ pre {
                 }
             }
         }
+    }
+
+    .container_available_item {
+        display: flex;
+        flex-direction: row;
+        margin: 10px;
     }
 
     .container_message_send {
@@ -214,10 +249,6 @@ pre {
             }
         }
     }
-
-    .bottom_limit {
-        height: 1px;
-    }
 }
 
 @media (prefers-color-scheme: Dark) {
@@ -238,45 +269,52 @@ pre {
         }
     }
 
-    .container_over {
-        background-color: color.$darkRootBackground;
-    }
-
-    .container_actionBar {
-        background: color.$darkActionBarBackground;
+    .menu {
+        background-color: color.$darkInteractionBackground;
         box-shadow: color.$darkBoxShadow;
 
-        .dialog {
-            background: color.$darkActionBarBackground;
-            box-shadow: color.$darkBoxShadow;
-
-            ul {
-                li {
-                    &:hover {
-                        background-color: color.$darkActionBarDialogHover;
-                    }
+        ul {
+            li {
+                &:hover {
+                    background-color: color.$darkInteractionHover;
                 }
             }
         }
     }
 
+    .chip {
+        background-color: color.$darkChipBackground;
+        border: 1px solid color.$darkChipBorder;
+    }
+
+    .container_over {
+        background-color: color.$darkRootBackground;
+    }
+
+    .container_header {
+        background-color: color.$darkInteractionBackground;
+        box-shadow: color.$darkBoxShadow;
+    }
+
     .container_message_receive {
         > div {
-            details {
-                color: color.$darkAssistantBoxColor;
-                background-color: color.$darkAssistantBoxBackground;
+            .container_chat_assistant {
+                details {
+                    color: color.$darkChatAssistantBoxColor;
+                    background-color: color.$darkChatAssistantBoxBackground;
+                }
             }
 
             .container_chat_user {
                 .message {
-                    border: 1px solid color.$darkMessageBorder;
+                    border: 1px solid color.$darkChatUserBoxColor;
                 }
             }
         }
     }
 
     .container_message_send {
-        border: 1px solid color.$darkMessageBorder;
+        border: 1px solid color.$darkChatUserBoxColor;
         box-shadow: color.$darkMessageSendBoxShadow;
     }
 }
@@ -299,45 +337,52 @@ pre {
         }
     }
 
-    .container_over {
-        background-color: color.$lightRootBackground;
-    }
-
-    .container_actionBar {
-        background: color.$lightActionBarBackground;
+    .menu {
+        background-color: color.$lightInteractionBackground;
         box-shadow: color.$lightBoxShadow;
 
-        .dialog {
-            background: color.$lightActionBarBackground;
-            box-shadow: color.$lightBoxShadow;
-
-            ul {
-                li {
-                    &:hover {
-                        background-color: color.$lightActionBarDialogHover;
-                    }
+        ul {
+            li {
+                &:hover {
+                    background-color: color.$lightInteractionHover;
                 }
             }
         }
     }
 
+    .chip {
+        background-color: color.$darkChipBackground;
+        border: 1px solid color.$darkChipBorder;
+    }
+
+    .container_over {
+        background-color: color.$lightRootBackground;
+    }
+
+    .container_header {
+        background-color: color.$lightInteractionBackground;
+        box-shadow: color.$lightBoxShadow;
+    }
+
     .container_message_receive {
         > div {
-            details {
-                color: color.$lightAssistantBoxColor;
-                background-color: color.$lightAssistantBoxBackground;
+            .container_chat_assistant {
+                details {
+                    color: color.$lightChatAssistantBoxColor;
+                    background-color: color.$lightChatAssistantBoxBackground;
+                }
             }
 
             .container_chat_user {
                 .message {
-                    border: 1px solid color.$lightMessageBorder;
+                    border: 1px solid color.$lightChatUserBoxColor;
                 }
             }
         }
     }
 
     .container_message_send {
-        border: 1px solid color.$lightMessageBorder;
+        border: 1px solid color.$lightChatUserBoxColor;
         box-shadow: color.$lightMessageSendBoxShadow;
     }
 }

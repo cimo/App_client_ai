@@ -28,18 +28,18 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     <p>Click here for connect to AD.</p>
                 </div>
             </div>
-            <div class="container_actionBar">
+            <div class="container_header">
                 <p>Model selected: {variableObject.modelSelected.state}</p>
-                <div class="selector_model">
-                    <div
+                <div class="dropdown">
+                    <i
                         class="cls_icon"
                         onclick={() => {
-                            methodObject.onClickButtonModel();
+                            methodObject.onClickDropdownModel();
                         }}
                     >
                         schema
-                    </div>
-                    <pre class={`dialog ${variableObject.isOpenDialogModelList.state ? "" : "none"}`}>
+                    </i>
+                    <div class={`menu ${variableObject.isOpenDropdownModelList.state ? "" : "none"}`}>
                         <p class="title">Model list:</p>
                         <ul>
                             {(() => {
@@ -61,7 +61,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                 return result;
                             })()}
                         </ul>
-                    </pre>
+                    </div>
                 </div>
             </div>
             <div class="container_message_receive" jsmvcfw-elementHookName="elementContainerMessageReceive">
@@ -141,6 +141,37 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     return result;
                 })()}
                 <div class="bottom_limit" jsmvcfw-elementHookName="elementBottomLimit"></div>
+            </div>
+            <div class="container_available_item">
+                <div class="dropdown">
+                    <div
+                        class="chip"
+                        onclick={() => {
+                            methodObject.onClickChipTool();
+                        }}
+                    >
+                        <i class="cls_icon">construction</i>
+                        <p>Tool</p>
+                    </div>
+                    <div class={`menu ${variableObject.isOpenDropdownToolList.state ? "" : "none"}`}>
+                        <ul>
+                            {(() => {
+                                // eslint-disable-next-line no-console
+                                console.log("cimo", variableObject.isOpenDropdownToolList.state);
+
+                                const result: IvirtualNode[] = [];
+
+                                if (variableObject.agentMode.state === "tool-call") {
+                                    for (const [key, value] of variableObject.toolList.state.entries()) {
+                                        result.push(<li key={key}>{value}</li>);
+                                    }
+                                }
+
+                                return result;
+                            })()}
+                        </ul>
+                    </div>
+                </div>
             </div>
             <div class="container_message_send">
                 <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
