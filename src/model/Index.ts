@@ -65,11 +65,12 @@ export interface IresponseBody {
 
 export interface Ivariable {
     modelList: IvariableBind<IapiAiModel[]>;
-    modelSelected: IvariableBind<string>;
     chatHistory: IvariableBind<IchatInput[]>;
     chatMessage: IvariableBind<IchatMessage[]>;
     isOpenDropdownModelList: IvariableBind<boolean>;
+    modelSelected: IvariableBind<string>;
     isOpenDropdownToolList: IvariableBind<boolean>;
+    toolSelected: IvariableBind<string>;
     isOfflineAi: IvariableBind<boolean>;
     isOfflineMcp: IvariableBind<boolean>;
     adUrl: IvariableBind<string>;
@@ -78,13 +79,14 @@ export interface Ivariable {
 }
 
 export interface Imethod {
-    onClickButtonUpload: () => void;
-    onClickButtonToolCall: () => void;
-    onClickButtonToolTask: () => void;
+    onClickChipUpload: () => void;
+    onClickChipTool: () => void;
+    onClickToolName: (name: string) => void;
+    onClickToolClose: () => void;
+    onClickChipTask: () => void;
     onClickButtonMessageSend: () => void;
     onClickDropdownModel: () => void;
     onClickModelName: (name: string) => void;
-    onClickChipTool: () => void;
     onClickRefreshPage: () => void;
     onClickAd: (event: Event) => void;
 }

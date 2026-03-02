@@ -166,3 +166,15 @@ export const readMimeType = (byteList: Uint8Array): modelHelperSrc.ImimeType => 
 
     return { content: "", extension: "" };
 };
+
+export const findElementParent = (element: HTMLElement, className: string): HTMLElement | null => {
+    if (!element.parentNode || element.parentNode === document) {
+        return null;
+    }
+
+    if (element && element.classList.contains(className)) {
+        return element;
+    }
+
+    return findElementParent(element.parentNode as HTMLElement, className);
+};

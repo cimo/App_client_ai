@@ -53,8 +53,28 @@ pre {
 
         .menu {
             position: absolute;
-            margin-top: 5px;
             z-index: parameter.$zIndexInteraction;
+            width: 150px;
+
+            &.bottom-right {
+                top: 110%;
+                left: 0;
+            }
+
+            &.bottom-left {
+                top: 110%;
+                right: 0;
+            }
+
+            &.top-right {
+                bottom: 110%;
+                left: 0;
+            }
+
+            &.top-left {
+                bottom: 110%;
+                right: 0;
+            }
 
             .title {
                 margin: 5px;
@@ -72,18 +92,24 @@ pre {
     .chip {
         display: flex;
         flex-direction: row;
+        align-content: center;
         align-items: center;
-        cursor: pointer !important;
         padding: 5px;
         border-radius: 10px;
 
         i {
             font-size: parameter.$fontSizeNormalPlus !important;
             height: 1em !important;
+
+            &.close {
+                cursor: pointer !important;
+                margin-left: 5px !important;
+            }
         }
 
         p {
             display: flex;
+            align-content: center;
             align-items: center;
             margin-left: 5px;
         }
@@ -101,6 +127,7 @@ pre {
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-content: center;
             align-items: center;
             cursor: pointer !important;
 
@@ -114,13 +141,14 @@ pre {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        align-content: center;
         align-items: center;
         height: 40px;
         padding: 10px;
         z-index: parameter.$zIndexInteraction;
     }
 
-    .container_message_receive {
+    .container_chat {
         height: 100%;
         overflow-x: hidden;
         overflow-y: scroll;
@@ -132,6 +160,7 @@ pre {
                 margin-top: 20px;
                 display: flex;
                 flex-direction: column;
+                align-content: center;
                 align-items: flex-end;
                 margin: 10px 25px;
 
@@ -148,21 +177,32 @@ pre {
                     &.file {
                         display: flex;
                         flex-direction: column;
+                        align-content: center;
                         align-items: flex-end;
                         list-style: none;
 
+                        .info {
+                            margin-bottom: 5px;
+                        }
+
                         li {
                             display: flex;
+                            align-content: center;
                             align-items: center;
 
                             p {
-                                margin-right: 5px;
                                 display: flex;
+                                align-content: center;
                                 align-items: center;
                             }
 
                             .cls_icon {
                                 font-size: parameter.$fontSizeNormalPlus !important;
+                            }
+
+                            .remove {
+                                cursor: pointer !important;
+                                margin-left: 5px !important;
                             }
                         }
                     }
@@ -172,6 +212,7 @@ pre {
             .container_chat_assistant {
                 display: flex;
                 flex-direction: column;
+                align-content: center;
                 align-items: flex-start;
                 margin: 10px 25px;
 
@@ -192,6 +233,7 @@ pre {
                         p {
                             margin-left: 5px;
                             display: flex;
+                            align-content: center;
                             align-items: center;
                         }
                     }
@@ -212,10 +254,12 @@ pre {
         }
     }
 
-    .container_available_item {
+    .container_chip {
         display: flex;
-        flex-direction: row;
-        margin: 10px;
+        justify-content: flex-start;
+        align-content: center;
+        align-items: center;
+        padding: 0 10px;
     }
 
     .container_message_send {
@@ -232,17 +276,28 @@ pre {
 
             .left {
                 display: flex;
-                align-items: flex-start;
+                justify-content: flex-start;
+                align-content: center;
+                align-items: center;
+
+                div {
+                    margin: 0 5px;
+                }
+
+                .chip {
+                    cursor: pointer !important;
+                }
             }
 
             .right {
                 display: flex;
-                align-items: flex-end;
+                justify-content: flex-end;
             }
 
             button {
                 display: flex;
                 justify-content: center;
+                align-content: center;
                 align-items: center;
                 width: 40px;
                 height: 40px;
@@ -257,15 +312,15 @@ pre {
         background-color: color.$darkRootBackground;
     }
 
+    .active {
+        border: 1px solid color.$darkBorderActive !important;
+    }
+
     button {
         background-color: color.$darkButtonBackground !important;
 
         &:hover {
-            border: 1px solid color.$darkButtonBorderHover !important;
-        }
-
-        &.active {
-            border: 1px solid color.$darkButtonBorderActive !important;
+            border: 1px solid color.$darkBorderHover !important;
         }
     }
 
@@ -276,6 +331,7 @@ pre {
         ul {
             li {
                 &:hover {
+                    color: color.$darkInteractionBackground;
                     background-color: color.$darkInteractionHover;
                 }
             }
@@ -285,6 +341,10 @@ pre {
     .chip {
         background-color: color.$darkChipBackground;
         border: 1px solid color.$darkChipBorder;
+
+        &:not(.no_hover):hover {
+            border: 1px solid color.$darkBorderHover !important;
+        }
     }
 
     .container_over {
@@ -296,7 +356,7 @@ pre {
         box-shadow: color.$darkBoxShadow;
     }
 
-    .container_message_receive {
+    .container_chat {
         > div {
             .container_chat_assistant {
                 details {
@@ -325,15 +385,15 @@ pre {
         background-color: color.$lightRootBackground;
     }
 
+    .active {
+        border: 1px solid color.$lightBorderActive !important;
+    }
+
     button {
         background-color: color.$lightButtonBackground !important;
 
         &:hover {
-            border: 1px solid color.$lightButtonBorderHover !important;
-        }
-
-        &.active {
-            border: 1px solid color.$lightButtonBorderActive !important;
+            border: 1px solid color.$lightBorderHover !important;
         }
     }
 
@@ -344,6 +404,7 @@ pre {
         ul {
             li {
                 &:hover {
+                    color: color.$lightInteractionBackground;
                     background-color: color.$lightInteractionHover;
                 }
             }
@@ -353,6 +414,10 @@ pre {
     .chip {
         background-color: color.$darkChipBackground;
         border: 1px solid color.$darkChipBorder;
+
+        &:not(.no_hover):hover {
+            border: 1px solid color.$lightBorderHover !important;
+        }
     }
 
     .container_over {
@@ -364,7 +429,7 @@ pre {
         box-shadow: color.$lightBoxShadow;
     }
 
-    .container_message_receive {
+    .container_chat {
         > div {
             .container_chat_assistant {
                 details {

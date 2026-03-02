@@ -28,6 +28,8 @@ export default class Index implements Icontroller {
     private mcpCookie: string;
     private mcpSessionId: string;
 
+    private fileList: string[] = [];
+
     private appWindow: Window;
     private appIsClosing: boolean;
 
@@ -152,7 +154,7 @@ export default class Index implements Icontroller {
 
                 this.variableObject.modelList.state = [...resultCleaned].sort((a, b) => a.id.localeCompare(b.id));
 
-                this.variableObject.isOpenDropdownModelList.state = !this.variableObject.isOpenDropdownModelList.state;
+                this.variableObject.isOpenDropdownModelList.state = true;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Index.ts - apiAiModel() - fetch() - catch()", error.message);
@@ -216,19 +218,20 @@ export default class Index implements Icontroller {
                 inputToolList = [];
             } else if (this.variableObject.agentMode.state === "tool-call") {
                 inputSystem =
-                    "You are a agent tool and you only need to decide which single tool to call.\n" +
+                    "You are a agent tool executer and you only need to execute a single tool call.\n" +
+                    `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state}.\n` +
+                    `For ${this.variableObject.toolSelected.state} you MUST return ONLY the tool response without additional information.\n` +
                     "You MUST NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
                     "You MUST NOT explain nothing.\n" +
-                    "If no action is executed, you MUST reply with: No tool to execute.\n" +
-                    "If you can read the action response, you MUST reply with the tool response.";
+                    "If is not possible execute the tool, you MUST reply with: No tool to execute.";
 
                 inputToolList = [
                     {
                         type: "mcp",
                         server_label: helperSrc.TOOL_SERVER_LABEL,
                         server_url: helperSrc.TOOL_SERVER_URL,
-                        allowed_tools: helperSrc.TOOL_SERVER_ALLOWED,
+                        allowed_tools: [this.variableObject.toolSelected.state],
                         headers: {
                             Cookie: this.mcpCookie
                         }
@@ -236,31 +239,32 @@ export default class Index implements Icontroller {
                 ];
             } else if (this.variableObject.agentMode.state === "tool-task") {
                 inputSystem =
-                    "You are a agent control planner, transform the user request in a ordered list of actions for task execution.\n" +
-                    "You MUST use ONLY the following actions: chrome_execute.\n" +
-                    'For chrome_execute you MUST return ONLY valid JSON with this format: { "stepList": [ { "action": "chrome_execute", "argumentObject": { "url": "..." } } ] }\n' +
+                    "You are a agent tool task executer and you need to transform the user request in a ordered list of actions.\n" +
+                    "You MUST use ONLY the following tool: chrome_execute.\n" +
+                    'For chrome_execute you MUST return ONLY valid JSON with this format without additional information: { "stepList": [ { "action": "chrome_execute", "argumentObject": { "url": "..." } } ] }\n' +
                     "You MUST NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
                     "You MUST NOT explain nothing.\n" +
-                    "If no action is executed, you MUST reply with: No task to execute.";
+                    "If is not possible executed the task, you MUST reply with: No task to execute.";
 
                 inputToolList = [];
             }
 
-            input.push({
-                role: "system",
-                content: [
-                    {
-                        type: "input_text",
-                        text: inputSystem
-                    }
-                ]
-            });
-
-            input.push({
-                role: "user",
-                content: [{ type: "input_text", text: this.hookObject.elementInputMessageSend.value }]
-            });
+            input.push(
+                {
+                    role: "system",
+                    content: [
+                        {
+                            type: "input_text",
+                            text: inputSystem
+                        }
+                    ]
+                },
+                {
+                    role: "user",
+                    content: [{ type: "input_text", text: this.hookObject.elementInputMessageSend.value }]
+                }
+            );
 
             fetch(`${helperSrc.URL_AI}/api/response`, {
                 method: "POST",
@@ -486,7 +490,7 @@ export default class Index implements Icontroller {
             directory: false
         });
 
-        if (filePathList) {
+        if (filePathList && filePathList.length <= 1) {
             for (const filePath of filePathList) {
                 const file = await readFile(filePath);
                 const mimeType = helperSrc.readMimeType(file);
@@ -511,7 +515,11 @@ export default class Index implements Icontroller {
                     .then(async (result) => {
                         const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
-                        resultList.push(resultJson.response.stdout);
+                        if (resultJson.response.stdout !== "") {
+                            resultList.push(resultJson.response.stdout);
+
+                            this.fileList = resultList;
+                        }
                     })
                     .catch((error: Error) => {
                         helperSrc.writeLog("Index.ts - apiMcpUpload() - fetch() - catch()", error.message);
@@ -519,16 +527,32 @@ export default class Index implements Icontroller {
                         this.variableObject.isOfflineMcp.state = true;
                     });
             }
-        }
 
-        if (resultList.length > 0) {
-            const index = this.variableObject.chatMessage.state.length - 1;
+            if (resultList.length > 0) {
+                const message = {} as modelIndex.IchatMessage;
+                message.time = helperSrc.localeFormat(new Date()) as string;
+                message.file = resultList.join(", ");
 
-            this.variableObject.chatMessage.state.push({
-                ...this.variableObject.chatMessage.state[index],
-                time: helperSrc.localeFormat(new Date()) as string,
-                file: resultList.join(", ")
-            });
+                this.variableObject.chatMessage.state.push(message);
+
+                this.autoscroll(false);
+            } else {
+                const message = {} as modelIndex.IchatMessage;
+                message.time = helperSrc.localeFormat(new Date()) as string;
+                message.user = "Error: File write problem.";
+                message.file = "";
+
+                this.variableObject.chatMessage.state.push(message);
+
+                this.autoscroll(false);
+            }
+        } else {
+            const message = {} as modelIndex.IchatMessage;
+            message.time = helperSrc.localeFormat(new Date()) as string;
+            message.user = "You can upload max 3 files at once.";
+            message.file = "";
+
+            this.variableObject.chatMessage.state.push(message);
 
             this.autoscroll(false);
         }
@@ -559,18 +583,6 @@ export default class Index implements Icontroller {
             });
     };
 
-    private onClickButtonUpload = (): void => {
-        this.apiMcpUpload();
-    };
-
-    private onClickButtonToolCall = (): void => {
-        this.variableObject.agentMode.state = this.variableObject.agentMode.state === "tool-call" ? "chat" : "tool-call";
-    };
-
-    private onClickButtonToolTask = (): void => {
-        this.variableObject.agentMode.state = this.variableObject.agentMode.state === "tool-task" ? "chat" : "tool-task";
-    };
-
     private onClickButtonMessageSend = (): void => {
         if (this.abortControllerApiAiResponse && this.responseId) {
             this.abortControllerApiAiResponse.abort();
@@ -578,18 +590,6 @@ export default class Index implements Icontroller {
         } else {
             this.apiAiResponse();
         }
-    };
-
-    private onClickDropdownModel = (): void => {
-        this.apiAiModel();
-    };
-
-    private onClickModelName = (name: string): void => {
-        this.variableObject.modelSelected.state = name;
-    };
-
-    private onClickChipTool = (): void => {
-        this.variableObject.isOpenDropdownToolList.state = !this.variableObject.isOpenDropdownToolList.state;
     };
 
     private onClickRefreshPage = (): void => {
@@ -604,6 +604,46 @@ export default class Index implements Icontroller {
         } else {
             openUrl(this.variableObject.adUrl.state);
         }
+    };
+
+    private onClickDropdownModel = (): void => {
+        this.apiAiModel();
+    };
+
+    private onClickModelName = (name: string): void => {
+        this.variableObject.modelSelected.state = name;
+    };
+
+    private onClickChipUpload = (): void => {
+        this.apiMcpUpload();
+    };
+
+    private onClickChipTool = (): void => {
+        if (this.variableObject.agentMode.state === "tool-task") {
+            return;
+        }
+
+        this.variableObject.isOpenDropdownToolList.state = true;
+    };
+
+    private onClickToolName = (name: string): void => {
+        this.variableObject.toolSelected.state = name;
+
+        this.variableObject.agentMode.state = this.variableObject.agentMode.state === "tool-call" ? "chat" : "tool-call";
+    };
+
+    private onClickToolClose = (): void => {
+        this.variableObject.isOpenDropdownToolList.state = false;
+        this.variableObject.toolSelected.state = "";
+        this.variableObject.agentMode.state = "chat";
+    };
+
+    private onClickChipTask = (): void => {
+        if (this.variableObject.agentMode.state === "tool-call") {
+            return;
+        }
+
+        this.variableObject.agentMode.state = this.variableObject.agentMode.state === "tool-task" ? "chat" : "tool-task";
     };
 
     constructor() {
@@ -622,6 +662,8 @@ export default class Index implements Icontroller {
         this.mcpCookie = "";
         this.mcpSessionId = "";
 
+        this.fileList = [];
+
         this.appWindow = getCurrentWindow();
         this.appIsClosing = false;
     }
@@ -632,11 +674,12 @@ export default class Index implements Icontroller {
         this.variableObject = variableBind(
             {
                 modelList: [],
-                modelSelected: helperSrc.MODEL_DEFAULT,
                 chatHistory: [] as modelIndex.IchatInput[],
                 chatMessage: [] as modelIndex.IchatMessage[],
                 isOpenDropdownModelList: false,
+                modelSelected: helperSrc.MODEL_DEFAULT,
                 isOpenDropdownToolList: false,
+                toolSelected: "",
                 isOfflineAi: false,
                 isOfflineMcp: false,
                 adUrl: "",
@@ -647,13 +690,14 @@ export default class Index implements Icontroller {
         );
 
         this.methodObject = {
-            onClickButtonUpload: this.onClickButtonUpload,
-            onClickButtonToolCall: this.onClickButtonToolCall,
-            onClickButtonToolTask: this.onClickButtonToolTask,
+            onClickChipUpload: this.onClickChipUpload,
+            onClickChipTool: this.onClickChipTool,
+            onClickToolName: this.onClickToolName,
+            onClickToolClose: this.onClickToolClose,
+            onClickChipTask: this.onClickChipTask,
             onClickButtonMessageSend: this.onClickButtonMessageSend,
             onClickDropdownModel: this.onClickDropdownModel,
             onClickModelName: this.onClickModelName,
-            onClickChipTool: this.onClickChipTool,
             onClickRefreshPage: this.onClickRefreshPage,
             onClickAd: this.onClickAd
         };
@@ -668,9 +712,15 @@ export default class Index implements Icontroller {
     }
 
     event(): void {
-        document.addEventListener("click", () => {
-            if (this.variableObject.isOpenDropdownModelList.state) {
+        document.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement;
+
+            if (!helperSrc.findElementParent(target, "dropdown") || helperSrc.findElementParent(target, "menu")) {
                 this.variableObject.isOpenDropdownModelList.state = false;
+            }
+
+            if (!helperSrc.findElementParent(target, "dropdown") || helperSrc.findElementParent(target, "menu")) {
+                this.variableObject.isOpenDropdownToolList.state = false;
             }
         });
 

@@ -39,7 +39,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     >
                         schema
                     </i>
-                    <div class={`menu ${variableObject.isOpenDropdownModelList.state ? "" : "none"}`}>
+                    <div class={`menu bottom-left ${variableObject.isOpenDropdownModelList.state ? "" : "none"}`}>
                         <p class="title">Model list:</p>
                         <ul>
                             {(() => {
@@ -64,7 +64,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     </div>
                 </div>
             </div>
-            <div class="container_message_receive" jsmvcfw-elementHookName="elementContainerMessageReceive">
+            <div class="container_chat" jsmvcfw-elementHookName="elementContainerMessageReceive">
                 {(() => {
                     const result: IvirtualNode[] = [];
 
@@ -75,18 +75,21 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                     <p class="time">{value.time}</p>
                                     <pre class={`message ${value.user ? "" : "none"}`}>{value.user}</pre>
                                     <ul class={`message file ${value.file ? "" : "none"}`}>
+                                        <p class="info">File will be valid for 10 minutes.</p>
                                         {(() => {
                                             const result: IvirtualNode[] = [];
 
-                                            const fileList = value.file.split(", ");
+                                            if (value.file !== "") {
+                                                const fileList = value.file.split(", ");
 
-                                            for (const [keyFile, valueFile] of fileList.entries()) {
-                                                result.push(
-                                                    <li key={keyFile}>
-                                                        <p>{valueFile}</p>
-                                                        <i class="cls_icon">file_present</i>
-                                                    </li>
-                                                );
+                                                for (const [keyFile, valueFile] of fileList.entries()) {
+                                                    result.push(
+                                                        <li key={keyFile}>
+                                                            <p>{valueFile}</p>
+                                                            <i class="cls_icon">file_present</i>
+                                                        </li>
+                                                    );
+                                                }
                                             }
 
                                             return result;
@@ -94,7 +97,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                     </ul>
                                 </div>
                                 <div class="container_chat_assistant">
-                                    <details class={value.mcpTool && value.mcpTool.name ? "" : "none"}>
+                                    <details class={value.mcpTool && value.mcpTool["name"] ? "" : "none"}>
                                         <summary>
                                             <i class="cls_icon">handyman</i>
                                             <p>Show tool</p>
@@ -125,10 +128,12 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                     {(() => {
                                         const result: IvirtualNode[] = [];
 
-                                        if (value.assistantNoReason === "") {
-                                            result.push(<i class={`cls_icon ${value.assistantReason ? "" : "none"}`}>update</i>);
-                                        } else {
-                                            result.push(<pre>{value.assistantNoReason}</pre>);
+                                        if (value.user !== "") {
+                                            if (value.assistantNoReason === "") {
+                                                result.push(<i class="cls_icon">update</i>);
+                                            } else {
+                                                result.push(<pre>{value.assistantNoReason}</pre>);
+                                            }
                                         }
 
                                         return result;
@@ -142,64 +147,74 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                 })()}
                 <div class="bottom_limit" jsmvcfw-elementHookName="elementBottomLimit"></div>
             </div>
-            <div class="container_available_item">
-                <div class="dropdown">
-                    <div
-                        class="chip"
+            <div class="container_chip">
+                <div class={`chip no_hover ${variableObject.toolSelected.state !== "" ? "" : "none"}`}>
+                    <p>{variableObject.toolSelected.state}</p>
+                    <i
+                        class="cls_icon close"
                         onclick={() => {
-                            methodObject.onClickChipTool();
+                            methodObject.onClickToolClose();
                         }}
                     >
-                        <i class="cls_icon">construction</i>
-                        <p>Tool</p>
-                    </div>
-                    <div class={`menu ${variableObject.isOpenDropdownToolList.state ? "" : "none"}`}>
-                        <ul>
-                            {(() => {
-                                // eslint-disable-next-line no-console
-                                console.log("cimo", variableObject.isOpenDropdownToolList.state);
-
-                                const result: IvirtualNode[] = [];
-
-                                if (variableObject.agentMode.state === "tool-call") {
-                                    for (const [key, value] of variableObject.toolList.state.entries()) {
-                                        result.push(<li key={key}>{value}</li>);
-                                    }
-                                }
-
-                                return result;
-                            })()}
-                        </ul>
-                    </div>
+                        cancel
+                    </i>
                 </div>
             </div>
             <div class="container_message_send">
                 <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
                 <div class="container_action">
                     <div class="left">
-                        <button
+                        <div
+                            class="chip"
                             onclick={() => {
-                                methodObject.onClickButtonUpload();
+                                methodObject.onClickChipUpload();
                             }}
                         >
                             <i class="cls_icon">upload_file</i>
-                        </button>
-                        <button
-                            class={variableObject.agentMode.state === "tool-call" ? "active" : ""}
+                            <p>Upload</p>
+                        </div>
+                        <div class="dropdown">
+                            <div
+                                class={`chip ${variableObject.agentMode.state === "tool-call" ? "active" : ""}`}
+                                onclick={() => {
+                                    methodObject.onClickChipTool();
+                                }}
+                            >
+                                <i class="cls_icon">construction</i>
+                                <p>Tool</p>
+                            </div>
+                            <div class={`menu top-right ${variableObject.isOpenDropdownToolList.state ? "" : "none"}`}>
+                                <ul>
+                                    {(() => {
+                                        const result: IvirtualNode[] = [];
+
+                                        for (const [key, value] of variableObject.toolList.state.entries()) {
+                                            result.push(
+                                                <li
+                                                    key={key}
+                                                    onClick={() => {
+                                                        methodObject.onClickToolName(value);
+                                                    }}
+                                                >
+                                                    {value}
+                                                </li>
+                                            );
+                                        }
+
+                                        return result;
+                                    })()}
+                                </ul>
+                            </div>
+                        </div>
+                        <div
+                            class={`chip ${variableObject.agentMode.state === "tool-task" ? "active" : ""}`}
                             onclick={() => {
-                                methodObject.onClickButtonToolCall();
-                            }}
-                        >
-                            <i class="cls_icon">construction</i>
-                        </button>
-                        <button
-                            class={variableObject.agentMode.state === "tool-task" ? "active" : ""}
-                            onclick={() => {
-                                methodObject.onClickButtonToolTask();
+                                methodObject.onClickChipTask();
                             }}
                         >
                             <i class="cls_icon">assignment</i>
-                        </button>
+                            <p>Task</p>
+                        </div>
                     </div>
                     <div class="right">
                         <button
