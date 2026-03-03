@@ -1,5 +1,12 @@
 import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 
+export interface IresponseBody {
+    response: {
+        stdout: string;
+        stderr: string | Error;
+    };
+}
+
 export interface IapiAiModel {
     id: string;
     object: string;
@@ -32,6 +39,11 @@ export interface IapiAiResponse {
     };
 }
 
+export interface IapiMcpTool {
+    name: string;
+    argumentObject: Record<string, string>;
+}
+
 export interface IchatInput {
     role: string;
     content: string | Array<{ type: string; text?: string; image_url?: string }>;
@@ -46,36 +58,19 @@ export interface IchatMessage {
     file: string;
 }
 
-export interface Itool {
-    type: string;
-    server_label: string;
-    server_url: string;
-    allowed_tools: string[];
-    headers: {
-        Cookie: string;
-    };
-}
-
-export interface IresponseBody {
-    response: {
-        stdout: string;
-        stderr: string | Error;
-    };
-}
-
 export interface Ivariable {
     modelList: IvariableBind<IapiAiModel[]>;
-    chatHistory: IvariableBind<IchatInput[]>;
-    chatMessage: IvariableBind<IchatMessage[]>;
+    chatHistoryList: IvariableBind<IchatInput[]>;
+    chatMessageList: IvariableBind<IchatMessage[]>;
     isOpenDropdownModelList: IvariableBind<boolean>;
     modelSelected: IvariableBind<string>;
+    toolList: IvariableBind<IapiMcpTool[]>;
     isOpenDropdownToolList: IvariableBind<boolean>;
-    toolSelected: IvariableBind<string>;
+    toolSelected: IvariableBind<IapiMcpTool>;
     isOfflineAi: IvariableBind<boolean>;
     isOfflineMcp: IvariableBind<boolean>;
     adUrl: IvariableBind<string>;
     agentMode: IvariableBind<string>;
-    toolList: IvariableBind<string[]>;
 }
 
 export interface Imethod {

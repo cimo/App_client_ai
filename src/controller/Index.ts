@@ -28,8 +28,6 @@ export default class Index implements Icontroller {
     private mcpCookie: string;
     private mcpSessionId: string;
 
-    private fileList: string[] = [];
-
     private appWindow: Window;
     private appIsClosing: boolean;
 
@@ -81,9 +79,9 @@ export default class Index implements Icontroller {
             }
         })
             .then(async (result) => {
-                const cookie = result.headers.get("set-cookie");
-
                 this.variableObject.isOfflineAi.state = false;
+
+                const cookie = result.headers.get("set-cookie");
 
                 this.aiCookie = cookie ? cookie : "";
 
@@ -174,7 +172,7 @@ export default class Index implements Icontroller {
 
             this.resetModelResponse();
 
-            this.variableObject.chatMessage.state.push({
+            this.variableObject.chatMessageList.state.push({
                 time: helperSrc.localeFormat(new Date()) as string,
                 user: this.hookObject.elementInputMessageSend.value,
                 assistantReason: this.responseReason,
@@ -187,67 +185,50 @@ export default class Index implements Icontroller {
 
             const input: modelIndex.IchatInput[] = [];
 
-            /*this.variableObject.chatHistory.state.push({
+            /*this.variableObject.chatHistoryList.state.push({
                 role: "user",
                 content: this.hookObject.elementInputMessageSend.value
             });
             
-            for (const chatHistory of this.variableObject.chatHistory.state) {
-                if (chatHistory.role === "system" || chatHistory.role === "user") {
+            for (const chatHistoryList of this.variableObject.chatHistoryList.state) {
+                if (chatHistoryList.role === "system" || chatHistoryList.role === "user") {
                     input.push({
-                        role: chatHistory.role,
-                        content: [{ type: "input_text", text: chatHistory.content as string }]
+                        role: chatHistoryList.role,
+                        content: [{ type: "input_text", text: chatHistoryList.content as string }]
                     });
                 } else {
                     input.push({
-                        role: chatHistory.role,
-                        content: [{ type: "output_text", text: chatHistory.content as string }]
+                        role: chatHistoryList.role,
+                        content: [{ type: "output_text", text: chatHistoryList.content as string }]
                     });
                 }
             }*/
 
             let inputSystem = "";
-            let inputToolList: modelIndex.Itool[] = [];
 
             if (this.variableObject.agentMode.state === "chat") {
                 inputSystem =
-                    "You are a multilingual agent that needs to speak in the user's input language.\n" +
+                    "You are a multilingual agent that needs to reply with the user input language.\n" +
                     "You MUST need to reason step by step and give a answer to the user question.\n" +
-                    "You MUST NOT use tools.";
-
-                inputToolList = [];
+                    "You MUST NOT use tools and tasks.";
             } else if (this.variableObject.agentMode.state === "tool-call") {
                 inputSystem =
-                    "You are a agent tool executer and you only need to execute a single tool call.\n" +
-                    `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state}.\n` +
-                    `For ${this.variableObject.toolSelected.state} you MUST return ONLY the tool response without additional information.\n` +
+                    `You are a multilingual agent tool executer that needs to reply with the user input language and you need to transform the user request in a action.\n` +
+                    `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}.\n` +
+                    `For ${this.variableObject.toolSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }\n` +
                     "You MUST NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
                     "You MUST NOT explain nothing.\n" +
-                    "If is not possible execute the tool, you MUST reply with: No tool to execute.";
-
-                inputToolList = [
-                    {
-                        type: "mcp",
-                        server_label: helperSrc.TOOL_SERVER_LABEL,
-                        server_url: helperSrc.TOOL_SERVER_URL,
-                        allowed_tools: [this.variableObject.toolSelected.state],
-                        headers: {
-                            Cookie: this.mcpCookie
-                        }
-                    }
-                ];
+                    "If the talk is not related to tool execution or the tool don't return a response, you MUST reply with: No tool to execute.";
             } else if (this.variableObject.agentMode.state === "tool-task") {
                 inputSystem =
-                    "You are a agent tool task executer and you need to transform the user request in a ordered list of actions.\n" +
+                    "You are a multilingual agent tool task executer that needs to reply with the user input language and you need to transform the user request in a ordered list of actions.\n" +
                     "You MUST use ONLY the following tool: chrome_execute.\n" +
-                    'For chrome_execute you MUST return ONLY valid JSON with this format without additional information: { "stepList": [ { "action": "chrome_execute", "argumentObject": { "url": "..." } } ] }\n' +
+                    'For chrome_execute you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "chrome_execute", "argumentObject": { "url": "..." } } ] }\n' +
                     "You MUST NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
                     "You MUST NOT explain nothing.\n" +
-                    "If is not possible executed the task, you MUST reply with: No task to execute.";
-
-                inputToolList = [];
+                    "If the talk is not related to tool task execution or the tool task don't return a response, you MUST reply with: No task to execute.";
             }
 
             input.push(
@@ -280,7 +261,7 @@ export default class Index implements Icontroller {
                     model: this.variableObject.modelSelected.state,
                     temperature: 0,
                     stream: true,
-                    tools: inputToolList
+                    tools: []
                 }),
                 signal: this.abortControllerApiAiResponse.signal,
                 danger: {
@@ -329,10 +310,10 @@ export default class Index implements Icontroller {
                                         const dataError = dataTrimParse.error;
 
                                         if (dataError) {
-                                            const idx = this.variableObject.chatMessage.state.length - 1;
+                                            const idx = this.variableObject.chatMessageList.state.length - 1;
 
-                                            this.variableObject.chatMessage.state[idx] = {
-                                                ...this.variableObject.chatMessage.state[idx],
+                                            this.variableObject.chatMessageList.state[idx] = {
+                                                ...this.variableObject.chatMessageList.state[idx],
                                                 assistantNoReason: dataError.message
                                             };
 
@@ -350,10 +331,10 @@ export default class Index implements Icontroller {
                                         if (dataDelta) {
                                             this.responseReason += dataDelta;
 
-                                            const index = this.variableObject.chatMessage.state.length - 1;
+                                            const index = this.variableObject.chatMessageList.state.length - 1;
 
-                                            this.variableObject.chatMessage.state[index] = {
-                                                ...this.variableObject.chatMessage.state[index],
+                                            this.variableObject.chatMessageList.state[index] = {
+                                                ...this.variableObject.chatMessageList.state[index],
                                                 assistantReason: this.responseReason.trim()
                                             };
 
@@ -365,10 +346,10 @@ export default class Index implements Icontroller {
                                         if (dataDelta) {
                                             this.responseNoReason += dataDelta;
 
-                                            const index = this.variableObject.chatMessage.state.length - 1;
+                                            const index = this.variableObject.chatMessageList.state.length - 1;
 
-                                            this.variableObject.chatMessage.state[index] = {
-                                                ...this.variableObject.chatMessage.state[index],
+                                            this.variableObject.chatMessageList.state[index] = {
+                                                ...this.variableObject.chatMessageList.state[index],
                                                 assistantNoReason: this.responseNoReason.trim()
                                             };
 
@@ -386,10 +367,10 @@ export default class Index implements Icontroller {
                                                 output: dataItem.output
                                             };
 
-                                            const index = this.variableObject.chatMessage.state.length - 1;
+                                            const index = this.variableObject.chatMessageList.state.length - 1;
 
-                                            this.variableObject.chatMessage.state[index] = {
-                                                ...this.variableObject.chatMessage.state[index],
+                                            this.variableObject.chatMessageList.state[index] = {
+                                                ...this.variableObject.chatMessageList.state[index],
                                                 mcpTool: this.responseMcpTool
                                             };
 
@@ -397,16 +378,16 @@ export default class Index implements Icontroller {
                                         }
                                     } else if (dataTrimParse.type === "response.completed") {
                                         this.autoscroll(false);
-                                    } else if (dataTrimParse.type === "task_response") {
+                                    } else if (dataTrimParse.type === "tool_response") {
                                         const dataResponse = dataTrimParse.response;
 
                                         if (dataResponse) {
-                                            const index = this.variableObject.chatMessage.state.length - 1;
+                                            /*const index = this.variableObject.chatMessageList.state.length - 1;
 
-                                            this.variableObject.chatMessage.state[index] = {
-                                                ...this.variableObject.chatMessage.state[index],
+                                            this.variableObject.chatMessageList.state[index] = {
+                                                ...this.variableObject.chatMessageList.state[index],
                                                 assistantNoReason: dataResponse.message
-                                            };
+                                            };*/
                                         }
 
                                         this.autoscroll(false);
@@ -441,7 +422,7 @@ export default class Index implements Icontroller {
             }
         })
             .then(() => {
-                this.variableObject.isOfflineAi.state = true;
+                this.variableObject.isOfflineAi.state = false;
 
                 this.aiBearerToken = "";
                 this.aiCookie = "";
@@ -465,9 +446,9 @@ export default class Index implements Icontroller {
             }
         })
             .then(async (result) => {
-                const cookie = result.headers.get("set-cookie");
-
                 this.variableObject.isOfflineMcp.state = false;
+
+                const cookie = result.headers.get("set-cookie");
 
                 this.mcpCookie = cookie ? cookie : "";
 
@@ -482,6 +463,33 @@ export default class Index implements Icontroller {
             });
     };
 
+    private apiMcpTool = async (): Promise<void | Response> => {
+        return fetch(`${helperSrc.URL_MCP}/api/tool-list`, {
+            method: "GET",
+            headers: {
+                Cookie: this.mcpCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (result) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+                if (resultJson.response.stdout !== "") {
+                    this.variableObject.toolList.state = JSON.parse(resultJson.response.stdout) as modelIndex.IapiMcpTool[];
+                }
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Index.ts - apiMcpTool() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
     private apiMcpUpload = async (): Promise<void> => {
         let resultList: string[] = [];
 
@@ -490,7 +498,7 @@ export default class Index implements Icontroller {
             directory: false
         });
 
-        if (filePathList && filePathList.length <= 1) {
+        if (filePathList && filePathList.length <= 3) {
             for (const filePath of filePathList) {
                 const file = await readFile(filePath);
                 const mimeType = helperSrc.readMimeType(file);
@@ -513,12 +521,12 @@ export default class Index implements Icontroller {
                     }
                 })
                     .then(async (result) => {
+                        this.variableObject.isOfflineMcp.state = false;
+
                         const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
                         if (resultJson.response.stdout !== "") {
                             resultList.push(resultJson.response.stdout);
-
-                            this.fileList = resultList;
                         }
                     })
                     .catch((error: Error) => {
@@ -530,29 +538,26 @@ export default class Index implements Icontroller {
 
             if (resultList.length > 0) {
                 const message = {} as modelIndex.IchatMessage;
-                message.time = helperSrc.localeFormat(new Date()) as string;
-                message.file = resultList.join(", ");
+                message.file = resultList.join(",");
 
-                this.variableObject.chatMessage.state.push(message);
+                this.variableObject.chatMessageList.state.push(message);
 
                 this.autoscroll(false);
             } else {
                 const message = {} as modelIndex.IchatMessage;
-                message.time = helperSrc.localeFormat(new Date()) as string;
-                message.user = "Error: File write problem.";
+                message.assistantNoReason = "Error: File write problem.";
                 message.file = "";
 
-                this.variableObject.chatMessage.state.push(message);
+                this.variableObject.chatMessageList.state.push(message);
 
                 this.autoscroll(false);
             }
         } else {
             const message = {} as modelIndex.IchatMessage;
-            message.time = helperSrc.localeFormat(new Date()) as string;
-            message.user = "You can upload max 3 files at once.";
+            message.assistantNoReason = "You can upload max 3 files at once.";
             message.file = "";
 
-            this.variableObject.chatMessage.state.push(message);
+            this.variableObject.chatMessageList.state.push(message);
 
             this.autoscroll(false);
         }
@@ -571,7 +576,7 @@ export default class Index implements Icontroller {
             }
         })
             .then(() => {
-                this.variableObject.isOfflineMcp.state = true;
+                this.variableObject.isOfflineMcp.state = false;
 
                 this.mcpCookie = "";
                 this.mcpSessionId = "";
@@ -627,14 +632,19 @@ export default class Index implements Icontroller {
     };
 
     private onClickToolName = (name: string): void => {
-        this.variableObject.toolSelected.state = name;
+        for (const tool of this.variableObject.toolList.state) {
+            if (tool.name === name) {
+                this.variableObject.toolSelected.state = tool;
 
-        this.variableObject.agentMode.state = this.variableObject.agentMode.state === "tool-call" ? "chat" : "tool-call";
+                break;
+            }
+        }
+
+        this.variableObject.agentMode.state = "tool-call";
     };
 
     private onClickToolClose = (): void => {
-        this.variableObject.isOpenDropdownToolList.state = false;
-        this.variableObject.toolSelected.state = "";
+        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
         this.variableObject.agentMode.state = "chat";
     };
 
@@ -662,8 +672,6 @@ export default class Index implements Icontroller {
         this.mcpCookie = "";
         this.mcpSessionId = "";
 
-        this.fileList = [];
-
         this.appWindow = getCurrentWindow();
         this.appIsClosing = false;
     }
@@ -674,17 +682,17 @@ export default class Index implements Icontroller {
         this.variableObject = variableBind(
             {
                 modelList: [],
-                chatHistory: [] as modelIndex.IchatInput[],
-                chatMessage: [] as modelIndex.IchatMessage[],
+                chatHistoryList: [],
+                chatMessageList: [],
                 isOpenDropdownModelList: false,
                 modelSelected: helperSrc.MODEL_DEFAULT,
+                toolList: [],
                 isOpenDropdownToolList: false,
-                toolSelected: "",
+                toolSelected: {} as modelIndex.IapiMcpTool,
                 isOfflineAi: false,
                 isOfflineMcp: false,
                 adUrl: "",
-                agentMode: "chat",
-                toolList: helperSrc.TOOL_SERVER_ALLOWED
+                agentMode: "chat"
             },
             this.constructor.name
         );
@@ -717,9 +725,6 @@ export default class Index implements Icontroller {
 
             if (!helperSrc.findElementParent(target, "dropdown") || helperSrc.findElementParent(target, "menu")) {
                 this.variableObject.isOpenDropdownModelList.state = false;
-            }
-
-            if (!helperSrc.findElementParent(target, "dropdown") || helperSrc.findElementParent(target, "menu")) {
                 this.variableObject.isOpenDropdownToolList.state = false;
             }
         });
@@ -754,6 +759,8 @@ export default class Index implements Icontroller {
             await this.apiAiUserInfo();
 
             await this.apiMcpLogin();
+
+            await this.apiMcpTool();
         })();
     }
 

@@ -172,40 +172,7 @@ pre {
                     border-radius: 8px;
                     margin: 5px 0;
                     padding: 10px;
-                    width: fit-content;
-
-                    &.file {
-                        display: flex;
-                        flex-direction: column;
-                        align-content: center;
-                        align-items: flex-end;
-                        list-style: none;
-
-                        .info {
-                            margin-bottom: 5px;
-                        }
-
-                        li {
-                            display: flex;
-                            align-content: center;
-                            align-items: center;
-
-                            p {
-                                display: flex;
-                                align-content: center;
-                                align-items: center;
-                            }
-
-                            .cls_icon {
-                                font-size: parameter.$fontSizeNormalPlus !important;
-                            }
-
-                            .remove {
-                                cursor: pointer !important;
-                                margin-left: 5px !important;
-                            }
-                        }
-                    }
+                    text-align: right;
                 }
             }
 
@@ -247,6 +214,38 @@ pre {
                     }
                 }
 
+                .file {
+                    display: flex;
+                    flex-direction: column;
+                    align-content: center;
+                    align-items: flex-start;
+                    list-style: none;
+                    border-radius: 8px;
+                    padding: 10px;
+                    width: fit-content;
+
+                    .info {
+                        margin-bottom: 5px;
+                    }
+
+                    li {
+                        display: flex;
+                        align-content: center;
+                        align-items: center;
+
+                        p {
+                            display: flex;
+                            align-content: center;
+                            align-items: center;
+                        }
+
+                        .cls_icon {
+                            font-size: parameter.$fontSizeNormalPlus !important;
+                            margin-right: 5px !important;
+                        }
+                    }
+                }
+
                 pre {
                     margin: 5px 0;
                 }
@@ -273,6 +272,7 @@ pre {
             display: flex;
             flex-direction: row;
             justify-content: space-between;
+            height: 55px;
 
             .left {
                 display: flex;
@@ -280,8 +280,8 @@ pre {
                 align-content: center;
                 align-items: center;
 
-                div {
-                    margin: 0 5px;
+                > div {
+                    margin-left: 5px;
                 }
 
                 .chip {
@@ -358,15 +358,19 @@ pre {
 
     .container_chat {
         > div {
+            .container_chat_user {
+                .message {
+                    border: 1px solid color.$darkChatUserBoxColor;
+                }
+            }
+
             .container_chat_assistant {
                 details {
                     color: color.$darkChatAssistantBoxColor;
                     background-color: color.$darkChatAssistantBoxBackground;
                 }
-            }
 
-            .container_chat_user {
-                .message {
+                .file {
                     border: 1px solid color.$darkChatUserBoxColor;
                 }
             }
@@ -431,6 +435,12 @@ pre {
 
     .container_chat {
         > div {
+            .container_chat_user {
+                .message {
+                    border: 1px solid color.$lightChatUserBoxColor;
+                }
+            }
+
             .container_chat_assistant {
                 details {
                     color: color.$lightChatAssistantBoxColor;
@@ -438,10 +448,8 @@ pre {
                 }
             }
 
-            .container_chat_user {
-                .message {
-                    border: 1px solid color.$lightChatUserBoxColor;
-                }
+            .file {
+                border: 1px solid color.$lightChatUserBoxColor;
             }
         }
     }

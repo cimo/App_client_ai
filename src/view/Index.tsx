@@ -68,33 +68,12 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                 {(() => {
                     const result: IvirtualNode[] = [];
 
-                    for (const [key, value] of Object.entries(variableObject.chatMessage.state)) {
+                    for (const [key, value] of Object.entries(variableObject.chatMessageList.state)) {
                         result.push(
                             <div key={key}>
-                                <div class="container_chat_user">
+                                <div class={`container_chat_user ${value.user ? "" : "none"}`}>
                                     <p class="time">{value.time}</p>
-                                    <pre class={`message ${value.user ? "" : "none"}`}>{value.user}</pre>
-                                    <ul class={`message file ${value.file ? "" : "none"}`}>
-                                        <p class="info">File will be valid for 10 minutes.</p>
-                                        {(() => {
-                                            const result: IvirtualNode[] = [];
-
-                                            if (value.file !== "") {
-                                                const fileList = value.file.split(", ");
-
-                                                for (const [keyFile, valueFile] of fileList.entries()) {
-                                                    result.push(
-                                                        <li key={keyFile}>
-                                                            <p>{valueFile}</p>
-                                                            <i class="cls_icon">file_present</i>
-                                                        </li>
-                                                    );
-                                                }
-                                            }
-
-                                            return result;
-                                        })()}
-                                    </ul>
+                                    <pre class="message">{value.user}</pre>
                                 </div>
                                 <div class="container_chat_assistant">
                                     <details class={value.mcpTool && value.mcpTool["name"] ? "" : "none"}>
@@ -128,16 +107,35 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                     {(() => {
                                         const result: IvirtualNode[] = [];
 
-                                        if (value.user !== "") {
-                                            if (value.assistantNoReason === "") {
-                                                result.push(<i class="cls_icon">update</i>);
-                                            } else {
-                                                result.push(<pre>{value.assistantNoReason}</pre>);
-                                            }
+                                        if (value.assistantNoReason === "") {
+                                            result.push(<i class="cls_icon">update</i>);
+                                        } else {
+                                            result.push(<pre>{value.assistantNoReason}</pre>);
                                         }
 
                                         return result;
                                     })()}
+                                    <ul class={`file ${value.file ? "" : "none"}`}>
+                                        <p class="info">File will be valid for 10 minutes.</p>
+                                        {(() => {
+                                            const result: IvirtualNode[] = [];
+
+                                            if (value.file !== "") {
+                                                const fileList = value.file.split(",");
+
+                                                for (const [keyFile, valueFile] of fileList.entries()) {
+                                                    result.push(
+                                                        <li key={keyFile}>
+                                                            <i class="cls_icon">file_present</i>
+                                                            <p>{valueFile}</p>
+                                                        </li>
+                                                    );
+                                                }
+                                            }
+
+                                            return result;
+                                        })()}
+                                    </ul>
                                 </div>
                             </div>
                         );
@@ -148,8 +146,8 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                 <div class="bottom_limit" jsmvcfw-elementHookName="elementBottomLimit"></div>
             </div>
             <div class="container_chip">
-                <div class={`chip no_hover ${variableObject.toolSelected.state !== "" ? "" : "none"}`}>
-                    <p>{variableObject.toolSelected.state}</p>
+                <div class={`chip no_hover ${variableObject.toolSelected.state.name ? "" : "none"}`}>
+                    <p>{variableObject.toolSelected.state.name}</p>
                     <i
                         class="cls_icon close"
                         onclick={() => {
@@ -193,10 +191,10 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                                 <li
                                                     key={key}
                                                     onClick={() => {
-                                                        methodObject.onClickToolName(value);
+                                                        methodObject.onClickToolName(value.name);
                                                     }}
                                                 >
-                                                    {value}
+                                                    {value.name}
                                                 </li>
                                             );
                                         }
