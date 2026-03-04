@@ -35,7 +35,7 @@ npm run tauri_build_windows_x86_64
 1. Remove this from the root:
 
     - node_modules
+    - src-tauri/Cargo.lock
     - package-lock.json
-    - Cargo.lock
 
 2. Follow the "Installation" instructions.
