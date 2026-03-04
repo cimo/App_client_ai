@@ -19,7 +19,7 @@ export default class Index implements Icontroller {
     private responseId: string;
     private responseReason: string;
     private responseNoReason: string;
-    private responseMcpTool: modelIndex.IapiAiResponseItem;
+    private responseMcpTool: modelIndex.IapiAiResponseTool;
 
     private abortControllerApiAiResponse: AbortController | null;
 
@@ -36,7 +36,7 @@ export default class Index implements Icontroller {
         this.responseId = "";
         this.responseReason = "";
         this.responseNoReason = "";
-        this.responseMcpTool = {} as modelIndex.IapiAiResponseItem;
+        this.responseMcpTool = {} as modelIndex.IapiAiResponseTool;
     };
 
     private autoscroll = (isAuto: boolean): void => {
@@ -218,17 +218,15 @@ export default class Index implements Icontroller {
                     `For ${this.variableObject.toolSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }\n` +
                     "You MUST NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
-                    "You MUST NOT explain nothing.\n" +
-                    "If the talk is not related to tool execution or the tool don't return a response, you MUST reply with: No tool to execute.";
+                    "You MUST NOT explain nothing.";
             } else if (this.variableObject.agentMode.state === "tool-task") {
                 inputSystem =
                     "You are a multilingual agent tool task executer that needs to reply with the user input language and you need to transform the user request in a ordered list of actions.\n" +
-                    "You MUST use ONLY the following tool: chrome_execute.\n" +
-                    'For chrome_execute you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "chrome_execute", "argumentObject": { "url": "..." } } ] }\n' +
+                    "You MUST use ONLY the following tool: chrome.\n" +
+                    'For chrome you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "chrome", "argumentObject": { "url": "..." } } ] }\n' +
                     "You MUST NOT solve problems.\n" +
                     "You MUST NOT invent new actions.\n" +
-                    "You MUST NOT explain nothing.\n" +
-                    "If the talk is not related to tool task execution or the tool task don't return a response, you MUST reply with: No task to execute.";
+                    "You MUST NOT explain nothing.";
             }
 
             input.push(
@@ -257,10 +255,9 @@ export default class Index implements Icontroller {
                     "mcp-session-id": this.mcpSessionId
                 },
                 body: JSON.stringify({
-                    input,
-                    model: this.variableObject.modelSelected.state,
-                    temperature: 0,
                     stream: true,
+                    model: this.variableObject.modelSelected.state,
+                    input,
                     tools: []
                 }),
                 signal: this.abortControllerApiAiResponse.signal,
@@ -379,15 +376,15 @@ export default class Index implements Icontroller {
                                     } else if (dataTrimParse.type === "response.completed") {
                                         this.autoscroll(false);
                                     } else if (dataTrimParse.type === "tool_response") {
-                                        const dataResponse = dataTrimParse.response;
+                                        const dataResponse = dataTrimParse.response.message;
 
                                         if (dataResponse) {
-                                            /*const index = this.variableObject.chatMessageList.state.length - 1;
+                                            const index = this.variableObject.chatMessageList.state.length - 1;
 
                                             this.variableObject.chatMessageList.state[index] = {
                                                 ...this.variableObject.chatMessageList.state[index],
-                                                assistantNoReason: dataResponse.message
-                                            };*/
+                                                assistantNoReason: dataResponse
+                                            };
                                         }
 
                                         this.autoscroll(false);
@@ -663,7 +660,7 @@ export default class Index implements Icontroller {
         this.responseId = "";
         this.responseReason = "";
         this.responseNoReason = "";
-        this.responseMcpTool = {} as modelIndex.IapiAiResponseItem;
+        this.responseMcpTool = {} as modelIndex.IapiAiResponseTool;
 
         this.abortControllerApiAiResponse = null;
 

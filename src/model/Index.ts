@@ -13,7 +13,7 @@ export interface IapiAiModel {
     owned_by: string;
 }
 
-export interface IapiAiResponseItem {
+export interface IapiAiResponseTool {
     tool_call_id: string;
     type: string;
     name: string;
@@ -23,20 +23,15 @@ export interface IapiAiResponseItem {
 
 export interface IapiAiResponse {
     type: string;
-    output_index: number;
-    sequence_number: number;
-    delta: string;
-    item: IapiAiResponseItem;
     response: {
         id: string;
         message: string;
     };
     error: {
-        code: string;
         message: string;
-        param: string;
-        type: string;
     };
+    delta: string;
+    item: IapiAiResponseTool;
 }
 
 export interface IapiMcpTool {
@@ -54,7 +49,7 @@ export interface IchatMessage {
     user: string;
     assistantReason: string;
     assistantNoReason: string;
-    mcpTool?: IapiAiResponseItem;
+    mcpTool?: IapiAiResponseTool;
     file: string;
 }
 
