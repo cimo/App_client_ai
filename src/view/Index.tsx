@@ -121,7 +121,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                             const result: IvirtualNode[] = [];
 
                                             if (value.file !== "") {
-                                                const fileList = value.file.split(",");
+                                                const fileList = JSON.parse(value.file);
 
                                                 for (const [keyFile, valueFile] of fileList.entries()) {
                                                     result.push(
@@ -173,7 +173,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                         </div>
                         <div class="dropdown">
                             <div
-                                class={`chip ${variableObject.agentMode.state === "tool-call" ? "active" : ""}`}
+                                class={`chip ${variableObject.systemMode.state === "tool-call" ? "active" : ""}`}
                                 onclick={() => {
                                     methodObject.onClickChipTool();
                                 }}
@@ -205,7 +205,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                             </div>
                         </div>
                         <div
-                            class={`chip ${variableObject.agentMode.state === "tool-task" ? "active" : ""}`}
+                            class={`chip ${variableObject.systemMode.state === "tool-task" ? "active" : ""}`}
                             onclick={() => {
                                 methodObject.onClickChipTask();
                             }}

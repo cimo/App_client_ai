@@ -65,7 +65,7 @@ export interface Ivariable {
     isOfflineAi: IvariableBind<boolean>;
     isOfflineMcp: IvariableBind<boolean>;
     adUrl: IvariableBind<string>;
-    agentMode: IvariableBind<string>;
+    systemMode: IvariableBind<string>;
 }
 
 export interface Imethod {
