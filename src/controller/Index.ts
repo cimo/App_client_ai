@@ -693,7 +693,7 @@ export default class Index implements Icontroller {
                 isOfflineAi: false,
                 isOfflineMcp: false,
                 adUrl: "",
-                systemMode: "agent-skill"
+                systemMode: "chat"
             },
             this.constructor.name
         );
