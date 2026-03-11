@@ -8,15 +8,16 @@ body,
     width: 100%;
     height: 100%;
     user-select: none;
+    overflow: hidden;
 }
 
 textarea,
 input,
 button {
-    border: 1px solid transparent;
     border-radius: 8px;
     padding: 5px;
     outline: none;
+    border: 1px solid transparent;
     background-color: transparent;
 }
 
@@ -25,14 +26,19 @@ button {
     cursor: pointer;
 }
 
-pre {
+pre,
+textarea {
     white-space: break-spaces;
+    word-break: break-word;
 }
 
 .page_container {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    align-content: center;
+    justify-content: center;
+    align-items: stretch;
+    justify-items: center;
 
     .bottom_limit {
         height: 1px;
@@ -53,8 +59,8 @@ pre {
 
         .menu {
             position: absolute;
-            z-index: parameter.$zIndexInteraction;
             width: 150px;
+            z-index: parameter.$zIndexInteraction;
 
             &.bottom-right {
                 top: 110%;
@@ -93,13 +99,16 @@ pre {
         display: flex;
         flex-direction: row;
         align-content: center;
+        justify-content: center;
         align-items: center;
-        padding: 5px;
-        border-radius: 10px;
+        justify-items: center;
+        padding: 5px 10px;
+        border-radius: 20px;
+        white-space: break-spaces;
+        word-break: break-word;
 
         i {
             font-size: parameter.$fontSizeNormalPlus !important;
-            height: 1em !important;
 
             &.close {
                 cursor: pointer !important;
@@ -108,10 +117,7 @@ pre {
         }
 
         p {
-            display: flex;
-            align-content: center;
-            align-items: center;
-            margin-left: 5px;
+            text-align: center;
         }
     }
 
@@ -119,16 +125,19 @@ pre {
         display: grid;
         place-items: center;
         position: fixed;
-        width: 100%;
-        height: 100%;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
         z-index: parameter.$zIndexOver;
 
         div {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-content: center;
+            justify-content: center;
             align-items: center;
+            justify-items: center;
             cursor: pointer !important;
 
             .cls_icon {
@@ -140,166 +149,289 @@ pre {
     .container_header {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
         align-content: center;
+        justify-content: space-between;
         align-items: center;
+        justify-items: center;
         height: 40px;
         padding: 10px;
         z-index: parameter.$zIndexInteraction;
     }
 
-    .container_chat {
+    .container_content {
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        justify-content: center;
+        align-items: stretch;
+        justify-items: center;
         height: 100%;
-        overflow-x: hidden;
-        overflow-y: scroll;
-        overscroll-behavior: contain;
-        scroll-behavior: auto;
 
-        > div {
-            .container_chat_user {
-                margin-top: 20px;
+        .container_left {
+            display: flex;
+            flex-direction: column;
+            align-content: center;
+            justify-content: start;
+            align-items: center;
+            justify-items: center;
+            flex: 0 0 150px;
+
+            .menu_item {
                 display: flex;
                 flex-direction: column;
                 align-content: center;
-                align-items: flex-end;
-                margin: 10px 25px;
+                justify-content: center;
+                align-items: center;
+                justify-items: center;
+                width: 100%;
 
-                .time {
-                    width: fit-content;
-                }
-
-                .message {
-                    border-radius: 8px;
-                    margin: 5px 0;
-                    padding: 10px;
-                }
-            }
-
-            .container_chat_assistant {
-                display: flex;
-                flex-direction: column;
-                align-content: center;
-                align-items: flex-start;
-                margin: 10px 25px;
-
-                details {
-                    padding: 5px;
-                    width: fit-content;
-                    margin: 5px 0;
-
-                    summary {
-                        display: flex;
-                        flex-direction: row;
-                        cursor: pointer;
-
-                        .cls_icon {
-                            font-size: parameter.$fontSizeNormalPlus !important;
-                        }
-
-                        p {
-                            margin-left: 5px;
-                            display: flex;
-                            align-content: center;
-                            align-items: center;
-                        }
-                    }
-
-                    .list {
-                        margin: 5px 0;
-
-                        p {
-                            margin: 2px 0;
-                        }
-                    }
-                }
-
-                .file {
+                li {
                     display: flex;
-                    flex-direction: column;
+                    flex-direction: row;
                     align-content: center;
-                    align-items: flex-start;
-                    list-style: none;
-                    border-radius: 8px;
-                    padding: 10px;
-                    width: fit-content;
+                    justify-content: start;
+                    align-items: center;
+                    justify-items: center;
+                    width: 100%;
+                    padding: 10px 0 10px 5px;
+                    cursor: pointer;
 
-                    .info {
-                        margin-bottom: 5px;
+                    p {
+                        margin-left: 5px;
                     }
-
-                    li {
-                        display: flex;
-                        align-content: center;
-                        align-items: center;
-
-                        p {
-                            display: flex;
-                            align-content: center;
-                            align-items: center;
-                        }
-
-                        .cls_icon {
-                            font-size: parameter.$fontSizeNormalPlus !important;
-                            margin-right: 5px !important;
-                        }
-                    }
-                }
-
-                pre {
-                    margin: 5px 0;
                 }
             }
         }
-    }
 
-    .container_chip {
-        display: flex;
-        justify-content: flex-start;
-        align-content: center;
-        align-items: center;
-        padding: 0 10px;
-    }
-
-    .container_message_send {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        margin: 10px;
-        border-radius: 8px;
-
-        .container_action {
+        .container_right {
             display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            height: 55px;
+            flex-direction: column;
+            align-content: center;
+            justify-content: center;
+            align-items: stretch;
+            justify-items: center;
+            width: 100%;
 
-            .left {
-                display: flex;
-                justify-content: flex-start;
-                align-content: center;
-                align-items: center;
+            .container_chat {
+                overflow-x: hidden;
+                overflow-y: auto;
+                height: 100%;
+                padding: 0 25px;
 
                 > div {
-                    margin-left: 5px;
-                }
+                    .container_chat_user {
+                        margin-top: 20px;
+                        display: flex;
+                        flex-direction: column;
+                        align-content: center;
+                        justify-content: center;
+                        align-items: end;
+                        justify-items: center;
+                        margin: 10px 0px;
 
-                .chip {
-                    cursor: pointer !important;
+                        .time {
+                            width: fit-content;
+                        }
+
+                        .message {
+                            border-radius: 8px;
+                            margin: 5px 0;
+                            padding: 10px;
+                        }
+                    }
+
+                    .container_chat_assistant {
+                        display: flex;
+                        flex-direction: column;
+                        align-content: center;
+                        justify-content: center;
+                        align-items: start;
+                        justify-items: center;
+                        margin: 10px 0px;
+
+                        details {
+                            padding: 5px;
+                            width: fit-content;
+                            margin: 5px 0;
+
+                            summary {
+                                display: flex;
+                                flex-direction: row;
+                                align-content: center;
+                                justify-content: center;
+                                align-items: center;
+                                justify-items: center;
+                                cursor: pointer;
+
+                                .cls_icon {
+                                    font-size: parameter.$fontSizeNormalPlus !important;
+                                }
+
+                                p {
+                                    margin-left: 5px;
+                                    display: flex;
+                                    align-content: center;
+                                    justify-content: center;
+                                    align-items: center;
+                                    justify-items: center;
+                                }
+                            }
+
+                            .list {
+                                margin: 5px 0;
+
+                                p {
+                                    margin: 2px 0;
+                                }
+                            }
+                        }
+
+                        .file {
+                            display: flex;
+                            flex-direction: column;
+                            align-content: center;
+                            justify-content: center;
+                            align-items: start;
+                            justify-items: center;
+                            list-style: none;
+                            border-radius: 8px;
+                            padding: 10px;
+                            width: fit-content;
+
+                            .info {
+                                margin-bottom: 5px;
+                            }
+
+                            li {
+                                display: flex;
+                                align-content: center;
+                                justify-content: center;
+                                align-items: center;
+                                justify-items: center;
+
+                                .cls_icon {
+                                    font-size: parameter.$fontSizeNormalPlus !important;
+                                    margin-right: 5px !important;
+                                }
+                            }
+                        }
+
+                        pre {
+                            margin: 5px 0;
+                        }
+                    }
                 }
             }
 
-            .right {
+            .container_chip {
                 display: flex;
-                justify-content: flex-end;
-            }
-
-            button {
-                display: flex;
-                justify-content: center;
                 align-content: center;
+                justify-content: center;
                 align-items: center;
-                width: 40px;
-                height: 40px;
+                justify-items: center;
+                padding: 0 10px;
+            }
+
+            .container_message_send {
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+                justify-content: center;
+                align-items: stretch;
+                justify-items: center;
+                border-radius: 8px;
+                width: 90%;
+                align-self: center;
+                margin-bottom: 10px;
+
+                .container_action {
+                    display: flex;
+                    flex-direction: row;
+                    align-content: center;
+                    justify-content: space-between;
+                    align-items: center;
+                    justify-items: center;
+                    height: 45px;
+
+                    .left {
+                        display: flex;
+                        align-content: center;
+                        justify-content: center;
+                        align-items: center;
+                        justify-items: center;
+
+                        > div {
+                            margin-left: 5px;
+                        }
+
+                        .chip {
+                            cursor: pointer !important;
+                        }
+                    }
+
+                    .right {
+                        display: flex;
+                        align-content: center;
+                        justify-content: center;
+                        align-items: center;
+                        justify-items: center;
+                    }
+
+                    button {
+                        display: flex;
+                        align-content: center;
+                        justify-content: center;
+                        align-items: center;
+                        justify-items: center;
+                        width: 40px;
+                        height: 36px;
+                        margin: 0 5px 0 0 !important;
+                    }
+                }
+            }
+
+            .container_menu_item {
+                position: fixed;
+                padding: 10px;
+                top: 40px;
+                right: 0;
+                bottom: 0;
+                left: 150px;
+                z-index: parameter.$zIndexMenuItem;
+
+                .container_file {
+                    display: flex;
+                    flex-direction: column;
+                    align-content: center;
+                    justify-content: center;
+                    align-items: start;
+                    justify-items: center;
+                    height: 100%;
+
+                    > p {
+                        margin-bottom: 10px;
+                    }
+
+                    ul {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 15px;
+                        align-content: start;
+                        justify-content: center;
+                        align-items: center;
+                        justify-items: center;
+                        overflow-y: scroll;
+                        height: 100%;
+
+                        .chip {
+                            align-content: center;
+                            justify-content: center;
+                            align-items: center;
+                            justify-items: center;
+                            width: 180px;
+                        }
+                    }
+                }
             }
         }
     }
@@ -312,7 +444,8 @@ pre {
     }
 
     .active {
-        border: 1px solid color.$darkBorderActive !important;
+        color: color.$darkInteractionBackground;
+        background-color: color.$darkInteractionHover;
     }
 
     button {
@@ -355,30 +488,51 @@ pre {
         box-shadow: color.$darkBoxShadow;
     }
 
-    .container_chat {
-        > div {
-            .container_chat_user {
-                .message {
-                    border: 1px solid color.$darkChatUserBoxColor;
-                }
-            }
-
-            .container_chat_assistant {
-                details {
-                    color: color.$darkChatAssistantBoxColor;
-                    background-color: color.$darkChatAssistantBoxBackground;
-                }
-
-                .file {
-                    border: 1px solid color.$darkChatUserBoxColor;
+    .container_content {
+        .container_left {
+            .menu_item {
+                li {
+                    &:hover {
+                        color: color.$darkInteractionBackground;
+                        background-color: color.$darkInteractionHover;
+                    }
                 }
             }
         }
-    }
 
-    .container_message_send {
-        border: 1px solid color.$darkChatUserBoxColor;
-        box-shadow: color.$darkMessageSendBoxShadow;
+        .container_right {
+            .container_chat {
+                > div {
+                    .container_chat_user {
+                        .message {
+                            border: 1px solid color.$darkChatUserBoxColor;
+                        }
+                    }
+
+                    .container_chat_assistant {
+                        details {
+                            color: color.$darkChatAssistantBoxColor;
+                            background-color: color.$darkChatAssistantBoxBackground;
+                        }
+
+                        .file {
+                            border: 1px solid color.$darkChatUserBoxColor;
+                        }
+                    }
+                }
+            }
+
+            .container_message_send {
+                border: 1px solid color.$darkChatUserBoxColor;
+                box-shadow: color.$darkMessageSendBoxShadow;
+            }
+
+            .container_menu_item {
+                border-left: 1px solid color.$darkBorderHover;
+                background-color: color.$darkRootBackground;
+                box-shadow: color.$darkOverBoxShadow;
+            }
+        }
     }
 }
 
@@ -389,7 +543,8 @@ pre {
     }
 
     .active {
-        border: 1px solid color.$lightBorderActive !important;
+        color: color.$lightInteractionBackground;
+        background-color: color.$lightInteractionHover;
     }
 
     button {
@@ -415,8 +570,8 @@ pre {
     }
 
     .chip {
-        background-color: color.$darkChipBackground;
-        border: 1px solid color.$darkChipBorder;
+        background-color: color.$lightChipBackground;
+        border: 1px solid color.$lightChipBorder;
 
         &:not(.no_hover):hover {
             border: 1px solid color.$lightBorderHover !important;
@@ -432,29 +587,50 @@ pre {
         box-shadow: color.$lightBoxShadow;
     }
 
-    .container_chat {
-        > div {
-            .container_chat_user {
-                .message {
-                    border: 1px solid color.$lightChatUserBoxColor;
+    .container_content {
+        .container_left {
+            .menu_item {
+                li {
+                    &:hover {
+                        color: color.$lightInteractionBackground;
+                        background-color: color.$lightInteractionHover;
+                    }
                 }
-            }
-
-            .container_chat_assistant {
-                details {
-                    color: color.$lightChatAssistantBoxColor;
-                    background-color: color.$lightChatAssistantBoxBackground;
-                }
-            }
-
-            .file {
-                border: 1px solid color.$lightChatUserBoxColor;
             }
         }
-    }
 
-    .container_message_send {
-        border: 1px solid color.$lightChatUserBoxColor;
-        box-shadow: color.$lightMessageSendBoxShadow;
+        .container_right {
+            .container_chat {
+                > div {
+                    .container_chat_user {
+                        .message {
+                            border: 1px solid color.$lightChatUserBoxColor;
+                        }
+                    }
+
+                    .container_chat_assistant {
+                        details {
+                            color: color.$lightChatAssistantBoxColor;
+                            background-color: color.$lightChatAssistantBoxBackground;
+                        }
+                    }
+
+                    .file {
+                        border: 1px solid color.$lightChatUserBoxColor;
+                    }
+                }
+            }
+
+            .container_message_send {
+                border: 1px solid color.$lightChatUserBoxColor;
+                box-shadow: color.$lightMessageSendBoxShadow;
+            }
+
+            .container_menu_item {
+                border-left: 1px solid color.$lightBorderHover;
+                background-color: color.$lightRootBackground;
+                box-shadow: color.$lightOverBoxShadow;
+            }
+        }
     }
 }

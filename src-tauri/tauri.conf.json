@@ -12,9 +12,9 @@
                 "theme": "Dark",
                 "decorations": true,
                 "resizable": true,
-                "width": 550,
+                "width": 750,
                 "height": 700,
-                "minWidth": 550,
+                "minWidth": 750,
                 "minHeight": 700
             }
         ],

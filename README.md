@@ -32,7 +32,7 @@ npm run tauri_build_windows_x86_64
 
 ## Reset
 
-1. Remove this from the root:
+1. Delete this from the root:
 
     - node_modules
     - src-tauri/Cargo.lock

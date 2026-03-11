@@ -11,13 +11,13 @@
     "type": "module",
     "scripts": {
         "preinstall": "npx -y npm-force-resolutions",
-        "remove_dist": "node -e \"const fs = require('fs'); try{ fs.rmdirSync('./dist/', { recursive: true }) } catch{}; process.exit(0);\"",
-        "remove_public_js": "node -e \"const fs = require('fs'); try{ fs.rmdirSync('./public/asset/js/', { recursive: true }) } catch{}; process.exit(0);\"",
-        "remove_public_style": "node -e \"const fs = require('fs'); try{ fs.rmdirSync('./public/asset/style/', { recursive: true }) } catch{}; process.exit(0);\"",
+        "delete_dist": "node -e \"const fs = require('fs'); try{ fs.rmdirSync('./dist/', { recursive: true }) } catch{}; process.exit(0);\"",
+        "delete_public_js": "node -e \"const fs = require('fs'); try{ fs.rmdirSync('./public/asset/js/', { recursive: true }) } catch{}; process.exit(0);\"",
+        "delete_public_style": "node -e \"const fs = require('fs'); try{ fs.rmdirSync('./public/asset/style/', { recursive: true }) } catch{}; process.exit(0);\"",
         "check": "eslint --no-cache --config eslint.config.js",
         "sass": "sass ./src/style/main.scss ./public/asset/style/main.css",
-        "build_tsc": "npm run remove_dist && tsc --build tsconfig.tsc.json",
-        "build_app": "npm run remove_public_js && npm run remove_public_style && npm run sass && tsc --noEmit --project tsconfig.json && webpack --config webpack.build.js",
+        "build_tsc": "npm run delete_dist && tsc --build tsconfig.tsc.json",
+        "build_app": "npm run delete_public_js && npm run delete_public_style && npm run sass && tsc --noEmit --project tsconfig.json && webpack --config webpack.build.js",
         "build": "npm run build_tsc && npm run check && npm run build_app",
         "execute": "nodemon --config nodemon.json",
         "tauri_dev": "tauri dev",
@@ -25,7 +25,7 @@
         "tauri_build_windows_x86_64": "tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc"
     },
     "dependencies": {
-        "@cimo/jsmvcfw": "1.4.34",
+        "@cimo/jsmvcfw": "1.4.36",
         "@tauri-apps/api": "2.10.1",
         "@tauri-apps/plugin-log": "2.8.0",
         "@tauri-apps/plugin-dialog": "2.6.0",

@@ -54,18 +54,24 @@ export interface IchatMessage {
 }
 
 export interface Ivariable {
-    modelList: IvariableBind<IapiAiModel[]>;
-    chatHistoryList: IvariableBind<IchatInput[]>;
-    chatMessageList: IvariableBind<IchatMessage[]>;
-    isOpenDropdownModelList: IvariableBind<boolean>;
-    modelSelected: IvariableBind<string>;
-    toolList: IvariableBind<IapiMcpTool[]>;
-    isOpenDropdownToolList: IvariableBind<boolean>;
-    toolSelected: IvariableBind<IapiMcpTool>;
     isOfflineAi: IvariableBind<boolean>;
     isOfflineMcp: IvariableBind<boolean>;
+    modelList: IvariableBind<IapiAiModel[]>;
+    chatMessageList: IvariableBind<IchatMessage[]>;
+    chatHistoryList: IvariableBind<IchatInput[]>;
+    toolList: IvariableBind<IapiMcpTool[]>;
+    isOpenDropdownModelList: IvariableBind<boolean>;
+    modelSelected: IvariableBind<string>;
+    isOpenDropdownToolList: IvariableBind<boolean>;
+    toolSelected: IvariableBind<IapiMcpTool>;
     adUrl: IvariableBind<string>;
     systemMode: IvariableBind<string>;
+    isMessageSent: IvariableBind<boolean>;
+    isMenuItemFile: IvariableBind<boolean>;
+    isMenuItemTool: IvariableBind<boolean>;
+    isMenuItemTask: IvariableBind<boolean>;
+    isMenuItemAgent: IvariableBind<boolean>;
+    fileUploadedList: IvariableBind<string[]>;
 }
 
 export interface Imethod {
@@ -79,6 +85,11 @@ export interface Imethod {
     onClickModelName: (name: string) => void;
     onClickRefreshPage: () => void;
     onClickAd: (event: Event) => void;
+    onClickMenuFile: () => void;
+    onClickMenuTool: () => void;
+    onClickMenuTask: () => void;
+    onClickMenuAgent: () => void;
+    onClickFileUploadDelete: (index: number, fileName: string) => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

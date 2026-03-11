@@ -10,11 +10,15 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import * as helperSrc from "../HelperSrc";
 import * as modelIndex from "../model/Index";
 import viewIndex from "../view/Index";
+import ControllerAi from "./Ai";
+import ControllerMcp from "./Mcp";
 
 export default class Index implements Icontroller {
     // Variable
     private variableObject: modelIndex.Ivariable;
     private methodObject: modelIndex.Imethod;
+    private controllerAi: ControllerAi;
+    private controllerMcp: ControllerMcp;
 
     private responseId: string;
     private responseReason: string;
@@ -25,8 +29,8 @@ export default class Index implements Icontroller {
 
     private aiBearerToken: string;
     private aiCookie: string;
-    private mcpCookie: string;
     private mcpSessionId: string;
+    private mcpCookie: string;
 
     private appWindow: Window;
     private appIsClosing: boolean;
@@ -37,6 +41,8 @@ export default class Index implements Icontroller {
         this.responseReason = "";
         this.responseNoReason = "";
         this.responseMcpTool = {} as modelIndex.IapiAiResponseTool;
+
+        this.variableObject.isMessageSent.state = false;
     };
 
     private autoscroll = (isAuto: boolean): void => {
@@ -70,8 +76,7 @@ export default class Index implements Icontroller {
         return fetch(`${helperSrc.URL_AI}/login`, {
             method: "GET",
             headers: {
-                Authorization: `Bearer ${this.aiBearerToken}`,
-                Cookie: this.aiCookie
+                Authorization: `Bearer ${this.aiBearerToken}`
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -255,8 +260,8 @@ export default class Index implements Icontroller {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${this.aiBearerToken}`,
                     Cookie: this.aiCookie,
-                    "cookie-mcp": this.mcpCookie,
-                    "mcp-session-id": this.mcpSessionId
+                    "mcp-session-id": this.mcpSessionId,
+                    "cookie-mcp": this.mcpCookie
                 },
                 body: JSON.stringify({
                     stream: true,
@@ -272,6 +277,8 @@ export default class Index implements Icontroller {
             })
                 .then(async (result) => {
                     this.variableObject.isOfflineAi.state = false;
+
+                    this.variableObject.isMessageSent.state = true;
 
                     const contentType = result.headers.get("Content-Type");
 
@@ -399,11 +406,22 @@ export default class Index implements Icontroller {
                     }
                 })
                 .catch((error: Error) => {
-                    helperSrc.writeLog("Index.ts - apiAiResponse() - fetch() - catch()", error.message);
-
-                    this.variableObject.isOfflineAi.state = true;
+                    helperSrc.writeLog("Index.ts - apiAiResponse() - fetch() - catch()", typeof error === "string" ? error : error.message);
 
                     this.resetModelResponse();
+
+                    if (error.toString().toLowerCase() === "request cancelled") {
+                        const idx = this.variableObject.chatMessageList.state.length - 1;
+
+                        this.variableObject.chatMessageList.state[idx] = {
+                            ...this.variableObject.chatMessageList.state[idx],
+                            assistantNoReason: "Stop by user"
+                        };
+
+                        return;
+                    }
+
+                    this.variableObject.isOfflineAi.state = true;
                 });
 
             this.hookObject.elementInputMessageSend.value = "";
@@ -439,7 +457,7 @@ export default class Index implements Icontroller {
         return fetch(`${helperSrc.URL_MCP}/login`, {
             method: "GET",
             headers: {
-                Cookie: this.mcpCookie
+                "mcp-session-id": this.mcpSessionId
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -456,6 +474,8 @@ export default class Index implements Icontroller {
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
                 this.mcpSessionId = resultJson.response.stdout;
+
+                localStorage.setItem("mcp-session-id", this.mcpSessionId);
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Index.ts - apiMcpLogin() - fetch() - catch()", error.message);
@@ -468,6 +488,7 @@ export default class Index implements Icontroller {
         return fetch(`${helperSrc.URL_MCP}/api/tool-list`, {
             method: "GET",
             headers: {
+                "mcp-session-id": this.mcpSessionId,
                 Cookie: this.mcpCookie
             },
             danger: {
@@ -492,14 +513,14 @@ export default class Index implements Icontroller {
     };
 
     private apiMcpUpload = async (): Promise<void> => {
-        let resultList: string[] = [];
-
         const pathFileList = await open({
             multiple: true,
             directory: false
         });
 
-        if (pathFileList && pathFileList.length <= 3) {
+        if (pathFileList) {
+            let fileList: string[] = [];
+
             for (const pathFile of pathFileList) {
                 const file = await readFile(pathFile);
                 const mimeType = helperSrc.readMimeType(file);
@@ -512,8 +533,8 @@ export default class Index implements Icontroller {
                 await fetch(`${helperSrc.URL_MCP}/api/upload`, {
                     method: "POST",
                     headers: {
-                        Cookie: this.mcpCookie,
-                        "mcp-session-id": this.mcpSessionId
+                        "mcp-session-id": this.mcpSessionId,
+                        Cookie: this.mcpCookie
                     },
                     body: formData,
                     danger: {
@@ -527,7 +548,7 @@ export default class Index implements Icontroller {
                         const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
                         if (resultJson.response.stdout !== "") {
-                            resultList.push(resultJson.response.stdout);
+                            fileList.push(resultJson.response.stdout);
                         }
                     })
                     .catch((error: Error) => {
@@ -537,9 +558,9 @@ export default class Index implements Icontroller {
                     });
             }
 
-            if (resultList.length > 0) {
+            if (fileList.length > 0) {
                 const message = {} as modelIndex.IchatMessage;
-                message.file = JSON.stringify(resultList);
+                message.file = JSON.stringify(fileList);
 
                 this.variableObject.chatMessageList.state.push(message);
 
@@ -553,23 +574,69 @@ export default class Index implements Icontroller {
 
                 this.autoscroll(false);
             }
-        } else {
-            const message = {} as modelIndex.IchatMessage;
-            message.assistantNoReason = "You can upload max 3 files at once.";
-            message.file = "";
-
-            this.variableObject.chatMessageList.state.push(message);
-
-            this.autoscroll(false);
         }
+    };
+
+    private apiMcpFileUploaded = async (): Promise<void> => {
+        fetch(`${helperSrc.URL_MCP}/api/file-uploaded`, {
+            method: "GET",
+            headers: {
+                "mcp-session-id": this.mcpSessionId,
+                Cookie: this.mcpCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (result) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+                if (resultJson.response.stdout !== "") {
+                    this.variableObject.fileUploadedList.state = JSON.parse(resultJson.response.stdout);
+                }
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Index.ts - apiMcpFileUploaded() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
+    private apiMcpFileUploadedDelete = (index: number, fileName: string): void => {
+        fetch(`${helperSrc.URL_MCP}/api/file-uploaded-delete`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": this.mcpSessionId,
+                Cookie: this.mcpCookie
+            },
+            body: JSON.stringify({ fileName }),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async () => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                this.variableObject.fileUploadedList.state.splice(index, 1);
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Index.ts - apiMcpFileUploadedDelete() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
     };
 
     private apiMcpLogout = async (): Promise<void | Response> => {
         return fetch(`${helperSrc.URL_MCP}/logout`, {
             method: "GET",
             headers: {
-                Cookie: this.mcpCookie,
-                "mcp-session-id": this.mcpSessionId
+                "mcp-session-id": this.mcpSessionId,
+                Cookie: this.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -579,23 +646,16 @@ export default class Index implements Icontroller {
             .then(() => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                this.mcpCookie = "";
                 this.mcpSessionId = "";
+                this.mcpCookie = "";
+
+                localStorage.removeItem("mcp-session-id");
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Index.ts - apiMcpLogout() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
             });
-    };
-
-    private onClickButtonMessageSend = (): void => {
-        if (this.abortControllerApiAiResponse && this.responseId) {
-            this.abortControllerApiAiResponse.abort();
-            this.abortControllerApiAiResponse = null;
-        } else {
-            this.apiAiResponse();
-        }
     };
 
     private onClickRefreshPage = (): void => {
@@ -612,6 +672,15 @@ export default class Index implements Icontroller {
         }
     };
 
+    private onClickButtonMessageSend = (): void => {
+        if (this.abortControllerApiAiResponse && this.responseId) {
+            this.abortControllerApiAiResponse.abort();
+            this.abortControllerApiAiResponse = null;
+        } else {
+            this.apiAiResponse();
+        }
+    };
+
     private onClickDropdownModel = (): void => {
         this.apiAiModel();
     };
@@ -623,7 +692,7 @@ export default class Index implements Icontroller {
     private onClickChipUpload = (): void => {
         this.apiMcpUpload();
     };
-
+    //...
     private onClickChipTool = (): void => {
         if (this.variableObject.systemMode.state === "tool-task") {
             return;
@@ -656,10 +725,46 @@ export default class Index implements Icontroller {
 
         this.variableObject.systemMode.state = this.variableObject.systemMode.state === "tool-task" ? "chat" : "tool-task";
     };
+    //...
+    private onClickMenuFile = (): void => {
+        this.apiMcpFileUploaded();
+
+        this.variableObject.isMenuItemFile.state = !this.variableObject.isMenuItemFile.state;
+        this.variableObject.isMenuItemTool.state = false;
+        this.variableObject.isMenuItemTask.state = false;
+        this.variableObject.isMenuItemAgent.state = false;
+    };
+
+    private onClickMenuTool = (): void => {
+        this.variableObject.isMenuItemFile.state = false;
+        this.variableObject.isMenuItemTool.state = !this.variableObject.isMenuItemTool.state;
+        this.variableObject.isMenuItemTask.state = false;
+        this.variableObject.isMenuItemAgent.state = false;
+    };
+
+    private onClickMenuTask = (): void => {
+        this.variableObject.isMenuItemFile.state = false;
+        this.variableObject.isMenuItemTool.state = false;
+        this.variableObject.isMenuItemTask.state = !this.variableObject.isMenuItemTask.state;
+        this.variableObject.isMenuItemAgent.state = false;
+    };
+
+    private onClickMenuAgent = (): void => {
+        this.variableObject.isMenuItemFile.state = false;
+        this.variableObject.isMenuItemTool.state = false;
+        this.variableObject.isMenuItemTask.state = false;
+        this.variableObject.isMenuItemAgent.state = !this.variableObject.isMenuItemAgent.state;
+    };
+
+    private onClickFileUploadDelete = (index: number, fileName: string): void => {
+        this.apiMcpFileUploadedDelete(index, fileName);
+    };
 
     constructor() {
         this.variableObject = {} as modelIndex.Ivariable;
         this.methodObject = {} as modelIndex.Imethod;
+        this.controllerAi = new ControllerAi();
+        this.controllerMcp = new ControllerMcp();
 
         this.responseId = "";
         this.responseReason = "";
@@ -670,8 +775,8 @@ export default class Index implements Icontroller {
 
         this.aiBearerToken = this.generateUniqueId();
         this.aiCookie = "";
+        this.mcpSessionId = localStorage.getItem("mcp-session-id") || "";
         this.mcpCookie = "";
-        this.mcpSessionId = "";
 
         this.appWindow = getCurrentWindow();
         this.appIsClosing = false;
@@ -682,18 +787,24 @@ export default class Index implements Icontroller {
     variable(): void {
         this.variableObject = variableBind(
             {
-                modelList: [],
-                chatHistoryList: [],
-                chatMessageList: [],
-                isOpenDropdownModelList: false,
-                modelSelected: helperSrc.MODEL_DEFAULT,
-                toolList: [],
-                isOpenDropdownToolList: false,
-                toolSelected: {} as modelIndex.IapiMcpTool,
                 isOfflineAi: false,
                 isOfflineMcp: false,
+                modelList: [],
+                chatMessageList: [],
+                chatHistoryList: [],
+                toolList: [],
+                isOpenDropdownModelList: false,
+                modelSelected: helperSrc.MODEL_DEFAULT,
+                isOpenDropdownToolList: false,
+                toolSelected: {} as modelIndex.IapiMcpTool,
                 adUrl: "",
-                systemMode: "chat"
+                systemMode: "chat",
+                isMessageSent: false,
+                isMenuItemFile: false,
+                isMenuItemTool: false,
+                isMenuItemTask: false,
+                isMenuItemAgent: false,
+                fileUploadedList: []
             },
             this.constructor.name
         );
@@ -708,7 +819,12 @@ export default class Index implements Icontroller {
             onClickDropdownModel: this.onClickDropdownModel,
             onClickModelName: this.onClickModelName,
             onClickRefreshPage: this.onClickRefreshPage,
-            onClickAd: this.onClickAd
+            onClickAd: this.onClickAd,
+            onClickMenuFile: this.onClickMenuFile,
+            onClickMenuTool: this.onClickMenuTool,
+            onClickMenuTask: this.onClickMenuTask,
+            onClickMenuAgent: this.onClickMenuAgent,
+            onClickFileUploadDelete: this.onClickFileUploadDelete
         };
     }
 
@@ -749,6 +865,9 @@ export default class Index implements Icontroller {
 
     subControllerList(): Icontroller[] {
         const resultList: Icontroller[] = [];
+
+        resultList.push(this.controllerAi);
+        resultList.push(this.controllerMcp);
 
         return resultList;
     }
