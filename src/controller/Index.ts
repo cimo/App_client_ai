@@ -214,30 +214,26 @@ export default class Index implements Icontroller {
             let inputSystem = "";
 
             if (this.variableObject.systemMode.state === "chat") {
-                inputSystem =
-                    "You are a multilingual assistant that needs to reply with the user input language.\n" +
-                    "You MUST need to reason step by step and give a answer to the user question.\n" +
-                    "You MUST NOT use tools and tasks.";
+                inputSystem = `You are a multilingual assistant that needs to reply with the user input language.
+                    You MUST need to reason step by step and give a answer to the user question.
+                    You MUST NOT use tools and tasks.`;
             } else if (this.variableObject.systemMode.state === "tool-call") {
-                inputSystem =
-                    `You are a multilingual assistant tool executer that needs to reply with the user input language and you need to transform the user request in a action.\n` +
-                    `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}.\n` +
-                    `For ${this.variableObject.toolSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }\n` +
-                    "You MUST NOT solve problems.\n" +
-                    "You MUST NOT invent new actions.\n" +
-                    "You MUST NOT explain nothing.";
+                inputSystem = `You are a multilingual assistant tool executer that needs to reply with the user input language and you need to transform the user request in a action.
+                    You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}.
+                    For ${this.variableObject.toolSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }
+                    You MUST NOT solve problems.
+                    You MUST NOT invent new actions.
+                    You MUST NOT explain nothing.`;
             } else if (this.variableObject.systemMode.state === "tool-task") {
-                inputSystem =
-                    "You are a multilingual assistant tool task executer that needs to reply with the user input language and you need to transform the user request in a ordered list of actions.\n" +
-                    "You MUST use ONLY the following tool: chrome.\n" +
-                    'For chrome you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "chrome", "argumentObject": { "url": "..." } } ] }\n' +
-                    "You MUST NOT solve problems.\n" +
-                    "You MUST NOT invent new actions.\n" +
-                    "You MUST NOT explain nothing.";
+                inputSystem = `You are a multilingual assistant tool task executer that needs to reply with the user input language and you need to transform the user request in a ordered list of actions.
+                    You MUST use ONLY the following tool: chrome.
+                    For chrome you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "chrome", "argumentObject": { "url": "..." } } ] }
+                    You MUST NOT solve problems.
+                    You MUST NOT invent new actions.
+                    You MUST NOT explain nothing.`;
             } else if (this.variableObject.systemMode.state === "agent-skill") {
-                inputSystem =
-                    "You are a multilingual agent skill executer that needs to reply with the user input language and you need to transform the user request in a action.\n" +
-                    'If you find a tag [script](...) in the text you MUST stop and write ONLY valid JSON with this format without additional information: { "action": { "script": true } }';
+                inputSystem = `You are a multilingual agent skill executer that needs to reply with the user input language and you need to transform the user request in a action.
+                    If you find a tag [script](...) in the text you MUST stop and write ONLY valid JSON with this format without additional information: { "action": { "script": true } }`;
             }
 
             input.push(

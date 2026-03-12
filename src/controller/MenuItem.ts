@@ -61,7 +61,7 @@ export default class MenuItem implements Icontroller {
                 isMenuItemTool: false,
                 isMenuItemTask: false,
                 isMenuItemAgent: false,
-                fileUploadedList: variableLink("Index")
+                fileUploadedList: variableLink<string[]>("Index")
             },
             this.constructor.name
         );

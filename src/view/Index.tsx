@@ -117,7 +117,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                                 if (value.assistantNoReason === "") {
                                                     result.push(<i class="cls_icon">update</i>);
                                                 } else {
-                                                    result.push(<div jsmvcfw-html={value.assistantNoReason}></div>);
+                                                    result.push(<pre>{value.assistantNoReason}</pre>);
                                                 }
 
                                                 return result;
