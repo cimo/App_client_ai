@@ -5,7 +5,7 @@ import * as modelIndex from "../model/Index";
 
 const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelIndex.Imethod): IvirtualNode => {
     return (
-        <div class="view_index page_container" jsmvcfw-controllerName="Index">
+        <div class="view_index" jsmvcfw-controllerName="Index">
             <aside jsmvcfw-controllerName="Ai" />
             <aside jsmvcfw-controllerName="Mcp" />
             <div
@@ -152,16 +152,16 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                         <div class="bottom_limit" jsmvcfw-elementHookName="elementBottomLimit"></div>
                     </div>
                     <div class="container_chip">
-                        <div class={`chip no_hover ${variableObject.toolSelected.state.name ? "" : "none"}`}>
-                            <p>{variableObject.toolSelected.state.name}</p>
+                        <div class={`chip ${variableObject.toolSelected.state.name ? "" : "none"}`}>
                             <i
                                 class="cls_icon close"
                                 onclick={() => {
-                                    methodObject.onClickToolClose();
+                                    //methodObject.onClickToolClose();
                                 }}
                             >
                                 cancel
                             </i>
+                            <p>{variableObject.toolSelected.state.name}</p>
                         </div>
                     </div>
                     <div class="container_message_send">
@@ -176,39 +176,6 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                 >
                                     <i class="cls_icon">upload_file</i>
                                     <p>Upload</p>
-                                </div>
-                                <div class="dropdown">
-                                    <div
-                                        class={`chip ${variableObject.systemMode.state === "tool-call" ? "active" : ""}`}
-                                        onclick={() => {
-                                            methodObject.onClickChipTool();
-                                        }}
-                                    >
-                                        <i class="cls_icon">construction</i>
-                                        <p>Tool</p>
-                                    </div>
-                                    <div class={`menu top-right ${variableObject.isOpenDropdownToolList.state ? "" : "none"}`}>
-                                        <ul>
-                                            {(() => {
-                                                const result: IvirtualNode[] = [];
-
-                                                for (const [key, value] of Object.entries(variableObject.toolList.state)) {
-                                                    result.push(
-                                                        <li
-                                                            key={key}
-                                                            onClick={() => {
-                                                                methodObject.onClickToolName(value.name);
-                                                            }}
-                                                        >
-                                                            {value.name}
-                                                        </li>
-                                                    );
-                                                }
-
-                                                return result;
-                                            })()}
-                                        </ul>
-                                    </div>
                                 </div>
                                 <div
                                     class={`chip ${variableObject.systemMode.state === "tool-task" ? "active" : ""}`}

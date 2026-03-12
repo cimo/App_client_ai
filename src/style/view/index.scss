@@ -4,7 +4,7 @@
 html,
 body,
 #jsmvcfw_app,
-.page_container {
+.view_index {
     width: 100%;
     height: 100%;
     user-select: none;
@@ -32,7 +32,11 @@ textarea {
     word-break: break-word;
 }
 
-.page_container {
+aside {
+    width: 100%;
+}
+
+.view_index {
     display: flex;
     flex-direction: column;
     align-content: center;
@@ -107,17 +111,17 @@ textarea {
         white-space: break-spaces;
         word-break: break-word;
 
-        i {
+        .cls_icon {
             font-size: parameter.$fontSizeNormalPlus !important;
 
             &.close {
                 cursor: pointer !important;
-                margin-left: 5px !important;
             }
         }
 
         p {
             text-align: center;
+            width: 100%;
         }
     }
 
@@ -138,7 +142,7 @@ textarea {
             justify-content: center;
             align-items: center;
             justify-items: center;
-            cursor: pointer !important;
+            cursor: pointer;
 
             .cls_icon {
                 font-size: parameter.$fontSizeVeryBig !important;
@@ -165,7 +169,8 @@ textarea {
         justify-content: center;
         align-items: stretch;
         justify-items: center;
-        height: 100%;
+        flex: 1 1 auto;
+        min-height: 0;
 
         .container_left {
             display: flex;
@@ -175,15 +180,15 @@ textarea {
             align-items: center;
             justify-items: center;
             flex: 0 0 150px;
+            min-height: 0;
 
-            .menu_item {
+            .view_menuItemLeft {
                 display: flex;
                 flex-direction: column;
                 align-content: center;
                 justify-content: center;
-                align-items: center;
+                align-items: stretch;
                 justify-items: center;
-                width: 100%;
 
                 li {
                     display: flex;
@@ -192,7 +197,6 @@ textarea {
                     justify-content: start;
                     align-items: center;
                     justify-items: center;
-                    width: 100%;
                     padding: 10px 0 10px 5px;
                     cursor: pointer;
 
@@ -210,17 +214,24 @@ textarea {
             justify-content: center;
             align-items: stretch;
             justify-items: center;
-            width: 100%;
+            flex: 1 1 auto;
+            min-height: 0;
 
             .container_chat {
-                overflow-x: hidden;
-                overflow-y: auto;
-                height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+                justify-content: start;
+                align-items: stretch;
+                justify-items: center;
+                flex: 1 1 auto;
+                min-height: 0;
                 padding: 0 25px;
+                overflow-x: hidden;
+                overflow-y: scroll;
 
                 > div {
                     .container_chat_user {
-                        margin-top: 20px;
                         display: flex;
                         flex-direction: column;
                         align-content: center;
@@ -268,12 +279,13 @@ textarea {
                                 }
 
                                 p {
-                                    margin-left: 5px;
                                     display: flex;
+                                    flex-direction: row;
                                     align-content: center;
                                     justify-content: center;
                                     align-items: center;
                                     justify-items: center;
+                                    margin-left: 5px;
                                 }
                             }
 
@@ -293,7 +305,6 @@ textarea {
                             justify-content: center;
                             align-items: start;
                             justify-items: center;
-                            list-style: none;
                             border-radius: 8px;
                             padding: 10px;
                             width: fit-content;
@@ -304,6 +315,7 @@ textarea {
 
                             li {
                                 display: flex;
+                                flex-direction: row;
                                 align-content: center;
                                 justify-content: center;
                                 align-items: center;
@@ -325,11 +337,16 @@ textarea {
 
             .container_chip {
                 display: flex;
+                flex-direction: row;
                 align-content: center;
-                justify-content: center;
+                justify-content: start;
                 align-items: center;
                 justify-items: center;
-                padding: 0 10px;
+                padding: 10px 25px;
+
+                .chip {
+                    width: 180px;
+                }
             }
 
             .container_message_send {
@@ -355,6 +372,7 @@ textarea {
 
                     .left {
                         display: flex;
+                        flex-direction: row;
                         align-content: center;
                         justify-content: center;
                         align-items: center;
@@ -365,12 +383,13 @@ textarea {
                         }
 
                         .chip {
-                            cursor: pointer !important;
+                            cursor: pointer;
                         }
                     }
 
                     .right {
                         display: flex;
+                        flex-direction: row;
                         align-content: center;
                         justify-content: center;
                         align-items: center;
@@ -379,18 +398,26 @@ textarea {
 
                     button {
                         display: flex;
+                        flex-direction: row;
                         align-content: center;
                         justify-content: center;
                         align-items: center;
                         justify-items: center;
                         width: 40px;
                         height: 36px;
-                        margin: 0 5px 0 0 !important;
+                        margin: 0 5px 0 0;
                     }
                 }
             }
 
-            .container_menu_item {
+            .view_menuItemRight {
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+                justify-content: center;
+                align-items: center;
+                justify-items: center;
+
                 position: fixed;
                 padding: 10px;
                 top: 40px;
@@ -403,10 +430,11 @@ textarea {
                     display: flex;
                     flex-direction: column;
                     align-content: center;
-                    justify-content: center;
+                    justify-content: start;
                     align-items: start;
                     justify-items: center;
-                    height: 100%;
+                    flex: 1 1 auto;
+                    min-height: 0;
 
                     > p {
                         margin-bottom: 10px;
@@ -414,14 +442,14 @@ textarea {
 
                     ul {
                         display: flex;
-                        flex-wrap: wrap;
-                        gap: 15px;
+                        flex-direction: row;
                         align-content: start;
                         justify-content: center;
                         align-items: center;
                         justify-items: center;
+                        flex-wrap: wrap;
+                        gap: 15px;
                         overflow-y: scroll;
-                        height: 100%;
 
                         .chip {
                             align-content: center;
@@ -429,6 +457,36 @@ textarea {
                             align-items: center;
                             justify-items: center;
                             width: 180px;
+                        }
+                    }
+                }
+
+                .container_tool {
+                    display: flex;
+                    flex-direction: column;
+                    align-content: center;
+                    justify-content: start;
+                    align-items: start;
+                    justify-items: center;
+                    flex: 1 1 auto;
+                    min-height: 0;
+
+                    ul {
+                        display: flex;
+                        flex-direction: row;
+                        align-content: start;
+                        justify-content: center;
+                        align-items: center;
+                        justify-items: center;
+                        overflow-y: scroll;
+
+                        .chip {
+                            align-content: center;
+                            justify-content: center;
+                            align-items: center;
+                            justify-items: center;
+                            width: 200px;
+                            height: 100px;
                         }
                     }
                 }
@@ -449,10 +507,11 @@ textarea {
     }
 
     button {
-        background-color: color.$darkButtonBackground !important;
+        background-color: color.$darkButtonBackground;
 
         &:hover {
-            border: 1px solid color.$darkBorderHover !important;
+            color: color.$darkInteractionBackground;
+            background-color: color.$darkInteractionHover;
         }
     }
 
@@ -475,7 +534,8 @@ textarea {
         border: 1px solid color.$darkChipBorder;
 
         &:not(.no_hover):hover {
-            border: 1px solid color.$darkBorderHover !important;
+            color: color.$darkInteractionBackground;
+            background-color: color.$darkInteractionHover;
         }
     }
 
@@ -490,7 +550,7 @@ textarea {
 
     .container_content {
         .container_left {
-            .menu_item {
+            .view_menuItemLeft {
                 li {
                     &:hover {
                         color: color.$darkInteractionBackground;
@@ -505,29 +565,29 @@ textarea {
                 > div {
                     .container_chat_user {
                         .message {
-                            border: 1px solid color.$darkChatUserBoxColor;
+                            border: 1px solid color.$darkChatUserBoxBorder;
                         }
                     }
 
                     .container_chat_assistant {
                         details {
-                            color: color.$darkChatAssistantBoxColor;
+                            color: color.$darkChatAssistantBoxBorder;
                             background-color: color.$darkChatAssistantBoxBackground;
                         }
 
                         .file {
-                            border: 1px solid color.$darkChatUserBoxColor;
+                            border: 1px solid color.$darkChatUserBoxBorder;
                         }
                     }
                 }
             }
 
             .container_message_send {
-                border: 1px solid color.$darkChatUserBoxColor;
+                border: 1px solid color.$darkChatUserBoxBorder;
                 box-shadow: color.$darkMessageSendBoxShadow;
             }
 
-            .container_menu_item {
+            .view_menuItemRight {
                 border-left: 1px solid color.$darkBorderHover;
                 background-color: color.$darkRootBackground;
                 box-shadow: color.$darkOverBoxShadow;
@@ -537,100 +597,5 @@ textarea {
 }
 
 @media (prefers-color-scheme: Light) {
-    :root {
-        color: color.$lightRootText;
-        background-color: color.$lightRootBackground;
-    }
-
-    .active {
-        color: color.$lightInteractionBackground;
-        background-color: color.$lightInteractionHover;
-    }
-
-    button {
-        background-color: color.$lightButtonBackground !important;
-
-        &:hover {
-            border: 1px solid color.$lightBorderHover !important;
-        }
-    }
-
-    .menu {
-        background-color: color.$lightInteractionBackground;
-        box-shadow: color.$lightBoxShadow;
-
-        ul {
-            li {
-                &:hover {
-                    color: color.$lightInteractionBackground;
-                    background-color: color.$lightInteractionHover;
-                }
-            }
-        }
-    }
-
-    .chip {
-        background-color: color.$lightChipBackground;
-        border: 1px solid color.$lightChipBorder;
-
-        &:not(.no_hover):hover {
-            border: 1px solid color.$lightBorderHover !important;
-        }
-    }
-
-    .container_over {
-        background-color: color.$lightRootBackground;
-    }
-
-    .container_header {
-        background-color: color.$lightInteractionBackground;
-        box-shadow: color.$lightBoxShadow;
-    }
-
-    .container_content {
-        .container_left {
-            .menu_item {
-                li {
-                    &:hover {
-                        color: color.$lightInteractionBackground;
-                        background-color: color.$lightInteractionHover;
-                    }
-                }
-            }
-        }
-
-        .container_right {
-            .container_chat {
-                > div {
-                    .container_chat_user {
-                        .message {
-                            border: 1px solid color.$lightChatUserBoxColor;
-                        }
-                    }
-
-                    .container_chat_assistant {
-                        details {
-                            color: color.$lightChatAssistantBoxColor;
-                            background-color: color.$lightChatAssistantBoxBackground;
-                        }
-                    }
-
-                    .file {
-                        border: 1px solid color.$lightChatUserBoxColor;
-                    }
-                }
-            }
-
-            .container_message_send {
-                border: 1px solid color.$lightChatUserBoxColor;
-                box-shadow: color.$lightMessageSendBoxShadow;
-            }
-
-            .container_menu_item {
-                border-left: 1px solid color.$lightBorderHover;
-                background-color: color.$lightRootBackground;
-                box-shadow: color.$lightOverBoxShadow;
-            }
-        }
-    }
+    //...
 }

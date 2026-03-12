@@ -57,12 +57,11 @@ export interface Ivariable {
     isOfflineAi: IvariableBind<boolean>;
     isOfflineMcp: IvariableBind<boolean>;
     modelList: IvariableBind<IapiAiModel[]>;
+    isOpenDropdownModelList: IvariableBind<boolean>;
+    modelSelected: IvariableBind<string>;
     chatMessageList: IvariableBind<IchatMessage[]>;
     chatHistoryList: IvariableBind<IchatInput[]>;
     toolList: IvariableBind<IapiMcpTool[]>;
-    isOpenDropdownModelList: IvariableBind<boolean>;
-    modelSelected: IvariableBind<string>;
-    isOpenDropdownToolList: IvariableBind<boolean>;
     toolSelected: IvariableBind<IapiMcpTool>;
     adUrl: IvariableBind<string>;
     systemMode: IvariableBind<string>;
@@ -71,16 +70,13 @@ export interface Ivariable {
 }
 
 export interface Imethod {
-    onClickChipUpload: () => void;
-    onClickChipTool: () => void;
-    onClickToolName: (name: string) => void;
-    onClickToolClose: () => void;
-    onClickChipTask: () => void;
-    onClickButtonMessageSend: () => void;
+    onClickAd: (event: Event) => void;
+    onClickRefreshPage: () => void;
     onClickDropdownModel: () => void;
     onClickModelName: (name: string) => void;
-    onClickRefreshPage: () => void;
-    onClickAd: (event: Event) => void;
+    onClickButtonMessageSend: () => void;
+    onClickChipUpload: () => void;
+    onClickChipTask: () => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

@@ -1,7 +1,7 @@
 import Fs from "fs";
 
 // Source
-import * as modelHelperSrc from "./model/HelperSrc.js";
+import * as modelHelperSrc from "./model/HelperSrc";
 
 declare const IS_DEPLOY_DEV: string;
 

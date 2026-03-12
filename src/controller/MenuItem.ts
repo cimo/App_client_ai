@@ -2,6 +2,7 @@ import { Icontroller, IvirtualNode, variableBind, variableLink } from "@cimo/jsm
 
 // Source
 import * as modelMenuItem from "../model/MenuItem";
+import * as modelIndex from "../model/Index";
 import * as viewMenuItem from "../view/MenuItem";
 import type Index from "./Index";
 
@@ -21,11 +22,32 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemAgent.state = false;
     };
 
+    private onClickFileUploadDelete = (index: number, fileName: string): void => {
+        this.controllerIndex.apiMcpFileUploadedDelete(index, fileName);
+    };
+
     private onClickMenuTool = (): void => {
         this.variableObject.isMenuItemFile.state = false;
         this.variableObject.isMenuItemTool.state = !this.variableObject.isMenuItemTool.state;
         this.variableObject.isMenuItemTask.state = false;
         this.variableObject.isMenuItemAgent.state = false;
+    };
+
+    private onClickToolName = (name: string): void => {
+        for (const tool of this.variableObject.toolList.state) {
+            if (tool.name === name) {
+                this.variableObject.toolSelected.state = tool;
+
+                break;
+            }
+        }
+
+        this.variableObject.systemMode.state = "tool-call";
+    };
+
+    private onClickToolClose = (): void => {
+        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
+        this.variableObject.systemMode.state = "chat";
     };
 
     private onClickMenuTask = (): void => {
@@ -42,10 +64,6 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemAgent.state = !this.variableObject.isMenuItemAgent.state;
     };
 
-    private onClickFileUploadDelete = (index: number, fileName: string): void => {
-        this.controllerIndex.apiMcpFileUploadedDelete(index, fileName);
-    };
-
     constructor(controllerIndex: Index) {
         this.variableObject = {} as modelMenuItem.Ivariable;
         this.methodObject = {} as modelMenuItem.Imethod;
@@ -58,20 +76,25 @@ export default class MenuItem implements Icontroller {
         this.variableObject = variableBind(
             {
                 isMenuItemFile: false,
+                fileUploadedList: variableLink<string[]>("Index"),
                 isMenuItemTool: false,
+                toolList: variableLink<modelIndex.IapiMcpTool[]>("Index"),
+                toolSelected: {} as modelIndex.IapiMcpTool,
                 isMenuItemTask: false,
                 isMenuItemAgent: false,
-                fileUploadedList: variableLink<string[]>("Index")
+                systemMode: variableLink<string>("Index")
             },
             this.constructor.name
         );
 
         this.methodObject = {
             onClickMenuFile: this.onClickMenuFile,
+            onClickFileUploadDelete: this.onClickFileUploadDelete,
             onClickMenuTool: this.onClickMenuTool,
+            onClickToolName: this.onClickToolName,
+            onClickToolClose: this.onClickToolClose,
             onClickMenuTask: this.onClickMenuTask,
-            onClickMenuAgent: this.onClickMenuAgent,
-            onClickFileUploadDelete: this.onClickFileUploadDelete
+            onClickMenuAgent: this.onClickMenuAgent
         };
     }
 

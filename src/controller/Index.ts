@@ -214,26 +214,34 @@ export default class Index implements Icontroller {
             let inputSystem = "";
 
             if (this.variableObject.systemMode.state === "chat") {
-                inputSystem = `You are a multilingual assistant that needs to reply with the user input language.
-                    You MUST need to reason step by step and give a answer to the user question.
-                    You MUST NOT use tools and tasks.`;
+                inputSystem = [
+                    "You are a multilingual assistant that needs to reply with the user input language.",
+                    "You MUST need to reason step by step and give a answer to the user question.",
+                    "You MUST NOT use tools and tasks."
+                ].join("\n");
             } else if (this.variableObject.systemMode.state === "tool-call") {
-                inputSystem = `You are a multilingual assistant tool executer that needs to reply with the user input language and you need to transform the user request in a action.
-                    You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}.
-                    For ${this.variableObject.toolSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }
-                    You MUST NOT solve problems.
-                    You MUST NOT invent new actions.
-                    You MUST NOT explain nothing.`;
+                inputSystem = [
+                    "You are a multilingual assistant tool executer that needs to reply with the user input language and you need to transform the user request in a action.",
+                    `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}.`,
+                    `For ${this.variableObject.toolSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }`,
+                    "You MUST NOT solve problems.",
+                    "You MUST NOT invent new actions.",
+                    "You MUST NOT explain nothing."
+                ].join("\n");
             } else if (this.variableObject.systemMode.state === "tool-task") {
-                inputSystem = `You are a multilingual assistant tool task executer that needs to reply with the user input language and you need to transform the user request in a ordered list of actions.
-                    You MUST use ONLY the following tool: chrome.
-                    For chrome you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "chrome", "argumentObject": { "url": "..." } } ] }
-                    You MUST NOT solve problems.
-                    You MUST NOT invent new actions.
-                    You MUST NOT explain nothing.`;
+                inputSystem = [
+                    "You are a multilingual assistant tool task executer that needs to reply with the user input language and you need to transform the user request in a ordered list of actions.",
+                    "You MUST use ONLY the following tool: chrome.",
+                    'For chrome you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "chrome", "argumentObject": { "url": "..." } } ] }',
+                    "You MUST NOT solve problems.",
+                    "You MUST NOT invent new actions.",
+                    "You MUST NOT explain nothing."
+                ].join("\n");
             } else if (this.variableObject.systemMode.state === "agent-skill") {
-                inputSystem = `You are a multilingual agent skill executer that needs to reply with the user input language and you need to transform the user request in a action.
-                    If you find a tag [script](...) in the text you MUST stop and write ONLY valid JSON with this format without additional information: { "action": { "script": true } }`;
+                inputSystem = [
+                    "You are a multilingual agent skill executer that needs to reply with the user input language and you need to transform the user request in a action.",
+                    'If you find a tag [script](...) in the text you MUST stop and write ONLY valid JSON with this format without additional information: { "action": { "script": true } }'
+                ].join("\n");
             }
 
             input.push(
@@ -691,31 +699,6 @@ export default class Index implements Icontroller {
         this.apiMcpUpload();
     };
     //...
-    private onClickChipTool = (): void => {
-        if (this.variableObject.systemMode.state === "tool-task") {
-            return;
-        }
-
-        this.variableObject.isOpenDropdownToolList.state = true;
-    };
-
-    private onClickToolName = (name: string): void => {
-        for (const tool of this.variableObject.toolList.state) {
-            if (tool.name === name) {
-                this.variableObject.toolSelected.state = tool;
-
-                break;
-            }
-        }
-
-        this.variableObject.systemMode.state = "tool-call";
-    };
-
-    private onClickToolClose = (): void => {
-        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
-        this.variableObject.systemMode.state = "chat";
-    };
-
     private onClickChipTask = (): void => {
         if (this.variableObject.systemMode.state === "tool-call") {
             return;
@@ -756,12 +739,11 @@ export default class Index implements Icontroller {
                 isOfflineAi: false,
                 isOfflineMcp: false,
                 modelList: [],
+                isOpenDropdownModelList: false,
+                modelSelected: helperSrc.MODEL_DEFAULT,
                 chatMessageList: [],
                 chatHistoryList: [],
                 toolList: [],
-                isOpenDropdownModelList: false,
-                modelSelected: helperSrc.MODEL_DEFAULT,
-                isOpenDropdownToolList: false,
                 toolSelected: {} as modelIndex.IapiMcpTool,
                 adUrl: "",
                 systemMode: "chat",
@@ -772,16 +754,13 @@ export default class Index implements Icontroller {
         );
 
         this.methodObject = {
-            onClickChipUpload: this.onClickChipUpload,
-            onClickChipTool: this.onClickChipTool,
-            onClickToolName: this.onClickToolName,
-            onClickToolClose: this.onClickToolClose,
-            onClickChipTask: this.onClickChipTask,
-            onClickButtonMessageSend: this.onClickButtonMessageSend,
+            onClickAd: this.onClickAd,
+            onClickRefreshPage: this.onClickRefreshPage,
             onClickDropdownModel: this.onClickDropdownModel,
             onClickModelName: this.onClickModelName,
-            onClickRefreshPage: this.onClickRefreshPage,
-            onClickAd: this.onClickAd
+            onClickButtonMessageSend: this.onClickButtonMessageSend,
+            onClickChipUpload: this.onClickChipUpload,
+            onClickChipTask: this.onClickChipTask
         };
     }
 
@@ -799,7 +778,6 @@ export default class Index implements Icontroller {
 
             if (!helperSrc.findElementParent(target, "dropdown") || helperSrc.findElementParent(target, "menu")) {
                 this.variableObject.isOpenDropdownModelList.state = false;
-                this.variableObject.isOpenDropdownToolList.state = false;
             }
         });
 

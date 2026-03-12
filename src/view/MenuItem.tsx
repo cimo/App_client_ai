@@ -5,49 +5,47 @@ import * as modelMenuItem from "../model/MenuItem";
 
 export const viewMenuItemLeft = (variableObject: modelMenuItem.Ivariable, methodObject: modelMenuItem.Imethod): IvirtualNode => {
     return (
-        <div class="view_menuItemLeft container_menuItem">
-            <ul class="menu_item">
-                <li
-                    class={variableObject.isMenuItemFile.state ? "active" : ""}
-                    onclick={() => {
-                        methodObject.onClickMenuFile();
-                    }}
-                >
-                    <i class="cls_icon">file_present</i> <p>File</p>
-                </li>
-                <li
-                    class={variableObject.isMenuItemTool.state ? "active" : ""}
-                    onclick={() => {
-                        methodObject.onClickMenuTool();
-                    }}
-                >
-                    <i class="cls_icon">construction</i> <p>Tool</p>
-                </li>
-                <li
-                    class={variableObject.isMenuItemTask.state ? "active" : ""}
-                    onclick={() => {
-                        methodObject.onClickMenuTask();
-                    }}
-                >
-                    <i class="cls_icon">assignment</i> <p>Task</p>
-                </li>
-                <li
-                    class={variableObject.isMenuItemAgent.state ? "active" : ""}
-                    onclick={() => {
-                        methodObject.onClickMenuAgent();
-                    }}
-                >
-                    <i class="cls_icon">smart_toy</i> <p>Agent</p>
-                </li>
-            </ul>
-        </div>
+        <ul class="view_menuItemLeft">
+            <li
+                class={variableObject.isMenuItemFile.state ? "active" : ""}
+                onclick={() => {
+                    methodObject.onClickMenuFile();
+                }}
+            >
+                <i class="cls_icon">file_present</i> <p>File</p>
+            </li>
+            <li
+                class={variableObject.isMenuItemTool.state ? "active" : ""}
+                onclick={() => {
+                    methodObject.onClickMenuTool();
+                }}
+            >
+                <i class="cls_icon">construction</i> <p>Tool</p>
+            </li>
+            <li
+                class={variableObject.isMenuItemTask.state ? "active" : ""}
+                onclick={() => {
+                    methodObject.onClickMenuTask();
+                }}
+            >
+                <i class="cls_icon">assignment</i> <p>Task</p>
+            </li>
+            <li
+                class={variableObject.isMenuItemAgent.state ? "active" : ""}
+                onclick={() => {
+                    methodObject.onClickMenuAgent();
+                }}
+            >
+                <i class="cls_icon">smart_toy</i> <p>Agent</p>
+            </li>
+        </ul>
     );
 };
 
 export const viewMenuItemRight = (variableObject: modelMenuItem.Ivariable, methodObject: modelMenuItem.Imethod): IvirtualNode => {
     return (
         <div
-            class={`view_menuItemRight container_menu_item ${variableObject.isMenuItemFile.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state ? "" : "none"}`}
+            class={`view_menuItemRight ${variableObject.isMenuItemFile.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state ? "" : "none"}`}
         >
             {(() => {
                 const result: IvirtualNode[] = [];
@@ -84,7 +82,31 @@ export const viewMenuItemRight = (variableObject: modelMenuItem.Ivariable, metho
                         </div>
                     );
                 } else if (variableObject.isMenuItemTool.state) {
-                    result.push(<p>tool</p>);
+                    result.push(
+                        <div class="container_tool">
+                            <ul>
+                                {(() => {
+                                    const result: IvirtualNode[] = [];
+
+                                    for (const [key, value] of Object.entries(variableObject.toolList.state)) {
+                                        result.push(
+                                            <li
+                                                key={key}
+                                                class="chip"
+                                                onClick={() => {
+                                                    methodObject.onClickToolName(value.name);
+                                                }}
+                                            >
+                                                {value.name}
+                                            </li>
+                                        );
+                                    }
+
+                                    return result;
+                                })()}
+                            </ul>
+                        </div>
+                    );
                 } else if (variableObject.isMenuItemTask.state) {
                     result.push(<p>task</p>);
                 } else if (variableObject.isMenuItemAgent.state) {
