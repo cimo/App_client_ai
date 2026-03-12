@@ -12,6 +12,7 @@ import * as modelIndex from "../model/Index";
 import viewIndex from "../view/Index";
 import ControllerAi from "./Ai";
 import ControllerMcp from "./Mcp";
+import ControllerMenuItem from "./MenuItem";
 
 export default class Index implements Icontroller {
     // Variable
@@ -19,6 +20,7 @@ export default class Index implements Icontroller {
     private methodObject: modelIndex.Imethod;
     private controllerAi: ControllerAi;
     private controllerMcp: ControllerMcp;
+    private controllerMenuItem: ControllerMenuItem;
 
     private responseId: string;
     private responseReason: string;
@@ -577,7 +579,7 @@ export default class Index implements Icontroller {
         }
     };
 
-    private apiMcpFileUploaded = async (): Promise<void> => {
+    apiMcpFileUploaded = async (): Promise<void> => {
         fetch(`${helperSrc.URL_MCP}/api/file-uploaded`, {
             method: "GET",
             headers: {
@@ -605,7 +607,7 @@ export default class Index implements Icontroller {
             });
     };
 
-    private apiMcpFileUploadedDelete = (index: number, fileName: string): void => {
+    apiMcpFileUploadedDelete = (index: number, fileName: string): void => {
         fetch(`${helperSrc.URL_MCP}/api/file-uploaded-delete`, {
             method: "POST",
             headers: {
@@ -622,7 +624,7 @@ export default class Index implements Icontroller {
             .then(async () => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                this.variableObject.fileUploadedList.state.splice(index, 1);
+                this.variableObject.fileUploadedList.state = this.variableObject.fileUploadedList.state.filter((_, a) => a !== index);
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Index.ts - apiMcpFileUploadedDelete() - fetch() - catch()", error.message);
@@ -726,45 +728,13 @@ export default class Index implements Icontroller {
         this.variableObject.systemMode.state = this.variableObject.systemMode.state === "tool-task" ? "chat" : "tool-task";
     };
     //...
-    private onClickMenuFile = (): void => {
-        this.apiMcpFileUploaded();
-
-        this.variableObject.isMenuItemFile.state = !this.variableObject.isMenuItemFile.state;
-        this.variableObject.isMenuItemTool.state = false;
-        this.variableObject.isMenuItemTask.state = false;
-        this.variableObject.isMenuItemAgent.state = false;
-    };
-
-    private onClickMenuTool = (): void => {
-        this.variableObject.isMenuItemFile.state = false;
-        this.variableObject.isMenuItemTool.state = !this.variableObject.isMenuItemTool.state;
-        this.variableObject.isMenuItemTask.state = false;
-        this.variableObject.isMenuItemAgent.state = false;
-    };
-
-    private onClickMenuTask = (): void => {
-        this.variableObject.isMenuItemFile.state = false;
-        this.variableObject.isMenuItemTool.state = false;
-        this.variableObject.isMenuItemTask.state = !this.variableObject.isMenuItemTask.state;
-        this.variableObject.isMenuItemAgent.state = false;
-    };
-
-    private onClickMenuAgent = (): void => {
-        this.variableObject.isMenuItemFile.state = false;
-        this.variableObject.isMenuItemTool.state = false;
-        this.variableObject.isMenuItemTask.state = false;
-        this.variableObject.isMenuItemAgent.state = !this.variableObject.isMenuItemAgent.state;
-    };
-
-    private onClickFileUploadDelete = (index: number, fileName: string): void => {
-        this.apiMcpFileUploadedDelete(index, fileName);
-    };
 
     constructor() {
         this.variableObject = {} as modelIndex.Ivariable;
         this.methodObject = {} as modelIndex.Imethod;
         this.controllerAi = new ControllerAi();
         this.controllerMcp = new ControllerMcp();
+        this.controllerMenuItem = new ControllerMenuItem(this);
 
         this.responseId = "";
         this.responseReason = "";
@@ -800,10 +770,6 @@ export default class Index implements Icontroller {
                 adUrl: "",
                 systemMode: "chat",
                 isMessageSent: false,
-                isMenuItemFile: false,
-                isMenuItemTool: false,
-                isMenuItemTask: false,
-                isMenuItemAgent: false,
                 fileUploadedList: []
             },
             this.constructor.name
@@ -819,12 +785,7 @@ export default class Index implements Icontroller {
             onClickDropdownModel: this.onClickDropdownModel,
             onClickModelName: this.onClickModelName,
             onClickRefreshPage: this.onClickRefreshPage,
-            onClickAd: this.onClickAd,
-            onClickMenuFile: this.onClickMenuFile,
-            onClickMenuTool: this.onClickMenuTool,
-            onClickMenuTask: this.onClickMenuTask,
-            onClickMenuAgent: this.onClickMenuAgent,
-            onClickFileUploadDelete: this.onClickFileUploadDelete
+            onClickAd: this.onClickAd
         };
     }
 
@@ -868,6 +829,7 @@ export default class Index implements Icontroller {
 
         resultList.push(this.controllerAi);
         resultList.push(this.controllerMcp);
+        resultList.push(this.controllerMenuItem);
 
         return resultList;
     }

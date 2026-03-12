@@ -67,10 +67,6 @@ export interface Ivariable {
     adUrl: IvariableBind<string>;
     systemMode: IvariableBind<string>;
     isMessageSent: IvariableBind<boolean>;
-    isMenuItemFile: IvariableBind<boolean>;
-    isMenuItemTool: IvariableBind<boolean>;
-    isMenuItemTask: IvariableBind<boolean>;
-    isMenuItemAgent: IvariableBind<boolean>;
     fileUploadedList: IvariableBind<string[]>;
 }
 
@@ -85,11 +81,6 @@ export interface Imethod {
     onClickModelName: (name: string) => void;
     onClickRefreshPage: () => void;
     onClickAd: (event: Event) => void;
-    onClickMenuFile: () => void;
-    onClickMenuTool: () => void;
-    onClickMenuTask: () => void;
-    onClickMenuAgent: () => void;
-    onClickFileUploadDelete: (index: number, fileName: string) => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {
