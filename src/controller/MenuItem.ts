@@ -33,7 +33,7 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemAgent.state = false;
     };
 
-    private onClickToolName = (name: string): void => {
+    private onClickTool = (name: string): void => {
         for (const tool of this.variableObject.toolList.state) {
             if (tool.name === name) {
                 this.variableObject.toolSelected.state = tool;
@@ -52,6 +52,20 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemTool.state = false;
         this.variableObject.isMenuItemTask.state = !this.variableObject.isMenuItemTask.state;
         this.variableObject.isMenuItemAgent.state = false;
+    };
+
+    private onClickTask = (name: string): void => {
+        for (const tool of this.variableObject.taskList.state) {
+            if (tool.name === name) {
+                this.variableObject.taskSelected.state = tool;
+
+                this.variableObject.isMenuItemTask.state = false;
+
+                break;
+            }
+        }
+
+        this.variableObject.systemMode.state = "task-call";
     };
 
     private onClickMenuAgent = (): void => {
@@ -77,6 +91,8 @@ export default class MenuItem implements Icontroller {
                 isMenuItemTool: false,
                 toolList: variableLink<modelIndex.IapiMcpTool[]>("Index"),
                 toolSelected: variableLink<modelIndex.IapiMcpTool>("Index"),
+                taskList: variableLink<modelIndex.IapiMcpTool[]>("Index"),
+                taskSelected: variableLink<modelIndex.IapiMcpTool>("Index"),
                 isMenuItemTask: false,
                 isMenuItemAgent: false,
                 systemMode: variableLink<string>("Index")
@@ -88,8 +104,9 @@ export default class MenuItem implements Icontroller {
             onClickMenuFile: this.onClickMenuFile,
             onClickFileUploadDelete: this.onClickFileUploadDelete,
             onClickMenuTool: this.onClickMenuTool,
-            onClickToolName: this.onClickToolName,
+            onClickTool: this.onClickTool,
             onClickMenuTask: this.onClickMenuTask,
+            onClickTask: this.onClickTask,
             onClickMenuAgent: this.onClickMenuAgent
         };
     }

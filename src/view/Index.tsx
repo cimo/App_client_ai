@@ -1,4 +1,4 @@
-import { jsxFactory, IvirtualNode } from "@cimo/jsmvcfw/dist/src/Main.js";
+import { jsxFactory, jsxFragment, IvirtualNode } from "@cimo/jsmvcfw/dist/src/Main.js";
 
 // Source
 import * as modelIndex from "../model/Index";
@@ -174,16 +174,34 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                         <div class="bottom_limit" jsmvcfw-elementHookName="elementBottomLimit"></div>
                     </div>
                     <div class="container_chip">
-                        <div class={`chip ${variableObject.toolSelected.state.name ? "" : "none"}`}>
-                            <i
-                                class="cls_icon close"
-                                onclick={() => {
-                                    methodObject.onClickToolClose();
-                                }}
-                            >
-                                cancel
-                            </i>
-                            <p>{variableObject.toolSelected.state.name}</p>
+                        <div class={`chip ${variableObject.toolSelected.state.name || variableObject.taskSelected.state.name ? "" : "none"}`}>
+                            {(() => {
+                                const result: IvirtualNode[] = [];
+
+                                let mode = "";
+
+                                if (variableObject.toolSelected.state.name) {
+                                    mode = "tool";
+                                } else if (variableObject.taskSelected.state.name) {
+                                    mode = "task";
+                                }
+
+                                result.push(
+                                    <>
+                                        <i
+                                            class="cls_icon close"
+                                            onclick={() => {
+                                                methodObject.onClickChipClose(mode);
+                                            }}
+                                        >
+                                            cancel
+                                        </i>
+                                        <p>{mode === "tool" ? variableObject.toolSelected.state.name : variableObject.taskSelected.state.name}</p>
+                                    </>
+                                );
+
+                                return result;
+                            })()}
                         </div>
                     </div>
                     <div class="container_message_send">
@@ -198,15 +216,6 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                 >
                                     <i class="cls_icon">upload_file</i>
                                     <p>Upload</p>
-                                </div>
-                                <div
-                                    class={`chip ${variableObject.systemMode.state === "tool-task" ? "active" : ""}`}
-                                    onclick={() => {
-                                        methodObject.onClickChipTask();
-                                    }}
-                                >
-                                    <i class="cls_icon">assignment</i>
-                                    <p>Task</p>
                                 </div>
                             </div>
                             <div class="right">

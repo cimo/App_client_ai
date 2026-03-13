@@ -94,7 +94,7 @@ export const viewMenuItemRight = (variableObject: modelMenuItem.Ivariable, metho
                                                 key={key}
                                                 class="chip"
                                                 onClick={() => {
-                                                    methodObject.onClickToolName(value.name);
+                                                    methodObject.onClickTool(value.name);
                                                 }}
                                             >
                                                 <div class="top">
@@ -112,7 +112,35 @@ export const viewMenuItemRight = (variableObject: modelMenuItem.Ivariable, metho
                         </div>
                     );
                 } else if (variableObject.isMenuItemTask.state) {
-                    result.push(<p>task</p>);
+                    result.push(
+                        <div class="container_task">
+                            <ul>
+                                {(() => {
+                                    const result: IvirtualNode[] = [];
+
+                                    for (const [key, value] of Object.entries(variableObject.taskList.state)) {
+                                        result.push(
+                                            <li
+                                                key={key}
+                                                class="chip"
+                                                onClick={() => {
+                                                    methodObject.onClickTask(value.name);
+                                                }}
+                                            >
+                                                <div class="top">
+                                                    <img src={`/asset/image/${value.icon}`} />
+                                                    <p>{value.name}</p>
+                                                </div>
+                                                <p class="bottom">{value.description}</p>
+                                            </li>
+                                        );
+                                    }
+
+                                    return result;
+                                })()}
+                            </ul>
+                        </div>
+                    );
                 } else if (variableObject.isMenuItemAgent.state) {
                     result.push(<p>agent</p>);
                 }

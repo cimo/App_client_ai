@@ -9,6 +9,8 @@ export interface Ivariable {
     isMenuItemTool: IvariableBind<boolean>;
     toolList: IvariableBind<modelIndex.IapiMcpTool[]>;
     toolSelected: IvariableBind<modelIndex.IapiMcpTool>;
+    taskList: IvariableBind<modelIndex.IapiMcpTool[]>;
+    taskSelected: IvariableBind<modelIndex.IapiMcpTool>;
     isMenuItemTask: IvariableBind<boolean>;
     isMenuItemAgent: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
@@ -18,8 +20,9 @@ export interface Imethod {
     onClickMenuFile: () => void;
     onClickFileUploadDelete: (index: number, fileName: string) => void;
     onClickMenuTool: () => void;
-    onClickToolName: (name: string) => void;
+    onClickTool: (name: string) => void;
     onClickMenuTask: () => void;
+    onClickTask: (name: string) => void;
     onClickMenuAgent: () => void;
 }
 

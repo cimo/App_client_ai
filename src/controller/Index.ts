@@ -38,20 +38,6 @@ export default class Index implements Icontroller {
     private appIsClosing: boolean;
 
     // Method
-    private onClickAd = (event: Event): void => {
-        event.preventDefault();
-
-        if (helperSrc.IS_DEBUG) {
-            this.variableObject.adUrl.state = "";
-        } else {
-            openUrl(this.variableObject.adUrl.state);
-        }
-    };
-
-    private onClickRefreshPage = (): void => {
-        window.location.reload();
-    };
-
     private generateUniqueId = (): string => {
         const timestamp = Date.now().toString(36);
         const randomPart = crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
@@ -213,7 +199,7 @@ export default class Index implements Icontroller {
                     "You MUST NOT invent new actions.",
                     "You MUST NOT explain nothing."
                 ].join("\n");
-            } else if (this.variableObject.systemMode.state === "tool-task") {
+            } else if (this.variableObject.systemMode.state === "task-call") {
                 inputSystem = [
                     "You are a multilingual assistant tool task executer that needs to reply with the user input language and you need to transform the user request in a ordered list of actions.",
                     "You MUST use ONLY the following tool: chrome.",
@@ -503,6 +489,34 @@ export default class Index implements Icontroller {
             });
     };
 
+    private apiMcpTask = async (): Promise<void | Response> => {
+        return fetch(`${helperSrc.URL_MCP}/api/task-list`, {
+            method: "GET",
+            headers: {
+                "mcp-session-id": this.mcpSessionId,
+                Cookie: this.mcpCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (result) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+                if (resultJson.response.stdout !== "") {
+                    this.variableObject.taskList.state = JSON.parse(resultJson.response.stdout) as modelIndex.IapiMcpTool[];
+                }
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Index.ts - apiMcpTask() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
     private apiMcpUpload = async (): Promise<void> => {
         const pathFileList = await open({
             multiple: true,
@@ -679,13 +693,18 @@ export default class Index implements Icontroller {
         });
     };
 
-    private onClickButtonMessageSend = (): void => {
-        if (this.abortControllerApiAiResponse && this.responseId) {
-            this.abortControllerApiAiResponse.abort();
-            this.abortControllerApiAiResponse = null;
+    private onClickAd = (event: Event): void => {
+        event.preventDefault();
+
+        if (helperSrc.IS_DEBUG) {
+            this.variableObject.adUrl.state = "";
         } else {
-            this.apiAiResponse();
+            openUrl(this.variableObject.adUrl.state);
         }
+    };
+
+    private onClickRefreshPage = (): void => {
+        window.location.reload();
     };
 
     private onClickDropdownModel = (): void => {
@@ -696,23 +715,28 @@ export default class Index implements Icontroller {
         this.variableObject.modelSelected.state = name;
     };
 
+    private onClickButtonMessageSend = (): void => {
+        if (this.abortControllerApiAiResponse && this.responseId) {
+            this.abortControllerApiAiResponse.abort();
+            this.abortControllerApiAiResponse = null;
+        } else {
+            this.apiAiResponse();
+        }
+    };
+
     private onClickChipUpload = (): void => {
         this.apiMcpUpload();
     };
 
-    private onClickToolClose = (): void => {
-        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
-        this.variableObject.systemMode.state = "chat";
-    };
-    //...
-    private onClickChipTask = (): void => {
-        if (this.variableObject.systemMode.state === "tool-call") {
-            return;
+    private onClickChipClose = (mode: string): void => {
+        if (mode === "tool") {
+            this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
+        } else if (mode === "task") {
+            this.variableObject.taskSelected.state = {} as modelIndex.IapiMcpTool;
         }
 
-        this.variableObject.systemMode.state = this.variableObject.systemMode.state === "tool-task" ? "chat" : "tool-task";
+        this.variableObject.systemMode.state = "chat";
     };
-    //...
 
     constructor() {
         this.variableObject = {} as modelIndex.Ivariable;
@@ -751,6 +775,8 @@ export default class Index implements Icontroller {
                 chatHistoryList: [],
                 toolList: [],
                 toolSelected: {} as modelIndex.IapiMcpTool,
+                taskList: [],
+                taskSelected: {} as modelIndex.IapiMcpTool,
                 adUrl: "",
                 systemMode: "chat",
                 isMessageSent: false,
@@ -766,8 +792,7 @@ export default class Index implements Icontroller {
             onClickModelName: this.onClickModelName,
             onClickButtonMessageSend: this.onClickButtonMessageSend,
             onClickChipUpload: this.onClickChipUpload,
-            onClickToolClose: this.onClickToolClose,
-            onClickChipTask: this.onClickChipTask
+            onClickChipClose: this.onClickChipClose
         };
     }
 
@@ -824,6 +849,8 @@ export default class Index implements Icontroller {
             await this.apiMcpLogin();
 
             await this.apiMcpTool();
+
+            await this.apiMcpTask();
         })();
     }
 

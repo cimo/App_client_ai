@@ -65,6 +65,8 @@ export interface Ivariable {
     chatHistoryList: IvariableBind<IchatInput[]>;
     toolList: IvariableBind<IapiMcpTool[]>;
     toolSelected: IvariableBind<IapiMcpTool>;
+    taskList: IvariableBind<IapiMcpTool[]>;
+    taskSelected: IvariableBind<IapiMcpTool>;
     adUrl: IvariableBind<string>;
     systemMode: IvariableBind<string>;
     isMessageSent: IvariableBind<boolean>;
@@ -78,8 +80,7 @@ export interface Imethod {
     onClickModelName: (name: string) => void;
     onClickButtonMessageSend: () => void;
     onClickChipUpload: () => void;
-    onClickToolClose: () => void;
-    onClickChipTask: () => void;
+    onClickChipClose: (mode: string) => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {
