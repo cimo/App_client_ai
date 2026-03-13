@@ -37,6 +37,8 @@ export interface IapiAiResponse {
 export interface IapiMcpTool {
     name: string;
     argumentObject: Record<string, string>;
+    icon: string;
+    description: string;
 }
 
 export interface IchatInput {

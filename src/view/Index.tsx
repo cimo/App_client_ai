@@ -93,11 +93,11 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
 
                                                     if (value.mcpTool) {
                                                         result.push(
-                                                            <div class="list">
-                                                                <p>Name: {value.mcpTool["name"]}</p>
-                                                                <p>Argument: {value.mcpTool["arguments"]}</p>
-                                                                <p>Output: {value.mcpTool["output"]}</p>
-                                                            </div>
+                                                            <ul class="list">
+                                                                <li>Name: {value.mcpTool["name"]}</li>
+                                                                <li>Argument: {value.mcpTool["arguments"]}</li>
+                                                                <li>Output: {value.mcpTool["output"]}</li>
+                                                            </ul>
                                                         );
                                                     }
 
@@ -116,32 +116,54 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
 
                                                 if (value.assistantNoReason === "") {
                                                     result.push(<i class="cls_icon">update</i>);
-                                                } else {
-                                                    result.push(<pre>{value.assistantNoReason}</pre>);
+                                                } else if (!value.assistantNoReason.startsWith("<html>")) {
+                                                    if (value.file) {
+                                                        result.push(
+                                                            <details>
+                                                                <summary>
+                                                                    <p>File</p>
+                                                                </summary>
+                                                                <ul class="file">
+                                                                    {(() => {
+                                                                        const result: IvirtualNode[] = [];
+
+                                                                        if (value.file !== "") {
+                                                                            const fileList = JSON.parse(value.file);
+
+                                                                            for (const [keyFile, valueFile] of Object.entries(fileList)) {
+                                                                                result.push(
+                                                                                    <li key={keyFile}>
+                                                                                        <i class="cls_icon">file_present</i>
+                                                                                        <p>{valueFile}</p>
+                                                                                    </li>
+                                                                                );
+                                                                            }
+                                                                        }
+
+                                                                        return result;
+                                                                    })()}
+                                                                </ul>
+                                                            </details>
+                                                        );
+                                                    } else {
+                                                        result.push(<pre>{value.assistantNoReason}</pre>);
+                                                    }
+                                                } else if (value.assistantNoReason.startsWith("<html>")) {
+                                                    result.push(
+                                                        <details
+                                                            jsmvcfw-html={value.assistantNoReason
+                                                                .replace(/^<html>/i, '<div class="html">')
+                                                                .replace(/<\/html>$/i, '</div class="html">')}
+                                                        >
+                                                            <summary>
+                                                                <p>Data</p>
+                                                            </summary>
+                                                        </details>
+                                                    );
                                                 }
 
                                                 return result;
                                             })()}
-                                            <ul class={`file ${value.file ? "" : "none"}`}>
-                                                {(() => {
-                                                    const result: IvirtualNode[] = [];
-
-                                                    if (value.file !== "") {
-                                                        const fileList = JSON.parse(value.file);
-
-                                                        for (const [keyFile, valueFile] of Object.entries(fileList)) {
-                                                            result.push(
-                                                                <li key={keyFile}>
-                                                                    <i class="cls_icon">file_present</i>
-                                                                    <p>{valueFile}</p>
-                                                                </li>
-                                                            );
-                                                        }
-                                                    }
-
-                                                    return result;
-                                                })()}
-                                            </ul>
                                         </div>
                                     </div>
                                 );

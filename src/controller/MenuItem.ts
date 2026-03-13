@@ -38,6 +38,8 @@ export default class MenuItem implements Icontroller {
             if (tool.name === name) {
                 this.variableObject.toolSelected.state = tool;
 
+                this.variableObject.isMenuItemTool.state = false;
+
                 break;
             }
         }

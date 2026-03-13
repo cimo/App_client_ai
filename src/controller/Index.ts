@@ -406,7 +406,7 @@ export default class Index implements Icontroller {
 
                         this.variableObject.chatMessageList.state[idx] = {
                             ...this.variableObject.chatMessageList.state[idx],
-                            assistantNoReason: "Stop by user"
+                            assistantNoReason: "Stoped by user."
                         };
 
                         return;
@@ -551,6 +551,7 @@ export default class Index implements Icontroller {
 
             if (fileList.length > 0) {
                 const message = {} as modelIndex.IchatMessage;
+                message.assistantNoReason = "File uploaded.";
                 message.file = JSON.stringify(fileList);
 
                 this.variableObject.chatMessageList.state.push(message);

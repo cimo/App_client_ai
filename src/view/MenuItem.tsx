@@ -97,7 +97,11 @@ export const viewMenuItemRight = (variableObject: modelMenuItem.Ivariable, metho
                                                     methodObject.onClickToolName(value.name);
                                                 }}
                                             >
-                                                {value.name}
+                                                <div class="top">
+                                                    <img src={`/asset/image/${value.icon}`} />
+                                                    <p>{value.name}</p>
+                                                </div>
+                                                <p class="bottom">{value.description}</p>
                                             </li>
                                         );
                                     }

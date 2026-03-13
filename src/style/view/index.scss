@@ -64,7 +64,6 @@ aside {
         .menu {
             position: absolute;
             width: 150px;
-            z-index: parameter.$zIndexInteraction;
 
             &.bottom-right {
                 top: 110%;
@@ -159,7 +158,7 @@ aside {
         justify-items: center;
         height: 40px;
         padding: 10px;
-        z-index: parameter.$zIndexInteraction;
+        z-index: parameter.$zIndexLevel1;
     }
 
     .container_content {
@@ -264,12 +263,16 @@ aside {
                             padding: 5px;
                             width: fit-content;
                             margin: 5px 0;
+                            border-radius: 8px;
+                            max-height: 500px;
+                            overflow-x: auto;
+                            overflow-y: auto;
 
                             summary {
                                 display: flex;
                                 flex-direction: row;
                                 align-content: center;
-                                justify-content: center;
+                                justify-content: start;
                                 align-items: center;
                                 justify-items: center;
                                 cursor: pointer;
@@ -277,59 +280,51 @@ aside {
                                 .cls_icon {
                                     font-size: parameter.$fontSizeNormalPlus !important;
                                 }
+                            }
 
-                                p {
+                            .list {
+                                margin: 5px 0;
+
+                                li {
+                                    margin: 2px 0;
+                                }
+                            }
+
+                            .file {
+                                display: flex;
+                                flex-direction: column;
+                                align-content: center;
+                                justify-content: center;
+                                align-items: start;
+                                justify-items: center;
+                                margin-top: 10px;
+
+                                li {
                                     display: flex;
                                     flex-direction: row;
                                     align-content: center;
                                     justify-content: center;
                                     align-items: center;
                                     justify-items: center;
-                                    margin-left: 5px;
+
+                                    .cls_icon {
+                                        font-size: parameter.$fontSizeNormalPlus !important;
+                                        margin-right: 5px !important;
+                                    }
                                 }
                             }
 
-                            .list {
-                                margin: 5px 0;
-
-                                p {
-                                    margin: 2px 0;
-                                }
-                            }
-                        }
-
-                        .file {
-                            display: flex;
-                            flex-direction: column;
-                            align-content: center;
-                            justify-content: center;
-                            align-items: start;
-                            justify-items: center;
-                            border-radius: 8px;
-                            padding: 10px;
-                            width: fit-content;
-
-                            .info {
-                                margin-bottom: 5px;
-                            }
-
-                            li {
+                            .html {
                                 display: flex;
-                                flex-direction: row;
+                                flex-direction: column;
                                 align-content: center;
                                 justify-content: center;
-                                align-items: center;
+                                align-items: stretch;
                                 justify-items: center;
-
-                                .cls_icon {
-                                    font-size: parameter.$fontSizeNormalPlus !important;
-                                    margin-right: 5px !important;
-                                }
+                                margin-top: 10px;
+                                white-space: break-spaces;
+                                word-break: break-word;
                             }
-                        }
-
-                        pre {
-                            margin: 5px 0;
                         }
                     }
                 }
@@ -415,7 +410,7 @@ aside {
                 flex-direction: column;
                 align-content: center;
                 justify-content: center;
-                align-items: center;
+                align-items: start;
                 justify-items: center;
 
                 position: fixed;
@@ -424,7 +419,7 @@ aside {
                 right: 0;
                 bottom: 0;
                 left: 150px;
-                z-index: parameter.$zIndexMenuItem;
+                z-index: parameter.$zIndexLevel2;
 
                 .container_file {
                     display: flex;
@@ -444,12 +439,13 @@ aside {
                         display: flex;
                         flex-direction: row;
                         align-content: start;
-                        justify-content: center;
+                        justify-content: start;
                         align-items: center;
                         justify-items: center;
                         flex-wrap: wrap;
-                        gap: 15px;
+                        gap: 12px;
                         overflow-y: scroll;
+                        padding-right: 15px;
 
                         .chip {
                             width: 180px;
@@ -471,18 +467,40 @@ aside {
                         display: flex;
                         flex-direction: row;
                         align-content: start;
-                        justify-content: space-between;
+                        justify-content: start;
                         align-items: center;
                         justify-items: center;
                         overflow-y: scroll;
                         flex-wrap: wrap;
-                        gap: 15px;
+                        gap: 12px;
                         overflow-y: scroll;
-                        padding-right: 25px;
+                        padding-right: 15px;
 
                         .chip {
-                            width: 170px;
-                            height: 100px;
+                            flex-direction: column;
+                            justify-content: start;
+                            align-items: start;
+                            width: 275px;
+                            height: 110px;
+                            cursor: pointer;
+
+                            .top {
+                                display: flex;
+                                flex-direction: row;
+                                align-content: center;
+                                justify-content: center;
+                                align-items: center;
+                                justify-items: center;
+                                margin: 10px 0;
+
+                                img {
+                                    margin-right: 5px;
+                                }
+                            }
+
+                            .bottom {
+                                text-align: left;
+                            }
                         }
                     }
                 }
@@ -513,7 +531,7 @@ aside {
 
     .menu {
         background-color: color.$darkInteractionBackground;
-        box-shadow: color.$darkBoxShadow;
+        box-shadow: color.$darkShadow;
 
         ul {
             li {
@@ -541,11 +559,13 @@ aside {
 
     .container_header {
         background-color: color.$darkInteractionBackground;
-        box-shadow: color.$darkBoxShadow;
+        box-shadow: color.$darkShadowHeader;
     }
 
     .container_content {
         .container_left {
+            border-right: 1px solid color.$darkRootBorder;
+
             .view_menuItemLeft {
                 li {
                     &:hover {
@@ -561,32 +581,35 @@ aside {
                 > div {
                     .container_chat_user {
                         .message {
-                            border: 1px solid color.$darkChatUserBoxBorder;
+                            border: 1px solid color.$darkRootBorder;
                         }
                     }
 
                     .container_chat_assistant {
                         details {
-                            color: color.$darkChatAssistantBoxBorder;
+                            border: 1px solid color.$darkChatAssistantBoxBorder;
                             background-color: color.$darkChatAssistantBoxBackground;
-                        }
+                            color: color.$darkRootText;
 
-                        .file {
-                            border: 1px solid color.$darkChatUserBoxBorder;
+                            .html {
+                                table {
+                                    td {
+                                        border: 1px solid;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
 
             .container_message_send {
-                border: 1px solid color.$darkChatUserBoxBorder;
-                box-shadow: color.$darkMessageSendBoxShadow;
+                border: 1px solid color.$darkChatMessageSendBorder;
+                box-shadow: color.$darkShadowMessageSend;
             }
 
             .view_menuItemRight {
-                border-left: 1px solid color.$darkBorderHover;
                 background-color: color.$darkRootBackground;
-                box-shadow: color.$darkOverBoxShadow;
             }
         }
     }
