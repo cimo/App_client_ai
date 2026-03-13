@@ -452,10 +452,6 @@ aside {
                         overflow-y: scroll;
 
                         .chip {
-                            align-content: center;
-                            justify-content: center;
-                            align-items: center;
-                            justify-items: center;
                             width: 180px;
                         }
                     }
@@ -475,17 +471,17 @@ aside {
                         display: flex;
                         flex-direction: row;
                         align-content: start;
-                        justify-content: center;
+                        justify-content: space-between;
                         align-items: center;
                         justify-items: center;
                         overflow-y: scroll;
+                        flex-wrap: wrap;
+                        gap: 15px;
+                        overflow-y: scroll;
+                        padding-right: 25px;
 
                         .chip {
-                            align-content: center;
-                            justify-content: center;
-                            align-items: center;
-                            justify-items: center;
-                            width: 200px;
+                            width: 170px;
                             height: 100px;
                         }
                     }

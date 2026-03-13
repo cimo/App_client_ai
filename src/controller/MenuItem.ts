@@ -45,11 +45,6 @@ export default class MenuItem implements Icontroller {
         this.variableObject.systemMode.state = "tool-call";
     };
 
-    private onClickToolClose = (): void => {
-        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
-        this.variableObject.systemMode.state = "chat";
-    };
-
     private onClickMenuTask = (): void => {
         this.variableObject.isMenuItemFile.state = false;
         this.variableObject.isMenuItemTool.state = false;
@@ -79,7 +74,7 @@ export default class MenuItem implements Icontroller {
                 fileUploadedList: variableLink<string[]>("Index"),
                 isMenuItemTool: false,
                 toolList: variableLink<modelIndex.IapiMcpTool[]>("Index"),
-                toolSelected: {} as modelIndex.IapiMcpTool,
+                toolSelected: variableLink<modelIndex.IapiMcpTool>("Index"),
                 isMenuItemTask: false,
                 isMenuItemAgent: false,
                 systemMode: variableLink<string>("Index")
@@ -92,7 +87,6 @@ export default class MenuItem implements Icontroller {
             onClickFileUploadDelete: this.onClickFileUploadDelete,
             onClickMenuTool: this.onClickMenuTool,
             onClickToolName: this.onClickToolName,
-            onClickToolClose: this.onClickToolClose,
             onClickMenuTask: this.onClickMenuTask,
             onClickMenuAgent: this.onClickMenuAgent
         };

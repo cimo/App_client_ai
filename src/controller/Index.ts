@@ -38,33 +38,18 @@ export default class Index implements Icontroller {
     private appIsClosing: boolean;
 
     // Method
-    private resetModelResponse = (): void => {
-        this.responseId = "";
-        this.responseReason = "";
-        this.responseNoReason = "";
-        this.responseMcpTool = {} as modelIndex.IapiAiResponseTool;
+    private onClickAd = (event: Event): void => {
+        event.preventDefault();
 
-        this.variableObject.isMessageSent.state = false;
+        if (helperSrc.IS_DEBUG) {
+            this.variableObject.adUrl.state = "";
+        } else {
+            openUrl(this.variableObject.adUrl.state);
+        }
     };
 
-    private autoscroll = (isAuto: boolean): void => {
-        const elementContainerMessageReceive = this.hookObject.elementContainerMessageReceive;
-        const elementBottomLimit = this.hookObject.elementBottomLimit;
-
-        const difference =
-            elementContainerMessageReceive.scrollHeight - (elementContainerMessageReceive.scrollTop + elementContainerMessageReceive.clientHeight);
-        const threshold = 50;
-        const isAtBottom = difference <= threshold;
-
-        elementContainerMessageReceive.dataset["autoScroll"] = isAtBottom ? "true" : "false";
-
-        requestAnimationFrame(() => {
-            if (elementContainerMessageReceive.dataset["autoScroll"] === "false" && isAuto) {
-                return;
-            }
-
-            elementBottomLimit.scrollIntoView({ block: "end", inline: "nearest" });
-        });
+    private onClickRefreshPage = (): void => {
+        window.location.reload();
     };
 
     private generateUniqueId = (): string => {
@@ -664,18 +649,33 @@ export default class Index implements Icontroller {
             });
     };
 
-    private onClickRefreshPage = (): void => {
-        window.location.reload();
+    private resetModelResponse = (): void => {
+        this.responseId = "";
+        this.responseReason = "";
+        this.responseNoReason = "";
+        this.responseMcpTool = {} as modelIndex.IapiAiResponseTool;
+
+        this.variableObject.isMessageSent.state = false;
     };
 
-    private onClickAd = (event: Event): void => {
-        event.preventDefault();
+    private autoscroll = (isAuto: boolean): void => {
+        const elementContainerMessageReceive = this.hookObject.elementContainerMessageReceive;
+        const elementBottomLimit = this.hookObject.elementBottomLimit;
 
-        if (helperSrc.IS_DEBUG) {
-            this.variableObject.adUrl.state = "";
-        } else {
-            openUrl(this.variableObject.adUrl.state);
-        }
+        const difference =
+            elementContainerMessageReceive.scrollHeight - (elementContainerMessageReceive.scrollTop + elementContainerMessageReceive.clientHeight);
+        const threshold = 50;
+        const isAtBottom = difference <= threshold;
+
+        elementContainerMessageReceive.dataset["autoScroll"] = isAtBottom ? "true" : "false";
+
+        requestAnimationFrame(() => {
+            if (elementContainerMessageReceive.dataset["autoScroll"] === "false" && isAuto) {
+                return;
+            }
+
+            elementBottomLimit.scrollIntoView({ block: "end", inline: "nearest" });
+        });
     };
 
     private onClickButtonMessageSend = (): void => {
@@ -697,6 +697,11 @@ export default class Index implements Icontroller {
 
     private onClickChipUpload = (): void => {
         this.apiMcpUpload();
+    };
+
+    private onClickToolClose = (): void => {
+        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
+        this.variableObject.systemMode.state = "chat";
     };
     //...
     private onClickChipTask = (): void => {
@@ -760,6 +765,7 @@ export default class Index implements Icontroller {
             onClickModelName: this.onClickModelName,
             onClickButtonMessageSend: this.onClickButtonMessageSend,
             onClickChipUpload: this.onClickChipUpload,
+            onClickToolClose: this.onClickToolClose,
             onClickChipTask: this.onClickChipTask
         };
     }

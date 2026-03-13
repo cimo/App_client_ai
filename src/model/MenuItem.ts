@@ -19,7 +19,6 @@ export interface Imethod {
     onClickFileUploadDelete: (index: number, fileName: string) => void;
     onClickMenuTool: () => void;
     onClickToolName: (name: string) => void;
-    onClickToolClose: () => void;
     onClickMenuTask: () => void;
     onClickMenuAgent: () => void;
 }

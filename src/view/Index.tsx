@@ -156,7 +156,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                             <i
                                 class="cls_icon close"
                                 onclick={() => {
-                                    //methodObject.onClickToolClose();
+                                    methodObject.onClickToolClose();
                                 }}
                             >
                                 cancel

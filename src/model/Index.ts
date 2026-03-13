@@ -76,6 +76,7 @@ export interface Imethod {
     onClickModelName: (name: string) => void;
     onClickButtonMessageSend: () => void;
     onClickChipUpload: () => void;
+    onClickToolClose: () => void;
     onClickChipTask: () => void;
 }
 
