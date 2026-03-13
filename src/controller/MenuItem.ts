@@ -34,6 +34,9 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickTool = (name: string): void => {
+        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
+        this.variableObject.taskSelected.state = {} as modelIndex.IapiMcpTool;
+
         for (const tool of this.variableObject.toolList.state) {
             if (tool.name === name) {
                 this.variableObject.toolSelected.state = tool;
@@ -55,6 +58,9 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickTask = (name: string): void => {
+        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
+        this.variableObject.taskSelected.state = {} as modelIndex.IapiMcpTool;
+
         for (const tool of this.variableObject.taskList.state) {
             if (tool.name === name) {
                 this.variableObject.taskSelected.state = tool;

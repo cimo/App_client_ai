@@ -191,7 +191,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                                         <i
                                             class="cls_icon close"
                                             onclick={() => {
-                                                methodObject.onClickChipClose(mode);
+                                                methodObject.onClickChipClose();
                                             }}
                                         >
                                             cancel

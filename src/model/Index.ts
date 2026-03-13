@@ -80,7 +80,7 @@ export interface Imethod {
     onClickModelName: (name: string) => void;
     onClickButtonMessageSend: () => void;
     onClickChipUpload: () => void;
-    onClickChipClose: (mode: string) => void;
+    onClickChipClose: () => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

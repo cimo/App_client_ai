@@ -1,4 +1,4 @@
-import { Icontroller, IvariableEffect, IvirtualNode, variableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
+import { Icontroller, IvariableEffect, IvirtualNode, variableBind, writeStorage, readStorage, deleteStorage } from "@cimo/jsmvcfw/dist/src/Main.js";
 import { getCurrentWindow, CloseRequestedEvent, type Window } from "@tauri-apps/api/window";
 //import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -193,7 +193,7 @@ export default class Index implements Icontroller {
             } else if (this.variableObject.systemMode.state === "tool-call") {
                 inputSystem = [
                     "You are a multilingual assistant tool executer that needs to reply with the user input language and you need to transform the user request in a action.",
-                    `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}.`,
+                    `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}`,
                     `For ${this.variableObject.toolSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }`,
                     "You MUST NOT solve problems.",
                     "You MUST NOT invent new actions.",
@@ -202,8 +202,8 @@ export default class Index implements Icontroller {
             } else if (this.variableObject.systemMode.state === "task-call") {
                 inputSystem = [
                     "You are a multilingual assistant tool task executer that needs to reply with the user input language and you need to transform the user request in a ordered list of actions.",
-                    "You MUST use ONLY the following tool: chrome.",
-                    'For chrome you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "chrome", "argumentObject": { "url": "..." } } ] }',
+                    `You MUST use ONLY the following tool: ${this.variableObject.taskSelected.state.name}`,
+                    `For ${this.variableObject.taskSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "${this.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.taskSelected.state.argumentObject)} } ] }`,
                     "You MUST NOT solve problems.",
                     "You MUST NOT invent new actions.",
                     "You MUST NOT explain nothing."
@@ -452,7 +452,7 @@ export default class Index implements Icontroller {
 
                 this.mcpSessionId = resultJson.response.stdout;
 
-                localStorage.setItem("mcp-session-id", this.mcpSessionId);
+                writeStorage("mcp-session-id", this.mcpSessionId);
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Index.ts - apiMcpLogin() - fetch() - catch()", error.message);
@@ -655,7 +655,7 @@ export default class Index implements Icontroller {
                 this.mcpSessionId = "";
                 this.mcpCookie = "";
 
-                localStorage.removeItem("mcp-session-id");
+                deleteStorage("mcp-session-id");
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Index.ts - apiMcpLogout() - fetch() - catch()", error.message);
@@ -728,12 +728,9 @@ export default class Index implements Icontroller {
         this.apiMcpUpload();
     };
 
-    private onClickChipClose = (mode: string): void => {
-        if (mode === "tool") {
-            this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
-        } else if (mode === "task") {
-            this.variableObject.taskSelected.state = {} as modelIndex.IapiMcpTool;
-        }
+    private onClickChipClose = (): void => {
+        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
+        this.variableObject.taskSelected.state = {} as modelIndex.IapiMcpTool;
 
         this.variableObject.systemMode.state = "chat";
     };
@@ -754,7 +751,7 @@ export default class Index implements Icontroller {
 
         this.aiBearerToken = this.generateUniqueId();
         this.aiCookie = "";
-        this.mcpSessionId = localStorage.getItem("mcp-session-id") || "";
+        this.mcpSessionId = readStorage("mcp-session-id") || "";
         this.mcpCookie = "";
 
         this.appWindow = getCurrentWindow();

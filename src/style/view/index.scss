@@ -109,6 +109,7 @@ aside {
         border-radius: 20px;
         white-space: break-spaces;
         word-break: break-word;
+        overflow-y: auto;
 
         .cls_icon {
             font-size: parameter.$fontSizeNormalPlus !important;
