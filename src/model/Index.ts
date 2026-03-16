@@ -7,10 +7,14 @@ export interface IresponseBody {
     };
 }
 
-export interface IapiAiModel {
+export interface IapiAiModelItem {
     id: string;
     object: string;
     owned_by: string;
+}
+
+export interface IapiAiModel {
+    data: IapiAiModelItem[];
 }
 
 export interface IapiAiResponseTool {
@@ -58,7 +62,7 @@ export interface IchatMessage {
 export interface Ivariable {
     isOfflineAi: IvariableBind<boolean>;
     isOfflineMcp: IvariableBind<boolean>;
-    modelList: IvariableBind<IapiAiModel[]>;
+    modelList: IvariableBind<IapiAiModelItem[]>;
     isOpenDropdownModelList: IvariableBind<boolean>;
     modelSelected: IvariableBind<string>;
     chatMessageList: IvariableBind<IchatMessage[]>;

@@ -117,10 +117,10 @@ export default class Index implements Icontroller {
                 this.variableObject.isOfflineAi.state = false;
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
-                const jsonParse = JSON.parse(resultJson.response.stdout) as modelIndex.IapiAiModel[];
+                const jsonParse = JSON.parse(resultJson.response.stdout) as modelIndex.IapiAiModel;
                 const resultCleaned = [];
 
-                for (const value of jsonParse) {
+                for (const value of jsonParse.data) {
                     if (value.id.toLowerCase().includes("embedding")) {
                         continue;
                     }
