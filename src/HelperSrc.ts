@@ -11,7 +11,7 @@ export const PATH_LOG = "log/";
 export const LOCALE = "jp";
 export const URL_AI = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
 export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
-export const MODEL_DEFAULT = "qwen3.5-0.8b";
+export const MODEL_DEFAULT = "Qwen3.5-0.8B-BF16";
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {
     // Asia
