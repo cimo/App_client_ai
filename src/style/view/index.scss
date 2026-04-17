@@ -7,7 +7,6 @@ body,
 .view_index {
     width: 100%;
     height: 100%;
-    user-select: none;
     overflow: hidden;
 }
 
@@ -43,10 +42,6 @@ aside {
     justify-content: center;
     align-items: stretch;
     justify-items: center;
-
-    .bottom_limit {
-        height: 1px;
-    }
 
     .cls_icon {
         display: block !important;
@@ -216,186 +211,18 @@ aside {
             justify-items: center;
             flex: 1 1 auto;
             min-height: 0;
+            min-width: 0;
 
-            .container_chat {
-                display: flex;
-                flex-direction: column;
-                align-content: center;
-                justify-content: start;
-                align-items: stretch;
-                justify-items: center;
-                flex: 1 1 auto;
-                min-height: 0;
-                padding: 0 25px;
-                overflow-x: hidden;
-                overflow-y: scroll;
-
-                > div {
-                    .container_chat_user {
-                        display: flex;
-                        flex-direction: column;
-                        align-content: center;
-                        justify-content: center;
-                        align-items: end;
-                        justify-items: center;
-                        margin: 10px 0px;
-
-                        .time {
-                            width: fit-content;
-                        }
-
-                        .message {
-                            border-radius: 8px;
-                            margin: 5px 0;
-                            padding: 10px;
-                        }
-                    }
-
-                    .container_chat_assistant {
-                        display: flex;
-                        flex-direction: column;
-                        align-content: center;
-                        justify-content: center;
-                        align-items: start;
-                        justify-items: center;
-                        margin: 10px 0px;
-
-                        details {
-                            padding: 5px;
-                            width: fit-content;
-                            margin: 5px 0;
-                            border-radius: 8px;
-                            max-height: 500px;
-                            overflow-x: auto;
-                            overflow-y: auto;
-
-                            summary {
-                                display: flex;
-                                flex-direction: row;
-                                align-content: center;
-                                justify-content: start;
-                                align-items: center;
-                                justify-items: center;
-                                cursor: pointer;
-
-                                .cls_icon {
-                                    font-size: parameter.$fontSizeNormalPlus !important;
-                                }
-                            }
-
-                            .list {
-                                margin: 5px 0;
-
-                                li {
-                                    margin: 2px 0;
-                                }
-                            }
-
-                            .file {
-                                display: flex;
-                                flex-direction: column;
-                                align-content: center;
-                                justify-content: center;
-                                align-items: start;
-                                justify-items: center;
-                                margin-top: 10px;
-
-                                li {
-                                    display: flex;
-                                    flex-direction: row;
-                                    align-content: center;
-                                    justify-content: center;
-                                    align-items: center;
-                                    justify-items: center;
-
-                                    .cls_icon {
-                                        font-size: parameter.$fontSizeNormalPlus !important;
-                                        margin-right: 5px !important;
-                                    }
-                                }
-                            }
-
-                            .html {
-                                margin-top: 10px;
-                            }
-                        }
-                    }
-                }
-            }
-
-            .container_chip {
-                display: flex;
-                flex-direction: row;
-                align-content: center;
-                justify-content: start;
-                align-items: center;
-                justify-items: center;
-                padding: 10px 25px;
-
-                .chip {
-                    width: 180px;
-                }
-            }
-
-            .container_message_send {
+            aside:has(> .view_ai) {
                 display: flex;
                 flex-direction: column;
                 align-content: center;
                 justify-content: center;
                 align-items: stretch;
                 justify-items: center;
-                border-radius: 8px;
-                width: 90%;
-                align-self: center;
-                margin-bottom: 10px;
-
-                .container_action {
-                    display: flex;
-                    flex-direction: row;
-                    align-content: center;
-                    justify-content: space-between;
-                    align-items: center;
-                    justify-items: center;
-                    height: 45px;
-
-                    .left {
-                        display: flex;
-                        flex-direction: row;
-                        align-content: center;
-                        justify-content: center;
-                        align-items: center;
-                        justify-items: center;
-
-                        > div {
-                            margin-left: 5px;
-                        }
-
-                        .chip {
-                            cursor: pointer;
-                        }
-                    }
-
-                    .right {
-                        display: flex;
-                        flex-direction: row;
-                        align-content: center;
-                        justify-content: center;
-                        align-items: center;
-                        justify-items: center;
-                    }
-
-                    button {
-                        display: flex;
-                        flex-direction: row;
-                        align-content: center;
-                        justify-content: center;
-                        align-items: center;
-                        justify-items: center;
-                        width: 40px;
-                        height: 36px;
-                        margin: 0 5px 0 0;
-                    }
-                }
+                flex: 1 1 auto;
+                min-height: 0;
+                min-width: 0;
             }
 
             .view_menuItemRight {
@@ -640,10 +467,11 @@ aside {
                             background-color: color.$darkChatAssistantBoxBackground;
                             color: color.$darkRootText;
 
-                            .html {
-                                table {
-                                    td {
-                                        border: 1px solid;
+                            summary {
+                                .page_index {
+                                    input {
+                                        color: color.$darkRootText !important;
+                                        background-color: color.$darkChatAssistantBoxBackground !important;
                                     }
                                 }
                             }

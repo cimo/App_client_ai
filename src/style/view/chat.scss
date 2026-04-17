@@ -1,0 +1,261 @@
+@use "../setting/color.scss" as color;
+@use "../setting/parameter.scss" as parameter;
+
+.view_message {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: stretch;
+    justify-items: center;
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+
+    .bottom_limit {
+        height: 1px;
+    }
+
+    .container_chat {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        justify-content: start;
+        align-items: stretch;
+        justify-items: center;
+        flex: 1 1 auto;
+        min-height: 0;
+        padding: 0 25px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+
+        > div {
+            .container_chat_user {
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+                justify-content: center;
+                align-items: end;
+                justify-items: center;
+                margin: 10px 0px;
+
+                .time {
+                    width: fit-content;
+                }
+
+                .message {
+                    border-radius: 8px;
+                    margin: 5px 0;
+                    padding: 10px;
+                }
+            }
+
+            .container_chat_assistant {
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+                justify-content: center;
+                align-items: start;
+                justify-items: center;
+                margin: 10px 0px;
+
+                details {
+                    padding: 5px;
+                    width: fit-content;
+                    max-width: 100%;
+                    margin: 5px 0;
+                    border-radius: 8px;
+                    max-height: 500px;
+                    overflow-x: auto;
+                    overflow-y: auto;
+
+                    summary {
+                        display: flex;
+                        flex-direction: row;
+                        align-content: center;
+                        justify-content: start;
+                        align-items: center;
+                        justify-items: center;
+                        cursor: pointer;
+
+                        .cls_icon {
+                            font-size: parameter.$fontSizeNormalPlus !important;
+                        }
+                    }
+
+                    .document_summary {
+                        position: sticky;
+                        top: 0;
+                        left: 0;
+
+                        .page_index {
+                            display: none;
+                            margin-right: 20px;
+
+                            input {
+                                width: 40px;
+                                margin-right: 5px;
+                                text-align: center;
+                                padding: 0 !important;
+                                border-radius: 0 !important;
+                                cursor: text !important;
+                            }
+                        }
+                    }
+
+                    .list {
+                        margin: 5px 0;
+
+                        li {
+                            margin: 2px 0;
+                        }
+                    }
+
+                    .file {
+                        display: flex;
+                        flex-direction: column;
+                        align-content: center;
+                        justify-content: center;
+                        align-items: start;
+                        justify-items: center;
+                        margin-top: 10px;
+
+                        li {
+                            display: flex;
+                            flex-direction: row;
+                            align-content: center;
+                            justify-content: center;
+                            align-items: center;
+                            justify-items: center;
+
+                            .cls_icon {
+                                font-size: parameter.$fontSizeNormalPlus !important;
+                                margin-right: 5px !important;
+                            }
+                        }
+                    }
+
+                    .json {
+                        margin-top: 10px;
+
+                        .source_link {
+                            text-decoration: underline;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.view_input {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: stretch;
+    justify-items: center;
+
+    .container_message_send {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        justify-content: center;
+        align-items: stretch;
+        justify-items: center;
+        border-radius: 8px;
+        width: 90%;
+        align-self: center;
+        margin-bottom: 10px;
+
+        .container_action {
+            display: flex;
+            flex-direction: row;
+            align-content: center;
+            justify-content: space-between;
+            align-items: center;
+            justify-items: center;
+            height: 45px;
+
+            .left {
+                display: flex;
+                flex-direction: row;
+                align-content: center;
+                justify-content: center;
+                align-items: center;
+                justify-items: center;
+
+                > div {
+                    margin-left: 5px;
+                }
+
+                .chip {
+                    cursor: pointer;
+                }
+            }
+
+            .right {
+                display: flex;
+                flex-direction: row;
+                align-content: center;
+                justify-content: center;
+                align-items: center;
+                justify-items: center;
+            }
+
+            button {
+                display: flex;
+                flex-direction: row;
+                align-content: center;
+                justify-content: center;
+                align-items: center;
+                justify-items: center;
+                width: 40px;
+                height: 36px;
+                margin: 0 5px 0 0;
+            }
+        }
+    }
+}
+
+@media (prefers-color-scheme: Dark) {
+    .container_chat {
+        > div {
+            .container_chat_user {
+                .message {
+                    border: 1px solid color.$darkRootBorder;
+                }
+            }
+
+            .container_chat_assistant {
+                details {
+                    border: 1px solid color.$darkChatAssistantBoxBorder;
+                    background-color: color.$darkChatAssistantBoxBackground;
+                    color: color.$darkRootText;
+
+                    summary {
+                        .page_index {
+                            input {
+                                color: color.$darkRootText !important;
+                                background-color: color.$darkChatAssistantBoxBackground !important;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .container_message_send {
+        border: 1px solid color.$darkChatMessageSendBorder;
+        box-shadow: color.$darkShadowMessageSend;
+    }
+
+    .view_menuItemRight {
+        background-color: color.$darkRootBackground;
+    }
+}
+
+@media (prefers-color-scheme: Light) {
+    //...
+}

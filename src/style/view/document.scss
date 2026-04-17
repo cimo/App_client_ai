@@ -1,0 +1,43 @@
+@use "../setting/color.scss" as color;
+@use "../setting/parameter.scss" as parameter;
+
+.view_document {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: stretch;
+    justify-items: center;
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    .container_html {
+        width: 100%;
+        height: 100%;
+        display: block;
+        margin: 10px auto;
+        text-align: center;
+
+        .html {
+            margin: 0 auto;
+            width: 90%;
+            height: 100%;
+        }
+    }
+
+    aside:has(> .view_message) {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        justify-content: center;
+        align-items: stretch;
+        justify-items: center;
+        flex: 1 1 auto;
+        min-height: 0;
+        min-width: 0;
+    }
+}

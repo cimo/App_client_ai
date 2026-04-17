@@ -3,12 +3,12 @@ import { jsxFactory, IvirtualNode } from "@cimo/jsmvcfw/dist/src/Main.js";
 // Source
 import * as modelMenuItem from "../model/MenuItem";
 
-export const viewMenuItemLeft = (variableObject: modelMenuItem.Ivariable, methodObject: modelMenuItem.Imethod): IvirtualNode => {
+export const left = (variableObject: modelMenuItem.Ivariable, methodObject: modelMenuItem.Imethod): IvirtualNode => {
     return (
         <ul class="view_menuItemLeft">
             <li
                 class={variableObject.isMenuItemFile.state ? "active" : ""}
-                onclick={() => {
+                onClick={() => {
                     methodObject.onClickMenuFile();
                 }}
             >
@@ -16,7 +16,7 @@ export const viewMenuItemLeft = (variableObject: modelMenuItem.Ivariable, method
             </li>
             <li
                 class={variableObject.isMenuItemTool.state ? "active" : ""}
-                onclick={() => {
+                onClick={() => {
                     methodObject.onClickMenuTool();
                 }}
             >
@@ -24,7 +24,7 @@ export const viewMenuItemLeft = (variableObject: modelMenuItem.Ivariable, method
             </li>
             <li
                 class={variableObject.isMenuItemTask.state ? "active" : ""}
-                onclick={() => {
+                onClick={() => {
                     methodObject.onClickMenuTask();
                 }}
             >
@@ -32,7 +32,7 @@ export const viewMenuItemLeft = (variableObject: modelMenuItem.Ivariable, method
             </li>
             <li
                 class={variableObject.isMenuItemAgent.state ? "active" : ""}
-                onclick={() => {
+                onClick={() => {
                     methodObject.onClickMenuAgent();
                 }}
             >
@@ -42,7 +42,7 @@ export const viewMenuItemLeft = (variableObject: modelMenuItem.Ivariable, method
     );
 };
 
-export const viewMenuItemRight = (variableObject: modelMenuItem.Ivariable, methodObject: modelMenuItem.Imethod): IvirtualNode => {
+export const right = (variableObject: modelMenuItem.Ivariable, methodObject: modelMenuItem.Imethod): IvirtualNode => {
     return (
         <div
             class={`view_menuItemRight ${variableObject.isMenuItemFile.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state ? "" : "none"}`}
@@ -62,11 +62,11 @@ export const viewMenuItemRight = (variableObject: modelMenuItem.Ivariable, metho
                                         const value = variableObject.fileUploadedList.state[a];
 
                                         result.push(
-                                            <li key={a} class="chip">
+                                            <li key={a} class="chip" onClick={() => methodObject.openDocument(value)}>
                                                 <i
                                                     class="cls_icon close"
-                                                    onclick={() => {
-                                                        methodObject.onClickFileUploadDelete(a, value);
+                                                    onClick={(event: Event) => {
+                                                        methodObject.onClickFileUploadDelete(event, a, value);
                                                     }}
                                                 >
                                                     delete

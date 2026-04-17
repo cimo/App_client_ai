@@ -1,15 +1,14 @@
-import { Icontroller, IvariableEffect, IvirtualNode, variableBind, writeStorage, readStorage, deleteStorage } from "@cimo/jsmvcfw/dist/src/Main.js";
+import { Icontroller, IvariableEffect, IvirtualNode, variableBind, variableLink } from "@cimo/jsmvcfw/dist/src/Main.js";
 import { getCurrentWindow, CloseRequestedEvent, type Window } from "@tauri-apps/api/window";
 //import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
-import { readFile } from "@tauri-apps/plugin-fs";
-import { fetch } from "@tauri-apps/plugin-http";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 // Source
+import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
 import * as modelIndex from "../model/Index";
 import viewIndex from "../view/Index";
+import ControllerChat from "./Chat";
 import ControllerAi from "./Ai";
 import ControllerMcp from "./Mcp";
 import ControllerMenuItem from "./MenuItem";
@@ -18,681 +17,16 @@ export default class Index implements Icontroller {
     // Variable
     private variableObject: modelIndex.Ivariable;
     private methodObject: modelIndex.Imethod;
+
+    private controllerChat: ControllerChat;
     private controllerAi: ControllerAi;
     private controllerMcp: ControllerMcp;
     private controllerMenuItem: ControllerMenuItem;
-
-    private responseId: string;
-    private responseReason: string;
-    private responseNoReason: string;
-    private responseMcpTool: modelIndex.IapiAiResponseTool;
-
-    private abortControllerApiAiResponse: AbortController | null;
-
-    private aiBearerToken: string;
-    private aiCookie: string;
-    private mcpSessionId: string;
-    private mcpCookie: string;
 
     private appWindow: Window;
     private appIsClosing: boolean;
 
     // Method
-    private generateUniqueId = (): string => {
-        const timestamp = Date.now().toString(36);
-        const randomPart = crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
-
-        return `${timestamp}-${randomPart}`;
-    };
-
-    private apiAiLogin = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_AI}/login`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${this.aiBearerToken}`
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (result) => {
-                this.variableObject.isOfflineAi.state = false;
-
-                const cookie = result.headers.get("set-cookie");
-
-                this.aiCookie = cookie ? cookie : "";
-
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                this.variableObject.adUrl.state = resultJson.response.stdout;
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiAiLogin() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineAi.state = true;
-            });
-    };
-
-    private apiAiUserInfo = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_AI}/user-info`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${this.aiBearerToken}`,
-                Cookie: this.aiCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (result) => {
-                this.variableObject.isOfflineAi.state = false;
-
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                // eslint-disable-next-line no-console
-                console.log("cimo - apiAiUserInfo()", resultJson);
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiAiUserInfo() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineAi.state = true;
-            });
-    };
-
-    private apiAiModel = (): void => {
-        fetch(`${helperSrc.URL_AI}/api/model`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${this.aiBearerToken}`,
-                Cookie: this.aiCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (result) => {
-                this.variableObject.isOfflineAi.state = false;
-
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-                const jsonParse = JSON.parse(resultJson.response.stdout) as modelIndex.IapiAiModel;
-                const resultCleaned = [];
-
-                for (const value of jsonParse.data) {
-                    if (value.id.toLowerCase().includes("embedding")) {
-                        continue;
-                    }
-
-                    resultCleaned.push(value);
-                }
-
-                this.variableObject.modelList.state = [...resultCleaned].sort((a, b) => a.id.localeCompare(b.id));
-
-                this.variableObject.isOpenDropdownModelList.state = true;
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiAiModel() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineAi.state = true;
-            });
-    };
-
-    private apiAiResponse = (): void => {
-        //const base64 = await invoke("test_screenshot");
-        //this.variableObject.modelSelected.state = base64 as string;
-
-        //await invoke("test");
-
-        if (this.hookObject.elementInputMessageSend.value && this.variableObject.modelSelected.state !== "") {
-            this.abortControllerApiAiResponse = new AbortController();
-
-            this.resetModelResponse();
-
-            this.variableObject.chatMessageList.state.push({
-                time: helperSrc.localeFormat(new Date()) as string,
-                user: this.hookObject.elementInputMessageSend.value,
-                assistantReason: this.responseReason,
-                assistantNoReason: this.responseNoReason,
-                mcpTool: this.responseMcpTool,
-                file: ""
-            });
-
-            this.autoscroll(false);
-
-            const input: modelIndex.IchatInput[] = [];
-
-            /*this.variableObject.chatHistoryList.state.push({
-                role: "user",
-                content: this.hookObject.elementInputMessageSend.value
-            });
-            
-            for (const chatHistoryList of this.variableObject.chatHistoryList.state) {
-                if (chatHistoryList.role === "system" || chatHistoryList.role === "user") {
-                    input.push({
-                        role: chatHistoryList.role,
-                        content: [{ type: "input_text", text: chatHistoryList.content as string }]
-                    });
-                } else {
-                    input.push({
-                        role: chatHistoryList.role,
-                        content: [{ type: "output_text", text: chatHistoryList.content as string }]
-                    });
-                }
-            }*/
-
-            let inputSystem = "";
-
-            if (this.variableObject.systemMode.state === "chat") {
-                inputSystem = [
-                    "You are a multilingual assistant that needs to reply with the user input language.",
-                    "You MUST need to reason step by step and give a answer to the user question.",
-                    "You MUST NOT use tools and tasks."
-                ].join("\n");
-            } else if (this.variableObject.systemMode.state === "tool-call") {
-                inputSystem = [
-                    "You are a multilingual assistant tool executer that needs to reply with the user input language and you need to transform the user request in a action.",
-                    `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}`,
-                    `For ${this.variableObject.toolSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }`,
-                    "You MUST NOT solve problems.",
-                    "You MUST NOT invent new actions.",
-                    "You MUST NOT explain nothing."
-                ].join("\n");
-            } else if (this.variableObject.systemMode.state === "task-call") {
-                inputSystem = [
-                    "You are a multilingual assistant tool task executer that needs to reply with the user input language and you need to transform the user request in a ordered list of actions.",
-                    `You MUST use ONLY the following tool: ${this.variableObject.taskSelected.state.name}`,
-                    `For ${this.variableObject.taskSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "${this.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.taskSelected.state.argumentObject)} } ] }`,
-                    "You MUST NOT solve problems.",
-                    "You MUST NOT invent new actions.",
-                    "You MUST NOT explain nothing."
-                ].join("\n");
-            } else if (this.variableObject.systemMode.state === "agent-skill") {
-                inputSystem = [
-                    "You are a multilingual agent skill executer that needs to reply with the user input language and you need to transform the user request in a action.",
-                    'If you find a tag [script](...) in the text you MUST stop and write ONLY valid JSON with this format without additional information: { "action": { "script": true } }'
-                ].join("\n");
-            }
-
-            input.push(
-                {
-                    role: "system",
-                    content: [
-                        {
-                            type: "input_text",
-                            text: inputSystem
-                        }
-                    ]
-                },
-                {
-                    role: "user",
-                    content: [{ type: "input_text", text: this.hookObject.elementInputMessageSend.value }]
-                }
-            );
-
-            fetch(`${helperSrc.URL_AI}/api/response`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${this.aiBearerToken}`,
-                    Cookie: this.aiCookie,
-                    "mcp-session-id": this.mcpSessionId,
-                    "cookie-mcp": this.mcpCookie
-                },
-                body: JSON.stringify({
-                    stream: true,
-                    model: this.variableObject.modelSelected.state,
-                    input,
-                    tools: []
-                }),
-                signal: this.abortControllerApiAiResponse.signal,
-                danger: {
-                    acceptInvalidCerts: true,
-                    acceptInvalidHostnames: true
-                }
-            })
-                .then(async (result) => {
-                    this.variableObject.isOfflineAi.state = false;
-
-                    this.variableObject.isMessageSent.state = true;
-
-                    const contentType = result.headers.get("Content-Type");
-
-                    if (!contentType || !contentType.includes("text/event-stream") || !result.body) {
-                        helperSrc.writeLog("Index.ts - apiAiResponse() - fetch() - Error", "Missing or invalid headers.");
-
-                        return;
-                    }
-
-                    const reader = result.body.getReader();
-                    const decoder = new TextDecoder("utf-8");
-                    let buffer = "";
-
-                    while (true) {
-                        const { value, done } = await reader.read();
-
-                        if (done) {
-                            this.resetModelResponse();
-
-                            break;
-                        }
-
-                        buffer += decoder.decode(value, { stream: true });
-                        const lineList = buffer.split(/\r?\n/);
-                        buffer = lineList.pop() || "";
-
-                        for (const line of lineList) {
-                            if (line.startsWith("data:")) {
-                                const data = line.slice(5).trim();
-
-                                const dataTrim = data.trim();
-
-                                if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
-                                    const dataTrimParse = JSON.parse(dataTrim) as modelIndex.IapiAiResponse;
-
-                                    if (dataTrimParse.type === "error") {
-                                        const dataError = dataTrimParse.error;
-
-                                        if (dataError) {
-                                            const idx = this.variableObject.chatMessageList.state.length - 1;
-
-                                            this.variableObject.chatMessageList.state[idx] = {
-                                                ...this.variableObject.chatMessageList.state[idx],
-                                                assistantNoReason: dataError.message
-                                            };
-
-                                            this.autoscroll(false);
-                                        }
-                                    } else if (dataTrimParse.type === "response.created") {
-                                        const dataResponse = dataTrimParse.response;
-
-                                        if (dataResponse) {
-                                            this.responseId = dataResponse.id;
-                                        }
-                                    } else if (dataTrimParse.type === "response.reasoning_text.delta") {
-                                        const dataDelta = dataTrimParse.delta;
-
-                                        if (dataDelta) {
-                                            this.responseReason += dataDelta;
-
-                                            const index = this.variableObject.chatMessageList.state.length - 1;
-
-                                            this.variableObject.chatMessageList.state[index] = {
-                                                ...this.variableObject.chatMessageList.state[index],
-                                                assistantReason: this.responseReason.trim()
-                                            };
-
-                                            this.autoscroll(true);
-                                        }
-                                    } else if (dataTrimParse.type === "response.output_text.delta") {
-                                        const dataDelta = dataTrimParse.delta;
-
-                                        if (dataDelta) {
-                                            this.responseNoReason += dataDelta;
-
-                                            const index = this.variableObject.chatMessageList.state.length - 1;
-
-                                            this.variableObject.chatMessageList.state[index] = {
-                                                ...this.variableObject.chatMessageList.state[index],
-                                                assistantNoReason: this.responseNoReason.trim()
-                                            };
-
-                                            this.autoscroll(true);
-                                        }
-                                    } else if (dataTrimParse.type === "response.output_item.done") {
-                                        const dataItem = dataTrimParse.item;
-
-                                        if (dataItem && dataItem.type === "mcp_call") {
-                                            this.responseMcpTool = {
-                                                tool_call_id: dataItem.tool_call_id,
-                                                type: dataItem.type,
-                                                name: dataItem.name,
-                                                arguments: dataItem.arguments,
-                                                output: dataItem.output
-                                            };
-
-                                            const index = this.variableObject.chatMessageList.state.length - 1;
-
-                                            this.variableObject.chatMessageList.state[index] = {
-                                                ...this.variableObject.chatMessageList.state[index],
-                                                mcpTool: this.responseMcpTool
-                                            };
-
-                                            this.autoscroll(true);
-                                        }
-                                    } else if (dataTrimParse.type === "response.completed") {
-                                        this.autoscroll(false);
-                                    } else if (dataTrimParse.type === "tool_response") {
-                                        const dataResponse = dataTrimParse.response.message;
-
-                                        if (dataResponse) {
-                                            const index = this.variableObject.chatMessageList.state.length - 1;
-
-                                            this.variableObject.chatMessageList.state[index] = {
-                                                ...this.variableObject.chatMessageList.state[index],
-                                                assistantNoReason: dataResponse
-                                            };
-                                        }
-
-                                        this.autoscroll(false);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                })
-                .catch((error: Error) => {
-                    helperSrc.writeLog("Index.ts - apiAiResponse() - fetch() - catch()", typeof error === "string" ? error : error.message);
-
-                    this.resetModelResponse();
-
-                    if (error.toString().toLowerCase() === "request cancelled") {
-                        const idx = this.variableObject.chatMessageList.state.length - 1;
-
-                        this.variableObject.chatMessageList.state[idx] = {
-                            ...this.variableObject.chatMessageList.state[idx],
-                            assistantNoReason: "Stoped by user."
-                        };
-
-                        return;
-                    }
-
-                    this.variableObject.isOfflineAi.state = true;
-                });
-
-            this.hookObject.elementInputMessageSend.value = "";
-        }
-    };
-
-    private apiAiLogout = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_AI}/logout`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${this.aiBearerToken}`,
-                Cookie: this.aiCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(() => {
-                this.variableObject.isOfflineAi.state = false;
-
-                this.aiBearerToken = "";
-                this.aiCookie = "";
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiAiLogout() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineAi.state = true;
-            });
-    };
-
-    private apiMcpLogin = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_MCP}/login`, {
-            method: "GET",
-            headers: {
-                "mcp-session-id": this.mcpSessionId
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (result) => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                const cookie = result.headers.get("set-cookie");
-
-                this.mcpCookie = cookie ? cookie : "";
-
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                this.mcpSessionId = resultJson.response.stdout;
-
-                writeStorage("mcp-session-id", this.mcpSessionId);
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiMcpLogin() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-            });
-    };
-
-    private apiMcpTool = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_MCP}/api/tool-list`, {
-            method: "GET",
-            headers: {
-                "mcp-session-id": this.mcpSessionId,
-                Cookie: this.mcpCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (result) => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                if (resultJson.response.stdout !== "") {
-                    this.variableObject.toolList.state = JSON.parse(resultJson.response.stdout) as modelIndex.IapiMcpTool[];
-                }
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiMcpTool() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-            });
-    };
-
-    private apiMcpTask = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_MCP}/api/task-list`, {
-            method: "GET",
-            headers: {
-                "mcp-session-id": this.mcpSessionId,
-                Cookie: this.mcpCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (result) => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                if (resultJson.response.stdout !== "") {
-                    this.variableObject.taskList.state = JSON.parse(resultJson.response.stdout) as modelIndex.IapiMcpTool[];
-                }
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiMcpTask() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-            });
-    };
-
-    private apiMcpUpload = async (): Promise<void> => {
-        const pathFileList = await open({
-            multiple: true,
-            directory: false
-        });
-
-        if (pathFileList) {
-            let fileList: string[] = [];
-
-            for (const pathFile of pathFileList) {
-                const file = await readFile(pathFile);
-                const mimeType = helperSrc.readMimeType(file);
-                const blob = new Blob([file], { type: mimeType.content });
-                const fileName = pathFile.split(/[/\\]/).pop() || "file";
-
-                const formData = new FormData();
-                formData.append("file", blob, `${fileName}`);
-
-                await fetch(`${helperSrc.URL_MCP}/api/upload`, {
-                    method: "POST",
-                    headers: {
-                        "mcp-session-id": this.mcpSessionId,
-                        Cookie: this.mcpCookie
-                    },
-                    body: formData,
-                    danger: {
-                        acceptInvalidCerts: true,
-                        acceptInvalidHostnames: true
-                    }
-                })
-                    .then(async (result) => {
-                        this.variableObject.isOfflineMcp.state = false;
-
-                        const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                        if (resultJson.response.stdout !== "") {
-                            fileList.push(resultJson.response.stdout);
-                        }
-                    })
-                    .catch((error: Error) => {
-                        helperSrc.writeLog("Index.ts - apiMcpUpload() - fetch() - catch()", error.message);
-
-                        this.variableObject.isOfflineMcp.state = true;
-                    });
-            }
-
-            if (fileList.length > 0) {
-                const message = {} as modelIndex.IchatMessage;
-                message.assistantNoReason = "File uploaded.";
-                message.file = JSON.stringify(fileList);
-
-                this.variableObject.chatMessageList.state.push(message);
-
-                this.autoscroll(false);
-            } else {
-                const message = {} as modelIndex.IchatMessage;
-                message.assistantNoReason = "Error: File write problem.";
-                message.file = "";
-
-                this.variableObject.chatMessageList.state.push(message);
-
-                this.autoscroll(false);
-            }
-        }
-    };
-
-    apiMcpFileUploaded = async (): Promise<void> => {
-        fetch(`${helperSrc.URL_MCP}/api/file-uploaded`, {
-            method: "GET",
-            headers: {
-                "mcp-session-id": this.mcpSessionId,
-                Cookie: this.mcpCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (result) => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                if (resultJson.response.stdout !== "") {
-                    this.variableObject.fileUploadedList.state = JSON.parse(resultJson.response.stdout);
-                }
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiMcpFileUploaded() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-            });
-    };
-
-    apiMcpFileUploadedDelete = (index: number, fileName: string): void => {
-        fetch(`${helperSrc.URL_MCP}/api/file-uploaded-delete`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "mcp-session-id": this.mcpSessionId,
-                Cookie: this.mcpCookie
-            },
-            body: JSON.stringify({ fileName }),
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async () => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                this.variableObject.fileUploadedList.state = this.variableObject.fileUploadedList.state.filter((_, a) => a !== index);
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiMcpFileUploadedDelete() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-            });
-    };
-
-    private apiMcpLogout = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_MCP}/logout`, {
-            method: "GET",
-            headers: {
-                "mcp-session-id": this.mcpSessionId,
-                Cookie: this.mcpCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(() => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                this.mcpSessionId = "";
-                this.mcpCookie = "";
-
-                deleteStorage("mcp-session-id");
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiMcpLogout() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-            });
-    };
-
-    private resetModelResponse = (): void => {
-        this.responseId = "";
-        this.responseReason = "";
-        this.responseNoReason = "";
-        this.responseMcpTool = {} as modelIndex.IapiAiResponseTool;
-
-        this.variableObject.isMessageSent.state = false;
-    };
-
-    private autoscroll = (isAuto: boolean): void => {
-        const elementContainerMessageReceive = this.hookObject.elementContainerMessageReceive;
-        const elementBottomLimit = this.hookObject.elementBottomLimit;
-
-        const difference =
-            elementContainerMessageReceive.scrollHeight - (elementContainerMessageReceive.scrollTop + elementContainerMessageReceive.clientHeight);
-        const threshold = 50;
-        const isAtBottom = difference <= threshold;
-
-        elementContainerMessageReceive.dataset["autoScroll"] = isAtBottom ? "true" : "false";
-
-        requestAnimationFrame(() => {
-            if (elementContainerMessageReceive.dataset["autoScroll"] === "false" && isAuto) {
-                return;
-            }
-
-            elementBottomLimit.scrollIntoView({ block: "end", inline: "nearest" });
-        });
-    };
-
     private onClickAd = (event: Event): void => {
         event.preventDefault();
 
@@ -707,52 +41,19 @@ export default class Index implements Icontroller {
         window.location.reload();
     };
 
-    private onClickDropdownModel = (): void => {
-        this.apiAiModel();
-    };
-
-    private onClickModelName = (name: string): void => {
-        this.variableObject.modelSelected.state = name;
-    };
-
-    private onClickButtonMessageSend = (): void => {
-        if (this.abortControllerApiAiResponse && this.responseId) {
-            this.abortControllerApiAiResponse.abort();
-            this.abortControllerApiAiResponse = null;
-        } else {
-            this.apiAiResponse();
-        }
-    };
-
-    private onClickChipUpload = (): void => {
-        this.apiMcpUpload();
-    };
-
-    private onClickChipClose = (): void => {
-        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
-        this.variableObject.taskSelected.state = {} as modelIndex.IapiMcpTool;
-
-        this.variableObject.systemMode.state = "chat";
-    };
-
     constructor() {
         this.variableObject = {} as modelIndex.Ivariable;
         this.methodObject = {} as modelIndex.Imethod;
+
+        this.controllerChat = new ControllerChat();
         this.controllerAi = new ControllerAi();
         this.controllerMcp = new ControllerMcp();
-        this.controllerMenuItem = new ControllerMenuItem(this);
+        this.controllerMenuItem = new ControllerMenuItem();
 
-        this.responseId = "";
-        this.responseReason = "";
-        this.responseNoReason = "";
-        this.responseMcpTool = {} as modelIndex.IapiAiResponseTool;
-
-        this.abortControllerApiAiResponse = null;
-
-        this.aiBearerToken = this.generateUniqueId();
-        this.aiCookie = "";
-        this.mcpSessionId = readStorage("mcp-session-id") || "";
-        this.mcpCookie = "";
+        this.controllerAi.setControllerChat(this.controllerChat);
+        this.controllerAi.setControllerMcp(this.controllerMcp);
+        this.controllerMcp.setControllerChat(this.controllerChat);
+        this.controllerMenuItem.setControllerMcp(this.controllerMcp);
 
         this.appWindow = getCurrentWindow();
         this.appIsClosing = false;
@@ -763,33 +64,16 @@ export default class Index implements Icontroller {
     variable(): void {
         this.variableObject = variableBind(
             {
-                isOfflineAi: false,
-                isOfflineMcp: false,
-                modelList: [],
-                isOpenDropdownModelList: false,
-                modelSelected: helperSrc.MODEL_DEFAULT,
-                chatMessageList: [],
-                chatHistoryList: [],
-                toolList: [],
-                toolSelected: {} as modelIndex.IapiMcpTool,
-                taskList: [],
-                taskSelected: {} as modelIndex.IapiMcpTool,
                 adUrl: "",
-                systemMode: "chat",
-                isMessageSent: false,
-                fileUploadedList: []
+                isOfflineAi: variableLink<boolean>("Ai"),
+                isOfflineMcp: variableLink<boolean>("Mcp")
             },
             this.constructor.name
         );
 
         this.methodObject = {
             onClickAd: this.onClickAd,
-            onClickRefreshPage: this.onClickRefreshPage,
-            onClickDropdownModel: this.onClickDropdownModel,
-            onClickModelName: this.onClickModelName,
-            onClickButtonMessageSend: this.onClickButtonMessageSend,
-            onClickChipUpload: this.onClickChipUpload,
-            onClickChipClose: this.onClickChipClose
+            onClickRefreshPage: this.onClickRefreshPage
         };
     }
 
@@ -802,14 +86,6 @@ export default class Index implements Icontroller {
     }
 
     event(): void {
-        document.addEventListener("click", (event) => {
-            const target = event.target as HTMLElement;
-
-            if (!helperSrc.findElementParent(target, "dropdown") || helperSrc.findElementParent(target, "menu")) {
-                this.variableObject.isOpenDropdownModelList.state = false;
-            }
-        });
-
         this.appWindow.onCloseRequested(async (event: CloseRequestedEvent) => {
             if (this.appIsClosing) {
                 return;
@@ -819,9 +95,10 @@ export default class Index implements Icontroller {
 
             this.appIsClosing = true;
 
-            await this.apiAiLogout();
-
-            await this.apiMcpLogout();
+            if (this.appWindow.label === "main") {
+                await this.controllerAi.apiLogout();
+                await this.controllerMcp.apiLogout();
+            }
 
             await this.appWindow.close();
         });
@@ -831,7 +108,6 @@ export default class Index implements Icontroller {
         const resultList: Icontroller[] = [];
 
         resultList.push(this.controllerAi);
-        resultList.push(this.controllerMcp);
         resultList.push(this.controllerMenuItem);
 
         return resultList;
@@ -839,23 +115,20 @@ export default class Index implements Icontroller {
 
     rendered(): void {
         (async () => {
-            await this.apiAiLogin();
+            if (!session.data.aiCookie) {
+                await this.controllerAi.apiLogin();
+            }
 
-            await this.apiAiUserInfo();
+            await this.controllerAi.apiUserInfo();
 
-            await this.apiMcpLogin();
+            if (!session.data.mcpCookie) {
+                await this.controllerMcp.apiLogin();
+            }
 
-            await this.apiMcpTool();
-
-            await this.apiMcpTask();
+            await this.controllerMcp.apiTool();
+            await this.controllerMcp.apiTask();
         })();
     }
 
-    destroy(): void {
-        (async () => {
-            await this.apiAiLogout();
-
-            await this.apiMcpLogout();
-        })();
-    }
+    destroy(): void {}
 }

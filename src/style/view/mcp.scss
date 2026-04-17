@@ -1,0 +1,15 @@
+.view_tool {
+    .container_chip {
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        justify-content: start;
+        align-items: center;
+        justify-items: center;
+        padding: 10px 25px;
+
+        .chip {
+            width: 180px;
+        }
+    }
+}

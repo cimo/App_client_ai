@@ -1,9 +1,10 @@
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { emitTo, listen } from "@tauri-apps/api/event";
+
 // Source
 import * as modelHelperSrc from "./model/HelperSrc";
 
 declare const IS_DEPLOY_DEV: string;
-// eslint-disable-next-line no-console
-console.log("cimo", IS_DEPLOY_DEV);
 export const PATH_ROOT = "/home/app/";
 export const IS_DEBUG = IS_DEPLOY_DEV;
 export const PATH_LOG = "log/";
@@ -164,4 +165,66 @@ export const findElementParent = (element: HTMLElement, className: string): HTML
     }
 
     return findElementParent(element.parentNode as HTMLElement, className);
+};
+
+export const isJson = (value: string): boolean => {
+    try {
+        JSON.parse(value);
+
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+export const baseFileName = (fileName: string): string => {
+    const nameList = fileName.split("/");
+    const nameWithExtension = nameList[nameList.length - 1];
+    const baseName = nameWithExtension.trim().replace(/.[^/.]+$/, "");
+
+    return baseName;
+};
+
+export const appWindowLabelUnique = (label: string, title: string): string => {
+    const safeName = title
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+
+    return `${label}-${safeName}`;
+};
+
+export const openWindow = async (label: string, title: string, route: string): Promise<WebviewWindow> => {
+    const uniqueLabel = appWindowLabelUnique(label, title);
+    const window = await WebviewWindow.getByLabel(uniqueLabel);
+
+    if (window) {
+        await window.unminimize();
+        await window.show();
+        await window.setAlwaysOnTop(true);
+
+        await window.setFocus();
+
+        return window;
+    }
+
+    const unlisten = await listen<string>(`window-${uniqueLabel}-ready`, async () => {
+        await emitTo(uniqueLabel, "window-init", route);
+
+        unlisten();
+    });
+
+    return new WebviewWindow(uniqueLabel, {
+        title: title,
+        url: route,
+        decorations: true,
+        resizable: true,
+        width: 750,
+        height: 700,
+        minWidth: 750,
+        minHeight: 700,
+        center: true,
+        focus: true
+    });
 };

@@ -1,29 +1,34 @@
 import { Icontroller, IvirtualNode, variableBind, variableLink } from "@cimo/jsmvcfw/dist/src/Main.js";
 
 // Source
+import * as helperSrc from "../HelperSrc";
 import * as modelMenuItem from "../model/MenuItem";
-import * as modelIndex from "../model/Index";
+import * as modelMcp from "../model/Mcp";
 import * as viewMenuItem from "../view/MenuItem";
-import type Index from "./Index";
+import type Mcp from "./Mcp";
 
 export default class MenuItem implements Icontroller {
     // Variable
     private variableObject: modelMenuItem.Ivariable;
     private methodObject: modelMenuItem.Imethod;
-    private controllerIndex: Index;
+    private controllerMcp: Mcp;
 
     // Method
     private onClickMenuFile = (): void => {
-        this.controllerIndex.apiMcpFileUploaded();
-
-        this.variableObject.isMenuItemFile.state = !this.variableObject.isMenuItemFile.state;
-        this.variableObject.isMenuItemTool.state = false;
-        this.variableObject.isMenuItemTask.state = false;
-        this.variableObject.isMenuItemAgent.state = false;
+        this.controllerMcp.apiFileUploaded().then(() => {
+            this.variableObject.isMenuItemFile.state = !this.variableObject.isMenuItemFile.state;
+            this.variableObject.isMenuItemTool.state = false;
+            this.variableObject.isMenuItemTask.state = false;
+            this.variableObject.isMenuItemAgent.state = false;
+        });
     };
 
-    private onClickFileUploadDelete = (index: number, fileName: string): void => {
-        this.controllerIndex.apiMcpFileUploadedDelete(index, fileName);
+    private onClickFileUploadDelete = (event: Event, index: number, fileName: string): void => {
+        event.stopPropagation();
+
+        const baseFileName = helperSrc.baseFileName(fileName);
+
+        this.controllerMcp.apiFileUploadedDelete(index, fileName, baseFileName);
     };
 
     private onClickMenuTool = (): void => {
@@ -34,8 +39,8 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickTool = (name: string): void => {
-        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
-        this.variableObject.taskSelected.state = {} as modelIndex.IapiMcpTool;
+        this.variableObject.toolSelected.state = {} as modelMcp.IapiTool;
+        this.variableObject.taskSelected.state = {} as modelMcp.IapiTool;
 
         for (const tool of this.variableObject.toolList.state) {
             if (tool.name === name) {
@@ -58,8 +63,8 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickTask = (name: string): void => {
-        this.variableObject.toolSelected.state = {} as modelIndex.IapiMcpTool;
-        this.variableObject.taskSelected.state = {} as modelIndex.IapiMcpTool;
+        this.variableObject.toolSelected.state = {} as modelMcp.IapiTool;
+        this.variableObject.taskSelected.state = {} as modelMcp.IapiTool;
 
         for (const tool of this.variableObject.taskList.state) {
             if (tool.name === name) {
@@ -81,10 +86,19 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemAgent.state = !this.variableObject.isMenuItemAgent.state;
     };
 
-    constructor(controllerIndex: Index) {
+    private openDocument = async (title: string): Promise<void> => {
+        await helperSrc.openWindow("document", title, "#/document");
+    };
+
+    setControllerMcp(controller: Mcp): void {
+        this.controllerMcp = controller;
+    }
+
+    constructor() {
         this.variableObject = {} as modelMenuItem.Ivariable;
         this.methodObject = {} as modelMenuItem.Imethod;
-        this.controllerIndex = controllerIndex;
+
+        this.controllerMcp = {} as Mcp;
     }
 
     hookObject = {} as modelMenuItem.IelementHook;
@@ -93,15 +107,15 @@ export default class MenuItem implements Icontroller {
         this.variableObject = variableBind(
             {
                 isMenuItemFile: false,
-                fileUploadedList: variableLink<string[]>("Index"),
                 isMenuItemTool: false,
-                toolList: variableLink<modelIndex.IapiMcpTool[]>("Index"),
-                toolSelected: variableLink<modelIndex.IapiMcpTool>("Index"),
-                taskList: variableLink<modelIndex.IapiMcpTool[]>("Index"),
-                taskSelected: variableLink<modelIndex.IapiMcpTool>("Index"),
                 isMenuItemTask: false,
                 isMenuItemAgent: false,
-                systemMode: variableLink<string>("Index")
+                toolList: variableLink<modelMcp.IapiTool[]>("Mcp"),
+                toolSelected: variableLink<modelMcp.IapiTool>("Mcp"),
+                taskList: variableLink<modelMcp.IapiTool[]>("Mcp"),
+                taskSelected: variableLink<modelMcp.IapiTool>("Mcp"),
+                fileUploadedList: variableLink<string[]>("Mcp"),
+                systemMode: variableLink<string>("Chat")
             },
             this.constructor.name
         );
@@ -113,17 +127,18 @@ export default class MenuItem implements Icontroller {
             onClickTool: this.onClickTool,
             onClickMenuTask: this.onClickMenuTask,
             onClickTask: this.onClickTask,
-            onClickMenuAgent: this.onClickMenuAgent
+            onClickMenuAgent: this.onClickMenuAgent,
+            openDocument: this.openDocument
         };
     }
 
     variableEffect(): void {}
 
     view(name?: string): IvirtualNode {
-        if (name === "viewMenuItemLeft") {
-            return viewMenuItem.viewMenuItemLeft(this.variableObject, this.methodObject);
-        } else if (name === "viewMenuItemRight") {
-            return viewMenuItem.viewMenuItemRight(this.variableObject, this.methodObject);
+        if (name === "left") {
+            return viewMenuItem.left(this.variableObject, this.methodObject);
+        } else if (name === "right") {
+            return viewMenuItem.right(this.variableObject, this.methodObject);
         }
 
         throw new Error(`Unsupported view: ${String(name)}`);

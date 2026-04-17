@@ -1,4 +1,4 @@
-import { jsxFactory, jsxFragment, IvirtualNode } from "@cimo/jsmvcfw/dist/src/Main.js";
+import { jsxFactory, IvirtualNode } from "@cimo/jsmvcfw/dist/src/Main.js";
 
 // Source
 import * as modelIndex from "../model/Index";
@@ -6,14 +6,12 @@ import * as modelIndex from "../model/Index";
 const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelIndex.Imethod): IvirtualNode => {
     return (
         <div class="view_index" jsmvcfw-controllerName="Index">
-            <aside jsmvcfw-controllerName="Ai" />
-            <aside jsmvcfw-controllerName="Mcp" />
             <div
-                class={`container_over ${variableObject.isOfflineAi.state || variableObject.isOfflineMcp.state || variableObject.adUrl.state !== "" ? "" : "none"}`}
+                class={`container_over ${variableObject.isOfflineMcp.state || variableObject.isOfflineAi.state || variableObject.adUrl.state !== "" ? "" : "none"}`}
             >
                 <div
-                    class={variableObject.isOfflineAi.state || variableObject.isOfflineMcp.state ? "" : "none"}
-                    onclick={() => {
+                    class={variableObject.isOfflineMcp.state || variableObject.isOfflineAi.state ? "" : "none"}
+                    onClick={() => {
                         methodObject.onClickRefreshPage();
                     }}
                 >
@@ -21,8 +19,8 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     <p>Click here for re-connect.</p>
                 </div>
                 <div
-                    class={!variableObject.isOfflineAi.state && !variableObject.isOfflineMcp.state && variableObject.adUrl.state !== "" ? "" : "none"}
-                    onclick={(event: Event) => {
+                    class={!variableObject.isOfflineMcp.state && !variableObject.isOfflineAi.state && variableObject.adUrl.state !== "" ? "" : "none"}
+                    onClick={(event: Event) => {
                         methodObject.onClickAd(event);
                     }}
                 >
@@ -32,204 +30,11 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
             </div>
             <div class="container_content">
                 <div class="container_left">
-                    <aside jsmvcfw-controllerName="MenuItem" view="viewMenuItemLeft" />
+                    <aside jsmvcfw-controllerName="MenuItem" view="left" />
                 </div>
                 <div class="container_right">
-                    <div class="container_header">
-                        <p>Model selected: {variableObject.modelSelected.state}</p>
-                        <div class="dropdown">
-                            <i
-                                class="cls_icon"
-                                onclick={() => {
-                                    methodObject.onClickDropdownModel();
-                                }}
-                            >
-                                schema
-                            </i>
-                            <div class={`menu bottom-left ${variableObject.isOpenDropdownModelList.state ? "" : "none"}`}>
-                                <p class="title">Model list:</p>
-                                <ul>
-                                    {(() => {
-                                        const result: IvirtualNode[] = [];
-
-                                        for (const [key, value] of Object.entries(variableObject.modelList.state)) {
-                                            result.push(
-                                                <li
-                                                    key={key}
-                                                    onClick={() => {
-                                                        methodObject.onClickModelName(value.id);
-                                                    }}
-                                                >
-                                                    {value.id}
-                                                </li>
-                                            );
-                                        }
-
-                                        return result;
-                                    })()}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="container_chat" jsmvcfw-elementHookName="elementContainerMessageReceive">
-                        {(() => {
-                            const result: IvirtualNode[] = [];
-
-                            for (const [key, value] of Object.entries(variableObject.chatMessageList.state)) {
-                                result.push(
-                                    <div key={key}>
-                                        <div class={`container_chat_user ${value.user ? "" : "none"}`}>
-                                            <p class="time">{value.time}</p>
-                                            <pre class="message">{value.user}</pre>
-                                        </div>
-                                        <div class="container_chat_assistant">
-                                            <details class={value.mcpTool && value.mcpTool["name"] ? "" : "none"}>
-                                                <summary>
-                                                    <i class="cls_icon">handyman</i>
-                                                    <p>Show tool</p>
-                                                </summary>
-                                                {(() => {
-                                                    const result: IvirtualNode[] = [];
-
-                                                    if (value.mcpTool) {
-                                                        result.push(
-                                                            <ul class="list">
-                                                                <li>Name: {value.mcpTool["name"]}</li>
-                                                                <li>Argument: {value.mcpTool["arguments"]}</li>
-                                                                <li>Output: {value.mcpTool["output"]}</li>
-                                                            </ul>
-                                                        );
-                                                    }
-
-                                                    return result;
-                                                })()}
-                                            </details>
-                                            <details class={value.assistantReason ? "" : "none"}>
-                                                <summary>
-                                                    <i class="cls_icon">generating_tokens</i>
-                                                    <p>Show reason</p>
-                                                </summary>
-                                                <pre>{value.assistantReason}</pre>
-                                            </details>
-                                            {(() => {
-                                                const result: IvirtualNode[] = [];
-
-                                                if (value.assistantNoReason === "") {
-                                                    result.push(<i class="cls_icon">update</i>);
-                                                } else if (!value.assistantNoReason.startsWith("<html>")) {
-                                                    if (value.file) {
-                                                        result.push(
-                                                            <details>
-                                                                <summary>
-                                                                    <p>File</p>
-                                                                </summary>
-                                                                <ul class="file">
-                                                                    {(() => {
-                                                                        const result: IvirtualNode[] = [];
-
-                                                                        if (value.file !== "") {
-                                                                            const fileList = JSON.parse(value.file);
-
-                                                                            for (const [keyFile, valueFile] of Object.entries(fileList)) {
-                                                                                result.push(
-                                                                                    <li key={keyFile}>
-                                                                                        <i class="cls_icon">file_present</i>
-                                                                                        <p>{valueFile}</p>
-                                                                                    </li>
-                                                                                );
-                                                                            }
-                                                                        }
-
-                                                                        return result;
-                                                                    })()}
-                                                                </ul>
-                                                            </details>
-                                                        );
-                                                    } else {
-                                                        result.push(<pre>{value.assistantNoReason}</pre>);
-                                                    }
-                                                } else if (value.assistantNoReason.startsWith("<html>")) {
-                                                    result.push(
-                                                        <details
-                                                            jsmvcfw-html={value.assistantNoReason
-                                                                .replace(/^<html>/i, '<div class="html">')
-                                                                .replace(/<\/html>$/i, '</div class="html">')}
-                                                        >
-                                                            <summary>
-                                                                <p>Data</p>
-                                                            </summary>
-                                                        </details>
-                                                    );
-                                                }
-
-                                                return result;
-                                            })()}
-                                        </div>
-                                    </div>
-                                );
-                            }
-
-                            return result;
-                        })()}
-                        <div class="bottom_limit" jsmvcfw-elementHookName="elementBottomLimit"></div>
-                    </div>
-                    <div class="container_chip">
-                        <div class={`chip ${variableObject.toolSelected.state.name || variableObject.taskSelected.state.name ? "" : "none"}`}>
-                            {(() => {
-                                const result: IvirtualNode[] = [];
-
-                                let mode = "";
-
-                                if (variableObject.toolSelected.state.name) {
-                                    mode = "tool";
-                                } else if (variableObject.taskSelected.state.name) {
-                                    mode = "task";
-                                }
-
-                                result.push(
-                                    <>
-                                        <i
-                                            class="cls_icon close"
-                                            onclick={() => {
-                                                methodObject.onClickChipClose();
-                                            }}
-                                        >
-                                            cancel
-                                        </i>
-                                        <p>{mode === "tool" ? variableObject.toolSelected.state.name : variableObject.taskSelected.state.name}</p>
-                                    </>
-                                );
-
-                                return result;
-                            })()}
-                        </div>
-                    </div>
-                    <div class="container_message_send">
-                        <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
-                        <div class="container_action">
-                            <div class="left">
-                                <div
-                                    class="chip"
-                                    onclick={() => {
-                                        methodObject.onClickChipUpload();
-                                    }}
-                                >
-                                    <i class="cls_icon">upload_file</i>
-                                    <p>Upload</p>
-                                </div>
-                            </div>
-                            <div class="right">
-                                <button
-                                    onclick={() => {
-                                        methodObject.onClickButtonMessageSend();
-                                    }}
-                                >
-                                    <i class="cls_icon">{variableObject.isMessageSent.state ? "stop" : "play_arrow"}</i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <aside jsmvcfw-controllerName="MenuItem" view="viewMenuItemRight" />
+                    <aside jsmvcfw-controllerName="Ai" />
+                    <aside jsmvcfw-controllerName="MenuItem" view="right" />
                 </div>
             </div>
         </div>

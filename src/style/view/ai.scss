@@ -1,0 +1,23 @@
+.view_ai {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: stretch;
+    justify-items: center;
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+
+    aside:has(> .view_message) {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        justify-content: center;
+        align-items: stretch;
+        justify-items: center;
+        flex: 1 1 auto;
+        min-height: 0;
+        min-width: 0;
+    }
+}
