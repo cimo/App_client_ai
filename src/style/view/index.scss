@@ -176,30 +176,6 @@ aside {
             justify-items: center;
             flex: 0 0 150px;
             min-height: 0;
-
-            .view_menuItemLeft {
-                display: flex;
-                flex-direction: column;
-                align-content: center;
-                justify-content: center;
-                align-items: stretch;
-                justify-items: center;
-
-                li {
-                    display: flex;
-                    flex-direction: row;
-                    align-content: center;
-                    justify-content: start;
-                    align-items: center;
-                    justify-items: center;
-                    padding: 10px 0 10px 5px;
-                    cursor: pointer;
-
-                    p {
-                        margin-left: 5px;
-                    }
-                }
-            }
         }
 
         .container_right {
@@ -223,163 +199,6 @@ aside {
                 flex: 1 1 auto;
                 min-height: 0;
                 min-width: 0;
-            }
-
-            .view_menuItemRight {
-                display: flex;
-                flex-direction: column;
-                align-content: center;
-                justify-content: center;
-                align-items: start;
-                justify-items: center;
-
-                position: fixed;
-                padding: 10px;
-                top: 40px;
-                right: 0;
-                bottom: 0;
-                left: 150px;
-                z-index: parameter.$zIndexLevel2;
-
-                .container_file {
-                    display: flex;
-                    flex-direction: column;
-                    align-content: center;
-                    justify-content: start;
-                    align-items: start;
-                    justify-items: center;
-                    flex: 1 1 auto;
-                    min-height: 0;
-
-                    > p {
-                        margin-bottom: 10px;
-                    }
-
-                    ul {
-                        display: flex;
-                        flex-direction: row;
-                        align-content: start;
-                        justify-content: start;
-                        align-items: center;
-                        justify-items: center;
-                        flex-wrap: wrap;
-                        gap: 12px;
-                        overflow-y: scroll;
-                        padding-right: 15px;
-
-                        .chip {
-                            width: 180px;
-                        }
-                    }
-                }
-
-                .container_tool {
-                    display: flex;
-                    flex-direction: column;
-                    align-content: center;
-                    justify-content: start;
-                    align-items: start;
-                    justify-items: center;
-                    flex: 1 1 auto;
-                    min-height: 0;
-
-                    ul {
-                        display: flex;
-                        flex-direction: row;
-                        align-content: start;
-                        justify-content: start;
-                        align-items: center;
-                        justify-items: center;
-                        overflow-y: scroll;
-                        flex-wrap: wrap;
-                        gap: 12px;
-                        overflow-y: scroll;
-                        padding-right: 15px;
-
-                        .chip {
-                            flex-direction: column;
-                            align-content: center;
-                            justify-content: center;
-                            align-items: start;
-                            justify-items: center;
-                            width: 275px;
-                            height: 110px;
-                            cursor: pointer;
-
-                            .top {
-                                display: flex;
-                                flex-direction: row;
-                                align-content: center;
-                                justify-content: center;
-                                align-items: center;
-                                justify-items: center;
-                                margin-bottom: 10px;
-
-                                img {
-                                    margin-right: 5px;
-                                }
-                            }
-
-                            .bottom {
-                                text-align: left;
-                            }
-                        }
-                    }
-                }
-
-                .container_task {
-                    display: flex;
-                    flex-direction: column;
-                    align-content: center;
-                    justify-content: start;
-                    align-items: start;
-                    justify-items: center;
-                    flex: 1 1 auto;
-                    min-height: 0;
-
-                    ul {
-                        display: flex;
-                        flex-direction: row;
-                        align-content: start;
-                        justify-content: start;
-                        align-items: center;
-                        justify-items: center;
-                        overflow-y: scroll;
-                        flex-wrap: wrap;
-                        gap: 12px;
-                        overflow-y: scroll;
-                        padding-right: 15px;
-
-                        .chip {
-                            flex-direction: column;
-                            align-content: center;
-                            justify-content: center;
-                            align-items: start;
-                            justify-items: center;
-                            width: 275px;
-                            height: 110px;
-                            cursor: pointer;
-
-                            .top {
-                                display: flex;
-                                flex-direction: row;
-                                align-content: center;
-                                justify-content: center;
-                                align-items: center;
-                                justify-items: center;
-                                margin-bottom: 10px;
-
-                                img {
-                                    margin-right: 5px;
-                                }
-                            }
-
-                            .bottom {
-                                text-align: left;
-                            }
-                        }
-                    }
-                }
             }
         }
     }
@@ -441,15 +260,6 @@ aside {
     .container_content {
         .container_left {
             border-right: 1px solid color.$darkRootBorder;
-
-            .view_menuItemLeft {
-                li {
-                    &:hover {
-                        color: color.$darkInteractionBackground;
-                        background-color: color.$darkInteractionHover;
-                    }
-                }
-            }
         }
 
         .container_right {
@@ -474,10 +284,6 @@ aside {
             .container_message_send {
                 border: 1px solid color.$darkChatMessageSendBorder;
                 box-shadow: color.$darkShadowMessageSend;
-            }
-
-            .view_menuItemRight {
-                background-color: color.$darkRootBackground;
             }
         }
     }

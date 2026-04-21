@@ -221,10 +221,6 @@
         border: 1px solid color.$darkChatMessageSendBorder;
         box-shadow: color.$darkShadowMessageSend;
     }
-
-    .view_menuItemRight {
-        background-color: color.$darkRootBackground;
-    }
 }
 
 @media (prefers-color-scheme: Light) {

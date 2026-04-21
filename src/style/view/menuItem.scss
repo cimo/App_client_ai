@@ -1,0 +1,202 @@
+@use "../setting/color.scss" as color;
+@use "../setting/parameter.scss" as parameter;
+
+.view_menuItem_left {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: stretch;
+    justify-items: center;
+
+    li {
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        justify-content: start;
+        align-items: center;
+        justify-items: center;
+        padding: 10px 0 10px 5px;
+        cursor: pointer;
+
+        p {
+            margin-left: 5px;
+        }
+    }
+}
+
+.view_menuItem_right {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: start;
+    justify-items: center;
+
+    position: fixed;
+    padding: 10px;
+    top: 40px;
+    right: 0;
+    bottom: 0;
+    left: 150px;
+    z-index: parameter.$zIndexLevel2;
+
+    .container_file {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        justify-content: start;
+        align-items: start;
+        justify-items: center;
+        flex: 1 1 auto;
+        min-height: 0;
+
+        > p {
+            margin-bottom: 10px;
+        }
+
+        ul {
+            display: flex;
+            flex-direction: row;
+            align-content: start;
+            justify-content: start;
+            align-items: center;
+            justify-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            overflow-y: scroll;
+            padding-right: 15px;
+
+            .chip {
+                width: 180px;
+            }
+        }
+    }
+
+    .container_tool {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        justify-content: start;
+        align-items: start;
+        justify-items: center;
+        flex: 1 1 auto;
+        min-height: 0;
+
+        ul {
+            display: flex;
+            flex-direction: row;
+            align-content: start;
+            justify-content: start;
+            align-items: center;
+            justify-items: center;
+            overflow-y: scroll;
+            flex-wrap: wrap;
+            gap: 12px;
+            overflow-y: scroll;
+            padding-right: 15px;
+
+            .chip {
+                flex-direction: column;
+                align-content: center;
+                justify-content: center;
+                align-items: start;
+                justify-items: center;
+                width: 275px;
+                height: 110px;
+                cursor: pointer;
+
+                .top {
+                    display: flex;
+                    flex-direction: row;
+                    align-content: center;
+                    justify-content: center;
+                    align-items: center;
+                    justify-items: center;
+                    margin-bottom: 10px;
+
+                    img {
+                        margin-right: 5px;
+                    }
+                }
+
+                .bottom {
+                    text-align: left;
+                }
+            }
+        }
+    }
+
+    .container_task {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        justify-content: start;
+        align-items: start;
+        justify-items: center;
+        flex: 1 1 auto;
+        min-height: 0;
+
+        ul {
+            display: flex;
+            flex-direction: row;
+            align-content: start;
+            justify-content: start;
+            align-items: center;
+            justify-items: center;
+            overflow-y: scroll;
+            flex-wrap: wrap;
+            gap: 12px;
+            overflow-y: scroll;
+            padding-right: 15px;
+
+            .chip {
+                flex-direction: column;
+                align-content: center;
+                justify-content: center;
+                align-items: start;
+                justify-items: center;
+                width: 275px;
+                height: 110px;
+                cursor: pointer;
+
+                .top {
+                    display: flex;
+                    flex-direction: row;
+                    align-content: center;
+                    justify-content: center;
+                    align-items: center;
+                    justify-items: center;
+                    margin-bottom: 10px;
+
+                    img {
+                        margin-right: 5px;
+                    }
+                }
+
+                .bottom {
+                    text-align: left;
+                }
+            }
+        }
+    }
+}
+
+@media (prefers-color-scheme: Dark) {
+    .view_menuItem_left {
+        li {
+            &:hover {
+                color: color.$darkInteractionBackground;
+                background-color: color.$darkInteractionHover;
+            }
+        }
+    }
+
+    .view_menuItem_right {
+        background-color: color.$darkRootBackground;
+    }
+}
+
+@media (prefers-color-scheme: Light) {
+    //...
+}

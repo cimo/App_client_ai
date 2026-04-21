@@ -5,7 +5,7 @@ import * as modelMenuItem from "../model/MenuItem";
 
 export const left = (variableObject: modelMenuItem.Ivariable, methodObject: modelMenuItem.Imethod): IvirtualNode => {
     return (
-        <ul class="view_menuItemLeft">
+        <ul class="view_menuItem_left">
             <li
                 class={variableObject.isMenuItemFile.state ? "active" : ""}
                 onClick={() => {
@@ -45,7 +45,7 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
 export const right = (variableObject: modelMenuItem.Ivariable, methodObject: modelMenuItem.Imethod): IvirtualNode => {
     return (
         <div
-            class={`view_menuItemRight ${variableObject.isMenuItemFile.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state ? "" : "none"}`}
+            class={`view_menuItem_right ${variableObject.isMenuItemFile.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state ? "" : "none"}`}
         >
             {(() => {
                 const result: IvirtualNode[] = [];

@@ -8,7 +8,7 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
         <div class="view_document" jsmvcfw-controllerName="Document">
             <div class="container_html">
                 <div>
-                    <p class="conatiner_page">
+                    <p class="container_page">
                         <input
                             type="text"
                             inputmode="numeric"
