@@ -5,7 +5,7 @@ import * as modelChat from "../model/Chat";
 
 export const message = (variableObject: modelChat.Ivariable, methodObject: modelChat.Imethod): IvirtualNode => {
     return (
-        <div class="view_message">
+        <div class="view_chat_message">
             <div class="container_chat" jsmvcfw-elementHookName="elementContainerMessageReceive">
                 {(() => {
                     const result: IvirtualNode[] = [];
@@ -144,7 +144,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
 
 export const input = (variableObject: modelChat.Ivariable, methodObject: modelChat.Imethod): IvirtualNode => {
     return (
-        <div class="view_input">
+        <div class="view_chat_input">
             <div class="container_message_send">
                 <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
                 <div class="container_action">

@@ -7,8 +7,8 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
     return (
         <div class="view_document" jsmvcfw-controllerName="Document">
             <div class="container_html">
-                <p>
-                    <span class="page_index">
+                <div>
+                    <p class="conatiner_page">
                         <input
                             type="text"
                             inputmode="numeric"
@@ -21,9 +21,10 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                                 methodObject.onInputChangePage(event);
                             }}
                         />
-                        / {variableObject.pageTotal.state}
-                    </span>
-                </p>
+                        <span>/</span>
+                        <span class="page_total">{variableObject.pageTotal.state}</span>
+                    </p>
+                </div>
                 <iframe class="html" srcdoc={variableObject.fileContent.state} sandbox="allow-scripts"></iframe>
             </div>
         </div>

@@ -1,7 +1,7 @@
 @use "../setting/color.scss" as color;
 @use "../setting/parameter.scss" as parameter;
 
-.view_message {
+.view_chat_message {
     display: flex;
     flex-direction: column;
     align-content: center;
@@ -83,26 +83,6 @@
                         }
                     }
 
-                    .document_summary {
-                        position: sticky;
-                        top: 0;
-                        left: 0;
-
-                        .page_index {
-                            display: none;
-                            margin-right: 20px;
-
-                            input {
-                                width: 40px;
-                                margin-right: 5px;
-                                text-align: center;
-                                padding: 0 !important;
-                                border-radius: 0 !important;
-                                cursor: text !important;
-                            }
-                        }
-                    }
-
                     .list {
                         margin: 5px 0;
 
@@ -148,7 +128,7 @@
     }
 }
 
-.view_input {
+.view_chat_input {
     display: flex;
     flex-direction: column;
     align-content: center;
@@ -232,15 +212,6 @@
                     border: 1px solid color.$darkChatAssistantBoxBorder;
                     background-color: color.$darkChatAssistantBoxBackground;
                     color: color.$darkRootText;
-
-                    summary {
-                        .page_index {
-                            input {
-                                color: color.$darkRootText !important;
-                                background-color: color.$darkChatAssistantBoxBackground !important;
-                            }
-                        }
-                    }
                 }
             }
         }

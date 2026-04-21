@@ -441,9 +441,11 @@ export default class Chat implements Icontroller {
                 if (fileName) {
                     const windowLabel = helperSrc.appWindowLabelUnique("document", fileName);
 
-                    await emitTo(windowLabel, "document-content-update", Object.entries(this.fileObject)[0]);
+                    if (Object.entries(this.fileObject).length > 0) {
+                        await emitTo(windowLabel, "document-content-update", Object.entries(this.fileObject)[0]);
 
-                    delete this.fileObject[fileName];
+                        delete this.fileObject[fileName];
+                    }
                 }
 
                 await this.openWindowDocument();

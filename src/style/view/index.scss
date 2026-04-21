@@ -466,15 +466,6 @@ aside {
                             border: 1px solid color.$darkChatAssistantBoxBorder;
                             background-color: color.$darkChatAssistantBoxBackground;
                             color: color.$darkRootText;
-
-                            summary {
-                                .page_index {
-                                    input {
-                                        color: color.$darkRootText !important;
-                                        background-color: color.$darkChatAssistantBoxBackground !important;
-                                    }
-                                }
-                            }
                         }
                     }
                 }

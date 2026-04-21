@@ -9,7 +9,7 @@
     min-height: 0;
     min-width: 0;
 
-    aside:has(> .view_message) {
+    aside:has(> .view_chat_message) {
         display: flex;
         flex-direction: column;
         align-content: center;
