@@ -26,9 +26,7 @@ export default class MenuItem implements Icontroller {
     private onClickFileUploadDelete = (event: Event, index: number, fileName: string): void => {
         event.stopPropagation();
 
-        const baseFileName = helperSrc.baseFileName(fileName);
-
-        this.controllerMcp.apiFileUploadedDelete(index, fileName, baseFileName);
+        this.controllerMcp.apiFileUploadedDelete(index, fileName);
     };
 
     private onClickMenuTool = (): void => {

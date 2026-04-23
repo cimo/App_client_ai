@@ -62,7 +62,7 @@ export default class Chat implements Icontroller {
         this.modelSelected = modelSelected;
     }
 
-    apiResponse = async (prompt?: string): Promise<void> => {
+    apiResponse = async (prompt?: string, mode?: string): Promise<void> => {
         //const base64 = await invoke("test_screenshot");
         //this.variableObject.modelSelected.state = base64 as string;
 
@@ -114,15 +114,21 @@ export default class Chat implements Icontroller {
                 }
             }*/
 
-            let inputSystem = "";
+            let inputSystem = [
+                "You are a multilingual assistant that needs to reply with the user input language.",
+                "You MUST need to reason step by step and give a answer to the user question.",
+                "You MUST NOT use tools and tasks."
+            ].join("\n");
 
-            if (this.variableObject.systemMode.state === "chat") {
-                inputSystem = [
-                    "You are a multilingual assistant that needs to reply with the user input language.",
-                    "You MUST need to reason step by step and give a answer to the user question.",
-                    "You MUST NOT use tools and tasks."
+            if (mode === "rag") {
+                inputSystem += [
+                    "",
+                    "You MUST ONLY use the provided CITATION to answer the user question.",
+                    "You MUST NOT add any information that is not provided in the CITATION."
                 ].join("\n");
-            } else if (this.variableObject.systemMode.state === "tool-call") {
+            }
+
+            if (this.variableObject.systemMode.state === "tool-call") {
                 inputSystem = [
                     "You are a multilingual assistant tool executer that needs to reply with the user input language and you need to transform the user request in a action.",
                     `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}`,
@@ -258,7 +264,7 @@ export default class Chat implements Icontroller {
                                     } else if (dataTrimParse.type === "response.output_text.delta") {
                                         const dataDelta = dataTrimParse.delta;
 
-                                        if (dataDelta && !prompt) {
+                                        if (dataDelta && (!prompt || mode === "rag")) {
                                             this.responseNoReason += dataDelta;
 
                                             const index = this.variableObject.chatMessageList.state.length - 1;
@@ -273,7 +279,7 @@ export default class Chat implements Icontroller {
                                     } else if (dataTrimParse.type === "response.output_item.done") {
                                         const dataItem = dataTrimParse.item;
 
-                                        if (dataItem && dataItem.type === "mcp_call" && !prompt) {
+                                        if (dataItem && dataItem.type === "mcp_call" && (!prompt || mode === "rag")) {
                                             this.responseMcpTool = {
                                                 tool_call_id: dataItem.tool_call_id,
                                                 type: dataItem.type,
@@ -308,6 +314,12 @@ export default class Chat implements Icontroller {
                                                         ...this.variableObject.chatMessageList.state[index],
                                                         citation: ragResult.resultList as modelMcp.IapiRag[]
                                                     };
+
+                                                    this.variableObject.systemMode.state = "chat";
+
+                                                    this.apiResponse(`${userPrompt}\n\nCITATION:\n${JSON.stringify(ragResult.resultList)}`, "rag");
+
+                                                    this.variableObject.systemMode.state = "tool-call";
                                                 } else if (ragResult.type === "html") {
                                                     const htmlResultList = ragResult.resultList as modelMcp.IapiRag[];
 
@@ -323,7 +335,7 @@ export default class Chat implements Icontroller {
                                                     };
                                                 }
                                             } else {
-                                                if (!prompt) {
+                                                if (!prompt || mode === "rag") {
                                                     this.variableObject.chatMessageList.state[index] = {
                                                         ...this.variableObject.chatMessageList.state[index],
                                                         assistantNoReason: dataResponse

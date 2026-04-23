@@ -23,12 +23,14 @@ export default class Mcp implements Icontroller {
 
     // Method
     private apiEmbeddingCheck = async (fileName: string): Promise<boolean> => {
-        return fetch(`${helperSrc.URL_MCP}/api/embedding-check?fileName=${encodeURIComponent(fileName)}`, {
-            method: "GET",
+        return fetch(`${helperSrc.URL_MCP}/api/embedding-check`, {
+            method: "POST",
             headers: {
+                "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
                 Cookie: session.data.mcpCookie
             },
+            body: JSON.stringify({ fileName }),
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
@@ -323,7 +325,7 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiFileUploadedDelete = (index: number, fileName: string, baseFileName: string): void => {
+    apiFileUploadedDelete = (index: number, fileName: string): void => {
         fetch(`${helperSrc.URL_MCP}/api/file-uploaded-delete`, {
             method: "POST",
             headers: {
@@ -331,7 +333,7 @@ export default class Mcp implements Icontroller {
                 "mcp-session-id": session.data.mcpSessionId,
                 Cookie: session.data.mcpCookie
             },
-            body: JSON.stringify({ fileName, baseFileName }),
+            body: JSON.stringify({ fileName }),
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
@@ -349,7 +351,7 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiFileRead = async (fileName: string, baseFileName: string): Promise<void | modelDocument.Iresult> => {
+    apiFileRead = async (fileName: string, pageNumber: number): Promise<void | modelDocument.Iresult> => {
         return fetch(`${helperSrc.URL_MCP}/api/file-read`, {
             method: "POST",
             headers: {
@@ -357,7 +359,7 @@ export default class Mcp implements Icontroller {
                 "mcp-session-id": session.data.mcpSessionId,
                 Cookie: session.data.mcpCookie
             },
-            body: JSON.stringify({ fileName, baseFileName }),
+            body: JSON.stringify({ fileName, pageNumber }),
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
