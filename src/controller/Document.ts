@@ -29,7 +29,7 @@ export default class Document implements Icontroller {
 
         const fileName = `${baseFileName}_${pageNumber}.html`;
 
-        const result = await this.controllerMcp.apiFileRead(fileName, baseFileName);
+        const result = await this.controllerMcp.apiFileRead(fileName, pageNumber);
 
         if (result) {
             this.variableObject.fileContent.state = window.atob(result.fileContent);
