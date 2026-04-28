@@ -6,6 +6,7 @@ import * as modelDocument from "../model/Document";
 const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: modelDocument.Imethod): IvirtualNode => {
     return (
         <div class="view_document" jsmvcfw-controllerName="Document">
+            <aside jsmvcfw-controllerName="Mcp" />
             <div class="container_html">
                 <div>
                     <p class="container_page">

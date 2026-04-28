@@ -45,9 +45,15 @@ export default class Document implements Icontroller {
         this.appWindow = getCurrentWindow();
 
         this.appWindow.title().then(async (appWindowTitle) => {
-            await this.readHtmlContent(1);
+            const interval = setInterval(async () => {
+                if (Object.keys(this.controllerMcp.getVariableObject()).length > 0) {
+                    await this.readHtmlContent(1);
 
-            await emitTo("main", "document-init", { fileName: appWindowTitle });
+                    await emitTo("main", "document-init", { fileName: appWindowTitle });
+
+                    clearInterval(interval);
+                }
+            }, 1000);
         });
     }
 
@@ -93,6 +99,8 @@ export default class Document implements Icontroller {
 
     subControllerList(): Icontroller[] {
         const resultList: Icontroller[] = [];
+
+        resultList.push(this.controllerMcp);
 
         return resultList;
     }

@@ -17,6 +17,7 @@ export default class Mcp implements Icontroller {
     // Variable
     private variableObject: modelMcp.Ivariable;
     private methodObject: modelMcp.Imethod;
+    private viewNodeEmpty: IvirtualNode;
     private controllerChat: Chat;
 
     // Method
@@ -82,7 +83,7 @@ export default class Mcp implements Icontroller {
             }
 
             isPolling = false;
-        }, 3000);
+        }, 1000);
     };
 
     private onClickChipUpload = async (): Promise<void> => {
@@ -95,6 +96,10 @@ export default class Mcp implements Icontroller {
 
         this.variableObject.systemMode.state = "chat";
     };
+
+    getVariableObject(): modelMcp.Ivariable {
+        return this.variableObject;
+    }
 
     setControllerChat(controller: Chat): void {
         this.controllerChat = controller;
@@ -370,6 +375,7 @@ export default class Mcp implements Icontroller {
     constructor() {
         this.variableObject = {} as modelMcp.Ivariable;
         this.methodObject = {} as modelMcp.Imethod;
+        this.viewNodeEmpty = { tag: "div", propertyObject: {}, childrenList: [] };
         this.controllerChat = {} as Chat;
     }
 
@@ -407,7 +413,7 @@ export default class Mcp implements Icontroller {
             return viewMcp.upload(this.variableObject, this.methodObject);
         }
 
-        throw new Error(`Unsupported view: ${String(name)}`);
+        return this.viewNodeEmpty;
     }
 
     event(): void {}
