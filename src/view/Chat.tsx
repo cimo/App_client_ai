@@ -1,7 +1,8 @@
-import { jsxFactory, jsxFragment, IvirtualNode } from "@cimo/jsmvcfw/dist/src/Main.js";
+import { jsxFactory, IvirtualNode } from "@cimo/jsmvcfw/dist/src/Main.js";
 
 // Source
 import * as modelChat from "../model/Chat";
+import * as modelMcp from "../model/Mcp";
 
 export const message = (variableObject: modelChat.Ivariable, methodObject: modelChat.Imethod): IvirtualNode => {
     return (
@@ -63,15 +64,19 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                 const result: IvirtualNode[] = [];
 
                                                                 if (value.file !== "") {
-                                                                    const fileList = JSON.parse(value.file);
+                                                                    const fileList = JSON.parse(value.file) as modelMcp.IfileStatus[];
 
                                                                     for (const [keyFile, valueFile] of Object.entries(fileList)) {
-                                                                        result.push(
-                                                                            <li key={keyFile}>
-                                                                                <i class="cls_icon">file_present</i>
-                                                                                <p>{valueFile}</p>
-                                                                            </li>
-                                                                        );
+                                                                        if (valueFile.fileName !== "") {
+                                                                            result.push(
+                                                                                <li key={keyFile}>
+                                                                                    <i class="cls_icon">file_present</i>
+                                                                                    <p>
+                                                                                        [{valueFile.status}] {valueFile.fileName}
+                                                                                    </p>
+                                                                                </li>
+                                                                            );
+                                                                        }
                                                                     }
                                                                 }
 
@@ -80,11 +85,43 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                         </ul>
                                                     </details>
                                                 );
-                                            } else if (value.citation.length > 0) {
+                                            } else if (value.embedding) {
                                                 result.push(
                                                     <details open>
                                                         <summary>
-                                                            <p>Data</p>
+                                                            <p>{value.assistantNoReason}</p>
+                                                        </summary>
+                                                        <ul class="embedding">
+                                                            {(() => {
+                                                                const result: IvirtualNode[] = [];
+
+                                                                if (value.embedding !== "") {
+                                                                    const fileList = JSON.parse(value.embedding) as modelMcp.IfileStatus[];
+
+                                                                    for (const [keyFile, valueFile] of Object.entries(fileList)) {
+                                                                        if (valueFile.fileName !== "") {
+                                                                            result.push(
+                                                                                <li key={keyFile}>
+                                                                                    <i class="cls_icon">storage</i>
+                                                                                    <p>
+                                                                                        [{valueFile.status}] {valueFile.fileName}
+                                                                                    </p>
+                                                                                </li>
+                                                                            );
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                return result;
+                                                            })()}
+                                                        </ul>
+                                                    </details>
+                                                );
+                                            } else if (value.citation) {
+                                                result.push(
+                                                    <details open>
+                                                        <summary>
+                                                            <p>Citation result:</p>
                                                         </summary>
                                                         <div class="json">
                                                             {(() => {
@@ -98,9 +135,12 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                         const citation = data.citation || "";
 
                                                                         result.push(
-                                                                            <>
-                                                                                <p>
-                                                                                    Citation {a + 1} - {fileName}
+                                                                            <div key={a} class="citation">
+                                                                                <p class="title">
+                                                                                    <i class="cls_icon">text_snippet</i>
+                                                                                    <span>
+                                                                                        [Citation {a + 1}] {fileName}
+                                                                                    </span>
                                                                                 </p>
                                                                                 <a
                                                                                     class="source_link"
@@ -111,8 +151,8 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                                 >
                                                                                     (source)
                                                                                 </a>
-                                                                                <pre>{citation}</pre>
-                                                                            </>
+                                                                                <pre>{citation.trim()}</pre>
+                                                                            </div>
                                                                         );
                                                                     }
                                                                 }

@@ -3,7 +3,6 @@ import { getCurrentWindow, type Window } from "@tauri-apps/api/window";
 import { listen, emitTo } from "@tauri-apps/api/event";
 
 // Source
-import * as helperSrc from "../HelperSrc";
 import * as modelDocument from "../model/Document";
 import viewDocument from "../view/Document";
 import ControllerMcp from "./Mcp";
@@ -20,20 +19,20 @@ export default class Document implements Icontroller {
     private onInputChangePage = (event: Event): void => {
         const inputValue = parseInt((event.target as HTMLInputElement).value.replace(/\D+/g, ""));
 
-        this.readHtmlContent(inputValue);
+        if (!isNaN(inputValue)) {
+            this.readHtmlContent(inputValue);
+        }
     };
 
     private readHtmlContent = async (pageNumber: number): Promise<void> => {
         const appWindowTitle = await this.appWindow.title();
-        const baseFileName = helperSrc.baseFileName(appWindowTitle);
 
-        const fileName = `${baseFileName}_${pageNumber}.html`;
-
-        const result = await this.controllerMcp.apiFileRead(fileName, pageNumber);
+        const result = await this.controllerMcp.apiFileRead(appWindowTitle, pageNumber);
 
         if (result) {
             this.variableObject.fileContent.state = window.atob(result.fileContent);
             this.variableObject.pageTotal.state = result.pageTotal;
+            this.variableObject.pageNumber.state = pageNumber;
         }
     };
 
@@ -57,8 +56,6 @@ export default class Document implements Icontroller {
     variable(): void {
         this.variableObject = variableBind(
             {
-                isMessageSent: false,
-                chatMessageList: [],
                 fileContent: "",
                 pageNumber: 1,
                 pageTotal: 1
@@ -88,8 +85,6 @@ export default class Document implements Icontroller {
 
                     if (fileName === appWindowTitle) {
                         await this.readHtmlContent(pageNumber);
-
-                        this.variableObject.pageNumber.state = pageNumber;
                     }
                 });
             });

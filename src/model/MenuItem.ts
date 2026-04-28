@@ -8,10 +8,10 @@ export interface Ivariable {
     isMenuItemTool: IvariableBind<boolean>;
     isMenuItemTask: IvariableBind<boolean>;
     isMenuItemAgent: IvariableBind<boolean>;
-    toolList: IvariableBind<modelMcp.IapiTool[]>;
-    toolSelected: IvariableBind<modelMcp.IapiTool>;
-    taskList: IvariableBind<modelMcp.IapiTool[]>;
-    taskSelected: IvariableBind<modelMcp.IapiTool>;
+    toolList: IvariableBind<modelMcp.Itool[]>;
+    toolSelected: IvariableBind<modelMcp.Itool>;
+    taskList: IvariableBind<modelMcp.Itask[]>;
+    taskSelected: IvariableBind<modelMcp.Itask>;
     fileUploadedList: IvariableBind<string[]>;
     systemMode: IvariableBind<string>;
 }

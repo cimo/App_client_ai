@@ -3,25 +3,12 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 // Source
 import * as modelMcp from "./Mcp";
 
-export interface IapiResponseTool {
+export interface ImcpTool {
     tool_call_id: string;
     type: string;
     name: string;
     arguments: string;
     output: string;
-}
-
-export interface IapiResponse {
-    type: string;
-    response: {
-        id: string;
-        message: string;
-    };
-    error: {
-        message: string;
-    };
-    delta: string;
-    item: IapiResponseTool;
 }
 
 export interface IchatInput {
@@ -34,9 +21,29 @@ export interface IchatMessage {
     user: string;
     assistantReason: string;
     assistantNoReason: string;
-    mcpTool?: IapiResponseTool;
+    mcpTool?: ImcpTool;
     file: string;
-    citation: modelMcp.IapiRag[];
+    embedding: string;
+    citation: modelMcp.IragSearch[] | undefined;
+}
+
+export interface Ifile {
+    [key: string]: {
+        pageNumber: string;
+    };
+}
+
+export interface IapiResponse {
+    type: string;
+    response: {
+        id: string;
+        message: string;
+    };
+    error: {
+        message: string;
+    };
+    delta: string;
+    item: ImcpTool;
 }
 
 export interface Ivariable {
@@ -44,9 +51,9 @@ export interface Ivariable {
     chatMessageList: IvariableBind<IchatMessage[]>;
     chatHistoryList: IvariableBind<IchatInput[]>;
     systemMode: IvariableBind<string>;
-    toolSelected: IvariableBind<modelMcp.IapiTool>;
-    toolList: IvariableBind<modelMcp.IapiTool[]>;
-    taskSelected: IvariableBind<modelMcp.IapiTool>;
+    toolSelected: IvariableBind<modelMcp.Itool>;
+    toolList: IvariableBind<modelMcp.Itool[]>;
+    taskSelected: IvariableBind<modelMcp.Itask>;
 }
 
 export interface Imethod {

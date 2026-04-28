@@ -13,7 +13,8 @@
     min-width: 0;
 
     .bottom_limit {
-        height: 1px;
+        height: 5px;
+        flex-shrink: 0;
     }
 
     .container_chat {
@@ -65,9 +66,6 @@
                     max-width: 100%;
                     margin: 5px 0;
                     border-radius: 8px;
-                    max-height: 500px;
-                    overflow-x: auto;
-                    overflow-y: auto;
 
                     summary {
                         display: flex;
@@ -91,7 +89,8 @@
                         }
                     }
 
-                    .file {
+                    .file,
+                    .embedding {
                         display: flex;
                         flex-direction: column;
                         align-content: center;
@@ -116,10 +115,28 @@
                     }
 
                     .json {
-                        margin-top: 10px;
+                        .citation {
+                            margin-top: 15px;
+                            padding: 10px;
 
-                        .source_link {
-                            text-decoration: underline;
+                            .title {
+                                display: flex;
+                                align-items: center;
+
+                                .cls_icon {
+                                    font-size: parameter.$fontSizeNormalPlus !important;
+                                    margin-right: 5px !important;
+                                }
+                            }
+
+                            .source_link {
+                                text-decoration: underline;
+                                margin-left: 5px;
+                            }
+
+                            pre {
+                                margin-bottom: 0 !important;
+                            }
                         }
                     }
                 }
@@ -212,6 +229,17 @@
                     border: 1px solid color.$darkChatAssistantBoxBorder;
                     background-color: color.$darkChatAssistantBoxBackground;
                     color: color.$darkRootText;
+
+                    .json {
+                        .citation {
+                            background-color: color.$darkCitationBackground;
+                            color: color.$darkCitationText;
+
+                            .source_link {
+                                color: color.$darkHyperLinkText;
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -37,8 +37,8 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickTool = (name: string): void => {
-        this.variableObject.toolSelected.state = {} as modelMcp.IapiTool;
-        this.variableObject.taskSelected.state = {} as modelMcp.IapiTool;
+        this.variableObject.toolSelected.state = {} as modelMcp.Itool;
+        this.variableObject.taskSelected.state = {} as modelMcp.Itask;
 
         for (const tool of this.variableObject.toolList.state) {
             if (tool.name === name) {
@@ -61,8 +61,8 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickTask = (name: string): void => {
-        this.variableObject.toolSelected.state = {} as modelMcp.IapiTool;
-        this.variableObject.taskSelected.state = {} as modelMcp.IapiTool;
+        this.variableObject.toolSelected.state = {} as modelMcp.Itool;
+        this.variableObject.taskSelected.state = {} as modelMcp.Itask;
 
         for (const tool of this.variableObject.taskList.state) {
             if (tool.name === name) {
@@ -108,10 +108,10 @@ export default class MenuItem implements Icontroller {
                 isMenuItemTool: false,
                 isMenuItemTask: false,
                 isMenuItemAgent: false,
-                toolList: variableLink<modelMcp.IapiTool[]>("Mcp"),
-                toolSelected: variableLink<modelMcp.IapiTool>("Mcp"),
-                taskList: variableLink<modelMcp.IapiTool[]>("Mcp"),
-                taskSelected: variableLink<modelMcp.IapiTool>("Mcp"),
+                toolList: variableLink<modelMcp.Itool[]>("Mcp"),
+                toolSelected: variableLink<modelMcp.Itool>("Mcp"),
+                taskList: variableLink<modelMcp.Itask[]>("Mcp"),
+                taskSelected: variableLink<modelMcp.Itask>("Mcp"),
                 fileUploadedList: variableLink<string[]>("Mcp"),
                 systemMode: variableLink<string>("Chat")
             },

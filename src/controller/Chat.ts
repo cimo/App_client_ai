@@ -18,19 +18,19 @@ export default class Chat implements Icontroller {
     private responseId: string;
     private responseReason: string;
     private responseNoReason: string;
-    private responseMcpTool: modelChat.IapiResponseTool;
+    private responseMcpTool: modelChat.ImcpTool;
 
     private abortControllerApiResponse: AbortController | null;
 
     private modelSelected: string;
-    private fileObject: Record<string, string | undefined>;
+    private fileList: modelChat.Ifile;
 
     // Method
     private resetModelResponse = (): void => {
         this.responseId = "";
         this.responseReason = "";
         this.responseNoReason = "";
-        this.responseMcpTool = {} as modelChat.IapiResponseTool;
+        this.responseMcpTool = {} as modelChat.ImcpTool;
 
         this.variableObject.isMessageSent.state = false;
     };
@@ -44,14 +44,30 @@ export default class Chat implements Icontroller {
         }
     };
 
-    private onClickSourceLink = async (event: Event, fileName: string, citation: string): Promise<void> => {
+    private onClickSourceLink = async (event: Event, fileName: string, searchInput: string): Promise<void> => {
         event.preventDefault();
 
-        this.apiResponse(`Search mode: document. File name: ${fileName}. Search input: ${citation}`);
+        const systemMode = this.variableObject.systemMode.state;
+        const toolSelected = this.variableObject.toolSelected.state;
+
+        this.variableObject.systemMode.state = "tool-call";
+
+        for (const tool of this.variableObject.toolList.state) {
+            if (tool.name === "document_parser") {
+                this.variableObject.toolSelected.state = tool;
+
+                break;
+            }
+        }
+
+        this.apiResponse(`Filename: ${fileName}. Search input: ${searchInput}.`);
+
+        this.variableObject.systemMode.state = systemMode;
+        this.variableObject.toolSelected.state = toolSelected;
     };
 
     private openWindowDocument = async (): Promise<void> => {
-        const fileNameList = Object.keys(this.fileObject);
+        const fileNameList = Object.keys(this.fileList);
 
         if (fileNameList.length > 0) {
             await helperSrc.openWindow("document", fileNameList[0], "#/document");
@@ -88,7 +104,8 @@ export default class Chat implements Icontroller {
                 assistantNoReason: this.responseNoReason,
                 mcpTool: this.responseMcpTool,
                 file: "",
-                citation: []
+                embedding: "",
+                citation: undefined
             });
 
             this.autoscroll(false);
@@ -301,50 +318,76 @@ export default class Chat implements Icontroller {
                                         this.autoscroll(false);
                                     } else if (dataTrimParse.type === "tool_response") {
                                         const dataResponse = dataTrimParse.response.message;
-                                        let isAutoScroll = true;
 
                                         if (dataResponse) {
                                             const index = this.variableObject.chatMessageList.state.length - 1;
 
                                             if (helperSrc.isJson(dataResponse)) {
-                                                const ragResult = JSON.parse(dataResponse) as modelMcp.IapiRagResult;
+                                                const toolResponse = JSON.parse(dataResponse) as modelMcp.IapiToolResponse;
 
-                                                if (ragResult.type === "citation") {
+                                                if (
+                                                    toolResponse.name === "automate_screenshot" ||
+                                                    toolResponse.name === "automate_mouse_move" ||
+                                                    toolResponse.name === "automate_mouse_click" ||
+                                                    toolResponse.name === "chrome" ||
+                                                    toolResponse.name === "math_expression" ||
+                                                    toolResponse.name === "ocr_execute" ||
+                                                    toolResponse.name === "rag_store" ||
+                                                    toolResponse.name === "rag_delete"
+                                                ) {
+                                                    const resultList = toolResponse.resultList as string[];
+
                                                     this.variableObject.chatMessageList.state[index] = {
                                                         ...this.variableObject.chatMessageList.state[index],
-                                                        citation: ragResult.resultList as modelMcp.IapiRag[]
+                                                        assistantNoReason: resultList[0]
                                                     };
+                                                } else if (toolResponse.name === "document_parser") {
+                                                    const parserList = toolResponse.resultList as modelMcp.IdocumentParser[];
+                                                    const parser = parserList[0];
 
-                                                    this.variableObject.systemMode.state = "chat";
+                                                    if (Object.keys(parser).length > 0) {
+                                                        this.fileList[parser.fileName] = {
+                                                            pageNumber: parser.terminalExecution
+                                                        };
 
-                                                    this.apiResponse(`${userPrompt}\n\nCITATION:\n${JSON.stringify(ragResult.resultList)}`, "rag");
+                                                        await this.openWindowDocument();
 
-                                                    this.variableObject.systemMode.state = "tool-call";
-                                                } else if (ragResult.type === "html") {
-                                                    const htmlResultList = ragResult.resultList as modelMcp.IapiRag[];
-
-                                                    for (const htmlResult of htmlResultList) {
-                                                        this.fileObject[htmlResult.fileName] = htmlResult.pageNumber;
+                                                        this.variableObject.chatMessageList.state[index] = {
+                                                            ...this.variableObject.chatMessageList.state[index],
+                                                            assistantNoReason: "Document opened."
+                                                        };
+                                                    } else {
+                                                        this.variableObject.chatMessageList.state[index] = {
+                                                            ...this.variableObject.chatMessageList.state[index],
+                                                            assistantNoReason: "Document not found."
+                                                        };
                                                     }
+                                                } else if (toolResponse.name === "rag_search") {
+                                                    const citationList = toolResponse.resultList as modelMcp.IragSearch[];
 
-                                                    await this.openWindowDocument();
+                                                    if (citationList.length > 0) {
+                                                        this.variableObject.chatMessageList.state[index] = {
+                                                            ...this.variableObject.chatMessageList.state[index],
+                                                            citation: citationList
+                                                        };
 
-                                                    this.variableObject.chatMessageList.state[index] = {
-                                                        ...this.variableObject.chatMessageList.state[index],
-                                                        assistantNoReason: "Document opened."
-                                                    };
-                                                }
-                                            } else {
-                                                if (!prompt || mode === "rag") {
-                                                    this.variableObject.chatMessageList.state[index] = {
-                                                        ...this.variableObject.chatMessageList.state[index],
-                                                        assistantNoReason: dataResponse
-                                                    };
+                                                        this.variableObject.systemMode.state = "chat";
+
+                                                        this.apiResponse(
+                                                            `${userPrompt}\n\nCITATION:\n${JSON.stringify(toolResponse.resultList)}`,
+                                                            "rag"
+                                                        );
+
+                                                        this.variableObject.systemMode.state = "tool-call";
+                                                    } else {
+                                                        this.variableObject.chatMessageList.state[index] = {
+                                                            ...this.variableObject.chatMessageList.state[index],
+                                                            assistantNoReason: "No citations found."
+                                                        };
+                                                    }
                                                 }
                                             }
-                                        }
 
-                                        if (isAutoScroll) {
                                             this.autoscroll(false);
                                         }
                                     }
@@ -363,7 +406,7 @@ export default class Chat implements Icontroller {
 
                         this.variableObject.chatMessageList.state[idx] = {
                             ...this.variableObject.chatMessageList.state[idx],
-                            assistantNoReason: "Stoped by user."
+                            assistantNoReason: "Stopped by user."
                         };
 
                         return;
@@ -380,7 +423,7 @@ export default class Chat implements Icontroller {
 
         const difference =
             elementContainerMessageReceive.scrollHeight - (elementContainerMessageReceive.scrollTop + elementContainerMessageReceive.clientHeight);
-        const threshold = 50;
+        const threshold = 10;
         const isAtBottom = difference <= threshold;
 
         elementContainerMessageReceive.dataset["autoScroll"] = isAtBottom ? "true" : "false";
@@ -401,12 +444,12 @@ export default class Chat implements Icontroller {
         this.responseId = "";
         this.responseReason = "";
         this.responseNoReason = "";
-        this.responseMcpTool = {} as modelChat.IapiResponseTool;
+        this.responseMcpTool = {} as modelChat.ImcpTool;
 
         this.abortControllerApiResponse = null;
 
         this.modelSelected = "";
-        this.fileObject = {};
+        this.fileList = {};
     }
 
     hookObject = {} as modelChat.IelementHook;
@@ -418,9 +461,9 @@ export default class Chat implements Icontroller {
                 chatMessageList: [],
                 chatHistoryList: [],
                 systemMode: "chat",
-                toolSelected: variableLink<modelMcp.IapiTool>("Mcp"),
-                toolList: variableLink<modelMcp.IapiTool[]>("Mcp"),
-                taskSelected: variableLink<modelMcp.IapiTool>("Mcp")
+                toolSelected: variableLink<modelMcp.Itool>("Mcp"),
+                toolList: variableLink<modelMcp.Itool[]>("Mcp"),
+                taskSelected: variableLink<modelMcp.Itask>("Mcp")
             },
             this.constructor.name
         );
@@ -453,10 +496,13 @@ export default class Chat implements Icontroller {
                 if (fileName) {
                     const windowLabel = helperSrc.appWindowLabelUnique("document", fileName);
 
-                    if (Object.entries(this.fileObject).length > 0) {
-                        await emitTo(windowLabel, "document-content-update", Object.entries(this.fileObject)[0]);
+                    if (Object.entries(this.fileList).length > 0) {
+                        const fileName = Object.keys(this.fileList)[0];
+                        const pageNumber = this.fileList[fileName].pageNumber;
 
-                        delete this.fileObject[fileName];
+                        await emitTo(windowLabel, "document-content-update", [fileName, pageNumber]);
+
+                        delete this.fileList[fileName];
                     }
                 }
 
