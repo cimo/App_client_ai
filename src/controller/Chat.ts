@@ -105,7 +105,8 @@ export default class Chat implements Icontroller {
                 mcpTool: this.responseMcpTool,
                 file: "",
                 embedding: "",
-                citation: undefined
+                citation: undefined,
+                scanner: ""
             });
 
             this.autoscroll(false);
@@ -387,6 +388,13 @@ export default class Chat implements Icontroller {
                                                             assistantNoReason: "No citations found."
                                                         };
                                                     }
+                                                } else if (toolResponse.name === "security_scanner") {
+                                                    const resultList = toolResponse.resultList as string[];
+
+                                                    this.variableObject.chatMessageList.state[index] = {
+                                                        ...this.variableObject.chatMessageList.state[index],
+                                                        scanner: resultList[0]
+                                                    };
                                                 }
                                             }
 

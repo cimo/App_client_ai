@@ -114,7 +114,7 @@
                         }
                     }
 
-                    .json {
+                    .citation_container {
                         .citation {
                             margin-top: 15px;
                             padding: 10px;
@@ -138,6 +138,17 @@
                                 margin-bottom: 0 !important;
                             }
                         }
+                    }
+                }
+
+                .scanner_container {
+                    overflow: scroll;
+
+                    .scanner {
+                        max-height: 500px;
+                        word-break: unset !important;
+                        white-space: pre !important;
+                        font-family: monospace !important;
                     }
                 }
             }
@@ -222,7 +233,7 @@
                     background-color: color.$darkChatAssistantBoxBackground;
                     color: color.$darkRootText;
 
-                    .json {
+                    .citation_container {
                         .citation {
                             background-color: color.$darkCitationBackground;
                             color: color.$darkCitationText;

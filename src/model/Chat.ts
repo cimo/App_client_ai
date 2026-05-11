@@ -25,6 +25,7 @@ export interface IchatMessage {
     file: string;
     embedding: string;
     citation: modelMcp.IragSearch[] | undefined;
+    scanner: string;
 }
 
 export interface Ifile {
