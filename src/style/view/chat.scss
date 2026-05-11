@@ -181,14 +181,6 @@
                 justify-content: center;
                 align-items: center;
                 justify-items: center;
-
-                > div {
-                    margin-left: 5px;
-                }
-
-                .chip {
-                    cursor: pointer;
-                }
             }
 
             .right {
@@ -215,7 +207,7 @@
     }
 }
 
-@media (prefers-color-scheme: Dark) {
+:root[data-theme="dark"] {
     .container_chat {
         > div {
             .container_chat_user {
@@ -251,6 +243,6 @@
     }
 }
 
-@media (prefers-color-scheme: Light) {
+:root[data-theme="light"] {
     //...
 }

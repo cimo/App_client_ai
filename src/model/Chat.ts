@@ -51,6 +51,7 @@ export interface Ivariable {
     chatMessageList: IvariableBind<IchatMessage[]>;
     chatHistoryList: IvariableBind<IchatInput[]>;
     systemMode: IvariableBind<string>;
+    agentInputSystem: IvariableBind<string>;
     toolSelected: IvariableBind<modelMcp.Itool>;
     toolList: IvariableBind<modelMcp.Itool[]>;
     taskSelected: IvariableBind<modelMcp.Itask>;

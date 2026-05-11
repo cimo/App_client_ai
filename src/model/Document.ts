@@ -17,7 +17,10 @@ export interface Ivariable {
 }
 
 export interface Imethod {
-    onInputChangePage: (event: Event) => void;
+    onInputChangePage: () => void;
+    onClickChangePage: (pageDifference: number) => void;
 }
 
-export interface IelementHook extends Record<string, Element | Element[]> {}
+export interface IelementHook extends Record<string, Element | Element[]> {
+    elementInputPageNumber: HTMLInputElement;
+}

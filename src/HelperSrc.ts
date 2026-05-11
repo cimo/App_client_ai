@@ -11,7 +11,7 @@ export const PATH_LOG = "log/";
 export const LOCALE = "jp";
 export const URL_AI = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
 export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
-export const MODEL_DEFAULT = "Qwen3.5-0.8B-BF16";
+export const MODEL_DEFAULT = "Qwen3.5-0.8B-Q8_0";
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {
     // Asia
@@ -99,7 +99,7 @@ export const generateUniqueId = (): string => {
     return `${timestamp}-${randomPart}`;
 };
 
-export const readMimeType = (byteList: Uint8Array): modelHelperSrc.ImimeType => {
+export const readMimeType = (byteList: Uint8Array, fileName?: string): modelHelperSrc.ImimeType => {
     const toHex = (byteList: Uint8Array) => {
         let out = "";
         for (let i = 0; i < byteList.length; i++) {
@@ -150,6 +150,8 @@ export const readMimeType = (byteList: Uint8Array): modelHelperSrc.ImimeType => 
                 extension: "pptx"
             };
         }
+    } else if (fileName && fileName.endsWith(".md")) {
+        return { content: "text/markdown", extension: "md" };
     }
 
     return { content: "", extension: "" };

@@ -49,6 +49,8 @@ export default class Ai implements Icontroller {
                 for (const value of jsonParse.data) {
                     if (value.id.toLowerCase().includes("embedding")) {
                         continue;
+                    } else if (value.id.toLowerCase() === "default") {
+                        continue;
                     }
 
                     resultCleaned.push(value);
@@ -59,7 +61,7 @@ export default class Ai implements Icontroller {
                 this.variableObject.isOpenDropdownModelList.state = true;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiModel() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Ai.ts - apiModel() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineAi.state = true;
             });
@@ -108,7 +110,7 @@ export default class Ai implements Icontroller {
                 this.variableObject.adUrl.state = resultJson.response.stdout;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiLogin() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Ai.ts - apiLogin() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineAi.state = true;
             });
@@ -135,7 +137,7 @@ export default class Ai implements Icontroller {
                 console.log("cimo - apiUserInfo()", resultJson);
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiUserInfo() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Ai.ts - apiUserInfo() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineAi.state = true;
             });
@@ -159,7 +161,7 @@ export default class Ai implements Icontroller {
                 session.deleteAiSession();
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Index.ts - apiLogout() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Ai.ts - apiLogout() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineAi.state = true;
             });
