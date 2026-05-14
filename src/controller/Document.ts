@@ -16,18 +16,41 @@ export default class Document implements Icontroller {
     private appWindow: Window;
 
     // Method
-    private onInputChangePage = (event: Event): void => {
-        const inputValue = parseInt((event.target as HTMLInputElement).value.replace(/\D+/g, ""));
+    private onClickChangePage = (pageDifference: number): void => {
+        const currentPage = parseInt(this.hookObject.elementInputPageNumber.value);
 
-        if (!isNaN(inputValue)) {
-            this.readHtmlContent(inputValue);
+        if (!isNaN(currentPage)) {
+            let newPage = currentPage + pageDifference;
+
+            if (newPage < 1) {
+                newPage = 1;
+            } else if (newPage > this.variableObject.pageTotal.state) {
+                newPage = this.variableObject.pageTotal.state;
+            }
+
+            this.hookObject.elementInputPageNumber.value = newPage.toString();
+
+            if (newPage !== currentPage) {
+                this.readHtmlContent(newPage);
+            }
+        }
+    };
+
+    private onInputChangePage = (): void => {
+        const inputValue = this.hookObject.elementInputPageNumber.value.replace(/\D+/g, "");
+        this.hookObject.elementInputPageNumber.value = inputValue;
+
+        const pageNumber = parseInt(inputValue);
+
+        if (!isNaN(pageNumber)) {
+            this.readHtmlContent(pageNumber);
         }
     };
 
     private readHtmlContent = async (pageNumber: number): Promise<void> => {
         const appWindowTitle = await this.appWindow.title();
 
-        const result = await this.controllerMcp.apiFileRead(appWindowTitle, pageNumber);
+        const result = await this.controllerMcp.apiDocumentRead(appWindowTitle, pageNumber);
 
         if (result) {
             this.variableObject.fileContent.state = window.atob(result.fileContent);
@@ -70,7 +93,8 @@ export default class Document implements Icontroller {
         );
 
         this.methodObject = {
-            onInputChangePage: this.onInputChangePage
+            onInputChangePage: this.onInputChangePage,
+            onClickChangePage: this.onClickChangePage
         };
     }
 

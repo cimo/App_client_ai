@@ -25,6 +25,7 @@ export interface IchatMessage {
     file: string;
     embedding: string;
     citation: modelMcp.IragSearch[] | undefined;
+    scanner: string;
 }
 
 export interface Ifile {
@@ -51,6 +52,7 @@ export interface Ivariable {
     chatMessageList: IvariableBind<IchatMessage[]>;
     chatHistoryList: IvariableBind<IchatInput[]>;
     systemMode: IvariableBind<string>;
+    agentInputSystem: IvariableBind<string>;
     toolSelected: IvariableBind<modelMcp.Itool>;
     toolList: IvariableBind<modelMcp.Itool[]>;
     taskSelected: IvariableBind<modelMcp.Itask>;

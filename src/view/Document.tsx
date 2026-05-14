@@ -10,20 +10,24 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
             <div class="container_html">
                 <div>
                     <p class="container_page">
+                        <i class="cls_icon" onClick={() => methodObject.onClickChangePage(-1)}>
+                            chevron_left
+                        </i>
                         <input
                             type="text"
                             inputmode="numeric"
                             pattern="[0-9]*"
                             value={variableObject.pageNumber.state}
-                            onClick={(event: Event) => {
-                                event.stopPropagation();
+                            onInput={() => {
+                                methodObject.onInputChangePage();
                             }}
-                            onInput={(event: Event) => {
-                                methodObject.onInputChangePage(event);
-                            }}
+                            jsmvcfw-elementHookName="elementInputPageNumber"
                         />
                         <span>/</span>
                         <span class="page_total">{variableObject.pageTotal.state}</span>
+                        <i class="cls_icon" onClick={() => methodObject.onClickChangePage(1)}>
+                            chevron_right
+                        </i>
                     </p>
                 </div>
                 <iframe class="html" srcdoc={variableObject.fileContent.state} sandbox="allow-scripts"></iframe>

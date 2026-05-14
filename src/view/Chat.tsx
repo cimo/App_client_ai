@@ -123,7 +123,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                         <summary>
                                                             <p>Citation result:</p>
                                                         </summary>
-                                                        <div class="json">
+                                                        <div class="citation_container">
                                                             {(() => {
                                                                 const result: IvirtualNode[] = [];
 
@@ -160,6 +160,15 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                 return result;
                                                             })()}
                                                         </div>
+                                                    </details>
+                                                );
+                                            } else if (value.scanner) {
+                                                result.push(
+                                                    <details open class="scanner_container">
+                                                        <summary>
+                                                            <p>Scanner result:</p>
+                                                        </summary>
+                                                        <pre class="scanner">{value.scanner}</pre>
                                                     </details>
                                                 );
                                             } else {

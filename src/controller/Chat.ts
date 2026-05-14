@@ -105,7 +105,8 @@ export default class Chat implements Icontroller {
                 mcpTool: this.responseMcpTool,
                 file: "",
                 embedding: "",
-                citation: undefined
+                citation: undefined,
+                scanner: ""
             });
 
             this.autoscroll(false);
@@ -164,9 +165,11 @@ export default class Chat implements Icontroller {
                     "You MUST NOT explain nothing."
                 ].join("\n");
             } else if (this.variableObject.systemMode.state === "agent-skill") {
-                inputSystem = [
-                    "You are a multilingual agent skill executer that needs to reply with the user input language and you need to transform the user request in a action.",
-                    'If you find a tag [script](...) in the text you MUST stop and write ONLY valid JSON with this format without additional information: { "action": { "script": true } }'
+                inputSystem += [
+                    "",
+                    // "You are a multilingual agent skill executer that needs to reply with the user input language and you need to transform the user request in a action.",
+                    // 'If you find a tag [script](...) in the text you MUST stop and write ONLY valid JSON with this format without additional information: { "action": { "script": true } }',
+                    this.variableObject.agentInputSystem.state
                 ].join("\n");
             }
 
@@ -213,7 +216,7 @@ export default class Chat implements Icontroller {
                     const contentType = result.headers.get("Content-Type");
 
                     if (!contentType || !contentType.includes("text/event-stream") || !result.body) {
-                        helperSrc.writeLog("Index.ts - apiResponse() - fetch() - Error", "Missing or invalid headers.");
+                        helperSrc.writeLog("Chat.ts - apiResponse() - fetch() - Error", "Missing or invalid headers.");
 
                         return;
                     }
@@ -385,6 +388,13 @@ export default class Chat implements Icontroller {
                                                             assistantNoReason: "No citations found."
                                                         };
                                                     }
+                                                } else if (toolResponse.name === "security_scanner") {
+                                                    const resultList = toolResponse.resultList as string[];
+
+                                                    this.variableObject.chatMessageList.state[index] = {
+                                                        ...this.variableObject.chatMessageList.state[index],
+                                                        scanner: resultList[0]
+                                                    };
                                                 }
                                             }
 
@@ -397,7 +407,7 @@ export default class Chat implements Icontroller {
                     }
                 })
                 .catch((error: Error) => {
-                    helperSrc.writeLog("Index.ts - apiResponse() - fetch() - catch()", typeof error === "string" ? error : error.message);
+                    helperSrc.writeLog("Chat.ts - apiResponse() - fetch() - catch()", typeof error === "string" ? error : error.message);
 
                     this.resetModelResponse();
 
@@ -461,6 +471,7 @@ export default class Chat implements Icontroller {
                 chatMessageList: [],
                 chatHistoryList: [],
                 systemMode: "chat",
+                agentInputSystem: "",
                 toolSelected: variableLink<modelMcp.Itool>("Mcp"),
                 toolList: variableLink<modelMcp.Itool[]>("Mcp"),
                 taskSelected: variableLink<modelMcp.Itask>("Mcp")

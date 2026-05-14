@@ -12,6 +12,9 @@ setAppLabel("jsmvcfw");
 
 session.syncFromStorage();
 
+document.documentElement.setAttribute("data-theme", "dark");
+document.documentElement.style.colorScheme = "dark";
+
 route([
     {
         title: "Index",

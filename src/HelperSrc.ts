@@ -99,7 +99,7 @@ export const generateUniqueId = (): string => {
     return `${timestamp}-${randomPart}`;
 };
 
-export const readMimeType = (byteList: Uint8Array): modelHelperSrc.ImimeType => {
+export const readMimeType = (byteList: Uint8Array, fileName?: string): modelHelperSrc.ImimeType => {
     const toHex = (byteList: Uint8Array) => {
         let out = "";
         for (let i = 0; i < byteList.length; i++) {
@@ -150,6 +150,8 @@ export const readMimeType = (byteList: Uint8Array): modelHelperSrc.ImimeType => 
                 extension: "pptx"
             };
         }
+    } else if (fileName && fileName.endsWith(".md")) {
+        return { content: "text/markdown", extension: "md" };
     }
 
     return { content: "", extension: "" };

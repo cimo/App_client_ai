@@ -21,6 +21,10 @@
         justify-content: center;
         gap: 8px;
 
+        .cls_icon {
+            cursor: pointer;
+        }
+
         input,
         .page_total {
             width: 50px;

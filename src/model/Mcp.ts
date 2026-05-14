@@ -17,6 +17,13 @@ export interface Itask {
     description: string;
 }
 
+export interface Iagent {
+    id: number;
+    name: string;
+    description: string;
+    skill: string;
+}
+
 export interface IragSearch {
     fileName: string;
     citation: string;
@@ -43,13 +50,19 @@ export interface Ivariable {
     toolSelected: IvariableBind<Itool>;
     taskList: IvariableBind<Itask[]>;
     taskSelected: IvariableBind<Itask>;
-    fileUploadedList: IvariableBind<string[]>;
+    agentList: IvariableBind<Iagent[]>;
+    agentSelected: IvariableBind<Iagent>;
+    documentList: IvariableBind<string[]>;
+    skillList: IvariableBind<string[]>;
+    agentForm: IvariableBind<Iagent>;
+    agentFormResult: IvariableBind<string>;
     systemMode: IvariableBind<string>;
     chatMessageList: IvariableBind<modelChat.IchatMessage[]>;
 }
 
 export interface Imethod {
-    onClickChipUpload: () => void;
+    onClickChipDocumentUpload: () => void;
+    onClickChipSkillUpload: () => void;
     onClickChipClose: () => void;
 }
 

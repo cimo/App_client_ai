@@ -204,7 +204,7 @@ aside {
     }
 }
 
-@media (prefers-color-scheme: Dark) {
+:root[data-theme="dark"] {
     :root {
         color: color.$darkRootText;
         background-color: color.$darkRootBackground;
@@ -289,6 +289,6 @@ aside {
     }
 }
 
-@media (prefers-color-scheme: Light) {
+:root[data-theme="light"] {
     //...
 }
