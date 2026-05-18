@@ -61,7 +61,6 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                 if (variableObject.isMenuItemDocument.state) {
                     result.push(
                         <div class="container_document">
-                            <p class="info">The files will be available for 10 minutes from the time the upload is completed.</p>
                             <ul>
                                 {(() => {
                                     const result: IvirtualNode[] = [];

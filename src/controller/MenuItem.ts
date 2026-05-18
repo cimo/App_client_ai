@@ -196,6 +196,7 @@ export default class MenuItem implements Icontroller {
         this.variableObject.toolSelected.state = {} as modelMcp.Itool;
         this.variableObject.taskSelected.state = {} as modelMcp.Itask;
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
+        this.variableObject.agentInputSystem.state = "";
 
         for (const agent of this.variableObject.agentList.state) {
             if (agent.id === id) {
