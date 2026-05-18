@@ -427,8 +427,9 @@ export default class Chat implements Icontroller {
         }
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     autoscroll = (isAuto: boolean): void => {
-        const elementContainerMessageReceive = this.hookObject.elementContainerMessageReceive;
+        /*const elementContainerMessageReceive = this.hookObject.elementContainerMessageReceive;
         const elementBottomLimit = this.hookObject.elementBottomLimit;
 
         const difference =
@@ -444,7 +445,7 @@ export default class Chat implements Icontroller {
             }
 
             elementBottomLimit.scrollIntoView({ block: "end", inline: "nearest" });
-        });
+        });*/
     };
 
     constructor() {
