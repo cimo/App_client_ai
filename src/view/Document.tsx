@@ -42,6 +42,8 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                     } else if (variableObject.imageContent.state !== "") {
                         result.push(<img src={`data:image/png;base64,${variableObject.imageContent.state}`} />);
                     }
+
+                    return result;
                 })()}
             </div>
         </div>

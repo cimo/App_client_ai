@@ -272,7 +272,7 @@ export default class Mcp implements Icontroller {
                             this.variableObject.chatMessageList.state[uploadMessageIndex].assistantNoReason = "Upload result:";
                             this.variableObject.chatMessageList.state[uploadMessageIndex].file = JSON.stringify(uploadDocumentList);
 
-                            if (resultFile.status === "Success") {
+                            if (helperSrc.filterMimeType(resultFile.fileName) !== "image" && resultFile.status === "Success") {
                                 embeddingDocumentList.push({ fileName: resultFile.fileName, status: "Ongoing" });
 
                                 this.variableObject.chatMessageList.state[embeddingMessageIndex].assistantNoReason = "Embedding result:";
