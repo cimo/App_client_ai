@@ -99,7 +99,7 @@ export const generateUniqueId = (): string => {
     return `${timestamp}-${randomPart}`;
 };
 
-export const readMimeType = (byteList: Uint8Array, fileName?: string): modelHelperSrc.ImimeType => {
+export const readMimeType = (byteList: Uint8Array): modelHelperSrc.ImimeType => {
     const toHex = (byteList: Uint8Array) => {
         let out = "";
         for (let i = 0; i < byteList.length; i++) {
@@ -130,6 +130,8 @@ export const readMimeType = (byteList: Uint8Array, fileName?: string): modelHelp
         return { content: "image/tiff", extension: "tiff" };
     } else if (toHex(byteList.subarray(0, 4)) === "25504446") {
         return { content: "application/pdf", extension: "pdf" };
+    } else if (toHex(byteList.subarray(0, 4)) === "504b0304") {
+        return { content: "application/zip", extension: "zip" };
     } else if (toHex(byteList.subarray(0, 2)) === "504b") {
         const headBytes = byteList.subarray(0, Math.min(byteList.length, 64 * 1024));
         const head = toLatin1(headBytes);
@@ -150,8 +152,6 @@ export const readMimeType = (byteList: Uint8Array, fileName?: string): modelHelp
                 extension: "pptx"
             };
         }
-    } else if (fileName && fileName.endsWith(".md")) {
-        return { content: "text/markdown", extension: "md" };
     }
 
     return { content: "", extension: "" };
@@ -229,4 +229,32 @@ export const openWindow = async (label: string, title: string, route: string): P
         center: true,
         focus: true
     });
+};
+
+export const filterMimeType = (fileName: string): string => {
+    let result = "";
+
+    const extension = fileName.toLowerCase().trim().split(".").pop();
+    const mimeTypeList = [
+        "image/jpg",
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+        "image/bmp",
+        "image/tiff",
+        "image/svg+xml",
+        "image/x-icon",
+        "image/avif"
+    ];
+
+    for (const mimeType of mimeTypeList) {
+        const [left, right] = mimeType.toLowerCase().split("/", 2);
+
+        if (extension === right) {
+            result = left;
+        }
+    }
+
+    return result;
 };

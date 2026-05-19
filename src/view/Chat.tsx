@@ -197,9 +197,7 @@ export const input = (variableObject: modelChat.Ivariable, methodObject: modelCh
             <div class="container_message_send">
                 <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
                 <div class="container_action">
-                    <div class="left">
-                        <aside jsmvcfw-controllerName="Mcp" view="upload" />
-                    </div>
+                    <div class="left"></div>
                     <div class="right">
                         <button
                             onClick={() => {

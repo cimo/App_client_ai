@@ -11,7 +11,8 @@ export interface Iresult {
 }
 
 export interface Ivariable {
-    fileContent: IvariableBind<string>;
+    htmlContent: IvariableBind<string>;
+    imageContent: IvariableBind<string>;
     pageNumber: IvariableBind<number>;
     pageTotal: IvariableBind<number>;
 }

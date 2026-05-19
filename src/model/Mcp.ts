@@ -61,8 +61,6 @@ export interface Ivariable {
 }
 
 export interface Imethod {
-    onClickChipDocumentUpload: () => void;
-    onClickChipSkillUpload: () => void;
     onClickChipClose: () => void;
 }
 

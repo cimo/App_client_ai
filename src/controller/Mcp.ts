@@ -86,143 +86,6 @@ export default class Mcp implements Icontroller {
         }, 1000);
     };
 
-    private apiDocumentUpload = async (): Promise<void> => {
-        const pathFileList = await open({
-            multiple: true,
-            directory: false
-        });
-
-        if (pathFileList) {
-            const uploadMessage = {} as modelChat.IchatMessage;
-            uploadMessage.assistantNoReason = "";
-            this.variableObject.chatMessageList.state.push(uploadMessage);
-            const uploadMessageIndex = this.variableObject.chatMessageList.state.length - 1;
-
-            const embeddingMessage = {} as modelChat.IchatMessage;
-            embeddingMessage.assistantNoReason = " ";
-            this.variableObject.chatMessageList.state.push(embeddingMessage);
-            const embeddingMessageIndex = this.variableObject.chatMessageList.state.length - 1;
-
-            let uploadDocumentList: modelMcp.IfileStatus[] = [];
-            let embeddingDocumentList: modelMcp.IfileStatus[] = [];
-
-            for (const pathFile of pathFileList) {
-                const file = await readFile(pathFile);
-                const mimeType = helperSrc.readMimeType(file);
-                const blob = new Blob([file], { type: mimeType.content });
-                const fileName = pathFile.split(/[/\\]/).pop() || "file";
-
-                const formData = new FormData();
-                formData.append("file", blob, `${fileName}`);
-
-                await fetch(`${helperSrc.URL_MCP}/api/document-upload`, {
-                    method: "POST",
-                    headers: {
-                        "mcp-session-id": session.data.mcpSessionId,
-                        Cookie: session.data.mcpCookie,
-                        fileName
-                    },
-                    body: formData,
-                    danger: {
-                        acceptInvalidCerts: true,
-                        acceptInvalidHostnames: true
-                    }
-                })
-                    .then(async (result) => {
-                        this.variableObject.isOfflineMcp.state = false;
-
-                        const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                        if (resultJson.response.stdout !== "") {
-                            const resultFile = JSON.parse(resultJson.response.stdout) as modelMcp.IfileStatus;
-
-                            uploadDocumentList.push(resultFile);
-
-                            this.variableObject.chatMessageList.state[uploadMessageIndex].assistantNoReason = "Upload result:";
-                            this.variableObject.chatMessageList.state[uploadMessageIndex].file = JSON.stringify(uploadDocumentList);
-
-                            if (resultFile.status === "Success") {
-                                embeddingDocumentList.push({ fileName: resultFile.fileName, status: "Ongoing" });
-
-                                this.variableObject.chatMessageList.state[embeddingMessageIndex].assistantNoReason = "Embedding result:";
-                                this.variableObject.chatMessageList.state[embeddingMessageIndex].embedding = JSON.stringify(embeddingDocumentList);
-
-                                this.startEmbeddingCheck(embeddingDocumentList, embeddingMessageIndex);
-                            }
-                        }
-                    })
-                    .catch((error: Error) => {
-                        helperSrc.writeLog("Mcp.ts - apiDocumentUpload() - fetch() - catch()", error.message);
-
-                        this.variableObject.isOfflineMcp.state = true;
-                    });
-            }
-
-            this.controllerChat.autoscroll(false);
-        }
-    };
-
-    private apiSkillUpload = async (): Promise<void> => {
-        const pathFileList = await open({
-            multiple: true,
-            directory: false
-        });
-
-        if (pathFileList) {
-            const uploadMessage = {} as modelChat.IchatMessage;
-            uploadMessage.assistantNoReason = "";
-            this.variableObject.chatMessageList.state.push(uploadMessage);
-            const uploadMessageIndex = this.variableObject.chatMessageList.state.length - 1;
-
-            const uploadSkillList: modelMcp.IfileStatus[] = [];
-
-            for (const pathFile of pathFileList) {
-                const file = await readFile(pathFile);
-                const fileName = pathFile.split(/[/\\]/).pop() || "file";
-                const mimeType = helperSrc.readMimeType(file, fileName);
-                const blob = new Blob([file], { type: mimeType.content });
-
-                const formData = new FormData();
-                formData.append("file", blob, `${fileName}`);
-
-                await fetch(`${helperSrc.URL_MCP}/api/skill-upload`, {
-                    method: "POST",
-                    headers: {
-                        "mcp-session-id": session.data.mcpSessionId,
-                        Cookie: session.data.mcpCookie,
-                        fileName
-                    },
-                    body: formData,
-                    danger: {
-                        acceptInvalidCerts: true,
-                        acceptInvalidHostnames: true
-                    }
-                })
-                    .then(async (result) => {
-                        this.variableObject.isOfflineMcp.state = false;
-
-                        const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                        if (resultJson.response.stdout !== "") {
-                            const resultFile = JSON.parse(resultJson.response.stdout) as modelMcp.IfileStatus;
-
-                            uploadSkillList.push(resultFile);
-
-                            this.variableObject.chatMessageList.state[uploadMessageIndex].assistantNoReason = "Upload result:";
-                            this.variableObject.chatMessageList.state[uploadMessageIndex].file = JSON.stringify(uploadSkillList);
-                        }
-                    })
-                    .catch((error: Error) => {
-                        helperSrc.writeLog("Mcp.ts - apiSkillUpload() - fetch() - catch()", error.message);
-
-                        this.variableObject.isOfflineMcp.state = true;
-                    });
-            }
-
-            this.controllerChat.autoscroll(false);
-        }
-    };
-
     private onClickChipDocumentUpload = async (): Promise<void> => {
         await this.apiDocumentUpload();
     };
@@ -354,6 +217,82 @@ export default class Mcp implements Icontroller {
             });
     };
 
+    apiDocumentUpload = async (): Promise<void> => {
+        const pathFileList = await open({
+            multiple: true,
+            directory: false
+        });
+
+        if (pathFileList) {
+            const uploadMessage = {} as modelChat.IchatMessage;
+            uploadMessage.assistantNoReason = "";
+            this.variableObject.chatMessageList.state.push(uploadMessage);
+            const uploadMessageIndex = this.variableObject.chatMessageList.state.length - 1;
+
+            const embeddingMessage = {} as modelChat.IchatMessage;
+            embeddingMessage.assistantNoReason = " ";
+            this.variableObject.chatMessageList.state.push(embeddingMessage);
+            const embeddingMessageIndex = this.variableObject.chatMessageList.state.length - 1;
+
+            let uploadDocumentList: modelMcp.IfileStatus[] = [];
+            let embeddingDocumentList: modelMcp.IfileStatus[] = [];
+
+            for (const pathFile of pathFileList) {
+                const file = await readFile(pathFile);
+                const mimeType = helperSrc.readMimeType(file);
+                const blob = new Blob([file], { type: mimeType.content });
+                const fileName = pathFile.split(/[/\\]/).pop() || "file";
+
+                const formData = new FormData();
+                formData.append("file", blob, `${fileName}`);
+
+                await fetch(`${helperSrc.URL_MCP}/api/document-upload`, {
+                    method: "POST",
+                    headers: {
+                        "mcp-session-id": session.data.mcpSessionId,
+                        Cookie: session.data.mcpCookie,
+                        fileName
+                    },
+                    body: formData,
+                    danger: {
+                        acceptInvalidCerts: true,
+                        acceptInvalidHostnames: true
+                    }
+                })
+                    .then(async (result) => {
+                        this.variableObject.isOfflineMcp.state = false;
+
+                        const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+                        if (resultJson.response.stdout !== "") {
+                            const resultFile = JSON.parse(resultJson.response.stdout) as modelMcp.IfileStatus;
+
+                            uploadDocumentList.push(resultFile);
+
+                            this.variableObject.chatMessageList.state[uploadMessageIndex].assistantNoReason = "Upload result:";
+                            this.variableObject.chatMessageList.state[uploadMessageIndex].file = JSON.stringify(uploadDocumentList);
+
+                            if (resultFile.status === "Success") {
+                                embeddingDocumentList.push({ fileName: resultFile.fileName, status: "Ongoing" });
+
+                                this.variableObject.chatMessageList.state[embeddingMessageIndex].assistantNoReason = "Embedding result:";
+                                this.variableObject.chatMessageList.state[embeddingMessageIndex].embedding = JSON.stringify(embeddingDocumentList);
+
+                                this.startEmbeddingCheck(embeddingDocumentList, embeddingMessageIndex);
+                            }
+                        }
+                    })
+                    .catch((error: Error) => {
+                        helperSrc.writeLog("Mcp.ts - apiDocumentUpload() - fetch() - catch()", error.message);
+
+                        this.variableObject.isOfflineMcp.state = true;
+                    });
+            }
+
+            this.controllerChat.autoscroll(false);
+        }
+    };
+
     apiDocumentList = async (): Promise<void> => {
         fetch(`${helperSrc.URL_MCP}/api/document-list`, {
             method: "GET",
@@ -433,6 +372,151 @@ export default class Mcp implements Icontroller {
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiDocumentRead() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
+    apiSkillUpload = async (): Promise<void> => {
+        const pathFileList = await open({
+            multiple: true,
+            directory: false
+        });
+
+        if (pathFileList) {
+            const uploadMessage = {} as modelChat.IchatMessage;
+            uploadMessage.assistantNoReason = "";
+            this.variableObject.chatMessageList.state.push(uploadMessage);
+            const uploadMessageIndex = this.variableObject.chatMessageList.state.length - 1;
+
+            const uploadSkillList: modelMcp.IfileStatus[] = [];
+
+            for (const pathFile of pathFileList) {
+                const file = await readFile(pathFile);
+                const fileName = pathFile.split(/[/\\]/).pop() || "file";
+                const mimeType = helperSrc.readMimeType(file);
+                const blob = new Blob([file], { type: mimeType.content });
+
+                const formData = new FormData();
+                formData.append("file", blob, `${fileName}`);
+
+                await fetch(`${helperSrc.URL_MCP}/api/skill-upload`, {
+                    method: "POST",
+                    headers: {
+                        "mcp-session-id": session.data.mcpSessionId,
+                        Cookie: session.data.mcpCookie,
+                        fileName
+                    },
+                    body: formData,
+                    danger: {
+                        acceptInvalidCerts: true,
+                        acceptInvalidHostnames: true
+                    }
+                })
+                    .then(async (result) => {
+                        this.variableObject.isOfflineMcp.state = false;
+
+                        const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+                        if (resultJson.response.stdout !== "") {
+                            const resultFile = JSON.parse(resultJson.response.stdout) as modelMcp.IfileStatus;
+
+                            uploadSkillList.push(resultFile);
+
+                            this.variableObject.chatMessageList.state[uploadMessageIndex].assistantNoReason = "Upload result:";
+                            this.variableObject.chatMessageList.state[uploadMessageIndex].file = JSON.stringify(uploadSkillList);
+                        }
+                    })
+                    .catch((error: Error) => {
+                        helperSrc.writeLog("Mcp.ts - apiSkillUpload() - fetch() - catch()", error.message);
+
+                        this.variableObject.isOfflineMcp.state = true;
+                    });
+            }
+
+            this.controllerChat.autoscroll(false);
+        }
+    };
+
+    apiSkillList = async (): Promise<void> => {
+        fetch(`${helperSrc.URL_MCP}/api/skill-list`, {
+            method: "GET",
+            headers: {
+                "mcp-session-id": session.data.mcpSessionId,
+                Cookie: session.data.mcpCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (result) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+                if (resultJson.response.stdout !== "") {
+                    this.variableObject.skillList.state = JSON.parse(resultJson.response.stdout);
+                }
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiSkillList() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
+    apiSkillDelete = (index: number, fileName: string): void => {
+        fetch(`${helperSrc.URL_MCP}/api/skill-delete`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                Cookie: session.data.mcpCookie
+            },
+            body: JSON.stringify({ fileName }),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(() => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                this.variableObject.skillList.state = this.variableObject.skillList.state.filter((_, a) => a !== index);
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiSkillDelete() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
+    apiSkillRead = async (fileName: string): Promise<void | string> => {
+        return fetch(`${helperSrc.URL_MCP}/api/skill-read`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                Cookie: session.data.mcpCookie
+            },
+            body: JSON.stringify({ fileName }),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (result) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+                if (resultJson.response.stdout !== "") {
+                    return resultJson.response.stdout;
+                }
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiSkillRead() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
             });
@@ -569,90 +653,6 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiSkillList = async (): Promise<void> => {
-        fetch(`${helperSrc.URL_MCP}/api/skill-list`, {
-            method: "GET",
-            headers: {
-                "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (result) => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                if (resultJson.response.stdout !== "") {
-                    this.variableObject.skillList.state = JSON.parse(resultJson.response.stdout);
-                }
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiSkillList() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-            });
-    };
-
-    apiSkillDelete = (index: number, fileName: string): void => {
-        fetch(`${helperSrc.URL_MCP}/api/skill-delete`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
-            },
-            body: JSON.stringify({ fileName }),
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(() => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                this.variableObject.skillList.state = this.variableObject.skillList.state.filter((_, a) => a !== index);
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiSkillDelete() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-            });
-    };
-
-    apiSkillRead = async (fileName: string): Promise<void | string> => {
-        return fetch(`${helperSrc.URL_MCP}/api/skill-read`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
-            },
-            body: JSON.stringify({ fileName }),
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (result) => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-
-                if (resultJson.response.stdout !== "") {
-                    return resultJson.response.stdout;
-                }
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiSkillRead() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-            });
-    };
-
     constructor() {
         this.variableObject = {} as modelMcp.Ivariable;
         this.methodObject = {} as modelMcp.Imethod;
@@ -683,8 +683,6 @@ export default class Mcp implements Icontroller {
         );
 
         this.methodObject = {
-            onClickChipDocumentUpload: this.onClickChipDocumentUpload,
-            onClickChipSkillUpload: this.onClickChipSkillUpload,
             onClickChipClose: this.onClickChipClose
         };
     }
@@ -696,8 +694,6 @@ export default class Mcp implements Icontroller {
     view(name?: string): IvirtualNode {
         if (name === "tool") {
             return viewMcp.tool(this.variableObject, this.methodObject);
-        } else if (name === "upload") {
-            return viewMcp.upload(this.variableObject, this.methodObject);
         }
 
         return this.viewNodeEmpty;

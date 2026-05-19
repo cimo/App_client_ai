@@ -52,6 +52,14 @@
         flex: 1 1 auto;
         min-height: 0;
 
+        .chip {
+            cursor: pointer;
+
+            p {
+                margin-left: 5px !important;
+            }
+        }
+
         .upload {
             cursor: pointer;
         }
@@ -94,6 +102,10 @@
 
             .chip {
                 width: 180px;
+
+                p {
+                    margin-left: 0 !important;
+                }
             }
         }
     }

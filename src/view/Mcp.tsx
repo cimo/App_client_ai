@@ -44,29 +44,3 @@ export const tool = (variableObject: modelMcp.Ivariable, methodObject: modelMcp.
         </div>
     );
 };
-
-export const upload = (variableObject: modelMcp.Ivariable, methodObject: modelMcp.Imethod): IvirtualNode => {
-    return (
-        <div class="view_mcp_upload">
-            <div
-                class="chip"
-                onClick={() => {
-                    methodObject.onClickChipDocumentUpload();
-                }}
-            >
-                <i class="cls_icon">upload_file</i>
-                <p>Document</p>
-            </div>
-
-            <div
-                class="chip"
-                onClick={() => {
-                    methodObject.onClickChipSkillUpload();
-                }}
-            >
-                <i class="cls_icon">upload_file</i>
-                <p>Skill</p>
-            </div>
-        </div>
-    );
-};

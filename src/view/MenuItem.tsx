@@ -61,6 +61,15 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                 if (variableObject.isMenuItemDocument.state) {
                     result.push(
                         <div class="container_document">
+                            <div
+                                class="chip"
+                                onClick={() => {
+                                    methodObject.onClickChipDocumentUpload();
+                                }}
+                            >
+                                <i class="cls_icon">upload_file</i>
+                                <p>Upload</p>
+                            </div>
                             <ul>
                                 {(() => {
                                     const result: IvirtualNode[] = [];
@@ -74,6 +83,45 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     class="cls_icon close"
                                                     onClick={(event: Event) => {
                                                         methodObject.onClickDocumentDelete(event, a, value);
+                                                    }}
+                                                >
+                                                    delete
+                                                </i>
+                                                <p>{value}</p>
+                                            </li>
+                                        );
+                                    }
+
+                                    return result;
+                                })()}
+                            </ul>
+                        </div>
+                    );
+                } else if (variableObject.isMenuItemSkill.state) {
+                    result.push(
+                        <div class="container_skill">
+                            <div
+                                class="chip"
+                                onClick={() => {
+                                    methodObject.onClickChipSkillUpload();
+                                }}
+                            >
+                                <i class="cls_icon">upload_file</i>
+                                <p>Upload</p>
+                            </div>
+                            <ul>
+                                {(() => {
+                                    const result: IvirtualNode[] = [];
+
+                                    for (let a = 0; a < variableObject.skillList.state.length; a++) {
+                                        const value = variableObject.skillList.state[a];
+
+                                        result.push(
+                                            <li key={a} class="chip">
+                                                <i
+                                                    class="cls_icon close"
+                                                    onClick={(event: Event) => {
+                                                        methodObject.onClickSkillDelete(event, a, value);
                                                     }}
                                                 >
                                                     delete
@@ -154,7 +202,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                             {(() => {
                                 const result: IvirtualNode[] = [];
 
-                                if (variableObject.isSelectSkill.state) {
+                                if (variableObject.isAgentSelectSkill.state) {
                                     result.push(
                                         <div class="container_skill">
                                             <div class="container_form_button">
@@ -330,36 +378,6 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
 
                                 return result;
                             })()}
-                        </div>
-                    );
-                } else if (variableObject.isMenuItemSkill.state) {
-                    result.push(
-                        <div class="container_skill">
-                            <ul>
-                                {(() => {
-                                    const result: IvirtualNode[] = [];
-
-                                    for (let a = 0; a < variableObject.skillList.state.length; a++) {
-                                        const value = variableObject.skillList.state[a];
-
-                                        result.push(
-                                            <li key={a} class="chip">
-                                                <i
-                                                    class="cls_icon close"
-                                                    onClick={(event: Event) => {
-                                                        methodObject.onClickSkillDelete(event, a, value);
-                                                    }}
-                                                >
-                                                    delete
-                                                </i>
-                                                <p>{value}</p>
-                                            </li>
-                                        );
-                                    }
-
-                                    return result;
-                                })()}
-                            </ul>
                         </div>
                     );
                 }

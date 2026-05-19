@@ -165,12 +165,10 @@ export default class Chat implements Icontroller {
                     "You MUST NOT explain nothing."
                 ].join("\n");
             } else if (this.variableObject.systemMode.state === "agent-skill") {
-                inputSystem += [
-                    "",
-                    // "You are a multilingual agent skill executer that needs to reply with the user input language and you need to transform the user request in a action.",
-                    // 'If you find a tag [script](...) in the text you MUST stop and write ONLY valid JSON with this format without additional information: { "action": { "script": true } }',
-                    this.variableObject.agentInputSystem.state
-                ].join("\n");
+                // "You are a multilingual agent skill executer that needs to reply with the user input language and you need to transform the user request in a action.",
+                // 'If you find a tag [script](...) in the text you MUST stop and write ONLY valid JSON with this format without additional information: { "action": { "script": true } }',
+
+                inputSystem = this.variableObject.agentInputSystem.state;
             }
 
             input.push(

@@ -23,14 +23,66 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemSkill.state = false;
 
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-            this.variableObject.isSelectSkill.state = false;
+            this.variableObject.isAgentSelectSkill.state = false;
         });
+    };
+
+    private onClickChipDocumentUpload = async (): Promise<void> => {
+        await this.controllerMcp.apiDocumentUpload();
     };
 
     private onClickDocumentDelete = (event: Event, index: number, fileName: string): void => {
         event.stopPropagation();
 
         this.controllerMcp.apiDocumentDelete(index, fileName);
+    };
+
+    private onClickMenuSkill = (): void => {
+        this.controllerMcp.apiSkillList().then(() => {
+            this.variableObject.isMenuItemDocument.state = false;
+            this.variableObject.isMenuItemTool.state = false;
+            this.variableObject.isMenuItemTask.state = false;
+            this.variableObject.isMenuItemAgent.state = false;
+            this.variableObject.isMenuItemSkill.state = !this.variableObject.isMenuItemSkill.state;
+
+            this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+            this.variableObject.isAgentSelectSkill.state = false;
+        });
+    };
+
+    private onClickChipSkillUpload = async (): Promise<void> => {
+        await this.controllerMcp.apiSkillUpload();
+    };
+
+    private onClickSkillDelete = (event: Event, index: number, fileName: string): void => {
+        event.stopPropagation();
+
+        this.controllerMcp.apiSkillDelete(index, fileName);
+    };
+
+    private onClickSelectSkill = (event: Event): void => {
+        event.stopPropagation();
+
+        this.controllerMcp.apiSkillList().then(() => {
+            this.variableObject.agentForm.state.name = this.hookObject.elementInputAgentName.value;
+            this.variableObject.agentForm.state.description = this.hookObject.elementInputAgentDescription.value;
+
+            this.variableObject.isAgentSelectSkill.state = true;
+        });
+    };
+
+    private onClickSkillItem = (event: Event, fileName: string): void => {
+        event.stopPropagation();
+
+        this.variableObject.agentForm.state.skill = fileName;
+
+        this.variableObject.isAgentSelectSkill.state = false;
+    };
+
+    private onClickSelectSkillCancel = (event: Event): void => {
+        event.stopPropagation();
+
+        this.variableObject.isAgentSelectSkill.state = false;
     };
 
     private onClickMenuTool = (): void => {
@@ -41,7 +93,7 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemSkill.state = false;
 
         this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-        this.variableObject.isSelectSkill.state = false;
+        this.variableObject.isAgentSelectSkill.state = false;
     };
 
     private onClickTool = (name: string): void => {
@@ -70,7 +122,7 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemSkill.state = false;
 
         this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-        this.variableObject.isSelectSkill.state = false;
+        this.variableObject.isAgentSelectSkill.state = false;
     };
 
     private onClickTask = (name: string): void => {
@@ -100,7 +152,7 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemSkill.state = false;
 
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-            this.variableObject.isSelectSkill.state = false;
+            this.variableObject.isAgentSelectSkill.state = false;
         });
     };
 
@@ -134,31 +186,6 @@ export default class MenuItem implements Icontroller {
         event.stopPropagation();
 
         this.controllerMcp.apiAgentDelete(index, id);
-    };
-
-    private onClickSelectSkill = (event: Event): void => {
-        event.stopPropagation();
-
-        this.controllerMcp.apiSkillList().then(() => {
-            this.variableObject.agentForm.state.name = this.hookObject.elementInputAgentName.value;
-            this.variableObject.agentForm.state.description = this.hookObject.elementInputAgentDescription.value;
-
-            this.variableObject.isSelectSkill.state = true;
-        });
-    };
-
-    private onClickSkillItem = (event: Event, fileName: string): void => {
-        event.stopPropagation();
-
-        this.variableObject.agentForm.state.skill = fileName;
-
-        this.variableObject.isSelectSkill.state = false;
-    };
-
-    private onClickSelectSkillCancel = (event: Event): void => {
-        event.stopPropagation();
-
-        this.variableObject.isSelectSkill.state = false;
     };
 
     private onClickAgentSave = (event: Event): void => {
@@ -217,25 +244,6 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private onClickMenuSkill = (): void => {
-        this.controllerMcp.apiSkillList().then(() => {
-            this.variableObject.isMenuItemDocument.state = false;
-            this.variableObject.isMenuItemTool.state = false;
-            this.variableObject.isMenuItemTask.state = false;
-            this.variableObject.isMenuItemAgent.state = false;
-            this.variableObject.isMenuItemSkill.state = !this.variableObject.isMenuItemSkill.state;
-
-            this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-            this.variableObject.isSelectSkill.state = false;
-        });
-    };
-
-    private onClickSkillDelete = (event: Event, index: number, fileName: string): void => {
-        event.stopPropagation();
-
-        this.controllerMcp.apiSkillDelete(index, fileName);
-    };
-
     private openDocument = async (title: string): Promise<void> => {
         await helperSrc.openWindow("document", title, "#/document");
     };
@@ -261,17 +269,17 @@ export default class MenuItem implements Icontroller {
                 isMenuItemTask: false,
                 isMenuItemAgent: false,
                 isMenuItemSkill: false,
-                agentForm: {} as modelMcp.Iagent,
-                isSelectSkill: false,
-                agentFormResult: "",
+                documentList: variableLink<string[]>("Mcp"),
+                skillList: variableLink<string[]>("Mcp"),
                 toolList: variableLink<modelMcp.Itool[]>("Mcp"),
                 toolSelected: variableLink<modelMcp.Itool>("Mcp"),
                 taskList: variableLink<modelMcp.Itask[]>("Mcp"),
                 taskSelected: variableLink<modelMcp.Itask>("Mcp"),
                 agentList: variableLink<modelMcp.Iagent[]>("Mcp"),
                 agentSelected: variableLink<modelMcp.Iagent>("Mcp"),
-                documentList: variableLink<string[]>("Mcp"),
-                skillList: variableLink<string[]>("Mcp"),
+                agentForm: {} as modelMcp.Iagent,
+                agentFormResult: "",
+                isAgentSelectSkill: false,
                 systemMode: variableLink<string>("Chat"),
                 agentInputSystem: variableLink<string>("Chat")
             },
@@ -280,23 +288,25 @@ export default class MenuItem implements Icontroller {
 
         this.methodObject = {
             onClickMenuDocument: this.onClickMenuDocument,
+            onClickChipDocumentUpload: this.onClickChipDocumentUpload,
             onClickDocumentDelete: this.onClickDocumentDelete,
+            onClickMenuSkill: this.onClickMenuSkill,
+            onClickChipSkillUpload: this.onClickChipSkillUpload,
+            onClickSkillDelete: this.onClickSkillDelete,
+            onClickSelectSkill: this.onClickSelectSkill,
+            onClickSkillItem: this.onClickSkillItem,
+            onClickSelectSkillCancel: this.onClickSelectSkillCancel,
             onClickMenuTool: this.onClickMenuTool,
             onClickTool: this.onClickTool,
             onClickMenuTask: this.onClickMenuTask,
             onClickTask: this.onClickTask,
             onClickMenuAgent: this.onClickMenuAgent,
-            onClickAgent: this.onClickAgent,
             onClickAgentCreate: this.onClickAgentCreate,
             onClickAgentEdit: this.onClickAgentEdit,
             onClickAgentDelete: this.onClickAgentDelete,
-            onClickSelectSkill: this.onClickSelectSkill,
-            onClickSkillItem: this.onClickSkillItem,
-            onClickSelectSkillCancel: this.onClickSelectSkillCancel,
             onClickAgentSave: this.onClickAgentSave,
             onClickAgentCancel: this.onClickAgentCancel,
-            onClickMenuSkill: this.onClickMenuSkill,
-            onClickSkillDelete: this.onClickSkillDelete,
+            onClickAgent: this.onClickAgent,
             openDocument: this.openDocument
         };
     }
