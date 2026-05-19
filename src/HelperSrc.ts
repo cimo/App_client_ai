@@ -5,13 +5,13 @@ import { emitTo, listen } from "@tauri-apps/api/event";
 import * as modelHelperSrc from "./model/HelperSrc";
 
 declare const IS_DEPLOY_DEV: string;
+
 export const PATH_ROOT = "/home/app/";
 export const IS_DEBUG = IS_DEPLOY_DEV;
 export const PATH_LOG = "log/";
 export const LOCALE = "jp";
 export const URL_AI = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
 export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
-export const MODEL_DEFAULT = "Qwen3.5-0.8B-Q8_0";
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {
     // Asia

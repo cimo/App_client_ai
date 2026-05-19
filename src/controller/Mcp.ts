@@ -110,8 +110,8 @@ export default class Mcp implements Icontroller {
         this.controllerChat = controller;
     }
 
-    apiLogin = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_MCP}/login`, {
+    apiLogin = (): void => {
+        fetch(`${helperSrc.URL_MCP}/login`, {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId
@@ -137,8 +137,8 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiTool = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_MCP}/api/tool-list`, {
+    apiTool = (): void => {
+        fetch(`${helperSrc.URL_MCP}/api/tool-list`, {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
@@ -165,8 +165,8 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiTask = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_MCP}/api/task-list`, {
+    apiTask = (): void => {
+        fetch(`${helperSrc.URL_MCP}/api/task-list`, {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,

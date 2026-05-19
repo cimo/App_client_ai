@@ -140,7 +140,6 @@ export default class Chat implements Icontroller {
 
             if (mode === "rag") {
                 inputSystem += [
-                    "",
                     "You MUST ONLY use the provided CITATION to answer the user question.",
                     "You MUST NOT add any information that is not provided in the CITATION."
                 ].join("\n");
@@ -167,7 +166,6 @@ export default class Chat implements Icontroller {
             } else if (this.variableObject.systemMode.state === "agent-skill") {
                 // "You are a multilingual agent skill executer that needs to reply with the user input language and you need to transform the user request in a action.",
                 // 'If you find a tag [script](...) in the text you MUST stop and write ONLY valid JSON with this format without additional information: { "action": { "script": true } }',
-
                 inputSystem = this.variableObject.agentInputSystem.state;
             }
 
@@ -183,7 +181,7 @@ export default class Chat implements Icontroller {
                 },
                 {
                     role: "user",
-                    content: [{ type: "input_text", text: !prompt ? userPrompt : prompt }]
+                    content: [{ type: "input_text", text: !prompt ? `Text: ${userPrompt}` : prompt }]
                 }
             );
 
@@ -375,7 +373,7 @@ export default class Chat implements Icontroller {
                                                         this.variableObject.systemMode.state = "chat";
 
                                                         this.apiResponse(
-                                                            `${userPrompt}\n\nCITATION:\n${JSON.stringify(toolResponse.resultList)}`,
+                                                            `CITATION:\n${JSON.stringify(toolResponse.resultList)}\n\nText: ${userPrompt}`,
                                                             "rag"
                                                         );
 

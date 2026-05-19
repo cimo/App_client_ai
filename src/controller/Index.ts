@@ -114,20 +114,20 @@ export default class Index implements Icontroller {
     }
 
     rendered(): void {
-        (async () => {
-            if (!session.data.aiCookie) {
-                await this.controllerAi.apiLogin();
-            }
+        if (!session.data.aiCookie) {
+            this.controllerAi.apiLogin();
+        }
 
-            await this.controllerAi.apiUserInfo();
+        this.controllerAi.apiUserInfo();
 
-            if (!session.data.mcpCookie) {
-                await this.controllerMcp.apiLogin();
-            }
+        this.controllerAi.apiModel(false);
 
-            await this.controllerMcp.apiTool();
-            await this.controllerMcp.apiTask();
-        })();
+        if (!session.data.mcpCookie) {
+            this.controllerMcp.apiLogin();
+        }
+
+        this.controllerMcp.apiTool();
+        this.controllerMcp.apiTask();
     }
 
     destroy(): void {}

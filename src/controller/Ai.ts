@@ -17,6 +17,8 @@ export default class Ai implements Icontroller {
     private controllerMcp: Mcp;
     private controllerChat: Chat;
 
+    private modelDefault: string;
+
     // Method
     private generateUniqueId = (): string => {
         const timestamp = Date.now().toString(36);
@@ -27,48 +29,8 @@ export default class Ai implements Icontroller {
         return uniqueId;
     };
 
-    private apiModel = (): void => {
-        fetch(`${helperSrc.URL_AI}/api/model`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${session.data.aiBearerToken}`,
-                Cookie: session.data.aiCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (result) => {
-                this.variableObject.isOfflineAi.state = false;
-
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-                const jsonParse = JSON.parse(resultJson.response.stdout) as modelAi.IapiModelResponse;
-                const resultCleaned = [];
-
-                for (const value of jsonParse.data) {
-                    if (value.id.toLowerCase().includes("embedding")) {
-                        continue;
-                    } else if (value.id.toLowerCase() === "default") {
-                        continue;
-                    }
-
-                    resultCleaned.push(value);
-                }
-
-                this.variableObject.modelList.state = [...resultCleaned].sort((a, b) => a.id.localeCompare(b.id));
-
-                this.variableObject.isOpenDropdownModelList.state = true;
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Ai.ts - apiModel() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineAi.state = true;
-            });
-    };
-
     private onClickDropdownModel = (): void => {
-        this.apiModel();
+        this.apiModel(true);
     };
 
     private onClickModelName = (name: string): void => {
@@ -84,11 +46,11 @@ export default class Ai implements Icontroller {
     setControllerChat(controller: Chat): void {
         this.controllerChat = controller;
 
-        this.controllerChat.setModelSelected(helperSrc.MODEL_DEFAULT);
+        this.controllerChat.setModelSelected(this.modelDefault);
     }
 
-    apiLogin = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_AI}/login`, {
+    apiLogin = (): void => {
+        fetch(`${helperSrc.URL_AI}/login`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${session.data.aiBearerToken}`
@@ -116,8 +78,8 @@ export default class Ai implements Icontroller {
             });
     };
 
-    apiUserInfo = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_AI}/user-info`, {
+    apiUserInfo = (): void => {
+        fetch(`${helperSrc.URL_AI}/user-info`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${session.data.aiBearerToken}`,
@@ -138,6 +100,52 @@ export default class Ai implements Icontroller {
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Ai.ts - apiUserInfo() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineAi.state = true;
+            });
+    };
+
+    apiModel = (isShowDropdown: boolean): void => {
+        fetch(`${helperSrc.URL_AI}/api/model`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${session.data.aiBearerToken}`,
+                Cookie: session.data.aiCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (result) => {
+                this.variableObject.isOfflineAi.state = false;
+
+                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+                const jsonParse = JSON.parse(resultJson.response.stdout) as modelAi.IapiModelResponse;
+                const resultCleaned = [];
+
+                for (const value of jsonParse.data) {
+                    if (value.id.toLowerCase() === "default") {
+                        continue;
+                    } else if (value.id.toLowerCase().includes("embedding")) {
+                        continue;
+                    }
+
+                    resultCleaned.push(value);
+                }
+
+                this.variableObject.modelList.state = [...resultCleaned].sort((a, b) => a.id.localeCompare(b.id));
+
+                this.variableObject.modelSelected.state = this.modelDefault = this.variableObject.modelList.state[0]?.id;
+
+                this.controllerChat.setModelSelected(this.variableObject.modelSelected.state);
+
+                if (isShowDropdown) {
+                    this.variableObject.isOpenDropdownModelList.state = true;
+                }
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Ai.ts - apiModel() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineAi.state = true;
             });
@@ -173,6 +181,8 @@ export default class Ai implements Icontroller {
         this.controllerMcp = {} as Mcp;
         this.controllerChat = {} as Chat;
 
+        this.modelDefault = "";
+
         if (!session.data.aiBearerToken) {
             session.data.aiBearerToken = this.generateUniqueId();
         }
@@ -186,7 +196,7 @@ export default class Ai implements Icontroller {
                 isOfflineAi: false,
                 isOpenDropdownModelList: false,
                 modelList: [],
-                modelSelected: helperSrc.MODEL_DEFAULT,
+                modelSelected: this.modelDefault,
                 adUrl: variableLink<string>("Index")
             },
             this.constructor.name
@@ -209,6 +219,7 @@ export default class Ai implements Icontroller {
     event(): void {
         document.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
+
             if (!helperSrc.findElementParent(target, "dropdown") || helperSrc.findElementParent(target, "menu")) {
                 this.variableObject.isOpenDropdownModelList.state = false;
             }
