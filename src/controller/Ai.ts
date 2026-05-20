@@ -49,8 +49,8 @@ export default class Ai implements Icontroller {
         this.controllerChat.setModelSelected(this.modelDefault);
     }
 
-    apiLogin = (): void => {
-        fetch(`${helperSrc.URL_AI}/login`, {
+    apiLogin = async (): Promise<void> => {
+        return fetch(`${helperSrc.URL_AI}/login`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${session.data.aiBearerToken}`
@@ -78,8 +78,8 @@ export default class Ai implements Icontroller {
             });
     };
 
-    apiUserInfo = (): void => {
-        fetch(`${helperSrc.URL_AI}/user-info`, {
+    apiUserInfo = async (): Promise<void> => {
+        return fetch(`${helperSrc.URL_AI}/user-info`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${session.data.aiBearerToken}`,
@@ -105,8 +105,8 @@ export default class Ai implements Icontroller {
             });
     };
 
-    apiModel = (isShowDropdown: boolean): void => {
-        fetch(`${helperSrc.URL_AI}/api/model`, {
+    apiModel = async (isShowDropdown: boolean): Promise<void> => {
+        return fetch(`${helperSrc.URL_AI}/api/model`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${session.data.aiBearerToken}`,
