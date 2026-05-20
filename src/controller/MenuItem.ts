@@ -235,12 +235,12 @@ export default class MenuItem implements Icontroller {
             }
         }
 
-        this.variableObject.systemMode.state = "agent-skill";
-
         const skillContent = await this.controllerMcp.apiSkillRead(this.variableObject.agentSelected.state.skill);
 
         if (skillContent) {
             this.variableObject.agentInputSystem.state = window.atob(skillContent);
+
+            this.variableObject.systemMode.state = "agent-skill";
         }
     };
 
