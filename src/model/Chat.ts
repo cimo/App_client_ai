@@ -22,8 +22,6 @@ export interface IchatMessage {
     assistantReason: string;
     assistantNoReason: string;
     mcpTool?: ImcpTool;
-    file: string;
-    embedding: string;
     citation: modelMcp.IragSearch[] | undefined;
     scanner: string;
 }

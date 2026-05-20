@@ -61,6 +61,87 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                 if (variableObject.isMenuItemDocument.state) {
                     result.push(
                         <div class="container_document">
+                            {(() => {
+                                const result: IvirtualNode[] = [];
+
+                                result.push(
+                                    <div class="container_status">
+                                        {(() => {
+                                            const result: IvirtualNode[] = [];
+
+                                            if (variableObject.isDocumentUploading.state) {
+                                                result.push(<i class="cls_icon">update</i>);
+                                            } else if (variableObject.documentUploadStatusList.state.length > 0) {
+                                                result.push(
+                                                    <details key="documentUploadStatus" open>
+                                                        <summary>
+                                                            <p>Upload result:</p>
+                                                        </summary>
+                                                        <ul key="documentUploadStatusList" class="file">
+                                                            {(() => {
+                                                                const result: IvirtualNode[] = [];
+
+                                                                for (const [key, value] of Object.entries(
+                                                                    variableObject.documentUploadStatusList.state
+                                                                )) {
+                                                                    if (value.status !== "" && value.fileName !== "") {
+                                                                        result.push(
+                                                                            <li key={`upload_${key}`}>
+                                                                                <i class="cls_icon">file_present</i>
+                                                                                <p>
+                                                                                    [{value.status}] {value.fileName}
+                                                                                </p>
+                                                                            </li>
+                                                                        );
+                                                                    }
+                                                                }
+
+                                                                return result;
+                                                            })()}
+                                                        </ul>
+                                                    </details>
+                                                );
+                                            }
+
+                                            if (variableObject.documentEmbeddingStatusList.state.length > 0) {
+                                                result.push(
+                                                    <details key="documentEmbeddingStatus" open>
+                                                        <summary>
+                                                            <p>Embedding result:</p>
+                                                        </summary>
+                                                        <ul key="documentEmbeddingStatusList" class="embedding">
+                                                            {(() => {
+                                                                const result: IvirtualNode[] = [];
+
+                                                                for (const [key, value] of Object.entries(
+                                                                    variableObject.documentEmbeddingStatusList.state
+                                                                )) {
+                                                                    if (value.status !== "" && value.fileName !== "") {
+                                                                        result.push(
+                                                                            <li key={`embedding_${key}`}>
+                                                                                <i class="cls_icon">storage</i>
+                                                                                <p>
+                                                                                    [{value.status}] {value.fileName}
+                                                                                </p>
+                                                                            </li>
+                                                                        );
+                                                                    }
+                                                                }
+
+                                                                return result;
+                                                            })()}
+                                                        </ul>
+                                                    </details>
+                                                );
+                                            }
+
+                                            return result;
+                                        })()}
+                                    </div>
+                                );
+
+                                return result;
+                            })()}
                             <div
                                 class="chip"
                                 onClick={() => {
@@ -100,6 +181,45 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                 } else if (variableObject.isMenuItemSkill.state) {
                     result.push(
                         <div class="container_skill">
+                            {(() => {
+                                const result: IvirtualNode[] = [];
+
+                                if (variableObject.isSkillUploading.state) {
+                                    result.push(<i class="cls_icon">update</i>);
+                                } else if (variableObject.skillUploadStatusList.state.length > 0) {
+                                    result.push(
+                                        <div class="container_status">
+                                            <details key="skillUploadStatusList" open>
+                                                <summary>
+                                                    <p>Upload result:</p>
+                                                </summary>
+                                                <ul class="file">
+                                                    {(() => {
+                                                        const result: IvirtualNode[] = [];
+
+                                                        for (const [key, value] of Object.entries(variableObject.skillUploadStatusList.state)) {
+                                                            if (value.status !== "" && value.fileName !== "") {
+                                                                result.push(
+                                                                    <li key={key}>
+                                                                        <i class="cls_icon">file_present</i>
+                                                                        <p>
+                                                                            [{value.status}] {value.fileName}
+                                                                        </p>
+                                                                    </li>
+                                                                );
+                                                            }
+                                                        }
+
+                                                        return result;
+                                                    })()}
+                                                </ul>
+                                            </details>
+                                        </div>
+                                    );
+                                }
+
+                                return result;
+                            })()}
                             <div
                                 class="chip"
                                 onClick={() => {

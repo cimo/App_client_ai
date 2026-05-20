@@ -2,7 +2,6 @@ import { jsxFactory, IvirtualNode } from "@cimo/jsmvcfw/dist/src/Main.js";
 
 // Source
 import * as modelChat from "../model/Chat";
-import * as modelMcp from "../model/Mcp";
 
 export const message = (variableObject: modelChat.Ivariable, methodObject: modelChat.Imethod): IvirtualNode => {
     return (
@@ -53,71 +52,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                         if (value.assistantNoReason === "") {
                                             result.push(<i class="cls_icon">update</i>);
                                         } else if (typeof value.assistantNoReason === "string") {
-                                            if (value.file) {
-                                                result.push(
-                                                    <details open>
-                                                        <summary>
-                                                            <p>{value.assistantNoReason}</p>
-                                                        </summary>
-                                                        <ul class="file">
-                                                            {(() => {
-                                                                const result: IvirtualNode[] = [];
-
-                                                                if (value.file !== "") {
-                                                                    const fileList = JSON.parse(value.file) as modelMcp.IfileStatus[];
-
-                                                                    for (const [keyFile, valueFile] of Object.entries(fileList)) {
-                                                                        if (valueFile.fileName !== "") {
-                                                                            result.push(
-                                                                                <li key={keyFile}>
-                                                                                    <i class="cls_icon">file_present</i>
-                                                                                    <p>
-                                                                                        [{valueFile.status}] {valueFile.fileName}
-                                                                                    </p>
-                                                                                </li>
-                                                                            );
-                                                                        }
-                                                                    }
-                                                                }
-
-                                                                return result;
-                                                            })()}
-                                                        </ul>
-                                                    </details>
-                                                );
-                                            } else if (value.embedding) {
-                                                result.push(
-                                                    <details open>
-                                                        <summary>
-                                                            <p>{value.assistantNoReason}</p>
-                                                        </summary>
-                                                        <ul class="embedding">
-                                                            {(() => {
-                                                                const result: IvirtualNode[] = [];
-
-                                                                if (value.embedding !== "") {
-                                                                    const fileList = JSON.parse(value.embedding) as modelMcp.IfileStatus[];
-
-                                                                    for (const [keyFile, valueFile] of Object.entries(fileList)) {
-                                                                        if (valueFile.fileName !== "") {
-                                                                            result.push(
-                                                                                <li key={keyFile}>
-                                                                                    <i class="cls_icon">storage</i>
-                                                                                    <p>
-                                                                                        [{valueFile.status}] {valueFile.fileName}
-                                                                                    </p>
-                                                                                </li>
-                                                                            );
-                                                                        }
-                                                                    }
-                                                                }
-
-                                                                return result;
-                                                            })()}
-                                                        </ul>
-                                                    </details>
-                                                );
-                                            } else if (value.citation) {
+                                            if (value.citation) {
                                                 result.push(
                                                     <details open>
                                                         <summary>

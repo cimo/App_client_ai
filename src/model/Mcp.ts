@@ -53,7 +53,12 @@ export interface Ivariable {
     agentList: IvariableBind<Iagent[]>;
     agentSelected: IvariableBind<Iagent>;
     documentList: IvariableBind<string[]>;
+    isDocumentUploading: IvariableBind<boolean>;
+    documentUploadStatusList: IvariableBind<IfileStatus[]>;
+    documentEmbeddingStatusList: IvariableBind<IfileStatus[]>;
     skillList: IvariableBind<string[]>;
+    isSkillUploading: IvariableBind<boolean>;
+    skillUploadStatusList: IvariableBind<IfileStatus[]>;
     agentForm: IvariableBind<Iagent>;
     agentFormResult: IvariableBind<string>;
     systemMode: IvariableBind<string>;

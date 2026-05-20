@@ -89,31 +89,6 @@
                         }
                     }
 
-                    .file,
-                    .embedding {
-                        display: flex;
-                        flex-direction: column;
-                        align-content: center;
-                        justify-content: center;
-                        align-items: start;
-                        justify-items: center;
-                        margin-top: 10px;
-
-                        li {
-                            display: flex;
-                            flex-direction: row;
-                            align-content: center;
-                            justify-content: center;
-                            align-items: center;
-                            justify-items: center;
-
-                            .cls_icon {
-                                font-size: parameter.$fontSizeNormalPlus !important;
-                                margin-right: 5px !important;
-                            }
-                        }
-                    }
-
                     .citation_container {
                         .citation {
                             margin-top: 15px;

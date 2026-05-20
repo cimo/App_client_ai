@@ -11,14 +11,12 @@ import * as modelIndex from "../model/Index";
 import * as modelChat from "../model/Chat";
 import * as modelDocument from "../model/Document";
 import * as viewMcp from "../view/Mcp";
-import type Chat from "./Chat";
 
 export default class Mcp implements Icontroller {
     // Variable
     private variableObject: modelMcp.Ivariable;
     private methodObject: modelMcp.Imethod;
     private viewNodeEmpty: IvirtualNode;
-    private controllerChat: Chat;
 
     // Method
     private apiEmbeddingCheck = async (fileName: string): Promise<string> => {
@@ -51,8 +49,8 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    private startEmbeddingCheck = (embeddingDocumentList: modelMcp.IfileStatus[], embeddingMessageIndex: number): void => {
-        const embeddingDocumentListIndex = embeddingDocumentList.length - 1;
+    private startEmbeddingCheck = (embeddingListIndex: number): void => {
+        const fileName = this.variableObject.documentEmbeddingStatusList.state[embeddingListIndex].fileName;
 
         let isPolling = false;
         let embeddingStatus = "ongoing";
@@ -64,19 +62,27 @@ export default class Mcp implements Icontroller {
 
             isPolling = true;
 
-            embeddingStatus = await this.apiEmbeddingCheck(embeddingDocumentList[embeddingDocumentListIndex].fileName);
-
-            if (embeddingStatus === "done") {
-                embeddingDocumentList[embeddingDocumentListIndex].status = "Success";
-            } else if (embeddingStatus === "fail") {
-                embeddingDocumentList[embeddingDocumentListIndex].status = "Failed";
-            }
-
-            this.variableObject.chatMessageList.state[embeddingMessageIndex].embedding = JSON.stringify(embeddingDocumentList);
-
-            this.controllerChat.autoscroll(false);
+            embeddingStatus = await this.apiEmbeddingCheck(fileName);
 
             if (embeddingStatus !== "ongoing") {
+                if (embeddingListIndex !== -1) {
+                    const embeddingListState = this.variableObject.documentEmbeddingStatusList.state.slice();
+
+                    if (embeddingStatus === "done") {
+                        embeddingListState[embeddingListIndex] = {
+                            ...embeddingListState[embeddingListIndex],
+                            status: "Success"
+                        };
+                    } else if (embeddingStatus === "fail") {
+                        embeddingListState[embeddingListIndex] = {
+                            ...embeddingListState[embeddingListIndex],
+                            status: "Failed"
+                        };
+                    }
+
+                    this.variableObject.documentEmbeddingStatusList.state = embeddingListState;
+                }
+
                 if (interval) {
                     clearInterval(interval);
                 }
@@ -84,14 +90,6 @@ export default class Mcp implements Icontroller {
 
             isPolling = false;
         }, 1000);
-    };
-
-    private onClickChipDocumentUpload = async (): Promise<void> => {
-        await this.apiDocumentUpload();
-    };
-
-    private onClickChipSkillUpload = async (): Promise<void> => {
-        await this.apiSkillUpload();
     };
 
     private onClickChipClose = (): void => {
@@ -104,10 +102,6 @@ export default class Mcp implements Icontroller {
 
     getVariableObject(): modelMcp.Ivariable {
         return this.variableObject;
-    }
-
-    setControllerChat(controller: Chat): void {
-        this.controllerChat = controller;
     }
 
     apiLogin = async (): Promise<void> => {
@@ -224,18 +218,9 @@ export default class Mcp implements Icontroller {
         });
 
         if (pathFileList) {
-            const uploadMessage = {} as modelChat.IchatMessage;
-            uploadMessage.assistantNoReason = "";
-            this.variableObject.chatMessageList.state.push(uploadMessage);
-            const uploadMessageIndex = this.variableObject.chatMessageList.state.length - 1;
-
-            const embeddingMessage = {} as modelChat.IchatMessage;
-            embeddingMessage.assistantNoReason = " ";
-            this.variableObject.chatMessageList.state.push(embeddingMessage);
-            const embeddingMessageIndex = this.variableObject.chatMessageList.state.length - 1;
-
-            let uploadDocumentList: modelMcp.IfileStatus[] = [];
-            let embeddingDocumentList: modelMcp.IfileStatus[] = [];
+            this.variableObject.isDocumentUploading.state = true;
+            this.variableObject.documentUploadStatusList.state = [];
+            this.variableObject.documentEmbeddingStatusList.state = [];
 
             for (const pathFile of pathFileList) {
                 const file = await readFile(pathFile);
@@ -265,20 +250,18 @@ export default class Mcp implements Icontroller {
                         const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
                         if (resultJson.response.stdout !== "") {
+                            this.variableObject.isDocumentUploading.state = false;
+
                             const resultFile = JSON.parse(resultJson.response.stdout) as modelMcp.IfileStatus;
 
-                            uploadDocumentList.push(resultFile);
+                            this.variableObject.documentUploadStatusList.state.push(resultFile);
 
-                            this.variableObject.chatMessageList.state[uploadMessageIndex].assistantNoReason = "Upload result:";
-                            this.variableObject.chatMessageList.state[uploadMessageIndex].file = JSON.stringify(uploadDocumentList);
+                            this.apiDocumentList();
 
                             if (helperSrc.filterMimeType(resultFile.fileName) !== "image" && resultFile.status === "Success") {
-                                embeddingDocumentList.push({ fileName: resultFile.fileName, status: "Ongoing" });
+                                this.variableObject.documentEmbeddingStatusList.state.push({ fileName: resultFile.fileName, status: "Ongoing" });
 
-                                this.variableObject.chatMessageList.state[embeddingMessageIndex].assistantNoReason = "Embedding result:";
-                                this.variableObject.chatMessageList.state[embeddingMessageIndex].embedding = JSON.stringify(embeddingDocumentList);
-
-                                this.startEmbeddingCheck(embeddingDocumentList, embeddingMessageIndex);
+                                this.startEmbeddingCheck(this.variableObject.documentEmbeddingStatusList.state.length - 1);
                             }
                         }
                     })
@@ -288,8 +271,6 @@ export default class Mcp implements Icontroller {
                         this.variableObject.isOfflineMcp.state = true;
                     });
             }
-
-            this.controllerChat.autoscroll(false);
         }
     };
 
@@ -384,12 +365,8 @@ export default class Mcp implements Icontroller {
         });
 
         if (pathFileList) {
-            const uploadMessage = {} as modelChat.IchatMessage;
-            uploadMessage.assistantNoReason = "";
-            this.variableObject.chatMessageList.state.push(uploadMessage);
-            const uploadMessageIndex = this.variableObject.chatMessageList.state.length - 1;
-
-            const uploadSkillList: modelMcp.IfileStatus[] = [];
+            this.variableObject.isSkillUploading.state = true;
+            this.variableObject.skillUploadStatusList.state = [];
 
             for (const pathFile of pathFileList) {
                 const file = await readFile(pathFile);
@@ -419,12 +396,13 @@ export default class Mcp implements Icontroller {
                         const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
                         if (resultJson.response.stdout !== "") {
+                            this.variableObject.isSkillUploading.state = false;
+
                             const resultFile = JSON.parse(resultJson.response.stdout) as modelMcp.IfileStatus;
 
-                            uploadSkillList.push(resultFile);
+                            this.variableObject.skillUploadStatusList.state.push(resultFile);
 
-                            this.variableObject.chatMessageList.state[uploadMessageIndex].assistantNoReason = "Upload result:";
-                            this.variableObject.chatMessageList.state[uploadMessageIndex].file = JSON.stringify(uploadSkillList);
+                            this.apiSkillList();
                         }
                     })
                     .catch((error: Error) => {
@@ -433,8 +411,6 @@ export default class Mcp implements Icontroller {
                         this.variableObject.isOfflineMcp.state = true;
                     });
             }
-
-            this.controllerChat.autoscroll(false);
         }
     };
 
@@ -657,7 +633,6 @@ export default class Mcp implements Icontroller {
         this.variableObject = {} as modelMcp.Ivariable;
         this.methodObject = {} as modelMcp.Imethod;
         this.viewNodeEmpty = { tag: "div", propertyObject: {}, childrenList: [] };
-        this.controllerChat = {} as Chat;
     }
 
     hookObject = {} as modelMcp.IelementHook;
@@ -673,7 +648,12 @@ export default class Mcp implements Icontroller {
                 agentList: [],
                 agentSelected: {} as modelMcp.Iagent,
                 documentList: [],
+                isDocumentUploading: variableLink<boolean>("MenuItem"),
+                documentUploadStatusList: variableLink<modelMcp.IfileStatus[]>("MenuItem"),
+                documentEmbeddingStatusList: variableLink<modelMcp.IfileStatus[]>("MenuItem"),
                 skillList: [],
+                isSkillUploading: variableLink<boolean>("MenuItem"),
+                skillUploadStatusList: variableLink<modelMcp.IfileStatus[]>("MenuItem"),
                 agentForm: variableLink<modelMcp.Iagent>("MenuItem"),
                 agentFormResult: variableLink<string>("MenuItem"),
                 systemMode: variableLink<string>("Chat"),

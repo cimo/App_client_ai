@@ -14,6 +14,18 @@ export default class MenuItem implements Icontroller {
     private controllerMcp: Mcp;
 
     // Method
+    private clearUploadSuccess = (): void => {
+        this.variableObject.documentUploadStatusList.state = this.variableObject.documentUploadStatusList.state.filter(
+            (documentUpload) => documentUpload.status !== "Success"
+        );
+        this.variableObject.documentEmbeddingStatusList.state = this.variableObject.documentEmbeddingStatusList.state.filter(
+            (documentEmbedding) => documentEmbedding.status !== "Success"
+        );
+        this.variableObject.skillUploadStatusList.state = this.variableObject.skillUploadStatusList.state.filter(
+            (skillUpload) => skillUpload.status !== "Success"
+        );
+    };
+
     private onClickMenuDocument = (): void => {
         this.controllerMcp.apiDocumentList().then(() => {
             this.variableObject.isMenuItemDocument.state = !this.variableObject.isMenuItemDocument.state;
@@ -24,6 +36,8 @@ export default class MenuItem implements Icontroller {
 
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSelectSkill.state = false;
+
+            this.clearUploadSuccess();
         });
     };
 
@@ -47,6 +61,8 @@ export default class MenuItem implements Icontroller {
 
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSelectSkill.state = false;
+
+            this.clearUploadSuccess();
         });
     };
 
@@ -94,6 +110,8 @@ export default class MenuItem implements Icontroller {
 
         this.variableObject.agentForm.state = {} as modelMcp.Iagent;
         this.variableObject.isAgentSelectSkill.state = false;
+
+        this.clearUploadSuccess();
     };
 
     private onClickTool = (name: string): void => {
@@ -123,6 +141,8 @@ export default class MenuItem implements Icontroller {
 
         this.variableObject.agentForm.state = {} as modelMcp.Iagent;
         this.variableObject.isAgentSelectSkill.state = false;
+
+        this.clearUploadSuccess();
     };
 
     private onClickTask = (name: string): void => {
@@ -153,6 +173,8 @@ export default class MenuItem implements Icontroller {
 
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSelectSkill.state = false;
+
+            this.clearUploadSuccess();
         });
     };
 
@@ -270,7 +292,12 @@ export default class MenuItem implements Icontroller {
                 isMenuItemAgent: false,
                 isMenuItemSkill: false,
                 documentList: variableLink<string[]>("Mcp"),
+                isDocumentUploading: false,
+                documentUploadStatusList: [],
+                documentEmbeddingStatusList: [],
                 skillList: variableLink<string[]>("Mcp"),
+                isSkillUploading: false,
+                skillUploadStatusList: [],
                 toolList: variableLink<modelMcp.Itool[]>("Mcp"),
                 toolSelected: variableLink<modelMcp.Itool>("Mcp"),
                 taskList: variableLink<modelMcp.Itask[]>("Mcp"),

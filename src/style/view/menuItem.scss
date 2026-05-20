@@ -52,6 +52,58 @@
         flex: 1 1 auto;
         min-height: 0;
 
+        .container_status {
+            margin-bottom: 5px;
+
+            details {
+                padding: 5px;
+                width: fit-content;
+                max-width: 100%;
+                margin: 5px 0;
+                border-radius: 8px;
+
+                summary {
+                    display: flex;
+                    flex-direction: row;
+                    align-content: center;
+                    justify-content: start;
+                    align-items: center;
+                    justify-items: center;
+                    cursor: pointer;
+
+                    .cls_icon {
+                        font-size: parameter.$fontSizeNormalPlus !important;
+                    }
+                }
+
+                .file,
+                .embedding {
+                    display: flex;
+                    flex-direction: column;
+                    align-content: center;
+                    justify-content: center;
+                    align-items: start;
+                    justify-items: center;
+                    margin-top: 10px;
+                    gap: 0px;
+
+                    li {
+                        display: flex;
+                        flex-direction: row;
+                        align-content: center;
+                        justify-content: center;
+                        align-items: center;
+                        justify-items: center;
+
+                        .cls_icon {
+                            font-size: parameter.$fontSizeNormalPlus !important;
+                            margin-right: 5px !important;
+                        }
+                    }
+                }
+            }
+        }
+
         .chip {
             cursor: pointer;
 
@@ -413,6 +465,17 @@
 
     .view_menuItem_right {
         background-color: color.$darkRootBackground;
+
+        .container_document,
+        .container_skill {
+            .container_status {
+                details {
+                    border: 1px solid color.$darkChatAssistantBoxBorder;
+                    background-color: color.$darkChatAssistantBoxBackground;
+                    color: color.$darkRootText;
+                }
+            }
+        }
 
         .container_agent {
             .agent_form {

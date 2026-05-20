@@ -121,7 +121,7 @@ export default class Document implements Icontroller {
                     const pageNumber = parseInt(event.payload[1]);
 
                     if (fileName === appWindowTitle) {
-                        await this.readHtmlContent(pageNumber);
+                        await this.readHtmlContent(pageNumber === -1 ? this.variableObject.pageNumber.state : pageNumber);
                     }
                 });
             });

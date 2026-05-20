@@ -70,7 +70,13 @@ export default class Chat implements Icontroller {
         const fileNameList = Object.keys(this.fileList);
 
         if (fileNameList.length > 0) {
-            await helperSrc.openWindow("document", fileNameList[0], "#/document");
+            const fileName = fileNameList[0];
+
+            await helperSrc.openWindow("document", fileName, "#/document");
+
+            const windowLabel = helperSrc.appWindowLabelUnique("document", fileName);
+
+            await emitTo(windowLabel, "document-content-update", [fileName, "-1"]);
         }
     };
 
@@ -103,8 +109,6 @@ export default class Chat implements Icontroller {
                 assistantReason: this.responseReason,
                 assistantNoReason: this.responseNoReason,
                 mcpTool: this.responseMcpTool,
-                file: "",
-                embedding: "",
                 citation: undefined,
                 scanner: ""
             });
@@ -178,6 +182,7 @@ export default class Chat implements Icontroller {
                     inputSystem = (
                         inputSystem.substring(0, tagUserPromptStart) + inputSystem.substring(tagUserPromptEnd + "[/USER_PROMPT]".length)
                     ).trim();
+
                     userPrompt = `${tagUserPrompt} ${userPrompt}`;
                 }
             }
@@ -262,10 +267,14 @@ export default class Chat implements Icontroller {
                                         if (dataError) {
                                             const idx = this.variableObject.chatMessageList.state.length - 1;
 
-                                            this.variableObject.chatMessageList.state[idx] = {
-                                                ...this.variableObject.chatMessageList.state[idx],
+                                            const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                            chatMessageListState[idx] = {
+                                                ...chatMessageListState[idx],
                                                 assistantNoReason: dataError.message
                                             };
+
+                                            this.variableObject.chatMessageList.state = chatMessageListState;
 
                                             this.autoscroll(false);
                                         }
@@ -283,10 +292,14 @@ export default class Chat implements Icontroller {
 
                                             const index = this.variableObject.chatMessageList.state.length - 1;
 
-                                            this.variableObject.chatMessageList.state[index] = {
-                                                ...this.variableObject.chatMessageList.state[index],
+                                            const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                            chatMessageListState[index] = {
+                                                ...chatMessageListState[index],
                                                 assistantReason: this.responseReason.trim()
                                             };
+
+                                            this.variableObject.chatMessageList.state = chatMessageListState;
 
                                             this.autoscroll(true);
                                         }
@@ -298,10 +311,14 @@ export default class Chat implements Icontroller {
 
                                             const index = this.variableObject.chatMessageList.state.length - 1;
 
-                                            this.variableObject.chatMessageList.state[index] = {
-                                                ...this.variableObject.chatMessageList.state[index],
+                                            const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                            chatMessageListState[index] = {
+                                                ...chatMessageListState[index],
                                                 assistantNoReason: this.responseNoReason.trim()
                                             };
+
+                                            this.variableObject.chatMessageList.state = chatMessageListState;
 
                                             this.autoscroll(true);
                                         }
@@ -319,10 +336,14 @@ export default class Chat implements Icontroller {
 
                                             const index = this.variableObject.chatMessageList.state.length - 1;
 
-                                            this.variableObject.chatMessageList.state[index] = {
-                                                ...this.variableObject.chatMessageList.state[index],
+                                            const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                            chatMessageListState[index] = {
+                                                ...chatMessageListState[index],
                                                 mcpTool: this.responseMcpTool
                                             };
+
+                                            this.variableObject.chatMessageList.state = chatMessageListState;
 
                                             this.autoscroll(true);
                                         }
@@ -349,10 +370,14 @@ export default class Chat implements Icontroller {
                                                 ) {
                                                     const resultList = toolResponse.resultList as string[];
 
-                                                    this.variableObject.chatMessageList.state[index] = {
-                                                        ...this.variableObject.chatMessageList.state[index],
+                                                    const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                                    chatMessageListState[index] = {
+                                                        ...chatMessageListState[index],
                                                         assistantNoReason: resultList[0]
                                                     };
+
+                                                    this.variableObject.chatMessageList.state = chatMessageListState;
                                                 } else if (toolResponse.name === "document_parser") {
                                                     const parserList = toolResponse.resultList as modelMcp.IdocumentParser[];
                                                     const parser = parserList[0];
@@ -364,24 +389,36 @@ export default class Chat implements Icontroller {
 
                                                         await this.openWindowDocument();
 
-                                                        this.variableObject.chatMessageList.state[index] = {
-                                                            ...this.variableObject.chatMessageList.state[index],
+                                                        const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                                        chatMessageListState[index] = {
+                                                            ...chatMessageListState[index],
                                                             assistantNoReason: "Document opened."
                                                         };
+
+                                                        this.variableObject.chatMessageList.state = chatMessageListState;
                                                     } else {
-                                                        this.variableObject.chatMessageList.state[index] = {
-                                                            ...this.variableObject.chatMessageList.state[index],
+                                                        const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                                        chatMessageListState[index] = {
+                                                            ...chatMessageListState[index],
                                                             assistantNoReason: "Document not found."
                                                         };
+
+                                                        this.variableObject.chatMessageList.state = chatMessageListState;
                                                     }
                                                 } else if (toolResponse.name === "rag_search") {
                                                     const citationList = toolResponse.resultList as modelMcp.IragSearch[];
 
                                                     if (citationList.length > 0) {
-                                                        this.variableObject.chatMessageList.state[index] = {
-                                                            ...this.variableObject.chatMessageList.state[index],
+                                                        const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                                        chatMessageListState[index] = {
+                                                            ...chatMessageListState[index],
                                                             citation: citationList
                                                         };
+
+                                                        this.variableObject.chatMessageList.state = chatMessageListState;
 
                                                         this.variableObject.systemMode.state = "chat";
 
@@ -392,18 +429,26 @@ export default class Chat implements Icontroller {
 
                                                         this.variableObject.systemMode.state = "tool-call";
                                                     } else {
-                                                        this.variableObject.chatMessageList.state[index] = {
-                                                            ...this.variableObject.chatMessageList.state[index],
+                                                        const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                                        chatMessageListState[index] = {
+                                                            ...chatMessageListState[index],
                                                             assistantNoReason: "No citations found."
                                                         };
+
+                                                        this.variableObject.chatMessageList.state = chatMessageListState;
                                                     }
                                                 } else if (toolResponse.name === "security_scanner") {
                                                     const resultList = toolResponse.resultList as string[];
 
-                                                    this.variableObject.chatMessageList.state[index] = {
-                                                        ...this.variableObject.chatMessageList.state[index],
+                                                    const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                                    chatMessageListState[index] = {
+                                                        ...chatMessageListState[index],
                                                         scanner: resultList[0]
                                                     };
+
+                                                    this.variableObject.chatMessageList.state = chatMessageListState;
                                                 }
                                             }
 
@@ -423,10 +468,14 @@ export default class Chat implements Icontroller {
                     if (error.toString().toLowerCase() === "request cancelled") {
                         const idx = this.variableObject.chatMessageList.state.length - 1;
 
-                        this.variableObject.chatMessageList.state[idx] = {
-                            ...this.variableObject.chatMessageList.state[idx],
+                        const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                        chatMessageListState[idx] = {
+                            ...chatMessageListState[idx],
                             assistantNoReason: "Stopped by user."
                         };
+
+                        this.variableObject.chatMessageList.state = chatMessageListState;
 
                         return;
                     }

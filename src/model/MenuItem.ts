@@ -10,7 +10,12 @@ export interface Ivariable {
     isMenuItemAgent: IvariableBind<boolean>;
     isMenuItemSkill: IvariableBind<boolean>;
     documentList: IvariableBind<string[]>;
+    isDocumentUploading: IvariableBind<boolean>;
+    documentUploadStatusList: IvariableBind<modelMcp.IfileStatus[]>;
+    documentEmbeddingStatusList: IvariableBind<modelMcp.IfileStatus[]>;
     skillList: IvariableBind<string[]>;
+    isSkillUploading: IvariableBind<boolean>;
+    skillUploadStatusList: IvariableBind<modelMcp.IfileStatus[]>;
     toolList: IvariableBind<modelMcp.Itool[]>;
     toolSelected: IvariableBind<modelMcp.Itool>;
     taskList: IvariableBind<modelMcp.Itask[]>;
