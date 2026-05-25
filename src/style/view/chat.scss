@@ -17,7 +17,7 @@
         flex-shrink: 0;
     }
 
-    .container_chat {
+    .chat_container {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -31,7 +31,7 @@
         overflow-y: scroll;
 
         > div {
-            .container_chat_user {
+            .chat_user_container {
                 display: flex;
                 flex-direction: column;
                 align-content: center;
@@ -51,7 +51,7 @@
                 }
             }
 
-            .container_chat_assistant {
+            .chat_assistant_container {
                 display: flex;
                 flex-direction: column;
                 align-content: center;
@@ -81,7 +81,7 @@
                         }
                     }
 
-                    .list {
+                    ul {
                         margin: 5px 0;
 
                         li {
@@ -90,7 +90,7 @@
                     }
 
                     .citation_container {
-                        .citation_nav {
+                        .pagination_container {
                             display: flex;
                             flex-direction: row;
                             align-content: center;
@@ -100,7 +100,7 @@
                             gap: 8px;
                             margin: 10px 0 5px 0;
 
-                            .citation_nav_button {
+                            button {
                                 display: flex;
                                 flex-direction: row;
                                 align-content: center;
@@ -111,13 +111,13 @@
                                 height: 28px;
                             }
 
-                            .citation_nav_label {
+                            .label {
                                 font-size: parameter.$fontSizeSmall;
                                 white-space: nowrap;
                             }
                         }
 
-                        .citation {
+                        .box {
                             margin-top: 10px;
                             padding: 10px;
 
@@ -131,7 +131,7 @@
                                 }
                             }
 
-                            .source_link {
+                            .link {
                                 text-decoration: underline;
                                 margin-left: 5px;
                             }
@@ -146,7 +146,7 @@
                         margin-top: 15px;
                         padding: 10px;
 
-                        .relation_title {
+                        .title {
                             display: flex;
                             flex-direction: row;
                             align-content: center;
@@ -161,12 +161,12 @@
                             }
                         }
 
-                        .relation_list {
+                        ul {
                             list-style: none;
                             padding: 0;
                             margin: 0;
 
-                            .relation_item {
+                            li {
                                 display: flex;
                                 flex-direction: row;
                                 align-content: center;
@@ -177,12 +177,12 @@
                                 gap: 6px;
                                 margin: 4px 0;
 
-                                .relation_source,
-                                .relation_target {
+                                .source,
+                                .target {
                                     font-weight: bold;
                                 }
 
-                                .relation_verb {
+                                .verb {
                                     font-style: italic;
                                     opacity: 0.7;
                                 }
@@ -214,7 +214,7 @@
     align-items: stretch;
     justify-items: center;
 
-    .container_message_send {
+    .message_send_container {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -226,7 +226,7 @@
         align-self: center;
         margin-bottom: 10px;
 
-        .container_action {
+        .action_container {
             display: flex;
             flex-direction: row;
             align-content: center;
@@ -269,26 +269,26 @@
 }
 
 :root[data-theme="dark"] {
-    .container_chat {
+    .chat_container {
         > div {
-            .container_chat_user {
+            .chat_user_container {
                 .message {
                     border: 1px solid color.$darkRootBorder;
                 }
             }
 
-            .container_chat_assistant {
+            .chat_assistant_container {
                 details {
                     border: 1px solid color.$darkChatAssistantBoxBorder;
                     background-color: color.$darkChatAssistantBoxBackground;
                     color: color.$darkRootText;
 
                     .citation_container {
-                        .citation {
+                        .box {
                             background-color: color.$darkCitationBackground;
                             color: color.$darkCitationText;
 
-                            .source_link {
+                            .link {
                                 color: color.$darkHyperLinkText;
                             }
                         }
@@ -303,7 +303,7 @@
         }
     }
 
-    .container_message_send {
+    .message_send_container {
         border: 1px solid color.$darkChatMessageSendBorder;
         box-shadow: color.$darkShadowMessageSend;
     }

@@ -127,22 +127,11 @@ export default class Ai implements Icontroller {
                 this.variableObject.isOfflineAi.state = false;
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
-                const jsonParse = JSON.parse(resultJson.response.stdout) as modelAi.IapiModelResponse;
-                const resultCleaned = [];
+                const jsonParse = JSON.parse(resultJson.response.stdout) as string[];
 
-                for (const value of jsonParse.data) {
-                    if (value.id.toLowerCase() === "default") {
-                        continue;
-                    } else if (value.id.toLowerCase().includes("embedding")) {
-                        continue;
-                    }
+                this.variableObject.modelList.state = jsonParse;
 
-                    resultCleaned.push(value);
-                }
-
-                this.variableObject.modelList.state = [...resultCleaned].sort((a, b) => a.id.localeCompare(b.id));
-
-                this.variableObject.modelSelected.state = this.modelDefault = this.variableObject.modelList.state[0]?.id;
+                this.variableObject.modelSelected.state = this.modelDefault = this.variableObject.modelList.state[0];
 
                 this.controllerChat.setModelSelected(this.variableObject.modelSelected.state);
 

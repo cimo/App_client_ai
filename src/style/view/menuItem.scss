@@ -41,8 +41,8 @@
     left: 150px;
     z-index: parameter.$zIndexLevel2;
 
-    .container_document,
-    .container_skill {
+    .document_container,
+    .skill_container {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -52,7 +52,7 @@
         flex: 1 1 auto;
         min-height: 0;
 
-        .container_status {
+        .status_container {
             margin-bottom: 5px;
 
             details {
@@ -162,12 +162,12 @@
         }
     }
 
-    .container_agent:has(.agent_form),
-    .container_agent:has(.container_skill) {
+    .agent_container:has(.agent_form),
+    .agent_container:has(.skill_container) {
         width: 100%;
     }
 
-    .container_agent {
+    .agent_container {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -269,7 +269,7 @@
                     margin: 5px 0 20px 0;
                 }
 
-                .container_select {
+                .select_container {
                     display: flex;
                     flex-direction: row;
                     align-content: center;
@@ -297,7 +297,7 @@
                 }
             }
 
-            .container_form_button {
+            .form_button_container {
                 display: flex;
                 flex-direction: row;
                 align-content: center;
@@ -318,10 +318,10 @@
             }
         }
 
-        > .container_skill {
+        > .skill_container {
             width: 100%;
 
-            .container_form_button {
+            .form_button_container {
                 display: flex;
                 flex-direction: row;
                 align-content: center;
@@ -344,7 +344,7 @@
         }
     }
 
-    .container_tool {
+    .tool_container {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -398,7 +398,7 @@
         }
     }
 
-    .container_task {
+    .task_container {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -466,9 +466,9 @@
     .view_menuItem_right {
         background-color: color.$darkRootBackground;
 
-        .container_document,
-        .container_skill {
-            .container_status {
+        .document_container,
+        .skill_container {
+            .status_container {
                 details {
                     border: 1px solid color.$darkChatAssistantBoxBorder;
                     background-color: color.$darkChatAssistantBoxBackground;
@@ -477,7 +477,7 @@
             }
         }
 
-        .container_agent {
+        .agent_container {
             .agent_form {
                 .form_message {
                     p {

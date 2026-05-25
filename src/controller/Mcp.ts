@@ -53,7 +53,7 @@ export default class Mcp implements Icontroller {
         const fileName = this.variableObject.documentEmbeddingStatusList.state[embeddingListIndex].fileName;
 
         let isPolling = false;
-        let embeddingStatus = "ongoing";
+        let status = "ongoing";
 
         const interval = setInterval(async () => {
             if (isPolling) {
@@ -62,18 +62,18 @@ export default class Mcp implements Icontroller {
 
             isPolling = true;
 
-            embeddingStatus = await this.apiEmbeddingCheck(fileName);
+            status = await this.apiEmbeddingCheck(fileName);
 
-            if (embeddingStatus !== "ongoing") {
+            if (status !== "ongoing") {
                 if (embeddingListIndex !== -1) {
                     const embeddingListState = this.variableObject.documentEmbeddingStatusList.state.slice();
 
-                    if (embeddingStatus === "done") {
+                    if (status === "done") {
                         embeddingListState[embeddingListIndex] = {
                             ...embeddingListState[embeddingListIndex],
                             status: "Success"
                         };
-                    } else if (embeddingStatus === "fail") {
+                    } else if (status === "fail") {
                         embeddingListState[embeddingListIndex] = {
                             ...embeddingListState[embeddingListIndex],
                             status: "Failed"
@@ -148,9 +148,7 @@ export default class Mcp implements Icontroller {
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
-                if (resultJson.response.stdout !== "") {
-                    this.variableObject.toolList.state = JSON.parse(resultJson.response.stdout) as modelMcp.Itool[];
-                }
+                this.variableObject.toolList.state = JSON.parse(resultJson.response.stdout) as modelMcp.Itool[];
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiTool() - fetch() - catch()", error.message);
@@ -176,9 +174,7 @@ export default class Mcp implements Icontroller {
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
-                if (resultJson.response.stdout !== "") {
-                    this.variableObject.taskList.state = JSON.parse(resultJson.response.stdout) as modelMcp.Itask[];
-                }
+                this.variableObject.taskList.state = JSON.parse(resultJson.response.stdout) as modelMcp.Itask[];
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiTask() - fetch() - catch()", error.message);
@@ -224,19 +220,19 @@ export default class Mcp implements Icontroller {
 
             for (const pathFile of pathFileList) {
                 const file = await readFile(pathFile);
+                const fileName = pathFile.split(/[/\\]/).pop() as string;
                 const mimeType = helperSrc.readMimeType(file);
                 const blob = new Blob([file], { type: mimeType.content });
-                const fileName = pathFile.split(/[/\\]/).pop() || "file";
 
                 const formData = new FormData();
-                formData.append("file", blob, `${fileName}`);
+                formData.append("file", blob, encodeURIComponent(fileName));
 
                 await fetch(`${helperSrc.URL_MCP}/api/document-upload`, {
                     method: "POST",
                     headers: {
                         "mcp-session-id": session.data.mcpSessionId,
                         Cookie: session.data.mcpCookie,
-                        fileName
+                        fileName: encodeURIComponent(fileName)
                     },
                     body: formData,
                     danger: {
@@ -291,9 +287,7 @@ export default class Mcp implements Icontroller {
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
-                if (resultJson.response.stdout !== "") {
-                    this.variableObject.documentList.state = JSON.parse(resultJson.response.stdout);
-                }
+                this.variableObject.documentList.state = JSON.parse(resultJson.response.stdout);
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiDocumentList() - fetch() - catch()", error.message);
@@ -347,9 +341,7 @@ export default class Mcp implements Icontroller {
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
-                if (resultJson.response.stdout !== "") {
-                    return JSON.parse(resultJson.response.stdout);
-                }
+                return JSON.parse(resultJson.response.stdout);
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiDocumentRead() - fetch() - catch()", error.message);
@@ -370,19 +362,19 @@ export default class Mcp implements Icontroller {
 
             for (const pathFile of pathFileList) {
                 const file = await readFile(pathFile);
-                const fileName = pathFile.split(/[/\\]/).pop() || "file";
+                const fileName = pathFile.split(/[/\\]/).pop() as string;
                 const mimeType = helperSrc.readMimeType(file);
                 const blob = new Blob([file], { type: mimeType.content });
 
                 const formData = new FormData();
-                formData.append("file", blob, `${fileName}`);
+                formData.append("file", blob, encodeURIComponent(fileName));
 
                 await fetch(`${helperSrc.URL_MCP}/api/skill-upload`, {
                     method: "POST",
                     headers: {
                         "mcp-session-id": session.data.mcpSessionId,
                         Cookie: session.data.mcpCookie,
-                        fileName
+                        fileName: encodeURIComponent(fileName)
                     },
                     body: formData,
                     danger: {
@@ -395,15 +387,13 @@ export default class Mcp implements Icontroller {
 
                         const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
-                        if (resultJson.response.stdout !== "") {
-                            this.variableObject.isSkillUploading.state = false;
+                        this.variableObject.isSkillUploading.state = false;
 
-                            const resultFile = JSON.parse(resultJson.response.stdout) as modelMcp.IfileStatus;
+                        const resultFile = JSON.parse(resultJson.response.stdout) as modelMcp.IfileStatus;
 
-                            this.variableObject.skillUploadStatusList.state.push(resultFile);
+                        this.variableObject.skillUploadStatusList.state.push(resultFile);
 
-                            this.apiSkillList();
-                        }
+                        this.apiSkillList();
                     })
                     .catch((error: Error) => {
                         helperSrc.writeLog("Mcp.ts - apiSkillUpload() - fetch() - catch()", error.message);
@@ -431,9 +421,7 @@ export default class Mcp implements Icontroller {
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
-                if (resultJson.response.stdout !== "") {
-                    this.variableObject.skillList.state = JSON.parse(resultJson.response.stdout);
-                }
+                this.variableObject.skillList.state = JSON.parse(resultJson.response.stdout);
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiSkillList() - fetch() - catch()", error.message);
@@ -487,9 +475,7 @@ export default class Mcp implements Icontroller {
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
-                if (resultJson.response.stdout !== "") {
-                    return resultJson.response.stdout;
-                }
+                return resultJson.response.stdout;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiSkillRead() - fetch() - catch()", error.message);
@@ -592,9 +578,7 @@ export default class Mcp implements Icontroller {
 
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
-                if (resultJson.response.stdout !== "") {
-                    this.variableObject.agentList.state = JSON.parse(resultJson.response.stdout);
-                }
+                this.variableObject.agentList.state = JSON.parse(resultJson.response.stdout);
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiAgentList() - fetch() - catch()", error.message);

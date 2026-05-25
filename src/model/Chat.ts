@@ -48,7 +48,7 @@ export interface IapiResponse {
 }
 
 export interface Ivariable {
-    isMessageSent: IvariableBind<boolean>;
+    isMessageSendAvailable: IvariableBind<boolean>;
     toastMessage: IvariableBind<string>;
     toastType: IvariableBind<string>;
     chatMessageList: IvariableBind<IchatMessage[]>;
@@ -62,7 +62,7 @@ export interface Ivariable {
 
 export interface Imethod {
     onClickButtonMessageSend: () => void;
-    onClickSourceLink: (event: Event, fileName: string, citation: string) => void;
+    onClickCitationLink: (event: Event, fileName: string, chunk: string) => void;
     onClickCitationTab: (messageIndex: number, tabIndex: number) => void;
 }
 

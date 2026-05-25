@@ -5,14 +5,14 @@ import * as modelChat from "./Chat";
 
 export interface Itool {
     name: string;
-    argumentObject: Record<string, string>;
+    argumentObject: Record<string, unknown>;
     icon: string;
     description: string;
 }
 
 export interface Itask {
     name: string;
-    argumentObject: Record<string, string>;
+    argumentObject: Record<string, unknown>;
     icon: string;
     description: string;
 }
@@ -26,12 +26,13 @@ export interface Iagent {
 
 export interface IragCitation {
     fileName: string;
-    citation: string;
+    chunk: string;
+    distance: number;
 }
 
 export interface IragRelation {
     source: string;
-    relation: string;
+    verb: string;
     target: string;
 }
 

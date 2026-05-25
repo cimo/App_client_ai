@@ -8,7 +8,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
 
     return (
         <div class="view_chat_message">
-            <div class="container_chat" jsmvcfw-elementHookName="elementContainerMessageReceive">
+            <div class="chat_container" jsmvcfw-elementHookName="elementContainerMessageReceive">
                 {(() => {
                     const result: IvirtualNode[] = [];
 
@@ -17,11 +17,11 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
 
                         result.push(
                             <div key={key} data-chat-index={key}>
-                                <div class={`container_chat_user ${value.user ? "" : "none"}`}>
+                                <div class={`chat_user_container ${value.user ? "" : "none"}`}>
                                     <p class="time">{value.time}</p>
                                     <pre class="message">{value.user}</pre>
                                 </div>
-                                <div class="container_chat_assistant">
+                                <div class="chat_assistant_container">
                                     <details class={value.mcpTool && value.mcpTool["name"] ? "" : "none"}>
                                         <summary>
                                             <i class="cls_icon">handyman</i>
@@ -32,7 +32,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
 
                                             if (value.mcpTool) {
                                                 result.push(
-                                                    <ul class="list">
+                                                    <ul>
                                                         <li>Name: {value.mcpTool["name"]}</li>
                                                         <li>Argument: {value.mcpTool["arguments"]}</li>
                                                         <li>Output: {value.mcpTool["output"]}</li>
@@ -63,9 +63,8 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                             <p>Citation result:</p>
                                                         </summary>
                                                         <div class="citation_container">
-                                                            <div class="citation_nav">
+                                                            <div class="pagination_container">
                                                                 <button
-                                                                    class="citation_nav_button"
                                                                     onClick={() => {
                                                                         methodObject.onClickCitationTab(
                                                                             messageIndex,
@@ -75,11 +74,10 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                 >
                                                                     <i class="cls_icon">chevron_left</i>
                                                                 </button>
-                                                                <span class="citation_nav_label">
+                                                                <span class="label">
                                                                     RAG Citation {value.ragCitationTabIndex + 1} / {value.ragCitation.length}
                                                                 </span>
                                                                 <button
-                                                                    class="citation_nav_button"
                                                                     onClick={() => {
                                                                         if (value.ragCitation) {
                                                                             methodObject.onClickCitationTab(
@@ -94,30 +92,31 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                             </div>
                                                             {(() => {
                                                                 const result: IvirtualNode[] = [];
-                                                                const data = value.ragCitation[value.ragCitationTabIndex];
+                                                                const citation = value.ragCitation[value.ragCitationTabIndex];
 
-                                                                if (data && typeof data !== "string") {
-                                                                    const fileName = data.fileName;
-                                                                    const citation = data.citation || "";
-
+                                                                if (citation && typeof citation !== "string") {
                                                                     result.push(
-                                                                        <div class="citation">
+                                                                        <div class="box">
                                                                             <p class="title">
                                                                                 <i class="cls_icon">text_snippet</i>
                                                                                 <span>
-                                                                                    [{value.ragCitationTabIndex + 1}] {fileName}
+                                                                                    [{value.ragCitationTabIndex + 1}] {citation.fileName}
                                                                                 </span>
                                                                             </p>
                                                                             <a
-                                                                                class="source_link"
+                                                                                class="link"
                                                                                 href="#"
                                                                                 onClick={(event: Event) => {
-                                                                                    methodObject.onClickSourceLink(event, fileName, citation);
+                                                                                    methodObject.onClickCitationLink(
+                                                                                        event,
+                                                                                        citation.fileName,
+                                                                                        citation.chunk
+                                                                                    );
                                                                                 }}
                                                                             >
                                                                                 (source)
                                                                             </a>
-                                                                            <pre>{citation.trim()}</pre>
+                                                                            <pre>{citation.chunk}</pre>
                                                                         </div>
                                                                     );
                                                                 }
@@ -131,22 +130,22 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                             if (value.ragRelationList && value.ragRelationList.length > 0) {
                                                                 result.push(
                                                                     <div class="relation_container">
-                                                                        <p class="relation_title">
+                                                                        <p class="title">
                                                                             <i class="cls_icon">account_tree</i>
                                                                             <span>Relation:</span>
                                                                         </p>
-                                                                        <ul class="relation_list">
+                                                                        <ul>
                                                                             {(() => {
                                                                                 const result: IvirtualNode[] = [];
 
                                                                                 for (let a = 0; a < value.ragRelationList.length; a++) {
-                                                                                    const rel = value.ragRelationList[a];
+                                                                                    const relation = value.ragRelationList[a];
 
                                                                                     result.push(
-                                                                                        <li key={a} class="relation_item">
-                                                                                            <span class="relation_source">{rel.source}</span>
-                                                                                            <span class="relation_verb">{rel.relation}</span>
-                                                                                            <span class="relation_target">{rel.target}</span>
+                                                                                        <li key={a}>
+                                                                                            <span class="source">{relation.source}</span>
+                                                                                            <span class="verb">{relation.verb}</span>
+                                                                                            <span class="target">{relation.target}</span>
                                                                                         </li>
                                                                                     );
                                                                                 }
@@ -198,9 +197,9 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
 export const input = (variableObject: modelChat.Ivariable, methodObject: modelChat.Imethod): IvirtualNode => {
     return (
         <div class="view_chat_input">
-            <div class="container_message_send">
+            <div class="message_send_container">
                 <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
-                <div class="container_action">
+                <div class="action_container">
                     <div class="left"></div>
                     <div class="right">
                         <button
@@ -208,7 +207,7 @@ export const input = (variableObject: modelChat.Ivariable, methodObject: modelCh
                                 methodObject.onClickButtonMessageSend();
                             }}
                         >
-                            <i class="cls_icon">{variableObject.isMessageSent.state ? "stop" : "play_arrow"}</i>
+                            <i class="cls_icon">{variableObject.isMessageSendAvailable.state ? "play_arrow" : "stop"}</i>
                         </button>
                     </div>
                 </div>

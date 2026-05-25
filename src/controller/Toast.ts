@@ -7,12 +7,10 @@ import viewToast from "../view/Toast";
 export default class Toast implements Icontroller {
     // Variable
     private variableObject: modelToast.Ivariable;
-    private viewNodeEmpty: IvirtualNode;
 
     // Method
     constructor() {
         this.variableObject = {} as modelToast.Ivariable;
-        this.viewNodeEmpty = { tag: "div", propertyObject: {}, childrenList: [] };
     }
 
     hookObject = {} as modelToast.IelementHook;
@@ -28,7 +26,19 @@ export default class Toast implements Icontroller {
     }
 
     variableEffect(watch: IvariableEffect): void {
-        watch([]);
+        watch([
+            {
+                list: ["toastMessage", "toastType"],
+                action: () => {
+                    if (this.variableObject.toastMessage.state !== "") {
+                        setTimeout(() => {
+                            this.variableObject.toastMessage.state = "";
+                            this.variableObject.toastType.state = "";
+                        }, 3000);
+                    }
+                }
+            }
+        ]);
     }
 
     view(): IvirtualNode {

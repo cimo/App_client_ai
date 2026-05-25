@@ -25,24 +25,27 @@ export default class Chat implements Icontroller {
     private modelSelected: string;
     private fileList: modelChat.Ifile;
 
-    // Method
-    private showToast = (message: string, type: string): void => {
-        this.variableObject.toastMessage.state = message;
-        this.variableObject.toastType.state = type;
+    private messageSentCount: number;
 
-        setTimeout(() => {
-            this.variableObject.toastMessage.state = "";
-            this.variableObject.toastType.state = "";
-        }, 3000);
+    // Method
+    private showToast = (mode: string, message: string): void => {
+        this.variableObject.toastType.state = mode;
+        this.variableObject.toastMessage.state = message;
     };
 
-    private resetModelResponse = (): void => {
+    private resetModelResponse = (mode?: string): void => {
         this.responseId = "";
         this.responseReason = "";
         this.responseNoReason = "";
         this.responseMcpTool = {} as modelChat.ImcpTool;
 
-        this.variableObject.isMessageSent.state = false;
+        if (mode === "finish") {
+            this.messageSentCount = Math.max(0, this.messageSentCount - 1);
+
+            if (this.messageSentCount === 0) {
+                this.variableObject.isMessageSendAvailable.state = true;
+            }
+        }
     };
 
     private onClickButtonMessageSend = (): void => {
@@ -54,7 +57,7 @@ export default class Chat implements Icontroller {
         }
     };
 
-    private onClickSourceLink = async (event: Event, fileName: string, searchInput: string): Promise<void> => {
+    private onClickCitationLink = async (event: Event, fileName: string, chunk: string): Promise<void> => {
         event.preventDefault();
 
         const systemMode = this.variableObject.systemMode.state;
@@ -70,10 +73,21 @@ export default class Chat implements Icontroller {
             }
         }
 
-        this.apiResponse(`Filename: ${fileName}. Search input: ${searchInput}.`);
+        this.apiResponse("", `Filename: ${fileName}. Search input: ${chunk}.`);
 
         this.variableObject.systemMode.state = systemMode;
         this.variableObject.toolSelected.state = toolSelected;
+    };
+
+    private onClickCitationTab = (messageIndex: number, tabIndex: number): void => {
+        const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+        chatMessageListState[messageIndex] = {
+            ...chatMessageListState[messageIndex],
+            ragCitationTabIndex: tabIndex
+        };
+
+        this.variableObject.chatMessageList.state = chatMessageListState;
     };
 
     private openWindowDocument = async (): Promise<void> => {
@@ -94,14 +108,14 @@ export default class Chat implements Icontroller {
         this.modelSelected = modelSelected;
     }
 
-    apiResponse = async (prompt?: string, mode?: string): Promise<void> => {
+    apiResponse = async (mode?: string, prompt?: string): Promise<void> => {
         //const base64 = await invoke("test_screenshot");
         //this.variableObject.modelSelected.state = base64 as string;
 
         //await invoke("test");
 
-        if (this.variableObject.isMessageSent.state && mode !== "rag") {
-            this.showToast("Wait for the current response to complete.", "warning");
+        if (!this.variableObject.isMessageSendAvailable.state && mode !== "rag") {
+            this.showToast("warning", "Wait for the current response to complete.");
 
             return;
         }
@@ -110,6 +124,10 @@ export default class Chat implements Icontroller {
             this.abortControllerApiResponse = new AbortController();
 
             this.resetModelResponse();
+
+            this.messageSentCount++;
+
+            this.variableObject.isMessageSendAvailable.state = false;
 
             let time = helperSrc.localeFormat(new Date()) as string;
             let userPrompt = this.hookObject.elementInputMessageSend.value;
@@ -121,9 +139,7 @@ export default class Chat implements Icontroller {
 
             let chatMessageIndex = -1;
 
-            if (mode === "rag") {
-                chatMessageIndex = this.variableObject.chatMessageList.state.length - 1;
-            } else {
+            if (mode !== "rag") {
                 this.variableObject.chatMessageList.state = [
                     ...this.variableObject.chatMessageList.state,
                     {
@@ -138,9 +154,9 @@ export default class Chat implements Icontroller {
                         securityScanner: ""
                     }
                 ];
-
-                chatMessageIndex = this.variableObject.chatMessageList.state.length - 1;
             }
+
+            chatMessageIndex = this.variableObject.chatMessageList.state.length - 1;
 
             this.autoscroll(false);
 
@@ -176,8 +192,9 @@ export default class Chat implements Icontroller {
                     "You MUST answer EXCLUSIVELY using the content of the provided CITATION and RELATION.",
                     "You MUST NOT use any external knowledge, training data, or assumptions.",
                     "You MUST NOT make inferences beyond what is explicitly stated in the CITATION and RELATION.",
-                    "Before writing each sentence, verify it is directly present in the provided citations. If it is not, do NOT write it.",
+                    "Before writing each sentence, verify it is directly present in the provided CITATION. If it is not, do NOT write it.",
                     "For EACH topic in the question, answer INDEPENDENTLY and SEPARATELY using what you find in the CITATION and RELATION, even if partial or incomplete.",
+                    "For EACH topic write a dedicated section with the topic name as title, followed by bullet points.",
                     "You MUST NEVER say there is no information about a topic if the CITATION and RELATION contain even partial information about it.",
                     "You MUST NOT look for relationships or connections between entities unless the question explicitly asks for them.",
                     "You MUST NOT add commentary about missing information."
@@ -188,7 +205,9 @@ export default class Chat implements Icontroller {
                 inputSystem = [
                     "You are a multilingual assistant tool executer that needs to reply ALWAYS with the user input language and you need to transform the user request in a action.",
                     `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}`,
+                    `Tool description: ${this.variableObject.toolSelected.state.description}`,
                     `For ${this.variableObject.toolSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }`,
+                    "You MUST NOT add parameters that are not present in the provided format.",
                     "You MUST NOT solve problems.",
                     "You MUST NOT invent new actions.",
                     "You MUST NOT explain nothing."
@@ -197,7 +216,9 @@ export default class Chat implements Icontroller {
                 inputSystem = [
                     "You are a multilingual assistant tool task executer that needs to reply ALWAYS with the user input language and you need to transform the user request in a ordered list of actions.",
                     `You MUST use ONLY the following tool: ${this.variableObject.taskSelected.state.name}`,
+                    `Tool description: ${this.variableObject.toolSelected.state.description}`,
                     `For ${this.variableObject.taskSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "${this.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.taskSelected.state.argumentObject)} } ] }`,
+                    "You MUST NOT add parameters that are not present in the provided format.",
                     "You MUST NOT solve problems.",
                     "You MUST NOT invent new actions.",
                     "You MUST NOT explain nothing."
@@ -260,8 +281,6 @@ export default class Chat implements Icontroller {
                 }
             })
                 .then(async (result) => {
-                    this.variableObject.isMessageSent.state = true;
-
                     const contentType = result.headers.get("Content-Type");
 
                     if (!contentType || !contentType.includes("text/event-stream") || !result.body) {
@@ -278,14 +297,14 @@ export default class Chat implements Icontroller {
                         const { value, done } = await reader.read();
 
                         if (done) {
-                            this.resetModelResponse();
+                            this.resetModelResponse("finish");
 
                             break;
                         }
 
                         buffer += decoder.decode(value, { stream: true });
                         const lineList = buffer.split(/\r?\n/);
-                        buffer = lineList.pop() || "";
+                        buffer = lineList.pop() as string;
 
                         for (const line of lineList) {
                             if (line.startsWith("data:")) {
@@ -452,10 +471,8 @@ export default class Chat implements Icontroller {
 
                                                         const citationContextList: string[] = [];
 
-                                                        for (let a = 0; a < Math.min(5, citationList.length); a++) {
-                                                            citationContextList.push(
-                                                                `[${citationList[a].fileName}]: ${citationList[a].citation.slice(0, 300)}`
-                                                            );
+                                                        for (let a = 0; a < Math.min(6, citationList.length); a++) {
+                                                            citationContextList.push(`[${citationList[a].fileName}]: ${citationList[a].chunk}`);
                                                         }
 
                                                         const citationContext = citationContextList.join("\n---\n");
@@ -467,16 +484,16 @@ export default class Chat implements Icontroller {
 
                                                             for (let a = 0; a < Math.min(20, relationList.length); a++) {
                                                                 relationContextList.push(
-                                                                    `${relationList[a].source} ${relationList[a].relation} ${relationList[a].target}`
+                                                                    `${relationList[a].source} ${relationList[a].verb} ${relationList[a].target}`
                                                                 );
                                                             }
 
-                                                            relationContext = `\n\nRELATION:\n${relationContextList.join("\n")}`;
+                                                            relationContext = relationContextList.join("\n");
                                                         }
 
                                                         this.apiResponse(
-                                                            `CITATION:\n${citationContext}${relationContext}\n\nText: ${userPrompt}`,
-                                                            "rag"
+                                                            "rag",
+                                                            `CITATION:\n${citationContext}\n\nRELATION:\n${relationContext}\n\nText:\n${userPrompt}`
                                                         );
 
                                                         this.variableObject.systemMode.state = "tool-call";
@@ -515,7 +532,7 @@ export default class Chat implements Icontroller {
                 .catch((error: Error) => {
                     helperSrc.writeLog("Chat.ts - apiResponse() - fetch() - catch()", typeof error === "string" ? error : error.message);
 
-                    this.resetModelResponse();
+                    this.resetModelResponse("finish");
 
                     if (error.toString().toLowerCase() === "request cancelled") {
                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();
@@ -533,17 +550,6 @@ export default class Chat implements Icontroller {
 
             this.hookObject.elementInputMessageSend.value = "";
         }
-    };
-
-    private onClickCitationTab = (messageIndex: number, tabIndex: number): void => {
-        const chatMessageListState = this.variableObject.chatMessageList.state.slice();
-
-        chatMessageListState[messageIndex] = {
-            ...chatMessageListState[messageIndex],
-            ragCitationTabIndex: tabIndex
-        };
-
-        this.variableObject.chatMessageList.state = chatMessageListState;
     };
 
     autoscroll = (isAuto: boolean): void => {
@@ -579,6 +585,8 @@ export default class Chat implements Icontroller {
 
         this.modelSelected = "";
         this.fileList = {};
+
+        this.messageSentCount = 0;
     }
 
     hookObject = {} as modelChat.IelementHook;
@@ -586,7 +594,7 @@ export default class Chat implements Icontroller {
     variable(): void {
         this.variableObject = variableBind(
             {
-                isMessageSent: false,
+                isMessageSendAvailable: true,
                 toastMessage: variableLink<string>("Toast"),
                 toastType: variableLink<string>("Toast"),
                 chatMessageList: [],
@@ -602,7 +610,7 @@ export default class Chat implements Icontroller {
 
         this.methodObject = {
             onClickButtonMessageSend: this.onClickButtonMessageSend,
-            onClickSourceLink: this.onClickSourceLink,
+            onClickCitationLink: this.onClickCitationLink,
             onClickCitationTab: this.onClickCitationTab
         };
     }

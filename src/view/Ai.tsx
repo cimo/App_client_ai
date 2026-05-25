@@ -6,7 +6,7 @@ import * as modelAi from "../model/Ai";
 const viewAi = (variableObject: modelAi.Ivariable, methodObject: modelAi.Imethod): IvirtualNode => {
     return (
         <div class="view_ai">
-            <div class="container_header">
+            <div class="header_container">
                 <p>Model selected: {variableObject.modelSelected.state}</p>
                 <div class="dropdown">
                     <i
@@ -28,10 +28,10 @@ const viewAi = (variableObject: modelAi.Ivariable, methodObject: modelAi.Imethod
                                         <li
                                             key={key}
                                             onClick={() => {
-                                                methodObject.onClickModelName(value.id);
+                                                methodObject.onClickModelName(value);
                                             }}
                                         >
-                                            {value.id}
+                                            {value}
                                         </li>
                                     );
                                 }
