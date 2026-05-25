@@ -120,7 +120,7 @@ aside {
         }
     }
 
-    .container_over {
+    .over_container {
         display: grid;
         place-items: center;
         position: fixed;
@@ -145,7 +145,7 @@ aside {
         }
     }
 
-    .container_header {
+    .header_container {
         display: flex;
         flex-direction: row;
         align-content: center;
@@ -157,7 +157,7 @@ aside {
         z-index: parameter.$zIndexLevel1;
     }
 
-    .container_content {
+    .center_container {
         display: flex;
         flex-direction: row;
         align-content: center;
@@ -167,7 +167,7 @@ aside {
         flex: 1 1 auto;
         min-height: 0;
 
-        .container_left {
+        .left_container {
             display: flex;
             flex-direction: column;
             align-content: center;
@@ -178,7 +178,7 @@ aside {
             min-height: 0;
         }
 
-        .container_right {
+        .right_container {
             display: flex;
             flex-direction: column;
             align-content: center;
@@ -248,30 +248,30 @@ aside {
         }
     }
 
-    .container_over {
+    .over_container {
         background-color: color.$darkRootBackground;
     }
 
-    .container_header {
+    .header_container {
         background-color: color.$darkInteractionBackground;
         box-shadow: color.$darkShadowHeader;
     }
 
-    .container_content {
-        .container_left {
+    .center_container {
+        .left_container {
             border-right: 1px solid color.$darkRootBorder;
         }
 
-        .container_right {
-            .container_chat {
+        .right_container {
+            .chat_container {
                 > div {
-                    .container_chat_user {
+                    .chat_user_container {
                         .message {
                             border: 1px solid color.$darkRootBorder;
                         }
                     }
 
-                    .container_chat_assistant {
+                    .chat_assistant_container {
                         details {
                             border: 1px solid color.$darkChatAssistantBoxBorder;
                             background-color: color.$darkChatAssistantBoxBackground;
@@ -281,7 +281,7 @@ aside {
                 }
             }
 
-            .container_message_send {
+            .message_send_container {
                 border: 1px solid color.$darkChatMessageSendBorder;
                 box-shadow: color.$darkShadowMessageSend;
             }

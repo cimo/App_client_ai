@@ -1,19 +1,9 @@
 import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 
-interface Imodel {
-    id: string;
-    object: string;
-    owned_by: string;
-}
-
-export interface IapiModelResponse {
-    data: Imodel[];
-}
-
 export interface Ivariable {
     isOfflineAi: IvariableBind<boolean>;
     isOpenDropdownModelList: IvariableBind<boolean>;
-    modelList: IvariableBind<Imodel[]>;
+    modelList: IvariableBind<string[]>;
     modelSelected: IvariableBind<string>;
     adUrl: IvariableBind<string>;
 }

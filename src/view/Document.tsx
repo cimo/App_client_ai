@@ -7,7 +7,7 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
     return (
         <div class="view_document" jsmvcfw-controllerName="Document">
             <aside jsmvcfw-controllerName="Mcp" />
-            <div class="container_file">
+            <div class="file_container">
                 {(() => {
                     const result: IvirtualNode[] = [];
 
@@ -15,7 +15,7 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                         result.push(
                             <>
                                 <div>
-                                    <p class="container_page">
+                                    <p class="page_container">
                                         <i class="cls_icon" onClick={() => methodObject.onClickChangePage(-1)}>
                                             chevron_left
                                         </i>

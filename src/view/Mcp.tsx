@@ -6,7 +6,7 @@ import * as modelMcp from "../model/Mcp";
 export const tool = (variableObject: modelMcp.Ivariable, methodObject: modelMcp.Imethod): IvirtualNode => {
     return (
         <div class="view_mcp_tool">
-            <div class="container_chip">
+            <div class="chip_container">
                 <div
                     class={`chip ${variableObject.toolSelected.state.name || variableObject.taskSelected.state.name || variableObject.agentSelected.state.name ? "" : "none"}`}
                 >

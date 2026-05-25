@@ -60,12 +60,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
 
                 if (variableObject.isMenuItemDocument.state) {
                     result.push(
-                        <div class="container_document">
+                        <div class="document_container">
                             {(() => {
                                 const result: IvirtualNode[] = [];
 
                                 result.push(
-                                    <div class="container_status">
+                                    <div class="status_container">
                                         {(() => {
                                             const result: IvirtualNode[] = [];
 
@@ -180,7 +180,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                     );
                 } else if (variableObject.isMenuItemSkill.state) {
                     result.push(
-                        <div class="container_skill">
+                        <div class="skill_container">
                             {(() => {
                                 const result: IvirtualNode[] = [];
 
@@ -188,7 +188,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     result.push(<i class="cls_icon">update</i>);
                                 } else if (variableObject.skillUploadStatusList.state.length > 0) {
                                     result.push(
-                                        <div class="container_status">
+                                        <div class="status_container">
                                             <details key="skillUploadStatusList" open>
                                                 <summary>
                                                     <p>Upload result:</p>
@@ -258,7 +258,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                     );
                 } else if (variableObject.isMenuItemTool.state) {
                     result.push(
-                        <div class="container_tool">
+                        <div class="tool_container">
                             <ul>
                                 {(() => {
                                     const result: IvirtualNode[] = [];
@@ -288,7 +288,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                     );
                 } else if (variableObject.isMenuItemTask.state) {
                     result.push(
-                        <div class="container_task">
+                        <div class="task_container">
                             <ul>
                                 {(() => {
                                     const result: IvirtualNode[] = [];
@@ -318,14 +318,14 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                     );
                 } else if (variableObject.isMenuItemAgent.state) {
                     result.push(
-                        <div class="container_agent">
+                        <div class="agent_container">
                             {(() => {
                                 const result: IvirtualNode[] = [];
 
                                 if (variableObject.isAgentSelectSkill.state) {
                                     result.push(
-                                        <div class="container_skill">
-                                            <div class="container_form_button">
+                                        <div class="skill_container">
+                                            <div class="form_button_container">
                                                 <div
                                                     class="chip"
                                                     onClick={(event: Event) => {
@@ -378,7 +378,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             </div>
                                             <div class="form_field">
                                                 <p>Skill:</p>
-                                                <div class="container_select">
+                                                <div class="select_container">
                                                     <div
                                                         class="chip"
                                                         onClick={(event: Event) => {
@@ -406,7 +406,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             <div class="form_message">
                                                 <p>{variableObject.agentFormResult.state}</p>
                                             </div>
-                                            <div class="container_form_button">
+                                            <div class="form_button_container">
                                                 <div
                                                     class="chip"
                                                     onClick={(event: Event) => {
