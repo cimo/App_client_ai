@@ -9,6 +9,7 @@ import * as modelIndex from "../model/Index";
 import viewAi from "../view/Ai";
 import type Mcp from "./Mcp";
 import type Chat from "./Chat";
+import type Toast from "./Toast";
 
 export default class Ai implements Icontroller {
     // Variable
@@ -16,6 +17,7 @@ export default class Ai implements Icontroller {
     private methodObject: modelAi.Imethod;
     private controllerMcp: Mcp;
     private controllerChat: Chat;
+    private controllerToast: Toast;
 
     private modelDefault: string;
 
@@ -38,6 +40,10 @@ export default class Ai implements Icontroller {
 
         this.controllerChat.setModelSelected(this.variableObject.modelSelected.state);
     };
+
+    setControllerToast(controller: Toast): void {
+        this.controllerToast = controller;
+    }
 
     setControllerMcp(controller: Mcp): void {
         this.controllerMcp = controller;
@@ -180,6 +186,7 @@ export default class Ai implements Icontroller {
         this.methodObject = {} as modelAi.Imethod;
         this.controllerMcp = {} as Mcp;
         this.controllerChat = {} as Chat;
+        this.controllerToast = {} as Toast;
 
         this.modelDefault = "";
 
@@ -229,6 +236,7 @@ export default class Ai implements Icontroller {
     subControllerList(): Icontroller[] {
         const resultList: Icontroller[] = [];
 
+        resultList.push(this.controllerToast);
         resultList.push(this.controllerChat);
         resultList.push(this.controllerMcp);
 

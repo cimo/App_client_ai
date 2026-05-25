@@ -90,8 +90,35 @@
                     }
 
                     .citation_container {
+                        .citation_nav {
+                            display: flex;
+                            flex-direction: row;
+                            align-content: center;
+                            justify-content: start;
+                            align-items: center;
+                            justify-items: center;
+                            gap: 8px;
+                            margin: 10px 0 5px 0;
+
+                            .citation_nav_button {
+                                display: flex;
+                                flex-direction: row;
+                                align-content: center;
+                                justify-content: center;
+                                align-items: center;
+                                justify-items: center;
+                                width: 32px;
+                                height: 28px;
+                            }
+
+                            .citation_nav_label {
+                                font-size: parameter.$fontSizeSmall;
+                                white-space: nowrap;
+                            }
+                        }
+
                         .citation {
-                            margin-top: 15px;
+                            margin-top: 10px;
                             padding: 10px;
 
                             .title {
@@ -114,12 +141,60 @@
                             }
                         }
                     }
+
+                    .relation_container {
+                        margin-top: 15px;
+                        padding: 10px;
+
+                        .relation_title {
+                            display: flex;
+                            flex-direction: row;
+                            align-content: center;
+                            justify-content: start;
+                            align-items: center;
+                            justify-items: center;
+                            margin-bottom: 8px;
+
+                            .cls_icon {
+                                font-size: parameter.$fontSizeNormalPlus !important;
+                                margin-right: 5px !important;
+                            }
+                        }
+
+                        .relation_list {
+                            list-style: none;
+                            padding: 0;
+                            margin: 0;
+
+                            .relation_item {
+                                display: flex;
+                                flex-direction: row;
+                                align-content: center;
+                                justify-content: start;
+                                align-items: center;
+                                justify-items: center;
+                                flex-wrap: wrap;
+                                gap: 6px;
+                                margin: 4px 0;
+
+                                .relation_source,
+                                .relation_target {
+                                    font-weight: bold;
+                                }
+
+                                .relation_verb {
+                                    font-style: italic;
+                                    opacity: 0.7;
+                                }
+                            }
+                        }
+                    }
                 }
 
                 .scanner_container {
                     overflow: scroll;
 
-                    .scanner {
+                    .security_scanner {
                         max-height: 500px;
                         word-break: unset !important;
                         white-space: pre !important;
@@ -217,6 +292,11 @@
                                 color: color.$darkHyperLinkText;
                             }
                         }
+                    }
+
+                    .relation_container {
+                        background-color: color.$darkCitationBackground;
+                        color: color.$darkCitationText;
                     }
                 }
             }

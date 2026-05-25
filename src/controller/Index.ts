@@ -12,6 +12,7 @@ import ControllerChat from "./Chat";
 import ControllerAi from "./Ai";
 import ControllerMcp from "./Mcp";
 import ControllerMenuItem from "./MenuItem";
+import ControllerToast from "./Toast";
 
 export default class Index implements Icontroller {
     // Variable
@@ -22,6 +23,7 @@ export default class Index implements Icontroller {
     private controllerAi: ControllerAi;
     private controllerMcp: ControllerMcp;
     private controllerMenuItem: ControllerMenuItem;
+    private controllerToast: ControllerToast;
 
     private appWindow: Window;
     private appIsClosing: boolean;
@@ -49,9 +51,11 @@ export default class Index implements Icontroller {
         this.controllerAi = new ControllerAi();
         this.controllerMcp = new ControllerMcp();
         this.controllerMenuItem = new ControllerMenuItem();
+        this.controllerToast = new ControllerToast();
 
         this.controllerAi.setControllerChat(this.controllerChat);
         this.controllerAi.setControllerMcp(this.controllerMcp);
+        this.controllerAi.setControllerToast(this.controllerToast);
         this.controllerMenuItem.setControllerMcp(this.controllerMcp);
 
         this.appWindow = getCurrentWindow();

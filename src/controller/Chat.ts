@@ -26,6 +26,16 @@ export default class Chat implements Icontroller {
     private fileList: modelChat.Ifile;
 
     // Method
+    private showToast = (message: string, type: string): void => {
+        this.variableObject.toastMessage.state = message;
+        this.variableObject.toastType.state = type;
+
+        setTimeout(() => {
+            this.variableObject.toastMessage.state = "";
+            this.variableObject.toastType.state = "";
+        }, 3000);
+    };
+
     private resetModelResponse = (): void => {
         this.responseId = "";
         this.responseReason = "";
@@ -90,6 +100,12 @@ export default class Chat implements Icontroller {
 
         //await invoke("test");
 
+        if (this.variableObject.isMessageSent.state && mode !== "rag") {
+            this.showToast("Wait for the current response to complete.", "warning");
+
+            return;
+        }
+
         if ((prompt || this.hookObject.elementInputMessageSend.value) && this.modelSelected !== "") {
             this.abortControllerApiResponse = new AbortController();
 
@@ -103,15 +119,28 @@ export default class Chat implements Icontroller {
                 userPrompt = "";
             }
 
-            this.variableObject.chatMessageList.state.push({
-                time: time,
-                user: userPrompt,
-                assistantReason: this.responseReason,
-                assistantNoReason: this.responseNoReason,
-                mcpTool: this.responseMcpTool,
-                citation: undefined,
-                scanner: ""
-            });
+            let chatMessageIndex = -1;
+
+            if (mode === "rag") {
+                chatMessageIndex = this.variableObject.chatMessageList.state.length - 1;
+            } else {
+                this.variableObject.chatMessageList.state = [
+                    ...this.variableObject.chatMessageList.state,
+                    {
+                        time: time,
+                        user: userPrompt,
+                        assistantReason: this.responseReason,
+                        assistantNoReason: this.responseNoReason,
+                        mcpTool: this.responseMcpTool,
+                        ragCitation: undefined,
+                        ragCitationTabIndex: 0,
+                        ragRelationList: [],
+                        securityScanner: ""
+                    }
+                ];
+
+                chatMessageIndex = this.variableObject.chatMessageList.state.length - 1;
+            }
 
             this.autoscroll(false);
 
@@ -138,20 +167,26 @@ export default class Chat implements Icontroller {
 
             let inputSystem = [
                 "You are a multilingual assistant that needs to reply with the user input language.",
-                "You MUST need to reason step by step and give a answer to the user question.",
                 "You MUST NOT use tools and tasks."
             ].join("\n");
 
             if (mode === "rag") {
-                inputSystem += [
-                    "You MUST ONLY use the provided CITATION to answer the user question.",
-                    "You MUST NOT add any information that is not provided in the CITATION."
+                inputSystem = [
+                    "You are a multilingual RAG assistant that needs to reply ALWAYS with the user input language.",
+                    "You MUST answer EXCLUSIVELY using the content of the provided CITATION and RELATION.",
+                    "You MUST NOT use any external knowledge, training data, or assumptions.",
+                    "You MUST NOT make inferences beyond what is explicitly stated in the CITATION and RELATION.",
+                    "Before writing each sentence, verify it is directly present in the provided citations. If it is not, do NOT write it.",
+                    "For EACH topic in the question, answer INDEPENDENTLY and SEPARATELY using what you find in the CITATION and RELATION, even if partial or incomplete.",
+                    "You MUST NEVER say there is no information about a topic if the CITATION and RELATION contain even partial information about it.",
+                    "You MUST NOT look for relationships or connections between entities unless the question explicitly asks for them.",
+                    "You MUST NOT add commentary about missing information."
                 ].join("\n");
             }
 
             if (this.variableObject.systemMode.state === "tool-call") {
                 inputSystem = [
-                    "You are a multilingual assistant tool executer that needs to reply with the user input language and you need to transform the user request in a action.",
+                    "You are a multilingual assistant tool executer that needs to reply ALWAYS with the user input language and you need to transform the user request in a action.",
                     `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}`,
                     `For ${this.variableObject.toolSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }`,
                     "You MUST NOT solve problems.",
@@ -160,7 +195,7 @@ export default class Chat implements Icontroller {
                 ].join("\n");
             } else if (this.variableObject.systemMode.state === "task-call") {
                 inputSystem = [
-                    "You are a multilingual assistant tool task executer that needs to reply with the user input language and you need to transform the user request in a ordered list of actions.",
+                    "You are a multilingual assistant tool task executer that needs to reply ALWAYS with the user input language and you need to transform the user request in a ordered list of actions.",
                     `You MUST use ONLY the following tool: ${this.variableObject.taskSelected.state.name}`,
                     `For ${this.variableObject.taskSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "${this.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.taskSelected.state.argumentObject)} } ] }`,
                     "You MUST NOT solve problems.",
@@ -265,12 +300,10 @@ export default class Chat implements Icontroller {
                                         const dataError = dataTrimParse.error;
 
                                         if (dataError) {
-                                            const idx = this.variableObject.chatMessageList.state.length - 1;
-
                                             const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
-                                            chatMessageListState[idx] = {
-                                                ...chatMessageListState[idx],
+                                            chatMessageListState[chatMessageIndex] = {
+                                                ...chatMessageListState[chatMessageIndex],
                                                 assistantNoReason: dataError.message
                                             };
 
@@ -290,12 +323,10 @@ export default class Chat implements Icontroller {
                                         if (dataDelta) {
                                             this.responseReason += dataDelta;
 
-                                            const index = this.variableObject.chatMessageList.state.length - 1;
-
                                             const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
-                                            chatMessageListState[index] = {
-                                                ...chatMessageListState[index],
+                                            chatMessageListState[chatMessageIndex] = {
+                                                ...chatMessageListState[chatMessageIndex],
                                                 assistantReason: this.responseReason.trim()
                                             };
 
@@ -309,12 +340,10 @@ export default class Chat implements Icontroller {
                                         if (dataDelta && (!prompt || mode === "rag")) {
                                             this.responseNoReason += dataDelta;
 
-                                            const index = this.variableObject.chatMessageList.state.length - 1;
-
                                             const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
-                                            chatMessageListState[index] = {
-                                                ...chatMessageListState[index],
+                                            chatMessageListState[chatMessageIndex] = {
+                                                ...chatMessageListState[chatMessageIndex],
                                                 assistantNoReason: this.responseNoReason.trim()
                                             };
 
@@ -334,12 +363,10 @@ export default class Chat implements Icontroller {
                                                 output: dataItem.output
                                             };
 
-                                            const index = this.variableObject.chatMessageList.state.length - 1;
-
                                             const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
-                                            chatMessageListState[index] = {
-                                                ...chatMessageListState[index],
+                                            chatMessageListState[chatMessageIndex] = {
+                                                ...chatMessageListState[chatMessageIndex],
                                                 mcpTool: this.responseMcpTool
                                             };
 
@@ -353,8 +380,6 @@ export default class Chat implements Icontroller {
                                         const dataResponse = dataTrimParse.response.message;
 
                                         if (dataResponse) {
-                                            const index = this.variableObject.chatMessageList.state.length - 1;
-
                                             if (helperSrc.isJson(dataResponse)) {
                                                 const toolResponse = JSON.parse(dataResponse) as modelMcp.IapiToolResponse;
 
@@ -372,8 +397,8 @@ export default class Chat implements Icontroller {
 
                                                     const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
-                                                    chatMessageListState[index] = {
-                                                        ...chatMessageListState[index],
+                                                    chatMessageListState[chatMessageIndex] = {
+                                                        ...chatMessageListState[chatMessageIndex],
                                                         assistantNoReason: resultList[0]
                                                     };
 
@@ -383,16 +408,14 @@ export default class Chat implements Icontroller {
                                                     const parser = parserList[0];
 
                                                     if (Object.keys(parser).length > 0) {
-                                                        this.fileList[parser.fileName] = {
-                                                            pageNumber: parser.terminalExecution
-                                                        };
+                                                        this.fileList[parser.fileName] = { pageNumber: parser.terminalExecution };
 
                                                         await this.openWindowDocument();
 
                                                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
-                                                        chatMessageListState[index] = {
-                                                            ...chatMessageListState[index],
+                                                        chatMessageListState[chatMessageIndex] = {
+                                                            ...chatMessageListState[chatMessageIndex],
                                                             assistantNoReason: "Document opened."
                                                         };
 
@@ -400,30 +423,59 @@ export default class Chat implements Icontroller {
                                                     } else {
                                                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
-                                                        chatMessageListState[index] = {
-                                                            ...chatMessageListState[index],
+                                                        chatMessageListState[chatMessageIndex] = {
+                                                            ...chatMessageListState[chatMessageIndex],
                                                             assistantNoReason: "Document not found."
                                                         };
 
                                                         this.variableObject.chatMessageList.state = chatMessageListState;
                                                     }
                                                 } else if (toolResponse.name === "rag_search") {
-                                                    const citationList = toolResponse.resultList as modelMcp.IragSearch[];
+                                                    const ragSearchList = toolResponse.resultList as modelMcp.IragSearch[];
+                                                    const ragSearch = ragSearchList[0];
+                                                    const citationList = ragSearch.citationList ?? [];
+                                                    const relationList = ragSearch.relationList ?? [];
 
                                                     if (citationList.length > 0) {
                                                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
-                                                        chatMessageListState[index] = {
-                                                            ...chatMessageListState[index],
-                                                            citation: citationList
+                                                        chatMessageListState[chatMessageIndex] = {
+                                                            ...chatMessageListState[chatMessageIndex],
+                                                            ragCitation: citationList,
+                                                            ragCitationTabIndex: 0,
+                                                            ragRelationList: relationList.length > 0 ? relationList : []
                                                         };
 
                                                         this.variableObject.chatMessageList.state = chatMessageListState;
 
                                                         this.variableObject.systemMode.state = "chat";
 
+                                                        const citationContextList: string[] = [];
+
+                                                        for (let a = 0; a < Math.min(5, citationList.length); a++) {
+                                                            citationContextList.push(
+                                                                `[${citationList[a].fileName}]: ${citationList[a].citation.slice(0, 300)}`
+                                                            );
+                                                        }
+
+                                                        const citationContext = citationContextList.join("\n---\n");
+
+                                                        let relationContext = "";
+
+                                                        if (relationList.length > 0) {
+                                                            const relationContextList: string[] = [];
+
+                                                            for (let a = 0; a < Math.min(20, relationList.length); a++) {
+                                                                relationContextList.push(
+                                                                    `${relationList[a].source} ${relationList[a].relation} ${relationList[a].target}`
+                                                                );
+                                                            }
+
+                                                            relationContext = `\n\nRELATION:\n${relationContextList.join("\n")}`;
+                                                        }
+
                                                         this.apiResponse(
-                                                            `CITATION:\n${JSON.stringify(toolResponse.resultList)}\n\nText: ${userPrompt}`,
+                                                            `CITATION:\n${citationContext}${relationContext}\n\nText: ${userPrompt}`,
                                                             "rag"
                                                         );
 
@@ -431,8 +483,8 @@ export default class Chat implements Icontroller {
                                                     } else {
                                                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
-                                                        chatMessageListState[index] = {
-                                                            ...chatMessageListState[index],
+                                                        chatMessageListState[chatMessageIndex] = {
+                                                            ...chatMessageListState[chatMessageIndex],
                                                             assistantNoReason: "No citations found."
                                                         };
 
@@ -443,9 +495,9 @@ export default class Chat implements Icontroller {
 
                                                     const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
-                                                    chatMessageListState[index] = {
-                                                        ...chatMessageListState[index],
-                                                        scanner: resultList[0]
+                                                    chatMessageListState[chatMessageIndex] = {
+                                                        ...chatMessageListState[chatMessageIndex],
+                                                        securityScanner: resultList[0]
                                                     };
 
                                                     this.variableObject.chatMessageList.state = chatMessageListState;
@@ -466,12 +518,10 @@ export default class Chat implements Icontroller {
                     this.resetModelResponse();
 
                     if (error.toString().toLowerCase() === "request cancelled") {
-                        const idx = this.variableObject.chatMessageList.state.length - 1;
-
                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
-                        chatMessageListState[idx] = {
-                            ...chatMessageListState[idx],
+                        chatMessageListState[chatMessageIndex] = {
+                            ...chatMessageListState[chatMessageIndex],
                             assistantNoReason: "Stopped by user."
                         };
 
@@ -483,6 +533,17 @@ export default class Chat implements Icontroller {
 
             this.hookObject.elementInputMessageSend.value = "";
         }
+    };
+
+    private onClickCitationTab = (messageIndex: number, tabIndex: number): void => {
+        const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+        chatMessageListState[messageIndex] = {
+            ...chatMessageListState[messageIndex],
+            ragCitationTabIndex: tabIndex
+        };
+
+        this.variableObject.chatMessageList.state = chatMessageListState;
     };
 
     autoscroll = (isAuto: boolean): void => {
@@ -526,6 +587,8 @@ export default class Chat implements Icontroller {
         this.variableObject = variableBind(
             {
                 isMessageSent: false,
+                toastMessage: variableLink<string>("Toast"),
+                toastType: variableLink<string>("Toast"),
                 chatMessageList: [],
                 chatHistoryList: [],
                 systemMode: "chat",
@@ -539,7 +602,8 @@ export default class Chat implements Icontroller {
 
         this.methodObject = {
             onClickButtonMessageSend: this.onClickButtonMessageSend,
-            onClickSourceLink: this.onClickSourceLink
+            onClickSourceLink: this.onClickSourceLink,
+            onClickCitationTab: this.onClickCitationTab
         };
     }
 

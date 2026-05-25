@@ -24,9 +24,20 @@ export interface Iagent {
     skill: string;
 }
 
-export interface IragSearch {
+export interface IragCitation {
     fileName: string;
     citation: string;
+}
+
+export interface IragRelation {
+    source: string;
+    relation: string;
+    target: string;
+}
+
+export interface IragSearch {
+    citationList: IragCitation[];
+    relationList: IragRelation[];
 }
 
 export interface IdocumentParser {

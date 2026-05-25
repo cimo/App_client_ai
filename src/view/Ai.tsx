@@ -42,6 +42,7 @@ const viewAi = (variableObject: modelAi.Ivariable, methodObject: modelAi.Imethod
                     </div>
                 </div>
             </div>
+            <aside jsmvcfw-controllerName="Toast" />
             <aside jsmvcfw-controllerName="Chat" view="message" />
             <aside jsmvcfw-controllerName="Mcp" view="tool" />
             <aside jsmvcfw-controllerName="Chat" view="input" />

@@ -1,0 +1,40 @@
+@use "../setting/color.scss" as color;
+@use "../setting/parameter.scss" as parameter;
+
+.view_toast {
+    flex-shrink: 0;
+
+    .container_toast {
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        justify-content: center;
+        align-items: center;
+        justify-items: center;
+        gap: 8px;
+        padding: 10px 25px;
+
+        .cls_icon {
+            font-size: parameter.$fontSizeNormalPlus !important;
+        }
+    }
+}
+
+:root[data-theme="dark"] {
+    .container_toast {
+        &.warning {
+            background-color: color.$darkToastWarningBackground;
+            color: color.$darkToastWarningText;
+        }
+
+        &.error {
+            background-color: color.$darkToastErrorBackground;
+            color: color.$darkToastErrorText;
+        }
+
+        &.success {
+            background-color: color.$darkToastSuccessBackground;
+            color: color.$darkToastSuccessText;
+        }
+    }
+}

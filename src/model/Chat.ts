@@ -22,8 +22,10 @@ export interface IchatMessage {
     assistantReason: string;
     assistantNoReason: string;
     mcpTool?: ImcpTool;
-    citation: modelMcp.IragSearch[] | undefined;
-    scanner: string;
+    ragCitation: modelMcp.IragCitation[] | undefined;
+    ragCitationTabIndex: number;
+    ragRelationList: modelMcp.IragRelation[] | undefined;
+    securityScanner: string;
 }
 
 export interface Ifile {
@@ -47,6 +49,8 @@ export interface IapiResponse {
 
 export interface Ivariable {
     isMessageSent: IvariableBind<boolean>;
+    toastMessage: IvariableBind<string>;
+    toastType: IvariableBind<string>;
     chatMessageList: IvariableBind<IchatMessage[]>;
     chatHistoryList: IvariableBind<IchatInput[]>;
     systemMode: IvariableBind<string>;
@@ -59,6 +63,7 @@ export interface Ivariable {
 export interface Imethod {
     onClickButtonMessageSend: () => void;
     onClickSourceLink: (event: Event, fileName: string, citation: string) => void;
+    onClickCitationTab: (messageIndex: number, tabIndex: number) => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {
