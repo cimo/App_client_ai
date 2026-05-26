@@ -100,8 +100,12 @@ export const generateUniqueId = (): string => {
     return `${timestamp}-${randomPart}`;
 };
 
-export const readMimeType = (value: Uint8Array | string): modelHelperSrc.ImimeType => {
+export const readMimeType = (value: Uint8Array | string | undefined): modelHelperSrc.ImimeType => {
     let result = { content: "", extension: "", type: "" };
+
+    if (value === undefined || value === null) {
+        return result;
+    }
 
     let toHex = undefined;
     let toLatin1 = undefined;
