@@ -1,6 +1,7 @@
 import { Icontroller, IvirtualNode, variableBind, variableLink, IvariableEffect } from "@cimo/jsmvcfw/dist/src/Main.js";
 import { fetch } from "@tauri-apps/plugin-http";
 import { listen, emitTo } from "@tauri-apps/api/event";
+import { getAllWindows } from "@tauri-apps/api/window";
 
 // Source
 import * as session from "../Session";
@@ -96,11 +97,20 @@ export default class Chat implements Icontroller {
         if (fileNameList.length > 0) {
             const fileName = fileNameList[0];
 
+            const windowLabel = helperSrc.appWindowLabelUnique("document", fileName);
+            const windowList = await getAllWindows();
+
             await helperSrc.openWindow("document", fileName, "#/document");
 
-            const windowLabel = helperSrc.appWindowLabelUnique("document", fileName);
+            for (const window of windowList) {
+                if (window.label === windowLabel) {
+                    await emitTo(windowLabel, "document-content-update", [fileName, "-1"]);
 
-            await emitTo(windowLabel, "document-content-update", [fileName, "-1"]);
+                    delete this.fileList[fileName];
+
+                    break;
+                }
+            }
         }
     };
 
@@ -427,7 +437,9 @@ export default class Chat implements Icontroller {
                                                     const parser = parserList[0];
 
                                                     if (Object.keys(parser).length > 0) {
-                                                        this.fileList[parser.fileName] = { pageNumber: parser.terminalExecution };
+                                                        this.fileList[parser.fileName] = {
+                                                            pageNumber: parser.terminalExecution
+                                                        };
 
                                                         await this.openWindowDocument();
 

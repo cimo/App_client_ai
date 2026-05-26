@@ -11,14 +11,17 @@ export interface Iresult {
 }
 
 export interface Ivariable {
-    htmlContent: IvariableBind<string>;
-    imageContent: IvariableBind<string>;
+    isLoadingWindow: IvariableBind<boolean>;
+    isLoadingPage: IvariableBind<boolean>;
+    isPageExist: IvariableBind<boolean>;
+    contentHtml: IvariableBind<string>;
+    contentImage: IvariableBind<string>;
     pageNumber: IvariableBind<number>;
     pageTotal: IvariableBind<number>;
 }
 
 export interface Imethod {
-    onInputChangePage: () => void;
+    onInputChangePage: (event: KeyboardEvent) => void;
     onClickChangePage: (pageDifference: number) => void;
 }
 

@@ -32,36 +32,55 @@ export default class Document implements Icontroller {
             this.hookObject.elementInputPageNumber.value = newPage.toString();
 
             if (newPage !== currentPage) {
-                this.readHtmlContent(newPage);
+                this.readContentData(newPage);
             }
         }
     };
 
-    private onInputChangePage = (): void => {
+    private onInputChangePage = (event: KeyboardEvent): void => {
         const inputValue = this.hookObject.elementInputPageNumber.value.replace(/\D+/g, "");
         this.hookObject.elementInputPageNumber.value = inputValue;
 
-        const pageNumber = parseInt(inputValue);
+        if (event.key === "Enter") {
+            const pageNumber = parseInt(inputValue);
 
-        if (!isNaN(pageNumber)) {
-            this.readHtmlContent(pageNumber);
+            if (!isNaN(pageNumber)) {
+                this.readContentData(pageNumber);
+            }
         }
     };
 
-    private readHtmlContent = async (pageNumber: number): Promise<void> => {
+    private readContentData = async (pageNumber: number): Promise<void> => {
+        this.variableObject.isLoadingPage.state = true;
+
         const appWindowTitle = await this.appWindow.title();
+
+        if (pageNumber < 1) {
+            this.variableObject.isPageExist.state = false;
+            this.variableObject.isLoadingPage.state = false;
+
+            return;
+        } else if (pageNumber > this.variableObject.pageTotal.state) {
+            this.variableObject.isPageExist.state = false;
+            this.variableObject.isLoadingPage.state = false;
+
+            return;
+        }
 
         const result = await this.controllerMcp.apiDocumentRead(appWindowTitle, pageNumber);
 
         if (result) {
-            if (helperSrc.filterMimeType(appWindowTitle) === "image") {
-                this.variableObject.imageContent.state = result.fileContent;
+            if (helperSrc.readMimeType(appWindowTitle).type === "image") {
+                this.variableObject.contentImage.state = result.fileContent;
             } else {
-                this.variableObject.htmlContent.state = window.atob(result.fileContent);
+                this.variableObject.contentHtml.state = window.atob(result.fileContent);
             }
 
             this.variableObject.pageTotal.state = result.pageTotal;
             this.variableObject.pageNumber.state = pageNumber;
+            this.variableObject.isPageExist.state = true;
+            this.variableObject.isLoadingPage.state = false;
+            this.variableObject.isLoadingWindow.state = false;
         }
     };
 
@@ -76,7 +95,7 @@ export default class Document implements Icontroller {
         this.appWindow.title().then(async (appWindowTitle) => {
             const interval = setInterval(async () => {
                 if (Object.keys(this.controllerMcp.getVariableObject()).length > 0) {
-                    await this.readHtmlContent(1);
+                    await this.readContentData(1);
 
                     await emitTo("main", "document-init", { fileName: appWindowTitle });
 
@@ -91,8 +110,11 @@ export default class Document implements Icontroller {
     variable(): void {
         this.variableObject = variableBind(
             {
-                htmlContent: "",
-                imageContent: "",
+                isLoadingWindow: true,
+                isLoadingPage: true,
+                isPageExist: true,
+                contentHtml: "",
+                contentImage: "",
                 pageNumber: 1,
                 pageTotal: 1
             },
@@ -118,10 +140,11 @@ export default class Document implements Icontroller {
             await listen<string[]>("document-content-update", async (event) => {
                 this.appWindow.title().then(async (appWindowTitle) => {
                     const fileName = event.payload[0];
-                    const pageNumber = parseInt(event.payload[1]);
+                    let pageNumber = parseInt(event.payload[1]);
+                    pageNumber = isNaN(pageNumber) ? 1 : pageNumber;
 
                     if (fileName === appWindowTitle) {
-                        await this.readHtmlContent(pageNumber === -1 ? this.variableObject.pageNumber.state : pageNumber);
+                        await this.readContentData(pageNumber === -1 ? this.variableObject.pageNumber.state : pageNumber);
                     }
                 });
             });

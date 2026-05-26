@@ -1,5 +1,5 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind, variableLink } from "@cimo/jsmvcfw/dist/src/Main.js";
-import { getCurrentWindow, CloseRequestedEvent, type Window } from "@tauri-apps/api/window";
+import { getCurrentWindow, CloseRequestedEvent, type Window, getAllWindows } from "@tauri-apps/api/window";
 //import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
@@ -99,6 +99,14 @@ export default class Index implements Icontroller {
             this.appIsClosing = true;
 
             if (this.appWindow.label === "main") {
+                const windowList = await getAllWindows();
+
+                for (const window of windowList) {
+                    if (window.label !== "main") {
+                        await window.close();
+                    }
+                }
+
                 await this.controllerAi.apiLogout();
                 await this.controllerMcp.apiLogout();
             }

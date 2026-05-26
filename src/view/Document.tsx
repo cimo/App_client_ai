@@ -7,40 +7,81 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
     return (
         <div class="view_document" jsmvcfw-controllerName="Document">
             <aside jsmvcfw-controllerName="Mcp" />
-            <div class="file_container">
+            <div class="main_container">
                 {(() => {
                     const result: IvirtualNode[] = [];
 
-                    if (variableObject.htmlContent.state !== "") {
+                    if (variableObject.isLoadingWindow.state) {
+                        result.push(
+                            <div key="0" class="over_container">
+                                <div>
+                                    <i class="cls_icon">update</i>
+                                    <p>Loading...</p>
+                                </div>
+                            </div>
+                        );
+                    } else {
                         result.push(
                             <>
-                                <div>
-                                    <p class="page_container">
-                                        <i class="cls_icon" onClick={() => methodObject.onClickChangePage(-1)}>
-                                            chevron_left
-                                        </i>
-                                        <input
-                                            type="text"
-                                            inputmode="numeric"
-                                            pattern="[0-9]*"
-                                            value={variableObject.pageNumber.state}
-                                            onInput={() => {
-                                                methodObject.onInputChangePage();
-                                            }}
-                                            jsmvcfw-elementHookName="elementInputPageNumber"
-                                        />
-                                        <span>/</span>
-                                        <span class="page_total">{variableObject.pageTotal.state}</span>
-                                        <i class="cls_icon" onClick={() => methodObject.onClickChangePage(1)}>
-                                            chevron_right
-                                        </i>
-                                    </p>
+                                <div key="1" class="pagination_container">
+                                    <i class="cls_icon" onClick={() => methodObject.onClickChangePage(-1)}>
+                                        chevron_left
+                                    </i>
+                                    <input
+                                        type="text"
+                                        inputmode="numeric"
+                                        pattern="[0-9]*"
+                                        value={variableObject.pageNumber.state}
+                                        onKeyUp={(event: KeyboardEvent) => {
+                                            methodObject.onInputChangePage(event);
+                                        }}
+                                        jsmvcfw-elementHookName="elementInputPageNumber"
+                                    />
+                                    <span>/</span>
+                                    <span class="page_total">{variableObject.pageTotal.state}</span>
+                                    <i class="cls_icon" onClick={() => methodObject.onClickChangePage(1)}>
+                                        chevron_right
+                                    </i>
                                 </div>
-                                <iframe class="html" srcdoc={variableObject.htmlContent.state} sandbox="allow-scripts"></iframe>
+                                <div class="data_container">
+                                    {(() => {
+                                        const result: IvirtualNode[] = [];
+
+                                        if (variableObject.isLoadingPage.state) {
+                                            result.push(
+                                                <div class="over_container">
+                                                    <div>
+                                                        <i class="cls_icon">update</i>
+                                                        <p>Loading...</p>
+                                                    </div>
+                                                </div>
+                                            );
+
+                                            return result;
+                                        } else if (!variableObject.isPageExist.state) {
+                                            result.push(
+                                                <div class="over_container">
+                                                    <div>
+                                                        <i class="cls_icon">error</i>
+                                                        <p>Page does not exist</p>
+                                                    </div>
+                                                </div>
+                                            );
+
+                                            return result;
+                                        }
+
+                                        if (variableObject.contentHtml.state !== "") {
+                                            result.push(<iframe srcdoc={variableObject.contentHtml.state} sandbox="allow-scripts"></iframe>);
+                                        } else if (variableObject.contentImage.state !== "") {
+                                            result.push(<img src={`data:image/png;base64,${variableObject.contentImage.state}`} />);
+                                        }
+
+                                        return result;
+                                    })()}
+                                </div>
                             </>
                         );
-                    } else if (variableObject.imageContent.state !== "") {
-                        result.push(<img src={`data:image/png;base64,${variableObject.imageContent.state}`} />);
                     }
 
                     return result;

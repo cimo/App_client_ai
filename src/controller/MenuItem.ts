@@ -26,7 +26,9 @@ export default class MenuItem implements Icontroller {
         );
     };
 
-    private onClickMenuDocument = (): void => {
+    private onClickMenuDocument = (event: Event): void => {
+        event.stopPropagation();
+
         this.controllerMcp.apiDocumentList().then(() => {
             this.variableObject.isMenuItemDocument.state = !this.variableObject.isMenuItemDocument.state;
             this.variableObject.isMenuItemTool.state = false;
@@ -45,13 +47,19 @@ export default class MenuItem implements Icontroller {
         await this.controllerMcp.apiDocumentUpload();
     };
 
-    private onClickDocumentDelete = (event: Event, index: number, fileName: string): void => {
+    private onClickDocumentDelete = async (event: Event, index: number, fileName: string): Promise<void> => {
         event.stopPropagation();
 
-        this.controllerMcp.apiDocumentDelete(index, fileName);
+        const isConfirm = await helperSrc.confirmDialog(`Are you sure you want to delete:\n"${fileName}"?`, "", "warning", "Delete", "Cancel");
+
+        if (isConfirm) {
+            this.controllerMcp.apiDocumentDelete(index, fileName);
+        }
     };
 
-    private onClickMenuSkill = (): void => {
+    private onClickMenuSkill = (event: Event): void => {
+        event.stopPropagation();
+
         this.controllerMcp.apiSkillList().then(() => {
             this.variableObject.isMenuItemDocument.state = false;
             this.variableObject.isMenuItemTool.state = false;
@@ -70,10 +78,41 @@ export default class MenuItem implements Icontroller {
         await this.controllerMcp.apiSkillUpload();
     };
 
-    private onClickSkillDelete = (event: Event, index: number, fileName: string): void => {
+    private onClickSkillDelete = async (event: Event, index: number, fileName: string): Promise<void> => {
         event.stopPropagation();
 
-        this.controllerMcp.apiSkillDelete(index, fileName);
+        await this.controllerMcp.apiAgentList();
+
+        let agentList = [];
+        let agentNameList = [];
+
+        for (let a = 0; a < this.variableObject.agentList.state.length; a++) {
+            if (this.variableObject.agentList.state[a].skill === fileName) {
+                agentList.push(this.variableObject.agentList.state[a]);
+                agentNameList.push(this.variableObject.agentList.state[a].name);
+            }
+        }
+
+        let confirmMessage = `Are you sure you want to delete:\n"${fileName}"?`;
+
+        if (agentList.length > 0) {
+            confirmMessage =
+                `Skill is being used by the agent: ${agentNameList.join(", ")}.\n` +
+                "If you delete this skill, the skill will be removed in the agent.\n" +
+                confirmMessage;
+        }
+
+        const isConfirm = await helperSrc.confirmDialog(confirmMessage, "", "warning", "Delete", "Cancel");
+
+        if (isConfirm) {
+            this.controllerMcp.apiSkillDelete(index, fileName);
+
+            for (const agent of agentList) {
+                agent.skill = "";
+
+                this.controllerMcp.apiAgentUpdate(agent);
+            }
+        }
     };
 
     private onClickSelectSkill = (event: Event): void => {
@@ -101,7 +140,9 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isAgentSelectSkill.state = false;
     };
 
-    private onClickMenuTool = (): void => {
+    private onClickMenuTool = (event: Event): void => {
+        event.stopPropagation();
+
         this.variableObject.isMenuItemDocument.state = false;
         this.variableObject.isMenuItemTool.state = !this.variableObject.isMenuItemTool.state;
         this.variableObject.isMenuItemTask.state = false;
@@ -132,7 +173,9 @@ export default class MenuItem implements Icontroller {
         this.variableObject.systemMode.state = "tool-call";
     };
 
-    private onClickMenuTask = (): void => {
+    private onClickMenuTask = (event: Event): void => {
+        event.stopPropagation();
+
         this.variableObject.isMenuItemDocument.state = false;
         this.variableObject.isMenuItemTool.state = false;
         this.variableObject.isMenuItemTask.state = !this.variableObject.isMenuItemTask.state;
@@ -163,7 +206,9 @@ export default class MenuItem implements Icontroller {
         this.variableObject.systemMode.state = "task-call";
     };
 
-    private onClickMenuAgent = (): void => {
+    private onClickMenuAgent = (event: Event): void => {
+        event.stopPropagation();
+
         this.controllerMcp.apiAgentList().then(() => {
             this.variableObject.isMenuItemDocument.state = false;
             this.variableObject.isMenuItemTool.state = false;
@@ -204,10 +249,14 @@ export default class MenuItem implements Icontroller {
         this.variableObject.agentFormResult.state = "";
     };
 
-    private onClickAgentDelete = (event: Event, index: number, id: number): void => {
+    private onClickAgentDelete = async (event: Event, index: number, id: number, name: string): Promise<void> => {
         event.stopPropagation();
 
-        this.controllerMcp.apiAgentDelete(index, id);
+        const isConfirm = await helperSrc.confirmDialog(`Are you sure you want to delete:\n"${name}"?`, "", "warning", "Delete", "Cancel");
+
+        if (isConfirm) {
+            this.controllerMcp.apiAgentDelete(index, id);
+        }
     };
 
     private onClickAgentSave = (event: Event): void => {
@@ -257,17 +306,27 @@ export default class MenuItem implements Icontroller {
             }
         }
 
-        const skillContent = await this.controllerMcp.apiSkillRead(this.variableObject.agentSelected.state.skill);
+        if (this.variableObject.agentSelected.state.skill !== "") {
+            const skillContent = await this.controllerMcp.apiSkillRead(this.variableObject.agentSelected.state.skill);
 
-        if (skillContent) {
-            this.variableObject.agentInputSystem.state = window.atob(skillContent);
-
-            this.variableObject.systemMode.state = "agent-skill";
+            if (skillContent) {
+                this.variableObject.agentInputSystem.state = window.atob(skillContent);
+            }
+        } else {
+            this.variableObject.agentInputSystem.state = "";
         }
+
+        this.variableObject.systemMode.state = "agent-skill";
     };
 
     private openDocument = async (title: string): Promise<void> => {
         await helperSrc.openWindow("document", title, "#/document");
+    };
+
+    private fileExtension = (fileName: string): string => {
+        const mimeType = helperSrc.readMimeType(fileName);
+
+        return mimeType.extension;
     };
 
     setControllerMcp(controller: Mcp): void {
@@ -291,11 +350,11 @@ export default class MenuItem implements Icontroller {
                 isMenuItemTask: false,
                 isMenuItemAgent: false,
                 isMenuItemSkill: false,
-                documentList: variableLink<string[]>("Mcp"),
+                documentList: variableLink<modelMcp.IfileDetail[]>("Mcp"),
                 isDocumentUploading: false,
                 documentUploadStatusList: [],
                 documentEmbeddingStatusList: [],
-                skillList: variableLink<string[]>("Mcp"),
+                skillList: variableLink<modelMcp.IfileDetail[]>("Mcp"),
                 isSkillUploading: false,
                 skillUploadStatusList: [],
                 toolList: variableLink<modelMcp.Itool[]>("Mcp"),
@@ -334,7 +393,8 @@ export default class MenuItem implements Icontroller {
             onClickAgentSave: this.onClickAgentSave,
             onClickAgentCancel: this.onClickAgentCancel,
             onClickAgent: this.onClickAgent,
-            openDocument: this.openDocument
+            openDocument: this.openDocument,
+            fileExtension: this.fileExtension
         };
     }
 

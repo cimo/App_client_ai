@@ -254,7 +254,7 @@ export default class Mcp implements Icontroller {
 
                             this.apiDocumentList();
 
-                            if (helperSrc.filterMimeType(resultFile.fileName) !== "image" && resultFile.status === "Success") {
+                            if (helperSrc.readMimeType(resultFile.fileName).type !== "image" && resultFile.status === "Success") {
                                 this.variableObject.documentEmbeddingStatusList.state.push({ fileName: resultFile.fileName, status: "Ongoing" });
 
                                 this.startEmbeddingCheck(this.variableObject.documentEmbeddingStatusList.state.length - 1);
@@ -579,6 +579,26 @@ export default class Mcp implements Icontroller {
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
                 this.variableObject.agentList.state = JSON.parse(resultJson.response.stdout);
+
+                if (Object.keys(this.variableObject.agentSelected.state).length > 0) {
+                    for (const agent of this.variableObject.agentList.state) {
+                        if (this.variableObject.agentSelected.state.id === agent.id) {
+                            this.variableObject.agentSelected.state = agent;
+
+                            if (agent.skill !== "") {
+                                const skillContent = await this.apiSkillRead(this.variableObject.agentSelected.state.skill);
+
+                                if (skillContent) {
+                                    this.variableObject.agentInputSystem.state = window.atob(skillContent);
+                                }
+                            } else {
+                                this.variableObject.agentInputSystem.state = "";
+                            }
+
+                            break;
+                        }
+                    }
+                }
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiAgentList() - fetch() - catch()", error.message);
@@ -640,6 +660,7 @@ export default class Mcp implements Icontroller {
                 skillUploadStatusList: variableLink<modelMcp.IfileStatus[]>("MenuItem"),
                 agentForm: variableLink<modelMcp.Iagent>("MenuItem"),
                 agentFormResult: variableLink<string>("MenuItem"),
+                agentInputSystem: variableLink<string>("Chat"),
                 systemMode: variableLink<string>("Chat"),
                 chatMessageList: variableLink<modelChat.IchatMessage[]>("Chat")
             },

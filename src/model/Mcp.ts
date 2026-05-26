@@ -51,6 +51,12 @@ export interface IfileStatus {
     status: string;
 }
 
+export interface IfileDetail {
+    fileName: string;
+    dateModified: string;
+    size: string;
+}
+
 export interface IapiToolResponse {
     name: string;
     resultList: [];
@@ -64,15 +70,16 @@ export interface Ivariable {
     taskSelected: IvariableBind<Itask>;
     agentList: IvariableBind<Iagent[]>;
     agentSelected: IvariableBind<Iagent>;
-    documentList: IvariableBind<string[]>;
+    documentList: IvariableBind<IfileDetail[]>;
     isDocumentUploading: IvariableBind<boolean>;
     documentUploadStatusList: IvariableBind<IfileStatus[]>;
     documentEmbeddingStatusList: IvariableBind<IfileStatus[]>;
-    skillList: IvariableBind<string[]>;
+    skillList: IvariableBind<IfileDetail[]>;
     isSkillUploading: IvariableBind<boolean>;
     skillUploadStatusList: IvariableBind<IfileStatus[]>;
     agentForm: IvariableBind<Iagent>;
     agentFormResult: IvariableBind<string>;
+    agentInputSystem: IvariableBind<string>;
     systemMode: IvariableBind<string>;
     chatMessageList: IvariableBind<modelChat.IchatMessage[]>;
 }

@@ -9,11 +9,11 @@ export interface Ivariable {
     isMenuItemTask: IvariableBind<boolean>;
     isMenuItemAgent: IvariableBind<boolean>;
     isMenuItemSkill: IvariableBind<boolean>;
-    documentList: IvariableBind<string[]>;
+    documentList: IvariableBind<modelMcp.IfileDetail[]>;
     isDocumentUploading: IvariableBind<boolean>;
     documentUploadStatusList: IvariableBind<modelMcp.IfileStatus[]>;
     documentEmbeddingStatusList: IvariableBind<modelMcp.IfileStatus[]>;
-    skillList: IvariableBind<string[]>;
+    skillList: IvariableBind<modelMcp.IfileDetail[]>;
     isSkillUploading: IvariableBind<boolean>;
     skillUploadStatusList: IvariableBind<modelMcp.IfileStatus[]>;
     toolList: IvariableBind<modelMcp.Itool[]>;
@@ -30,27 +30,28 @@ export interface Ivariable {
 }
 
 export interface Imethod {
-    onClickMenuDocument: () => void;
+    onClickMenuDocument: (event: Event) => void;
     onClickChipDocumentUpload: () => void;
     onClickDocumentDelete: (event: Event, index: number, fileName: string) => void;
-    onClickMenuSkill: () => void;
+    onClickMenuSkill: (event: Event) => void;
     onClickChipSkillUpload: () => void;
     onClickSkillDelete: (event: Event, index: number, fileName: string) => void;
     onClickSelectSkill: (event: Event) => void;
     onClickSkillItem: (event: Event, fileName: string) => void;
     onClickSelectSkillCancel: (event: Event) => void;
-    onClickMenuTool: () => void;
+    onClickMenuTool: (event: Event) => void;
     onClickTool: (name: string) => void;
-    onClickMenuTask: () => void;
+    onClickMenuTask: (event: Event) => void;
     onClickTask: (name: string) => void;
-    onClickMenuAgent: () => void;
+    onClickMenuAgent: (event: Event) => void;
     onClickAgentCreate: (event: Event) => void;
     onClickAgentEdit: (event: Event, id: number) => void;
-    onClickAgentDelete: (event: Event, index: number, id: number) => void;
+    onClickAgentDelete: (event: Event, index: number, id: number, name: string) => void;
     onClickAgentSave: (event: Event) => void;
     onClickAgentCancel: (event: Event) => void;
     onClickAgent: (id: number) => void;
     openDocument: (title: string) => void;
+    fileExtension: (fileName: string) => string;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

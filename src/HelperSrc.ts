@@ -1,5 +1,6 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { emitTo, listen } from "@tauri-apps/api/event";
+import { confirm } from "@tauri-apps/plugin-dialog";
 
 // Source
 import * as modelHelperSrc from "./model/HelperSrc";
@@ -99,64 +100,118 @@ export const generateUniqueId = (): string => {
     return `${timestamp}-${randomPart}`;
 };
 
-export const readMimeType = (byteList: Uint8Array): modelHelperSrc.ImimeType => {
-    const toHex = (byteList: Uint8Array) => {
-        let out = "";
-        for (let i = 0; i < byteList.length; i++) {
-            out += byteList[i].toString(16).padStart(2, "0");
-        }
-        return out;
-    };
+export const readMimeType = (value: Uint8Array | string): modelHelperSrc.ImimeType => {
+    let result = { content: "", extension: "", type: "" };
 
-    const toLatin1 = (byteList: Uint8Array) => {
-        const chunk = 0x8000;
+    let toHex = undefined;
+    let toLatin1 = undefined;
+    let extension = undefined;
 
-        let result = "";
+    if (value instanceof Uint8Array) {
+        toHex = (value: Uint8Array) => {
+            let out = "";
 
-        for (let a = 0; a < byteList.length; a += chunk) {
-            const subChunk = byteList.subarray(a, a + chunk);
-
-            result += String.fromCharCode(...subChunk);
-        }
-
-        return result;
-    };
-
-    if (toHex(byteList.subarray(0, 3)) === "ffd8ff") {
-        return { content: "image/jpeg", extension: "jpg" };
-    } else if (toHex(byteList.subarray(0, 8)) === "89504e470d0a1a0a") {
-        return { content: "image/png", extension: "png" };
-    } else if (toHex(byteList.subarray(0, 4)) === "49492a00" || toHex(byteList.subarray(0, 4)) === "4d4d002a") {
-        return { content: "image/tiff", extension: "tiff" };
-    } else if (toHex(byteList.subarray(0, 4)) === "25504446") {
-        return { content: "application/pdf", extension: "pdf" };
-    } else if (toHex(byteList.subarray(0, 2)) === "504b") {
-        const headBytes = byteList.subarray(0, Math.min(byteList.length, 64 * 1024));
-        const head = toLatin1(headBytes);
-
-        if (head.includes("word/")) {
-            return {
-                content: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                extension: "docx"
-            };
-        } else if (head.includes("xl/")) {
-            return {
-                content: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                extension: "xlsx"
-            };
-        } else if (head.includes("ppt/")) {
-            return {
-                content: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                extension: "pptx"
-            };
-        } else {
-            if (toHex(byteList.subarray(0, 4)) === "504b0304") {
-                return { content: "application/zip", extension: "zip" };
+            for (let a = 0; a < value.length; a++) {
+                out += value[a].toString(16).padStart(2, "0");
             }
+
+            return out;
+        };
+
+        toLatin1 = (value: Uint8Array) => {
+            const chunk = 0x8000;
+
+            let result = "";
+
+            for (let a = 0; a < value.length; a += chunk) {
+                const subChunk = value.subarray(a, a + chunk);
+
+                result += String.fromCharCode(...subChunk);
+            }
+
+            return result;
+        };
+    } else {
+        extension = value.toLowerCase().trim().split(".").pop();
+    }
+
+    if ((value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 4)) === "25504446") || extension === "pdf") {
+        result = { content: "application/pdf", extension: "pdf", type: "application" };
+    } else if (
+        (value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 3)) === "ffd8ff") ||
+        extension === "jpg" ||
+        extension === "jpeg"
+    ) {
+        result = { content: "image/jpeg", extension: "jpg", type: "image" };
+    } else if ((value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 8)) === "89504e470d0a1a0a") || extension === "png") {
+        result = { content: "image/png", extension: "png", type: "image" };
+    } else if ((value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 6)) === "474946383761") || extension === "gif") {
+        result = { content: "image/gif", extension: "gif", type: "image" };
+    } else if (
+        (value instanceof Uint8Array &&
+            toHex != undefined &&
+            toHex(value.subarray(0, 4)) === "52494646" &&
+            toHex(value.subarray(8, 12)) === "57454250") ||
+        extension === "webp"
+    ) {
+        result = { content: "image/webp", extension: "webp", type: "image" };
+    } else if ((value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 2)) === "424d") || extension === "bmp") {
+        result = { content: "image/bmp", extension: "bmp", type: "image" };
+    } else if (
+        (value instanceof Uint8Array &&
+            toHex != undefined &&
+            (toHex(value.subarray(0, 4)) === "49492a00" || toHex(value.subarray(0, 4)) === "4d4d002a")) ||
+        extension === "tif" ||
+        extension === "tiff"
+    ) {
+        result = { content: "image/tiff", extension: "tiff", type: "image" };
+    } else if (
+        (value instanceof Uint8Array &&
+            toHex != undefined &&
+            (toHex(value.subarray(0, 4)) === "00000100" || toHex(value.subarray(0, 4)) === "00000200")) ||
+        extension === "ico"
+    ) {
+        result = { content: "image/x-icon", extension: "ico", type: "image" };
+    } else if (extension === "svg" || extension === "svg+xml") {
+        result = { content: "image/svg+xml", extension: "svg", type: "image" };
+    } else if (extension === "avif") {
+        result = { content: "image/avif", extension: "avif", type: "image" };
+    } else {
+        let headByte = undefined;
+        let head = "";
+
+        if (value instanceof Uint8Array && toHex != undefined) {
+            headByte = value.subarray(0, Math.min(value.length, 64 * 1024));
+
+            if (toLatin1 != undefined) {
+                head = toLatin1(headByte);
+            }
+        }
+
+        if (head.includes("word/") || extension === "docx") {
+            result = {
+                content: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                extension: "docx",
+                type: "application"
+            };
+        } else if (head.includes("xl/") || extension === "xlsx") {
+            result = {
+                content: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                extension: "xlsx",
+                type: "application"
+            };
+        } else if (head.includes("ppt/") || extension === "pptx") {
+            result = {
+                content: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                extension: "pptx",
+                type: "application"
+            };
+        } else if ((value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 4)) === "504b0304") || extension === "zip") {
+            result = { content: "application/zip", extension: "zip", type: "application" };
         }
     }
 
-    return { content: "", extension: "" };
+    return result;
 };
 
 export const findElementParent = (element: HTMLElement, className: string): HTMLElement | null => {
@@ -225,38 +280,25 @@ export const openWindow = async (label: string, title: string, route: string): P
         decorations: true,
         resizable: true,
         width: 750,
-        height: 700,
+        height: 1000,
         minWidth: 750,
-        minHeight: 700,
+        minHeight: 1050,
         center: true,
         focus: true
     });
 };
 
-export const filterMimeType = (fileName: string): string => {
-    let result = "";
-
-    const extension = fileName.toLowerCase().trim().split(".").pop() as string;
-    const mimeTypeList = [
-        "image/jpg",
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "image/webp",
-        "image/bmp",
-        "image/tiff",
-        "image/svg+xml",
-        "image/x-icon",
-        "image/avif"
-    ];
-
-    for (const mimeType of mimeTypeList) {
-        const [left, right] = mimeType.toLowerCase().split("/", 2);
-
-        if (extension === right) {
-            result = left;
-        }
-    }
-
-    return result;
+export const confirmDialog = async (
+    message: string,
+    title: string,
+    kind: "info" | "warning" | "error" | undefined,
+    okLabel: string,
+    cancelLabel: string
+): Promise<boolean> => {
+    return await confirm(message, {
+        title,
+        kind,
+        okLabel,
+        cancelLabel
+    });
 };

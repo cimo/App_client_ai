@@ -51,9 +51,33 @@
         justify-items: center;
         flex: 1 1 auto;
         min-height: 0;
+        width: 100%;
+
+        .button_container {
+            display: flex;
+            flex-direction: row;
+            align-content: center;
+            justify-content: center;
+            align-items: center;
+            justify-items: center;
+            padding: 5px 10px;
+            border-radius: 20px;
+            gap: 5px;
+
+            button {
+                width: 100px;
+                margin: 0px !important;
+
+                .cls_icon {
+                    margin-right: 5px !important;
+                }
+            }
+        }
 
         .status_container {
-            margin-bottom: 5px;
+            .cls_icon {
+                margin-bottom: 5px !important;
+            }
 
             details {
                 padding: 5px;
@@ -104,18 +128,6 @@
             }
         }
 
-        .chip {
-            cursor: pointer;
-
-            p {
-                margin-left: 5px !important;
-            }
-        }
-
-        .upload {
-            cursor: pointer;
-        }
-
         > p {
             margin-bottom: 10px;
         }
@@ -139,34 +151,82 @@
             }
         }
 
-        ul {
+        .table_flex {
             display: flex;
-            flex-direction: row;
-            align-content: start;
-            justify-content: start;
-            align-items: center;
-            justify-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            overflow-y: scroll;
-            padding-right: 15px;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-height: 0;
+            width: 100%;
             margin-top: 10px;
 
-            .chip {
-                width: 180px;
+            .list_container {
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow-y: auto;
+            }
 
-                p {
-                    margin-left: 0 !important;
+            .row {
+                display: flex;
+
+                &.header {
+                    .cell {
+                        position: relative;
+                    }
+
+                    .cell + .cell::before {
+                        content: "";
+                        position: absolute;
+                        left: 0;
+                        top: 25%;
+                        bottom: 25%;
+                        width: 1px;
+                    }
+                }
+
+                .cell {
+                    flex: 1 1 0;
+                    align-content: center;
+                    justify-content: center;
+                    align-items: center;
+                    justify-items: center;
+                    padding: 10px;
+                    text-align: center;
+
+                    &.icon_delete {
+                        flex: 0 0 40px;
+
+                        .cls_icon {
+                            cursor: pointer;
+                        }
+                    }
+
+                    &.name {
+                        display: flex;
+                        flex-direction: row;
+                        align-content: center;
+                        justify-content: start;
+                        align-items: center;
+                        justify-items: center;
+                        gap: 10px;
+                        word-break: break-word;
+                        text-align: left !important;
+                        cursor: pointer;
+
+                        .icon {
+                            width: 40px;
+                        }
+                    }
+
+                    &.name.skill {
+                        cursor: default !important;
+                    }
                 }
             }
         }
     }
 
-    .agent_container:has(.agent_form),
-    .agent_container:has(.skill_container) {
-        width: 100%;
-    }
-
+    .tool_container,
+    .task_container,
     .agent_container {
         display: flex;
         flex-direction: column;
@@ -176,19 +236,42 @@
         justify-items: center;
         flex: 1 1 auto;
         min-height: 0;
+        width: 100%;
 
-        > ul {
+        .button_container {
+            display: flex;
+            flex-direction: row;
+            align-content: center;
+            justify-content: center;
+            align-items: center;
+            justify-items: center;
+            padding: 5px 10px;
+            border-radius: 20px;
+            gap: 5px;
+
+            button {
+                width: 100px;
+                margin: 0px !important;
+
+                .cls_icon {
+                    margin-right: 5px !important;
+                }
+            }
+        }
+
+        ul {
             display: flex;
             flex-direction: row;
             align-content: start;
-            justify-content: start;
-            align-items: center;
+            justify-content: center;
+            align-items: stretch;
             justify-items: center;
-            overflow-y: scroll;
             flex-wrap: wrap;
+            flex: 1 1 auto;
             gap: 12px;
+            width: 100%;
             overflow-y: scroll;
-            padding-right: 15px;
+            margin-top: 10px;
 
             .chip {
                 flex-direction: column;
@@ -208,10 +291,17 @@
                     align-items: center;
                     justify-items: center;
                     margin-bottom: 10px;
+                    width: 100%;
 
                     img,
                     .cls_icon {
+                        width: 35px;
+                        height: 35px;
                         margin-right: 5px !important;
+                    }
+
+                    p {
+                        text-align: left !important;
                     }
                 }
 
@@ -228,26 +318,10 @@
                     justify-items: center;
                     margin-top: 10px;
 
-                    .cls_icon {
+                    img {
+                        width: 20px;
+                        height: 20px;
                         margin-right: 5px !important;
-                    }
-                }
-            }
-        }
-
-        .create {
-            cursor: pointer;
-        }
-
-        ul {
-            margin-top: 10px;
-
-            .chip {
-                .top {
-                    width: 100%;
-
-                    p {
-                        text-align: left !important;
                     }
                 }
             }
@@ -278,11 +352,12 @@
                     justify-items: center;
                     margin: 5px 0 20px 0;
 
-                    .chip {
-                        margin-right: 10px;
+                    button {
+                        width: 100px;
+                        margin: 0 10px 0 0 !important;
                     }
 
-                    .skill_selected {
+                    .skill {
                         display: flex;
                         flex-direction: row;
                         align-content: center;
@@ -290,7 +365,9 @@
                         align-items: center;
                         justify-items: center;
 
-                        .cls_icon {
+                        img {
+                            width: 20px;
+                            height: 20px;
                             margin-right: 5px !important;
                         }
                     }
@@ -311,142 +388,9 @@
                 overflow-y: auto;
                 gap: 5px;
 
-                .chip {
+                button {
                     width: 100px;
-                    cursor: pointer;
-                }
-            }
-        }
-
-        > .skill_container {
-            width: 100%;
-
-            .form_button_container {
-                display: flex;
-                flex-direction: row;
-                align-content: center;
-                justify-content: start;
-                align-items: start;
-                justify-items: center;
-                padding: 5px 10px;
-                border-radius: 20px;
-                white-space: break-spaces;
-                word-break: break-word;
-                overflow-y: auto;
-                margin-top: 10px;
-                width: 100%;
-
-                .chip {
-                    width: 100px;
-                    cursor: pointer;
-                }
-            }
-        }
-    }
-
-    .tool_container {
-        display: flex;
-        flex-direction: column;
-        align-content: center;
-        justify-content: start;
-        align-items: start;
-        justify-items: center;
-        flex: 1 1 auto;
-        min-height: 0;
-
-        ul {
-            display: flex;
-            flex-direction: row;
-            align-content: start;
-            justify-content: start;
-            align-items: center;
-            justify-items: center;
-            overflow-y: scroll;
-            flex-wrap: wrap;
-            gap: 12px;
-            overflow-y: scroll;
-            padding-right: 15px;
-
-            .chip {
-                flex-direction: column;
-                align-content: center;
-                justify-content: center;
-                align-items: start;
-                justify-items: center;
-                width: 275px;
-                height: 110px;
-                cursor: pointer;
-
-                .top {
-                    display: flex;
-                    flex-direction: row;
-                    align-content: center;
-                    justify-content: center;
-                    align-items: center;
-                    justify-items: center;
-                    margin-bottom: 10px;
-
-                    img {
-                        margin-right: 5px !important;
-                    }
-                }
-
-                .bottom {
-                    text-align: left;
-                }
-            }
-        }
-    }
-
-    .task_container {
-        display: flex;
-        flex-direction: column;
-        align-content: center;
-        justify-content: start;
-        align-items: start;
-        justify-items: center;
-        flex: 1 1 auto;
-        min-height: 0;
-
-        ul {
-            display: flex;
-            flex-direction: row;
-            align-content: start;
-            justify-content: start;
-            align-items: center;
-            justify-items: center;
-            overflow-y: scroll;
-            flex-wrap: wrap;
-            gap: 12px;
-            overflow-y: scroll;
-            padding-right: 15px;
-
-            .chip {
-                flex-direction: column;
-                align-content: center;
-                justify-content: center;
-                align-items: start;
-                justify-items: center;
-                width: 275px;
-                height: 110px;
-                cursor: pointer;
-
-                .top {
-                    display: flex;
-                    flex-direction: row;
-                    align-content: center;
-                    justify-content: center;
-                    align-items: center;
-                    justify-items: center;
-                    margin-bottom: 10px;
-
-                    img {
-                        margin-right: 5px;
-                    }
-                }
-
-                .bottom {
-                    text-align: left;
+                    margin: 0px !important;
                 }
             }
         }
@@ -473,6 +417,19 @@
                     border: 1px solid color.$darkChatAssistantBoxBorder;
                     background-color: color.$darkChatAssistantBoxBackground;
                     color: color.$darkRootText;
+                }
+            }
+
+            .table_flex {
+                .row {
+                    &.header {
+                        background-color: color.$darkInteractionBackground;
+                        color: color.$darkRootText;
+
+                        .cell + .cell::before {
+                            background-color: color.$darkChatAssistantBoxBorder;
+                        }
+                    }
                 }
             }
         }
