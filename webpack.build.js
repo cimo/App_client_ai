@@ -8,6 +8,8 @@ import CompressionPlugin from "compression-webpack-plugin";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 
+const isDeployDev = process.env.IS_DEPLOY_DEV;
+
 export default {
     target: "web",
     devtool: "source-map",
@@ -21,7 +23,11 @@ export default {
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".jsx"],
         fallback: {
-            fs: false
+            fs: false,
+            crypto: false,
+            http: false,
+            https: false,
+            child_process: false
         }
     },
     module: {
@@ -60,7 +66,7 @@ export default {
         hints: false
     },
     optimization: {
-        minimize: false,
+        minimize: isDeployDev === "true" ? false : true,
         minimizer: [
             new TerserPlugin({
                 exclude: /(dist|node_modules|public)/,
@@ -77,7 +83,7 @@ export default {
     },
     plugins: [
         new webpack.DefinePlugin({
-            IS_DEPLOY_DEV: JSON.stringify(process.env.IS_DEPLOY_DEV)
+            IS_DEPLOY_DEV: JSON.stringify(isDeployDev)
         }),
         new HtmlWebpackPlugin({
             template: Path.resolve(__dirname, "template_index.html"),
