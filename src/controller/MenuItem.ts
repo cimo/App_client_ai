@@ -1,4 +1,5 @@
-import { Icontroller, IvirtualNode, variableBind, variableLink } from "@cimo/jsmvcfw/dist/src/Main.js";
+import { Icontroller, IvariableEffect, IvirtualNode, variableBind, variableLink } from "@cimo/jsmvcfw/dist/src/Main.js";
+import { getAllWindows } from "@tauri-apps/api/window";
 
 // Source
 import * as helperSrc from "../HelperSrc";
@@ -6,12 +7,14 @@ import * as modelMenuItem from "../model/MenuItem";
 import * as modelMcp from "../model/Mcp";
 import * as viewMenuItem from "../view/MenuItem";
 import type Mcp from "./Mcp";
+import ControllerDialog from "./Dialog";
 
 export default class MenuItem implements Icontroller {
     // Variable
     private variableObject: modelMenuItem.Ivariable;
     private methodObject: modelMenuItem.Imethod;
     private controllerMcp: Mcp;
+    private controllerDialog: ControllerDialog;
 
     // Method
     private clearUploadSuccess = (): void => {
@@ -50,9 +53,20 @@ export default class MenuItem implements Icontroller {
     private onClickDocumentDelete = async (event: Event, index: number, fileName: string): Promise<void> => {
         event.stopPropagation();
 
-        const isConfirm = await helperSrc.confirmDialog(`Are you sure you want to delete:\n"${fileName}"?`, "", "warning", "Delete", "Cancel");
+        const isConfirm = await this.controllerDialog.show("warning", `Are you sure you want to delete: '${fileName}'?`, false);
 
         if (isConfirm) {
+            const windowLabel = helperSrc.appWindowLabelUnique("document", fileName);
+            const windowList = await getAllWindows();
+
+            for (const window of windowList) {
+                if (window.label === windowLabel) {
+                    await window.close();
+
+                    break;
+                }
+            }
+
             this.controllerMcp.apiDocumentDelete(index, fileName);
         }
     };
@@ -81,38 +95,40 @@ export default class MenuItem implements Icontroller {
     private onClickSkillDelete = async (event: Event, index: number, fileName: string): Promise<void> => {
         event.stopPropagation();
 
-        await this.controllerMcp.apiAgentList();
+        this.controllerMcp.apiAgentList().then(async (resultList) => {
+            let agentList = [];
+            let agentNameList = [];
 
-        let agentList = [];
-        let agentNameList = [];
-
-        for (let a = 0; a < this.variableObject.agentList.state.length; a++) {
-            if (this.variableObject.agentList.state[a].skill === fileName) {
-                agentList.push(this.variableObject.agentList.state[a]);
-                agentNameList.push(this.variableObject.agentList.state[a].name);
+            for (let a = 0; a < resultList.length; a++) {
+                if (resultList[a].skill === fileName) {
+                    agentList.push(resultList[a]);
+                    agentNameList.push(resultList[a].name);
+                }
             }
-        }
 
-        let confirmMessage = `Are you sure you want to delete:\n"${fileName}"?`;
+            let dialogMessage = `Are you sure you want to delete: '${fileName}'?`;
 
-        if (agentList.length > 0) {
-            confirmMessage =
-                `Skill is being used by the agent: ${agentNameList.join(", ")}.\n` +
-                "If you delete this skill, the skill will be removed in the agent.\n" +
-                confirmMessage;
-        }
-
-        const isConfirm = await helperSrc.confirmDialog(confirmMessage, "", "warning", "Delete", "Cancel");
-
-        if (isConfirm) {
-            this.controllerMcp.apiSkillDelete(index, fileName);
-
-            for (const agent of agentList) {
-                agent.skill = "";
-
-                this.controllerMcp.apiAgentUpdate(agent);
+            if (agentList.length > 0) {
+                dialogMessage =
+                    `Skill is being used by the agent: ${agentNameList.join(", ")}. ` +
+                    "If you delete the skill, it will be removed in the agent. " +
+                    dialogMessage;
             }
-        }
+
+            const isConfirm = await this.controllerDialog.show("warning", dialogMessage, false);
+
+            if (isConfirm) {
+                this.controllerMcp.apiSkillDelete(index, fileName);
+
+                for (const agent of agentList) {
+                    agent.skill = "";
+
+                    this.controllerMcp.apiAgentUpdate(agent);
+
+                    this.unselectAgent(agent.id);
+                }
+            }
+        });
     };
 
     private onClickSelectSkill = (event: Event): void => {
@@ -252,10 +268,12 @@ export default class MenuItem implements Icontroller {
     private onClickAgentDelete = async (event: Event, index: number, id: number, name: string): Promise<void> => {
         event.stopPropagation();
 
-        const isConfirm = await helperSrc.confirmDialog(`Are you sure you want to delete:\n"${name}"?`, "", "warning", "Delete", "Cancel");
+        const isConfirm = await this.controllerDialog.show("warning", `Are you sure you want to delete: '${name}'?`, false);
 
         if (isConfirm) {
             this.controllerMcp.apiAgentDelete(index, id);
+
+            this.unselectAgent(id);
         }
     };
 
@@ -294,39 +312,57 @@ export default class MenuItem implements Icontroller {
         this.variableObject.toolSelected.state = {} as modelMcp.Itool;
         this.variableObject.taskSelected.state = {} as modelMcp.Itask;
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
-        this.variableObject.agentInputSystem.state = "";
 
         for (const agent of this.variableObject.agentList.state) {
             if (agent.id === id) {
-                this.variableObject.agentSelected.state = agent;
+                if (agent.skill === "") {
+                    await this.controllerDialog.show(
+                        "info",
+                        `Agent '${agent.name}' does not have a selected skill. Please select a skill to use this agent.`,
+                        true
+                    );
+                } else {
+                    this.variableObject.agentSelected.state = agent;
 
-                this.variableObject.isMenuItemAgent.state = false;
+                    this.variableObject.isMenuItemAgent.state = false;
+
+                    this.variableObject.systemMode.state = "agent-skill";
+                }
 
                 break;
             }
         }
-
-        if (this.variableObject.agentSelected.state.skill !== "") {
-            const skillContent = await this.controllerMcp.apiSkillRead(this.variableObject.agentSelected.state.skill);
-
-            if (skillContent) {
-                this.variableObject.agentInputSystem.state = window.atob(skillContent);
-            }
-        } else {
-            this.variableObject.agentInputSystem.state = "";
-        }
-
-        this.variableObject.systemMode.state = "agent-skill";
     };
 
     private openDocument = async (title: string): Promise<void> => {
-        await helperSrc.openWindow("document", title, "#/document");
+        const route = "#/document";
+
+        await helperSrc.openWindow("document", title, route, {
+            title,
+            url: route,
+            decorations: true,
+            resizable: true,
+            width: 750,
+            height: 1000,
+            minWidth: 750,
+            minHeight: 1050,
+            center: true,
+            focus: true
+        });
     };
 
     private fileExtension = (fileName: string): string => {
         const mimeType = helperSrc.readMimeType(fileName);
 
         return mimeType.extension;
+    };
+
+    private unselectAgent = (id: number): void => {
+        if (this.variableObject.agentSelected.state.id === id) {
+            this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
+
+            this.variableObject.systemMode.state = "chat";
+        }
     };
 
     setControllerMcp(controller: Mcp): void {
@@ -338,6 +374,7 @@ export default class MenuItem implements Icontroller {
         this.methodObject = {} as modelMenuItem.Imethod;
 
         this.controllerMcp = {} as Mcp;
+        this.controllerDialog = new ControllerDialog();
     }
 
     hookObject = {} as modelMenuItem.IelementHook;
@@ -366,8 +403,7 @@ export default class MenuItem implements Icontroller {
                 agentForm: {} as modelMcp.Iagent,
                 agentFormResult: "",
                 isAgentSelectSkill: false,
-                systemMode: variableLink<string>("Chat"),
-                agentInputSystem: variableLink<string>("Chat")
+                systemMode: variableLink<string>("Chat")
             },
             this.constructor.name
         );
@@ -398,7 +434,9 @@ export default class MenuItem implements Icontroller {
         };
     }
 
-    variableEffect(): void {}
+    variableEffect(watch: IvariableEffect): void {
+        watch([]);
+    }
 
     view(name?: string): IvirtualNode {
         if (name === "left") {

@@ -49,15 +49,15 @@ export interface IapiResponse {
 
 export interface Ivariable {
     isMessageSendAvailable: IvariableBind<boolean>;
-    toastMessage: IvariableBind<string>;
-    toastType: IvariableBind<string>;
+    mode: IvariableBind<string>;
+    message: IvariableBind<string>;
     chatMessageList: IvariableBind<IchatMessage[]>;
     chatHistoryList: IvariableBind<IchatInput[]>;
     systemMode: IvariableBind<string>;
-    agentInputSystem: IvariableBind<string>;
     toolSelected: IvariableBind<modelMcp.Itool>;
     toolList: IvariableBind<modelMcp.Itool[]>;
     taskSelected: IvariableBind<modelMcp.Itask>;
+    agentSelected: IvariableBind<modelMcp.Iagent>;
 }
 
 export interface Imethod {

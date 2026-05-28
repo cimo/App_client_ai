@@ -71,9 +71,9 @@ export default class Document implements Icontroller {
 
         if (result) {
             if (helperSrc.readMimeType(appWindowTitle).type === "image") {
-                this.variableObject.contentImage.state = result.fileContent;
+                this.variableObject.imageContent.state = result.fileContent;
             } else {
-                this.variableObject.contentHtml.state = window.atob(result.fileContent);
+                this.variableObject.htmlContent.state = window.atob(result.fileContent);
             }
 
             this.variableObject.pageTotal.state = result.pageTotal;
@@ -97,7 +97,7 @@ export default class Document implements Icontroller {
                 if (Object.keys(this.controllerMcp.getVariableObject()).length > 0) {
                     await this.readContentData(1);
 
-                    await emitTo("main", "document-init", { fileName: appWindowTitle });
+                    await emitTo("main", "document-data", { fileName: appWindowTitle });
 
                     clearInterval(interval);
                 }
@@ -113,8 +113,8 @@ export default class Document implements Icontroller {
                 isLoadingWindow: true,
                 isLoadingPage: true,
                 isPageExist: true,
-                contentHtml: "",
-                contentImage: "",
+                htmlContent: "",
+                imageContent: "",
                 pageNumber: 1,
                 pageTotal: 1
             },

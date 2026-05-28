@@ -9,6 +9,16 @@ export default class Toast implements Icontroller {
     private variableObject: modelToast.Ivariable;
 
     // Method
+    show(mode: string, message: string): void {
+        this.variableObject.mode.state = mode;
+        this.variableObject.message.state = message;
+
+        setTimeout(() => {
+            this.variableObject.mode.state = "";
+            this.variableObject.message.state = "";
+        }, 3000);
+    }
+
     constructor() {
         this.variableObject = {} as modelToast.Ivariable;
     }
@@ -18,27 +28,15 @@ export default class Toast implements Icontroller {
     variable(): void {
         this.variableObject = variableBind(
             {
-                toastMessage: "",
-                toastType: ""
+                mode: "",
+                message: ""
             },
             this.constructor.name
         );
     }
 
     variableEffect(watch: IvariableEffect): void {
-        watch([
-            {
-                list: ["toastMessage", "toastType"],
-                action: () => {
-                    if (this.variableObject.toastMessage.state !== "") {
-                        setTimeout(() => {
-                            this.variableObject.toastMessage.state = "";
-                            this.variableObject.toastType.state = "";
-                        }, 3000);
-                    }
-                }
-            }
-        ]);
+        watch([]);
     }
 
     view(): IvirtualNode {

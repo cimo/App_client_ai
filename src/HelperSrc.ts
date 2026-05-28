@@ -1,6 +1,7 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { emitTo, listen } from "@tauri-apps/api/event";
-import { confirm } from "@tauri-apps/plugin-dialog";
+import { WebviewOptions } from "@tauri-apps/api/webview";
+import { WindowOptions } from "@tauri-apps/api/window";
 
 // Source
 import * as modelHelperSrc from "./model/HelperSrc";
@@ -258,9 +259,14 @@ export const appWindowLabelUnique = (label: string, title: string): string => {
     return `${label}-${safeName}`;
 };
 
-export const openWindow = async (label: string, title: string, route: string): Promise<WebviewWindow> => {
-    const uniqueLabel = appWindowLabelUnique(label, title);
-    const window = await WebviewWindow.getByLabel(uniqueLabel);
+export const openWindow = async (
+    label: string,
+    title: string,
+    route: string,
+    windowOptions: Omit<WebviewOptions, "x" | "y" | "width" | "height"> & WindowOptions
+): Promise<WebviewWindow> => {
+    const windowLabel = appWindowLabelUnique(label, title);
+    const window = await WebviewWindow.getByLabel(windowLabel);
 
     if (window) {
         await window.unminimize();
@@ -272,37 +278,11 @@ export const openWindow = async (label: string, title: string, route: string): P
         return window;
     }
 
-    const unlisten = await listen<string>(`window-${uniqueLabel}-ready`, async () => {
-        await emitTo(uniqueLabel, "window-init", route);
+    const unlisten = await listen<string>(`window-${windowLabel}-ready`, async () => {
+        await emitTo(windowLabel, "window-data", route);
 
         unlisten();
     });
 
-    return new WebviewWindow(uniqueLabel, {
-        title: title,
-        url: route,
-        decorations: true,
-        resizable: true,
-        width: 750,
-        height: 1000,
-        minWidth: 750,
-        minHeight: 1050,
-        center: true,
-        focus: true
-    });
-};
-
-export const confirmDialog = async (
-    message: string,
-    title: string,
-    kind: "info" | "warning" | "error" | undefined,
-    okLabel: string,
-    cancelLabel: string
-): Promise<boolean> => {
-    return await confirm(message, {
-        title,
-        kind,
-        okLabel,
-        cancelLabel
-    });
+    return new WebviewWindow(windowLabel, windowOptions);
 };

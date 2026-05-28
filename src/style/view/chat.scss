@@ -123,7 +123,11 @@
 
                             .title {
                                 display: flex;
+                                flex-direction: row;
+                                align-content: center;
+                                justify-content: start;
                                 align-items: center;
+                                justify-items: center;
 
                                 .cls_icon {
                                     font-size: parameter.$fontSizeNormalPlus !important;
@@ -295,8 +299,4 @@
         border: 1px solid color.$darkChatMessageSendBorder;
         box-shadow: color.$darkShadowMessageSend;
     }
-}
-
-:root[data-theme="light"] {
-    //...
 }

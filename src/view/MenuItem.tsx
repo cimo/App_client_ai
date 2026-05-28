@@ -75,7 +75,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                 const result: IvirtualNode[] = [];
 
                                 result.push(
-                                    <div class="status_container">
+                                    <div class="upload_status">
                                         {(() => {
                                             const result: IvirtualNode[] = [];
 
@@ -222,14 +222,14 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                 const result: IvirtualNode[] = [];
 
                                 result.push(
-                                    <div class="status_container">
+                                    <div class="upload_status">
                                         {(() => {
                                             const result: IvirtualNode[] = [];
                                             if (variableObject.isSkillUploading.state) {
                                                 result.push(<i class="cls_icon">update</i>);
                                             } else if (variableObject.skillUploadStatusList.state.length > 0) {
                                                 result.push(
-                                                    <details key="2" open>
+                                                    <details open>
                                                         <summary>
                                                             <p>Upload result:</p>
                                                         </summary>
@@ -393,7 +393,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         methodObject.onClickSelectSkillCancel(event);
                                                     }}
                                                 >
-                                                    <p>Cancel</p>
+                                                    <p>Back</p>
                                                 </button>
                                             </div>
                                             <div class="table_flex">

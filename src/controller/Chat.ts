@@ -10,11 +10,15 @@ import * as modelChat from "../model/Chat";
 import * as modelMcp from "../model/Mcp";
 import * as modelDocument from "../model/Document";
 import * as viewChat from "../view/Chat";
+import type Mcp from "./Mcp";
+import type Toast from "./Toast";
 
 export default class Chat implements Icontroller {
     // Variable
     private variableObject: modelChat.Ivariable;
     private methodObject: modelChat.Imethod;
+    private controllerMcp: Mcp;
+    private controllerToast: Toast;
 
     private responseId: string;
     private responseReason: string;
@@ -29,11 +33,6 @@ export default class Chat implements Icontroller {
     private messageSentCount: number;
 
     // Method
-    private showToast = (mode: string, message: string): void => {
-        this.variableObject.toastType.state = mode;
-        this.variableObject.toastMessage.state = message;
-    };
-
     private resetModelResponse = (mode?: string): void => {
         this.responseId = "";
         this.responseReason = "";
@@ -100,7 +99,20 @@ export default class Chat implements Icontroller {
             const windowLabel = helperSrc.appWindowLabelUnique("document", fileName);
             const windowList = await getAllWindows();
 
-            await helperSrc.openWindow("document", fileName, "#/document");
+            const route = "#/document";
+
+            await helperSrc.openWindow("document", fileName, route, {
+                title: fileName,
+                url: route,
+                decorations: true,
+                resizable: true,
+                width: 750,
+                height: 1000,
+                minWidth: 750,
+                minHeight: 1050,
+                center: true,
+                focus: true
+            });
 
             for (const window of windowList) {
                 if (window.label === windowLabel) {
@@ -114,6 +126,14 @@ export default class Chat implements Icontroller {
         }
     };
 
+    setControllerMcp(controller: Mcp): void {
+        this.controllerMcp = controller;
+    }
+
+    setControllerToast(controller: Toast): void {
+        this.controllerToast = controller;
+    }
+
     setModelSelected(modelSelected: string): void {
         this.modelSelected = modelSelected;
     }
@@ -125,7 +145,7 @@ export default class Chat implements Icontroller {
         //await invoke("test");
 
         if (!this.variableObject.isMessageSendAvailable.state && mode !== "rag") {
-            this.showToast("warning", "Wait for the current response to complete.");
+            this.controllerToast.show("warning", "Wait for the current response to complete.");
 
             return;
         }
@@ -199,15 +219,13 @@ export default class Chat implements Icontroller {
             if (mode === "rag") {
                 inputSystem = [
                     "You are a multilingual RAG assistant that needs to reply ALWAYS with the user input language.",
-                    "You MUST answer EXCLUSIVELY using the content of the provided CITATION and RELATION.",
-                    "You MUST NOT use any external knowledge, training data, or assumptions.",
-                    "You MUST NOT make inferences beyond what is explicitly stated in the CITATION and RELATION.",
-                    "Before writing each sentence, verify it is directly present in the provided CITATION. If it is not, do NOT write it.",
-                    "For EACH topic in the question, answer INDEPENDENTLY and SEPARATELY using what you find in the CITATION and RELATION, even if partial or incomplete.",
-                    "For EACH topic write a dedicated section with the topic name as title, followed by bullet points.",
-                    "You MUST NEVER say there is no information about a topic if the CITATION and RELATION contain even partial information about it.",
+                    "You MUST answer EXCLUSIVELY using the content of the provided CITATION and RELATION without inventing or adding information from your side.",
+                    "For EACH topic answer INDEPENDENTLY and SEPARATELY and write a dedicated section with the topic name as title, followed by bullet points.",
                     "You MUST NOT look for relationships or connections between entities unless the question explicitly asks for them.",
-                    "You MUST NOT add commentary about missing information."
+                    "You MUST NOT add commentary about missing information.",
+                    "You MUST NOT solve problems.",
+                    "You MUST NOT invent new actions.",
+                    "You MUST NOT explain nothing."
                 ].join("\n");
             }
 
@@ -216,27 +234,36 @@ export default class Chat implements Icontroller {
                     "You are a multilingual assistant tool executer that needs to reply ALWAYS with the user input language and you need to transform the user request in a action.",
                     `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}`,
                     `Tool description: ${this.variableObject.toolSelected.state.description}`,
-                    `For ${this.variableObject.toolSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }`,
-                    "You MUST NOT add parameters that are not present in the provided format.",
+                    "You MUST return ONLY raw json WITHOUT wrap it in ```json",
+                    `For ${this.variableObject.toolSelected.state.name} return ALWAYS the json with this format: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }`,
                     "You MUST NOT solve problems.",
                     "You MUST NOT invent new actions.",
                     "You MUST NOT explain nothing."
                 ].join("\n");
             } else if (this.variableObject.systemMode.state === "task-call") {
                 inputSystem = [
-                    "You are a multilingual assistant tool task executer that needs to reply ALWAYS with the user input language and you need to transform the user request in a ordered list of actions.",
+                    "You are a multilingual assistant task executer that needs to reply ALWAYS with the user input language and you need to transform the user request in a ordered list of actions.",
                     `You MUST use ONLY the following tool: ${this.variableObject.taskSelected.state.name}`,
-                    `Tool description: ${this.variableObject.toolSelected.state.description}`,
-                    `For ${this.variableObject.taskSelected.state.name} you MUST return ONLY valid JSON with this format without additional information: { "list": [ { "name": "${this.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.taskSelected.state.argumentObject)} } ] }`,
-                    "You MUST NOT add parameters that are not present in the provided format.",
+                    `Tool description: ${this.variableObject.taskSelected.state.description}`,
+                    "You MUST return ONLY raw json WITHOUT wrap it in ```json",
+                    `For ${this.variableObject.taskSelected.state.name} return ALWAYS the json with this format: { "list": [ { "name": "${this.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.taskSelected.state.argumentObject)} } ] }`,
                     "You MUST NOT solve problems.",
                     "You MUST NOT invent new actions.",
                     "You MUST NOT explain nothing."
                 ].join("\n");
             } else if (this.variableObject.systemMode.state === "agent-skill") {
+                const skillContent = await this.controllerMcp.apiSkillRead(this.variableObject.agentSelected.state.skill);
+
+                let skillDescription = "";
+
+                if (skillContent) {
+                    skillDescription = window.atob(skillContent);
+                }
+
                 inputSystem = [
-                    this.variableObject.agentInputSystem.state,
-                    'If you find a tag [script](...) in the text you MUST stop and write ONLY valid JSON with this format without additional information: { "action": { "script": true } }'
+                    skillDescription,
+                    "You MUST return ONLY raw json WITHOUT wrap it in ```json",
+                    'If you find a tag [script](...) in the text you MUST stop and return ALWAYS the json with this format: { "action": { "script": true } }'
                 ].join("\n");
 
                 const tagUserPromptStart = inputSystem.indexOf("[USER_PROMPT]");
@@ -587,6 +614,8 @@ export default class Chat implements Icontroller {
     constructor() {
         this.variableObject = {} as modelChat.Ivariable;
         this.methodObject = {} as modelChat.Imethod;
+        this.controllerMcp = {} as Mcp;
+        this.controllerToast = {} as Toast;
 
         this.responseId = "";
         this.responseReason = "";
@@ -607,15 +636,15 @@ export default class Chat implements Icontroller {
         this.variableObject = variableBind(
             {
                 isMessageSendAvailable: true,
-                toastMessage: variableLink<string>("Toast"),
-                toastType: variableLink<string>("Toast"),
+                mode: variableLink<string>("Toast"),
+                message: variableLink<string>("Toast"),
                 chatMessageList: [],
                 chatHistoryList: [],
                 systemMode: "chat",
-                agentInputSystem: "",
                 toolSelected: variableLink<modelMcp.Itool>("Mcp"),
                 toolList: variableLink<modelMcp.Itool[]>("Mcp"),
-                taskSelected: variableLink<modelMcp.Itask>("Mcp")
+                taskSelected: variableLink<modelMcp.Itask>("Mcp"),
+                agentSelected: variableLink<modelMcp.Iagent>("Mcp")
             },
             this.constructor.name
         );
@@ -643,7 +672,7 @@ export default class Chat implements Icontroller {
 
     event(): void {
         (async () => {
-            await listen<modelDocument.Idata>("document-init", async (event) => {
+            await listen<modelDocument.Idata>("document-data", async (event) => {
                 const fileName = event.payload.fileName;
 
                 if (fileName) {

@@ -26,7 +26,6 @@ export interface Ivariable {
     agentFormResult: IvariableBind<string>;
     isAgentSelectSkill: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
-    agentInputSystem: IvariableBind<string>;
 }
 
 export interface Imethod {

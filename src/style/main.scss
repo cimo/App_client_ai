@@ -3,6 +3,7 @@
 
 @use "button.scss";
 @use "icon.scss";
+@use "table.scss";
 
 @use "view/index.scss";
 @use "view/chat.scss";
@@ -11,3 +12,4 @@
 @use "view/menuItem.scss";
 @use "view/document.scss";
 @use "view/toast.scss";
+@use "view/dialog.scss";

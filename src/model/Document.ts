@@ -14,8 +14,8 @@ export interface Ivariable {
     isLoadingWindow: IvariableBind<boolean>;
     isLoadingPage: IvariableBind<boolean>;
     isPageExist: IvariableBind<boolean>;
-    contentHtml: IvariableBind<string>;
-    contentImage: IvariableBind<string>;
+    htmlContent: IvariableBind<string>;
+    imageContent: IvariableBind<string>;
     pageNumber: IvariableBind<number>;
     pageTotal: IvariableBind<number>;
 }

@@ -6,9 +6,9 @@ import * as modelToast from "../model/Toast";
 const viewToast = (variableObject: modelToast.Ivariable): IvirtualNode => {
     return (
         <div class="view_toast">
-            <div class={`toast_container ${variableObject.toastType.state} ${variableObject.toastMessage.state ? "" : "none"}`}>
+            <div class={`message_container ${variableObject.mode.state} ${variableObject.message.state ? "" : "none"}`}>
                 <i class="cls_icon">info</i>
-                <p>{variableObject.toastMessage.state}</p>
+                <p>{variableObject.message.state}</p>
             </div>
         </div>
     );

@@ -1,11 +1,12 @@
 import { setUrlRoot, setAppLabel, route, navigateTo } from "@cimo/jsmvcfw/dist/src/Main.js";
-import { emitTo, listen } from "@tauri-apps/api/event";
+import { emitTo, listen, UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 // Source
 import * as session from "./Session";
 import ControllerIndex from "./controller/Index";
 import ControllerDocument from "./controller/Document";
+import ControllerDialog from "./controller/Dialog";
 
 setUrlRoot("");
 setAppLabel("jsmvcfw");
@@ -25,16 +26,19 @@ route([
         title: "Document",
         path: "/document",
         controller: () => new ControllerDocument()
+    },
+    {
+        title: "Dialog",
+        path: "/dialog",
+        controller: () => new ControllerDialog()
     }
 ]);
 
 const currentWindow = getCurrentWindow();
 
-if (currentWindow.label !== "main") {
-    emitTo("main", `window-${currentWindow.label}-ready`);
-}
+let unlisten: UnlistenFn | null = null;
 
-listen<string>("window-init", (event) => {
+listen<string>("window-data", (event) => {
     if (currentWindow.label === "main") {
         return;
     }
@@ -44,6 +48,16 @@ listen<string>("window-init", (event) => {
     if (typeof path === "string" && path.startsWith("#/")) {
         navigateTo(path.slice(path.indexOf("#") + 1), true);
     }
-}).then((unlisten) => {
-    unlisten();
+
+    if (unlisten !== null) {
+        unlisten();
+
+        unlisten = null;
+    }
+}).then(async (unlistenFn) => {
+    unlisten = unlistenFn;
+
+    if (currentWindow.label !== "main") {
+        await emitTo("main", `window-${currentWindow.label}-ready`);
+    }
 });

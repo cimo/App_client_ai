@@ -270,8 +270,8 @@ export default class Mcp implements Icontroller {
         }
     };
 
-    apiDocumentList = async (): Promise<void> => {
-        fetch(`${helperSrc.URL_MCP}/api/document-list`, {
+    apiDocumentList = async (): Promise<modelMcp.IfileDetail[]> => {
+        return fetch(`${helperSrc.URL_MCP}/api/document-list`, {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
@@ -288,11 +288,15 @@ export default class Mcp implements Icontroller {
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
                 this.variableObject.documentList.state = JSON.parse(resultJson.response.stdout);
+
+                return this.variableObject.documentList.state;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiDocumentList() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
+
+                return [];
             });
     };
 
@@ -404,8 +408,8 @@ export default class Mcp implements Icontroller {
         }
     };
 
-    apiSkillList = async (): Promise<void> => {
-        fetch(`${helperSrc.URL_MCP}/api/skill-list`, {
+    apiSkillList = async (): Promise<modelMcp.IfileDetail[]> => {
+        return fetch(`${helperSrc.URL_MCP}/api/skill-list`, {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
@@ -422,11 +426,15 @@ export default class Mcp implements Icontroller {
                 const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
                 this.variableObject.skillList.state = JSON.parse(resultJson.response.stdout);
+
+                return this.variableObject.skillList.state;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiSkillList() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
+
+                return [];
             });
     };
 
@@ -561,8 +569,8 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiAgentList = async (): Promise<void> => {
-        fetch(`${helperSrc.URL_MCP}/api/agent-list`, {
+    apiAgentList = async (): Promise<modelMcp.Iagent[]> => {
+        return fetch(`${helperSrc.URL_MCP}/api/agent-list`, {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
@@ -585,25 +593,19 @@ export default class Mcp implements Icontroller {
                         if (this.variableObject.agentSelected.state.id === agent.id) {
                             this.variableObject.agentSelected.state = agent;
 
-                            if (agent.skill !== "") {
-                                const skillContent = await this.apiSkillRead(this.variableObject.agentSelected.state.skill);
-
-                                if (skillContent) {
-                                    this.variableObject.agentInputSystem.state = window.atob(skillContent);
-                                }
-                            } else {
-                                this.variableObject.agentInputSystem.state = "";
-                            }
-
                             break;
                         }
                     }
                 }
+
+                return this.variableObject.agentList.state;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiAgentList() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
+
+                return [];
             });
     };
 
@@ -660,7 +662,6 @@ export default class Mcp implements Icontroller {
                 skillUploadStatusList: variableLink<modelMcp.IfileStatus[]>("MenuItem"),
                 agentForm: variableLink<modelMcp.Iagent>("MenuItem"),
                 agentFormResult: variableLink<string>("MenuItem"),
-                agentInputSystem: variableLink<string>("Chat"),
                 systemMode: variableLink<string>("Chat"),
                 chatMessageList: variableLink<modelChat.IchatMessage[]>("Chat")
             },

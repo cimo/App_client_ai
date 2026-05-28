@@ -11,19 +11,17 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                 {(() => {
                     const result: IvirtualNode[] = [];
 
-                    if (variableObject.isLoadingWindow.state) {
+                    if (variableObject.isLoadingWindow.state || variableObject.isLoadingPage.state) {
                         result.push(
-                            <div key="0" class="over_container">
-                                <div>
-                                    <i class="cls_icon">update</i>
-                                    <p>Loading...</p>
-                                </div>
+                            <div class="loading_container">
+                                <i class="cls_icon">update</i>
+                                <p>Loading...</p>
                             </div>
                         );
                     } else {
                         result.push(
                             <>
-                                <div key="1" class="pagination_container">
+                                <div class="pagination_container">
                                     <i class="cls_icon" onClick={() => methodObject.onClickChangePage(-1)}>
                                         chevron_left
                                     </i>
@@ -47,34 +45,17 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                                     {(() => {
                                         const result: IvirtualNode[] = [];
 
-                                        if (variableObject.isLoadingPage.state) {
+                                        if (!variableObject.isPageExist.state) {
                                             result.push(
-                                                <div class="over_container">
-                                                    <div>
-                                                        <i class="cls_icon">update</i>
-                                                        <p>Loading...</p>
-                                                    </div>
+                                                <div class="message_container">
+                                                    <i class="cls_icon">error</i>
+                                                    <p>Page does not exist</p>
                                                 </div>
                                             );
-
-                                            return result;
-                                        } else if (!variableObject.isPageExist.state) {
-                                            result.push(
-                                                <div class="over_container">
-                                                    <div>
-                                                        <i class="cls_icon">error</i>
-                                                        <p>Page does not exist</p>
-                                                    </div>
-                                                </div>
-                                            );
-
-                                            return result;
-                                        }
-
-                                        if (variableObject.contentHtml.state !== "") {
-                                            result.push(<iframe srcdoc={variableObject.contentHtml.state} sandbox="allow-scripts"></iframe>);
-                                        } else if (variableObject.contentImage.state !== "") {
-                                            result.push(<img src={`data:image/png;base64,${variableObject.contentImage.state}`} />);
+                                        } else if (variableObject.htmlContent.state !== "") {
+                                            result.push(<iframe srcdoc={variableObject.htmlContent.state} sandbox="allow-scripts"></iframe>);
+                                        } else if (variableObject.imageContent.state !== "") {
+                                            result.push(<img src={`data:image/png;base64,${variableObject.imageContent.state}`} />);
                                         }
 
                                         return result;

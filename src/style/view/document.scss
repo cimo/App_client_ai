@@ -9,29 +9,24 @@
     align-items: stretch;
     justify-items: center;
     flex: 1 1 auto;
-    min-height: 0;
-    min-width: 0;
-    width: 100%;
-    height: 100%;
     overflow: hidden;
 
-    .over_container {
-        display: grid;
-        place-items: center;
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        z-index: parameter.$zIndexOver;
+    .main_container {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        justify-content: stretch;
+        align-items: stretch;
+        justify-items: center;
+        flex: 1 1 auto;
 
-        div {
+        .loading_container {
             display: flex;
             flex-direction: column;
             align-content: center;
             justify-content: center;
             align-items: center;
-            justify-items: center;
+            flex: 1 1 auto;
 
             .cls_icon {
                 display: block !important;
@@ -39,19 +34,6 @@
                 font-size: parameter.$fontSizeVeryBig !important;
             }
         }
-    }
-
-    .main_container {
-        display: flex;
-        flex-direction: column;
-        align-content: center;
-        justify-content: center;
-        align-items: center;
-        justify-items: center;
-        width: 100%;
-        height: 100%;
-        min-height: 0;
-        min-width: 0;
 
         .pagination_container {
             display: flex;
@@ -86,15 +68,27 @@
             justify-content: center;
             align-items: center;
             justify-items: center;
-            flex: 1 1 auto;
-            width: 100%;
-            min-width: 0;
-            min-height: 0;
-            position: relative;
+            flex: 1 1 0;
+            overflow: hidden;
+
+            .message_container {
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+                justify-content: center;
+                align-items: center;
+                justify-items: center;
+
+                .cls_icon {
+                    display: block !important;
+                    height: 1em !important;
+                    font-size: parameter.$fontSizeVeryBig !important;
+                }
+            }
 
             iframe {
-                flex: 1;
                 width: 100%;
+                height: 100%;
             }
         }
     }
@@ -103,11 +97,7 @@
 :root[data-theme="dark"] {
     .view_document {
         .over_container {
-            background-color: color.$darkRootBackground !important;
+            background-color: color.$darkRootBackground;
         }
     }
-}
-
-:root[data-theme="light"] {
-    //...
 }

@@ -79,7 +79,6 @@ export interface Ivariable {
     skillUploadStatusList: IvariableBind<IfileStatus[]>;
     agentForm: IvariableBind<Iagent>;
     agentFormResult: IvariableBind<string>;
-    agentInputSystem: IvariableBind<string>;
     systemMode: IvariableBind<string>;
     chatMessageList: IvariableBind<modelChat.IchatMessage[]>;
 }

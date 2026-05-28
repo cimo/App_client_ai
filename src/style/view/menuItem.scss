@@ -30,7 +30,7 @@
     flex-direction: column;
     align-content: center;
     justify-content: center;
-    align-items: start;
+    align-items: stretch;
     justify-items: center;
 
     position: fixed;
@@ -42,22 +42,24 @@
     z-index: parameter.$zIndexLevel2;
 
     .document_container,
-    .skill_container {
+    .skill_container,
+    .tool_container,
+    .task_container,
+    .agent_container {
         display: flex;
         flex-direction: column;
         align-content: center;
         justify-content: start;
-        align-items: start;
+        align-items: stretch;
         justify-items: center;
         flex: 1 1 auto;
         min-height: 0;
-        width: 100%;
 
         .button_container {
             display: flex;
             flex-direction: row;
             align-content: center;
-            justify-content: center;
+            justify-content: start;
             align-items: center;
             justify-items: center;
             padding: 5px 10px;
@@ -73,8 +75,11 @@
                 }
             }
         }
+    }
 
-        .status_container {
+    .document_container,
+    .skill_container {
+        .upload_status {
             .cls_icon {
                 margin-bottom: 5px !important;
             }
@@ -82,7 +87,6 @@
             details {
                 padding: 5px;
                 width: fit-content;
-                max-width: 100%;
                 margin: 5px 0;
                 border-radius: 8px;
 
@@ -127,138 +131,11 @@
                 }
             }
         }
-
-        > p {
-            margin-bottom: 10px;
-        }
-
-        .skill_status {
-            flex-direction: column !important;
-            gap: 5px !important;
-
-            li {
-                display: flex;
-                flex-direction: row;
-                align-content: center;
-                justify-content: center;
-                align-items: center;
-                justify-items: center;
-
-                .cls_icon {
-                    font-size: parameter.$fontSizeNormalPlus !important;
-                    margin-right: 5px !important;
-                }
-            }
-        }
-
-        .table_flex {
-            display: flex;
-            flex-direction: column;
-            flex: 1 1 auto;
-            min-height: 0;
-            width: 100%;
-            margin-top: 10px;
-
-            .list_container {
-                flex: 1 1 auto;
-                min-height: 0;
-                overflow-y: auto;
-            }
-
-            .row {
-                display: flex;
-
-                &.header {
-                    .cell {
-                        position: relative;
-                    }
-
-                    .cell + .cell::before {
-                        content: "";
-                        position: absolute;
-                        left: 0;
-                        top: 25%;
-                        bottom: 25%;
-                        width: 1px;
-                    }
-                }
-
-                .cell {
-                    flex: 1 1 0;
-                    align-content: center;
-                    justify-content: center;
-                    align-items: center;
-                    justify-items: center;
-                    padding: 10px;
-                    text-align: center;
-
-                    &.icon_delete {
-                        flex: 0 0 40px;
-
-                        .cls_icon {
-                            cursor: pointer;
-                        }
-                    }
-
-                    &.name {
-                        display: flex;
-                        flex-direction: row;
-                        align-content: center;
-                        justify-content: start;
-                        align-items: center;
-                        justify-items: center;
-                        gap: 10px;
-                        word-break: break-word;
-                        text-align: left !important;
-                        cursor: pointer;
-
-                        .icon {
-                            width: 40px;
-                        }
-                    }
-
-                    &.name.skill {
-                        cursor: default !important;
-                    }
-                }
-            }
-        }
     }
 
     .tool_container,
     .task_container,
     .agent_container {
-        display: flex;
-        flex-direction: column;
-        align-content: center;
-        justify-content: start;
-        align-items: start;
-        justify-items: center;
-        flex: 1 1 auto;
-        min-height: 0;
-        width: 100%;
-
-        .button_container {
-            display: flex;
-            flex-direction: row;
-            align-content: center;
-            justify-content: center;
-            align-items: center;
-            justify-items: center;
-            padding: 5px 10px;
-            border-radius: 20px;
-            gap: 5px;
-
-            button {
-                width: 100px;
-                margin: 0px !important;
-
-                .cls_icon {
-                    margin-right: 5px !important;
-                }
-            }
-        }
-
         ul {
             display: flex;
             flex-direction: row;
@@ -269,7 +146,6 @@
             flex-wrap: wrap;
             flex: 1 1 auto;
             gap: 12px;
-            width: 100%;
             overflow-y: scroll;
             margin-top: 10px;
 
@@ -277,7 +153,7 @@
                 flex-direction: column;
                 align-content: center;
                 justify-content: center;
-                align-items: start;
+                align-items: stretch;
                 justify-items: center;
                 width: 275px;
                 height: 110px;
@@ -291,7 +167,6 @@
                     align-items: center;
                     justify-items: center;
                     margin-bottom: 10px;
-                    width: 100%;
 
                     img,
                     .cls_icon {
@@ -322,6 +197,10 @@
                         width: 20px;
                         height: 20px;
                         margin-right: 5px !important;
+                    }
+
+                    p {
+                        text-align: left !important;
                     }
                 }
             }
@@ -395,6 +274,16 @@
             }
         }
     }
+
+    .table_flex {
+        .row {
+            .cell {
+                &.name.skill {
+                    cursor: default !important;
+                }
+            }
+        }
+    }
 }
 
 :root[data-theme="dark"] {
@@ -412,24 +301,11 @@
 
         .document_container,
         .skill_container {
-            .status_container {
+            .upload_status {
                 details {
                     border: 1px solid color.$darkChatAssistantBoxBorder;
                     background-color: color.$darkChatAssistantBoxBackground;
                     color: color.$darkRootText;
-                }
-            }
-
-            .table_flex {
-                .row {
-                    &.header {
-                        background-color: color.$darkInteractionBackground;
-                        color: color.$darkRootText;
-
-                        .cell + .cell::before {
-                            background-color: color.$darkChatAssistantBoxBorder;
-                        }
-                    }
                 }
             }
         }
@@ -451,8 +327,4 @@
             }
         }
     }
-}
-
-:root[data-theme="light"] {
-    //...
 }
