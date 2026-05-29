@@ -25,7 +25,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             body: JSON.stringify({ fileName }),
             danger: {
@@ -136,7 +136,7 @@ export default class Mcp implements Icontroller {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -162,7 +162,7 @@ export default class Mcp implements Icontroller {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -188,7 +188,7 @@ export default class Mcp implements Icontroller {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -218,21 +218,23 @@ export default class Mcp implements Icontroller {
             this.variableObject.documentUploadStatusList.state = [];
             this.variableObject.documentEmbeddingStatusList.state = [];
 
-            for (const pathFile of pathFileList) {
+            for (let a = 0; a < pathFileList.length; a++) {
+                const pathFile = pathFileList[a];
+
                 const file = await readFile(pathFile);
-                const fileName = pathFile.split(/[/\\]/).pop() as string;
-                const mimeType = helperSrc.readMimeType(file);
-                const blob = new Blob([file], { type: mimeType.content });
+                const fileDetail = helperSrc.fileDetail(pathFile, file);
+
+                const blob = new Blob([file], { type: fileDetail.mimeType });
 
                 const formData = new FormData();
-                formData.append("file", blob, encodeURIComponent(fileName));
+                formData.append("file", blob, encodeURIComponent(fileDetail.fileName));
 
                 await fetch(`${helperSrc.URL_MCP}/api/document-upload`, {
                     method: "POST",
                     headers: {
                         "mcp-session-id": session.data.mcpSessionId,
-                        Cookie: session.data.mcpCookie,
-                        fileName: encodeURIComponent(fileName)
+                        "mcp-cookie": session.data.mcpCookie,
+                        fileName: encodeURIComponent(fileDetail.fileName)
                     },
                     body: formData,
                     danger: {
@@ -254,7 +256,7 @@ export default class Mcp implements Icontroller {
 
                             this.apiDocumentList();
 
-                            if (helperSrc.readMimeType(resultFile.fileName).type !== "image" && resultFile.status === "Success") {
+                            if (fileDetail.category !== "image" && resultFile.status === "Success") {
                                 this.variableObject.documentEmbeddingStatusList.state.push({ fileName: resultFile.fileName, status: "Ongoing" });
 
                                 this.startEmbeddingCheck(this.variableObject.documentEmbeddingStatusList.state.length - 1);
@@ -275,7 +277,7 @@ export default class Mcp implements Icontroller {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -306,7 +308,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             body: JSON.stringify({ fileName }),
             danger: {
@@ -317,7 +319,15 @@ export default class Mcp implements Icontroller {
             .then(() => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                this.variableObject.documentList.state = this.variableObject.documentList.state.filter((_, a) => a !== index);
+                const documentFilteredList = [];
+
+                for (let a = 0; a < this.variableObject.documentList.state.length; a++) {
+                    if (a !== index) {
+                        documentFilteredList.push(this.variableObject.documentList.state[a]);
+                    }
+                }
+
+                this.variableObject.documentList.state = documentFilteredList;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiDocumentDelete() - fetch() - catch()", error.message);
@@ -332,7 +342,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             body: JSON.stringify({ fileName, pageNumber }),
             danger: {
@@ -364,21 +374,22 @@ export default class Mcp implements Icontroller {
             this.variableObject.isSkillUploading.state = true;
             this.variableObject.skillUploadStatusList.state = [];
 
-            for (const pathFile of pathFileList) {
+            for (let a = 0; a < pathFileList.length; a++) {
+                const pathFile = pathFileList[a];
+
                 const file = await readFile(pathFile);
-                const fileName = pathFile.split(/[/\\]/).pop() as string;
-                const mimeType = helperSrc.readMimeType(file);
-                const blob = new Blob([file], { type: mimeType.content });
+                const fileDetail = helperSrc.fileDetail(pathFile, file);
+                const blob = new Blob([file], { type: fileDetail.mimeType });
 
                 const formData = new FormData();
-                formData.append("file", blob, encodeURIComponent(fileName));
+                formData.append("file", blob, encodeURIComponent(fileDetail.fileName));
 
                 await fetch(`${helperSrc.URL_MCP}/api/skill-upload`, {
                     method: "POST",
                     headers: {
                         "mcp-session-id": session.data.mcpSessionId,
-                        Cookie: session.data.mcpCookie,
-                        fileName: encodeURIComponent(fileName)
+                        "mcp-cookie": session.data.mcpCookie,
+                        fileName: encodeURIComponent(fileDetail.fileName)
                     },
                     body: formData,
                     danger: {
@@ -413,7 +424,7 @@ export default class Mcp implements Icontroller {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -444,7 +455,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             body: JSON.stringify({ fileName }),
             danger: {
@@ -455,7 +466,15 @@ export default class Mcp implements Icontroller {
             .then(() => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                this.variableObject.skillList.state = this.variableObject.skillList.state.filter((_, a) => a !== index);
+                const skillFilteredList = [];
+
+                for (let a = 0; a < this.variableObject.skillList.state.length; a++) {
+                    if (a !== index) {
+                        skillFilteredList.push(this.variableObject.skillList.state[a]);
+                    }
+                }
+
+                this.variableObject.skillList.state = skillFilteredList;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiSkillDelete() - fetch() - catch()", error.message);
@@ -470,7 +489,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             body: JSON.stringify({ fileName }),
             danger: {
@@ -498,7 +517,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             body: JSON.stringify({
                 name: agent.name,
@@ -536,7 +555,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             body: JSON.stringify({
                 id: agent.id,
@@ -574,7 +593,7 @@ export default class Mcp implements Icontroller {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -589,7 +608,9 @@ export default class Mcp implements Icontroller {
                 this.variableObject.agentList.state = JSON.parse(resultJson.response.stdout);
 
                 if (Object.keys(this.variableObject.agentSelected.state).length > 0) {
-                    for (const agent of this.variableObject.agentList.state) {
+                    for (let a = 0; a < this.variableObject.agentList.state.length; a++) {
+                        const agent = this.variableObject.agentList.state[a];
+
                         if (this.variableObject.agentSelected.state.id === agent.id) {
                             this.variableObject.agentSelected.state = agent;
 
@@ -615,7 +636,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                Cookie: session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie
             },
             body: JSON.stringify({ id }),
             danger: {
@@ -626,7 +647,15 @@ export default class Mcp implements Icontroller {
             .then(() => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                this.variableObject.agentList.state = this.variableObject.agentList.state.filter((_, a) => a !== index);
+                const agentFilteredList = [];
+
+                for (let a = 0; a < this.variableObject.agentList.state.length; a++) {
+                    if (a !== index) {
+                        agentFilteredList.push(this.variableObject.agentList.state[a]);
+                    }
+                }
+
+                this.variableObject.agentList.state = agentFilteredList;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiAgentDelete() - fetch() - catch()", error.message);

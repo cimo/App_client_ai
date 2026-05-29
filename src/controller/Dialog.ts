@@ -36,7 +36,7 @@ export default class Dialog implements Icontroller {
         const route = "#/dialog";
 
         return await new Promise<boolean>(async (resolve) => {
-            const windowLabel = helperSrc.appWindowLabelUnique("dialog", mode);
+            const windowLabel = helperSrc.windowLabelUnique("dialog", mode);
 
             const unlistenReady = await listen(`dialog-${windowLabel}-ready`, async () => {
                 await emitTo(windowLabel, "dialog-data", { mode, message, isConfirm });
@@ -50,7 +50,7 @@ export default class Dialog implements Icontroller {
                 unlistenResult();
             });
 
-            this.window = await helperSrc.openWindow("dialog", mode, route, {
+            this.window = await helperSrc.windowOpen("dialog", mode, route, {
                 title: mode,
                 url: route,
                 decorations: true,
@@ -71,7 +71,7 @@ export default class Dialog implements Icontroller {
         this.variableObject = {} as modelDialog.Ivariable;
         this.methodObject = {} as modelDialog.Imethod;
 
-        this.window = null as unknown as WebviewWindow;
+        this.window = undefined as unknown as WebviewWindow;
     }
 
     hookObject = {} as modelDialog.IelementHook;

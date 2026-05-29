@@ -169,17 +169,18 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     {(() => {
                                         const result: IvirtualNode[] = [];
 
-                                        for (let a = 0; a < variableObject.documentList.state.length; a++) {
-                                            const value = variableObject.documentList.state[a];
+                                        const list = Object.entries(variableObject.documentList.state);
+
+                                        for (const [key, value] of list) {
                                             const extension = methodObject.fileExtension(value.fileName);
 
                                             result.push(
-                                                <div key={a} class="row">
+                                                <div key={key} class="row">
                                                     <div class="cell icon_delete">
                                                         <i
                                                             class="cls_icon"
                                                             onClick={(event: Event) => {
-                                                                methodObject.onClickDocumentDelete(event, a, value.fileName);
+                                                                methodObject.onClickDocumentDelete(event, Number(key), value.fileName);
                                                             }}
                                                         >
                                                             delete
@@ -283,16 +284,16 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     {(() => {
                                         const result: IvirtualNode[] = [];
 
-                                        for (let a = 0; a < variableObject.skillList.state.length; a++) {
-                                            const value = variableObject.skillList.state[a];
+                                        const list = Object.entries(variableObject.skillList.state);
 
+                                        for (const [key, value] of list) {
                                             result.push(
-                                                <div key={a} class="row">
+                                                <div key={key} class="row">
                                                     <div class="cell icon_delete">
                                                         <i
                                                             class="cls_icon"
                                                             onClick={(event: Event) => {
-                                                                methodObject.onClickSkillDelete(event, a, value.fileName);
+                                                                methodObject.onClickSkillDelete(event, Number(key), value.fileName);
                                                             }}
                                                         >
                                                             delete
@@ -412,11 +413,11 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     {(() => {
                                                         const result: IvirtualNode[] = [];
 
-                                                        for (let a = 0; a < variableObject.skillList.state.length; a++) {
-                                                            const value = variableObject.skillList.state[a];
+                                                        const list = Object.entries(variableObject.skillList.state);
 
+                                                        for (const [key, value] of list) {
                                                             result.push(
-                                                                <div key={a} class="row">
+                                                                <div key={key} class="row">
                                                                     <div
                                                                         class="cell name"
                                                                         onClick={(event: Event) => {
@@ -521,12 +522,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                 {(() => {
                                                     const result: IvirtualNode[] = [];
 
-                                                    for (let a = 0; a < variableObject.agentList.state.length; a++) {
-                                                        const value = variableObject.agentList.state[a];
+                                                    const list = Object.entries(variableObject.agentList.state);
 
+                                                    for (const [key, value] of list) {
                                                         result.push(
                                                             <li
-                                                                key={a}
+                                                                key={key}
                                                                 class="chip"
                                                                 onClick={() => {
                                                                     methodObject.onClickAgent(value.id);
@@ -546,7 +547,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     <i
                                                                         class="cls_icon"
                                                                         onClick={(event: Event) => {
-                                                                            methodObject.onClickAgentDelete(event, a, value.id, value.name);
+                                                                            methodObject.onClickAgentDelete(event, Number(key), value.id, value.name);
                                                                         }}
                                                                     >
                                                                         delete

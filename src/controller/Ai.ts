@@ -89,7 +89,7 @@ export default class Ai implements Icontroller {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${session.data.aiBearerToken}`,
-                Cookie: session.data.aiCookie
+                "ai-cookie": session.data.aiCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -116,7 +116,7 @@ export default class Ai implements Icontroller {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${session.data.aiBearerToken}`,
-                Cookie: session.data.aiCookie
+                "ai-cookie": session.data.aiCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -151,7 +151,7 @@ export default class Ai implements Icontroller {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${session.data.aiBearerToken}`,
-                Cookie: session.data.aiCookie
+                "ai-cookie": session.data.aiCookie
             },
             danger: {
                 acceptInvalidCerts: true,

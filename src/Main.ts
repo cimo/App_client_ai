@@ -36,7 +36,7 @@ route([
 
 const currentWindow = getCurrentWindow();
 
-let unlisten: UnlistenFn | null = null;
+let unlisten: UnlistenFn | undefined = undefined;
 
 listen<string>("window-data", (event) => {
     if (currentWindow.label === "main") {
@@ -49,10 +49,10 @@ listen<string>("window-data", (event) => {
         navigateTo(path.slice(path.indexOf("#") + 1), true);
     }
 
-    if (unlisten !== null) {
+    if (unlisten !== undefined) {
         unlisten();
 
-        unlisten = null;
+        unlisten = undefined;
     }
 }).then(async (unlistenFn) => {
     unlisten = unlistenFn;

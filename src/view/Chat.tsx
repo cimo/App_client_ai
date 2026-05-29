@@ -138,14 +138,14 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                             {(() => {
                                                                                 const result: IvirtualNode[] = [];
 
-                                                                                for (let a = 0; a < value.ragRelationList.length; a++) {
-                                                                                    const relation = value.ragRelationList[a];
+                                                                                const list = Object.entries(value.ragRelationList);
 
+                                                                                for (const [key, value] of list) {
                                                                                     result.push(
-                                                                                        <li key={a}>
-                                                                                            <span class="source">{relation.source}</span>
-                                                                                            <span class="verb">{relation.verb}</span>
-                                                                                            <span class="target">{relation.target}</span>
+                                                                                        <li key={key}>
+                                                                                            <span class="source">{value.source}</span>
+                                                                                            <span class="verb">{value.verb}</span>
+                                                                                            <span class="target">{value.target}</span>
                                                                                         </li>
                                                                                     );
                                                                                 }

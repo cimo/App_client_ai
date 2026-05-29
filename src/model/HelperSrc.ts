@@ -1,5 +1,9 @@
-export interface ImimeType {
+export interface IfileDetail {
+    fileName: string;
+    baseName: string;
+    mimeType: string;
     extension: string;
-    content: string;
-    type: string;
+    category: string;
+    size: string;
+    dateModified: string;
 }

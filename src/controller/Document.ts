@@ -54,6 +54,7 @@ export default class Document implements Icontroller {
         this.variableObject.isLoadingPage.state = true;
 
         const appWindowTitle = await this.appWindow.title();
+        const fileDetail = helperSrc.fileDetail(appWindowTitle);
 
         if (pageNumber < 1) {
             this.variableObject.isPageExist.state = false;
@@ -67,10 +68,10 @@ export default class Document implements Icontroller {
             return;
         }
 
-        const result = await this.controllerMcp.apiDocumentRead(appWindowTitle, pageNumber);
+        const result = await this.controllerMcp.apiDocumentRead(fileDetail.fileName, pageNumber);
 
         if (result) {
-            if (helperSrc.readMimeType(appWindowTitle).type === "image") {
+            if (fileDetail.category === "image") {
                 this.variableObject.imageContent.state = result.fileContent;
             } else {
                 this.variableObject.htmlContent.state = window.atob(result.fileContent);

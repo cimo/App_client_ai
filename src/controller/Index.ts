@@ -103,7 +103,9 @@ export default class Index implements Icontroller {
             if (this.appWindow.label === "main") {
                 const windowList = await getAllWindows();
 
-                for (const window of windowList) {
+                for (let a = 0; a < windowList.length; a++) {
+                    const window = windowList[a];
+
                     if (window.label !== "main") {
                         await window.close();
                     }

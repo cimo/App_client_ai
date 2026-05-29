@@ -33,11 +33,11 @@ export const deleteAiSession = (): void => {
     deleteStorage("ai-cookie");
 };
 
-export const writeMcpSession = (sessionId: string, cookie: string): void => {
-    data.mcpSessionId = sessionId;
+export const writeMcpSession = (id: string, cookie: string): void => {
+    data.mcpSessionId = id;
     data.mcpCookie = cookie;
 
-    writeStorage("mcp-session-id", sessionId);
+    writeStorage("mcp-session-id", id);
     writeStorage("mcp-cookie", cookie);
 };
 

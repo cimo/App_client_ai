@@ -1,6 +1,6 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { emitTo, listen } from "@tauri-apps/api/event";
 import { WebviewOptions } from "@tauri-apps/api/webview";
+import { emitTo, listen } from "@tauri-apps/api/event";
 import { WindowOptions } from "@tauri-apps/api/window";
 
 // Source
@@ -8,12 +8,36 @@ import * as modelHelperSrc from "./model/HelperSrc";
 
 declare const IS_DEPLOY_DEV: string;
 
-export const PATH_ROOT = "/home/app/";
 export const IS_DEBUG = IS_DEPLOY_DEV;
-export const PATH_LOG = "log/";
-export const LOCALE = "jp";
 export const URL_AI = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
 export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
+
+// Custom
+// Custom
+
+const fileSize = (value: Uint8Array | number, isOnlyByte = true): string => {
+    let result = "";
+
+    const byte = typeof value === "number" ? value : value.length;
+
+    if (isOnlyByte) {
+        return byte.toString();
+    }
+
+    if (byte < 1024) {
+        result = byte + " B";
+    } else if (byte < 1048576) {
+        result = (byte / 1024).toFixed(1) + " KB";
+    } else if (byte < 1073741824) {
+        result = (byte / 1048576).toFixed(1) + " MB";
+    } else if (byte < 1099511627776) {
+        result = (byte / 1073741824).toFixed(1) + " GB";
+    } else {
+        result = (byte / 1099511627776).toFixed(1) + " TB";
+    }
+
+    return result;
+};
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {
     // Asia
@@ -46,6 +70,8 @@ export const localeConfiguration: Record<string, { locale: string; currency: str
     au: { locale: "en-AU", currency: "AUD", dateFormat: "c" },
     nz: { locale: "mi-NZ", currency: "NZD", dateFormat: "c" }
 };
+
+export const LOCALE = "jp";
 
 export const localeFormat = (value: number | Date, isMonth = true, isDay = true, isTime = true): string | undefined => {
     if (typeof value === "number") {
@@ -101,124 +127,230 @@ export const generateUniqueId = (): string => {
     return `${timestamp}-${randomPart}`;
 };
 
-export const readMimeType = (value: Uint8Array | string | undefined): modelHelperSrc.ImimeType => {
-    let result = { content: "", extension: "", type: "" };
+export const isJson = (value: string): boolean => {
+    try {
+        JSON.parse(value);
 
-    if (value === undefined || value === null) {
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+export const fileDetail = (value: string, buffer?: Uint8Array, isOnlyByte = true): modelHelperSrc.IfileDetail => {
+    let result = {} as modelHelperSrc.IfileDetail;
+
+    if (!value) {
         return result;
     }
 
-    let toHex = undefined;
-    let toLatin1 = undefined;
-    let extension = undefined;
+    const fileNameWithExtension = value.includes("/") ? value.split("/").pop()! : value;
+    const baseName = fileNameWithExtension.trim().replace(/\.[^/.]+$/, "");
+    const signatureList: { mimeType: string; extension: string; category: string; magicByteList?: { offset: number; bytes: number[] }[] }[] = [
+        { mimeType: "text/javascript", extension: "js", category: "code" },
+        { mimeType: "text/javascript", extension: "jsx", category: "code" },
+        { mimeType: "text/javascript", extension: "mjs", category: "code" },
+        { mimeType: "text/typescript", extension: "ts", category: "code" },
+        { mimeType: "text/typescript", extension: "tsx", category: "code" },
+        { mimeType: "text/x-python", extension: "py", category: "code" },
+        { mimeType: "text/css", extension: "css", category: "code" },
+        { mimeType: "text/html", extension: "html", category: "code" },
+        { mimeType: "text/html", extension: "htm", category: "code" },
+        { mimeType: "text/csv", extension: "csv", category: "text" },
+        { mimeType: "text/plain", extension: "txt", category: "text" },
+        { mimeType: "text/xml", extension: "xml", category: "code" },
+        { mimeType: "text/markdown", extension: "md", category: "code" },
+        { mimeType: "text/yaml", extension: "yaml", category: "code" },
+        { mimeType: "text/yaml", extension: "yml", category: "code" },
+        { mimeType: "text/x-sh", extension: "sh", category: "code" },
+        { mimeType: "font/ttf", extension: "ttf", category: "font", magicByteList: [{ offset: 0, bytes: [0x00, 0x01, 0x00, 0x00, 0x00] }] },
+        { mimeType: "font/otf", extension: "otf", category: "font", magicByteList: [{ offset: 0, bytes: [0x4f, 0x54, 0x54, 0x4f] }] },
+        { mimeType: "font/woff", extension: "woff", category: "font", magicByteList: [{ offset: 0, bytes: [0x77, 0x4f, 0x46, 0x46] }] },
+        { mimeType: "font/woff2", extension: "woff2", category: "font", magicByteList: [{ offset: 0, bytes: [0x77, 0x4f, 0x46, 0x32] }] },
+        { mimeType: "image/jpeg", extension: "jpg", category: "image", magicByteList: [{ offset: 0, bytes: [0xff, 0xd8, 0xff] }] },
+        { mimeType: "image/jpeg", extension: "jpeg", category: "image" },
+        {
+            mimeType: "image/png",
+            extension: "png",
+            category: "image",
+            magicByteList: [{ offset: 0, bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] }]
+        },
+        { mimeType: "image/gif", extension: "gif", category: "image", magicByteList: [{ offset: 0, bytes: [0x47, 0x49, 0x46, 0x38] }] },
+        {
+            mimeType: "image/webp",
+            extension: "webp",
+            category: "image",
+            magicByteList: [
+                { offset: 0, bytes: [0x52, 0x49, 0x46, 0x46] },
+                { offset: 8, bytes: [0x57, 0x45, 0x42, 0x50] }
+            ]
+        },
+        { mimeType: "image/bmp", extension: "bmp", category: "image", magicByteList: [{ offset: 0, bytes: [0x42, 0x4d] }] },
+        { mimeType: "image/tiff", extension: "tiff", category: "image", magicByteList: [{ offset: 0, bytes: [0x49, 0x49, 0x2a, 0x00] }] },
+        { mimeType: "image/tiff", extension: "tiff", category: "image", magicByteList: [{ offset: 0, bytes: [0x4d, 0x4d, 0x00, 0x2a] }] },
+        { mimeType: "image/x-icon", extension: "ico", category: "image", magicByteList: [{ offset: 0, bytes: [0x00, 0x00, 0x01, 0x00] }] },
+        {
+            mimeType: "image/avif",
+            extension: "avif",
+            category: "image",
+            magicByteList: [{ offset: 4, bytes: [0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66] }]
+        },
+        {
+            mimeType: "image/avif",
+            extension: "avif",
+            category: "image",
+            magicByteList: [{ offset: 4, bytes: [0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x73] }]
+        },
+        { mimeType: "image/svg+xml", extension: "svg", category: "image" },
+        { mimeType: "audio/mpeg", extension: "mp3", category: "audio", magicByteList: [{ offset: 0, bytes: [0x49, 0x44, 0x33] }] },
+        { mimeType: "audio/mpeg", extension: "mp3", category: "audio", magicByteList: [{ offset: 0, bytes: [0xff, 0xfb] }] },
+        {
+            mimeType: "audio/wav",
+            extension: "wav",
+            category: "audio",
+            magicByteList: [
+                { offset: 0, bytes: [0x52, 0x49, 0x46, 0x46] },
+                { offset: 8, bytes: [0x57, 0x41, 0x56, 0x45] }
+            ]
+        },
+        { mimeType: "audio/ogg", extension: "ogg", category: "audio", magicByteList: [{ offset: 0, bytes: [0x4f, 0x67, 0x67, 0x53] }] },
+        { mimeType: "audio/flac", extension: "flac", category: "audio", magicByteList: [{ offset: 0, bytes: [0x66, 0x4c, 0x61, 0x43] }] },
+        { mimeType: "video/mp4", extension: "mp4", category: "video", magicByteList: [{ offset: 4, bytes: [0x66, 0x74, 0x79, 0x70] }] },
+        {
+            mimeType: "video/avi",
+            extension: "avi",
+            category: "video",
+            magicByteList: [
+                { offset: 0, bytes: [0x52, 0x49, 0x46, 0x46] },
+                { offset: 8, bytes: [0x41, 0x56, 0x49, 0x20] }
+            ]
+        },
+        { mimeType: "video/webm", extension: "webm", category: "video", magicByteList: [{ offset: 0, bytes: [0x1a, 0x45, 0xdf, 0xa3] }] },
+        { mimeType: "application/pdf", extension: "pdf", category: "document", magicByteList: [{ offset: 0, bytes: [0x25, 0x50, 0x44, 0x46] }] },
+        { mimeType: "application/msword", extension: "doc", category: "document" },
+        { mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", extension: "docx", category: "document" },
+        { mimeType: "application/vnd.ms-excel", extension: "xls", category: "document" },
+        { mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", extension: "xlsx", category: "document" },
+        { mimeType: "application/vnd.ms-powerpoint", extension: "ppt", category: "document" },
+        { mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation", extension: "pptx", category: "document" },
+        { mimeType: "application/vnd.oasis.opendocument.text", extension: "odt", category: "document" },
+        { mimeType: "application/vnd.oasis.opendocument.spreadsheet", extension: "ods", category: "document" },
+        { mimeType: "application/vnd.oasis.opendocument.presentation", extension: "odp", category: "document" },
+        { mimeType: "application/zip", extension: "zip", category: "archive", magicByteList: [{ offset: 0, bytes: [0x50, 0x4b, 0x03, 0x04] }] },
+        {
+            mimeType: "application/x-rar-compressed",
+            extension: "rar",
+            category: "archive",
+            magicByteList: [{ offset: 0, bytes: [0x52, 0x61, 0x72, 0x21, 0x1a, 0x07] }]
+        },
+        {
+            mimeType: "application/x-7z-compressed",
+            extension: "7z",
+            category: "archive",
+            magicByteList: [{ offset: 0, bytes: [0x37, 0x7a, 0xbc, 0xaf, 0x27, 0x1c] }]
+        },
+        { mimeType: "application/gzip", extension: "gz", category: "archive", magicByteList: [{ offset: 0, bytes: [0x1f, 0x8b] }] },
+        { mimeType: "application/x-bzip2", extension: "bz2", category: "archive", magicByteList: [{ offset: 0, bytes: [0x42, 0x5a, 0x68] }] },
+        {
+            mimeType: "application/x-xz",
+            extension: "xz",
+            category: "archive",
+            magicByteList: [{ offset: 0, bytes: [0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00] }]
+        },
+        { mimeType: "application/json", extension: "json", category: "code" },
+        { mimeType: "application/x-msdownload", extension: "exe", category: "executable", magicByteList: [{ offset: 0, bytes: [0x4d, 0x5a] }] },
+        {
+            mimeType: "application/x-elf",
+            extension: "elf",
+            category: "executable",
+            magicByteList: [{ offset: 0, bytes: [0x7f, 0x45, 0x4c, 0x46] }]
+        },
+        {
+            mimeType: "application/wasm",
+            extension: "wasm",
+            category: "executable",
+            magicByteList: [{ offset: 0, bytes: [0x00, 0x61, 0x73, 0x6d] }]
+        },
+        {
+            mimeType: "application/x-sqlite3",
+            extension: "db",
+            category: "database",
+            magicByteList: [{ offset: 0, bytes: [0x53, 0x51, 0x4c, 0x69, 0x74, 0x65, 0x20] }]
+        }
+    ];
 
-    if (value instanceof Uint8Array) {
-        toHex = (value: Uint8Array) => {
-            let out = "";
+    if (buffer) {
+        for (let a = 0; a < signatureList.length; a++) {
+            const magicByteList = signatureList[a].magicByteList;
 
-            for (let a = 0; a < value.length; a++) {
-                out += value[a].toString(16).padStart(2, "0");
+            if (!magicByteList) {
+                continue;
             }
 
-            return out;
-        };
+            let isMatched = false;
 
-        toLatin1 = (value: Uint8Array) => {
-            const chunk = 0x8000;
+            for (let b = 0; b < magicByteList.length; b++) {
+                const check = magicByteList[b];
 
-            let result = "";
+                if (buffer.length < check.offset + check.bytes.length) {
+                    isMatched = false;
 
-            for (let a = 0; a < value.length; a += chunk) {
-                const subChunk = value.subarray(a, a + chunk);
+                    break;
+                }
 
-                result += String.fromCharCode(...subChunk);
+                isMatched = true;
+
+                for (let c = 0; c < check.bytes.length; c++) {
+                    if (buffer[check.offset + c] !== check.bytes[c]) {
+                        isMatched = false;
+
+                        break;
+                    }
+                }
+
+                if (!isMatched) {
+                    break;
+                }
             }
 
-            return result;
-        };
-    } else {
-        extension = value.toLowerCase().trim().split(".").pop();
-    }
-
-    if ((value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 4)) === "25504446") || extension === "pdf") {
-        result = { content: "application/pdf", extension: "pdf", type: "application" };
-    } else if (
-        (value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 3)) === "ffd8ff") ||
-        extension === "jpg" ||
-        extension === "jpeg"
-    ) {
-        result = { content: "image/jpeg", extension: "jpg", type: "image" };
-    } else if ((value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 8)) === "89504e470d0a1a0a") || extension === "png") {
-        result = { content: "image/png", extension: "png", type: "image" };
-    } else if ((value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 6)) === "474946383761") || extension === "gif") {
-        result = { content: "image/gif", extension: "gif", type: "image" };
-    } else if (
-        (value instanceof Uint8Array &&
-            toHex != undefined &&
-            toHex(value.subarray(0, 4)) === "52494646" &&
-            toHex(value.subarray(8, 12)) === "57454250") ||
-        extension === "webp"
-    ) {
-        result = { content: "image/webp", extension: "webp", type: "image" };
-    } else if ((value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 2)) === "424d") || extension === "bmp") {
-        result = { content: "image/bmp", extension: "bmp", type: "image" };
-    } else if (
-        (value instanceof Uint8Array &&
-            toHex != undefined &&
-            (toHex(value.subarray(0, 4)) === "49492a00" || toHex(value.subarray(0, 4)) === "4d4d002a")) ||
-        extension === "tif" ||
-        extension === "tiff"
-    ) {
-        result = { content: "image/tiff", extension: "tiff", type: "image" };
-    } else if (
-        (value instanceof Uint8Array &&
-            toHex != undefined &&
-            (toHex(value.subarray(0, 4)) === "00000100" || toHex(value.subarray(0, 4)) === "00000200")) ||
-        extension === "ico"
-    ) {
-        result = { content: "image/x-icon", extension: "ico", type: "image" };
-    } else if (extension === "svg" || extension === "svg+xml") {
-        result = { content: "image/svg+xml", extension: "svg", type: "image" };
-    } else if (extension === "avif") {
-        result = { content: "image/avif", extension: "avif", type: "image" };
-    } else {
-        let headByte = undefined;
-        let head = "";
-
-        if (value instanceof Uint8Array && toHex != undefined) {
-            headByte = value.subarray(0, Math.min(value.length, 64 * 1024));
-
-            if (toLatin1 != undefined) {
-                head = toLatin1(headByte);
+            if (isMatched) {
+                result = {
+                    ...result,
+                    fileName: fileNameWithExtension,
+                    baseName,
+                    mimeType: signatureList[a].mimeType,
+                    extension: signatureList[a].extension,
+                    category: signatureList[a].category,
+                    size: fileSize(buffer, isOnlyByte)
+                };
             }
         }
+    }
 
-        if (head.includes("word/") || extension === "docx") {
-            result = {
-                content: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                extension: "docx",
-                type: "application"
-            };
-        } else if (head.includes("xl/") || extension === "xlsx") {
-            result = {
-                content: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                extension: "xlsx",
-                type: "application"
-            };
-        } else if (head.includes("ppt/") || extension === "pptx") {
-            result = {
-                content: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                extension: "pptx",
-                type: "application"
-            };
-        } else if ((value instanceof Uint8Array && toHex != undefined && toHex(value.subarray(0, 4)) === "504b0304") || extension === "zip") {
-            result = { content: "application/zip", extension: "zip", type: "application" };
+    if ((!result.mimeType || result.mimeType === "application/zip") && value !== "") {
+        const extensionIndex = value.lastIndexOf(".");
+        const extension = extensionIndex !== -1 ? value.slice(extensionIndex + 1).toLowerCase() : "";
+
+        for (let a = 0; a < signatureList.length; a++) {
+            if (signatureList[a].extension === extension) {
+                result = {
+                    ...result,
+                    fileName: fileNameWithExtension,
+                    baseName,
+                    mimeType: signatureList[a].mimeType,
+                    extension: signatureList[a].extension,
+                    category: signatureList[a].category
+                };
+
+                break;
+            }
         }
     }
 
     return result;
 };
 
+// Custom
 export const findElementParent = (element: HTMLElement, className: string): HTMLElement | null => {
     if (!element.parentNode || element.parentNode === document) {
         return null;
@@ -231,25 +363,7 @@ export const findElementParent = (element: HTMLElement, className: string): HTML
     return findElementParent(element.parentNode as HTMLElement, className);
 };
 
-export const isJson = (value: string): boolean => {
-    try {
-        JSON.parse(value);
-
-        return true;
-    } catch {
-        return false;
-    }
-};
-
-export const baseFileName = (fileName: string): string => {
-    const nameList = fileName.split("/");
-    const nameWithExtension = nameList[nameList.length - 1];
-    const baseName = nameWithExtension.trim().replace(/.[^/.]+$/, "");
-
-    return baseName;
-};
-
-export const appWindowLabelUnique = (label: string, title: string): string => {
+export const windowLabelUnique = (label: string, title: string): string => {
     const safeName = title
         .toLowerCase()
         .replace(/[^a-z0-9_-]+/g, "-")
@@ -259,13 +373,13 @@ export const appWindowLabelUnique = (label: string, title: string): string => {
     return `${label}-${safeName}`;
 };
 
-export const openWindow = async (
+export const windowOpen = async (
     label: string,
     title: string,
     route: string,
     windowOptions: Omit<WebviewOptions, "x" | "y" | "width" | "height"> & WindowOptions
 ): Promise<WebviewWindow> => {
-    const windowLabel = appWindowLabelUnique(label, title);
+    const windowLabel = windowLabelUnique(label, title);
     const window = await WebviewWindow.getByLabel(windowLabel);
 
     if (window) {
@@ -286,3 +400,4 @@ export const openWindow = async (
 
     return new WebviewWindow(windowLabel, windowOptions);
 };
+// Custom

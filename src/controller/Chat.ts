@@ -25,7 +25,7 @@ export default class Chat implements Icontroller {
     private responseNoReason: string;
     private responseMcpTool: modelChat.ImcpTool;
 
-    private abortControllerApiResponse: AbortController | null;
+    private abortControllerApiResponse: AbortController | undefined;
 
     private modelSelected: string;
     private fileList: modelChat.Ifile;
@@ -51,7 +51,7 @@ export default class Chat implements Icontroller {
     private onClickButtonMessageSend = (): void => {
         if (this.abortControllerApiResponse && this.responseId) {
             this.abortControllerApiResponse.abort();
-            this.abortControllerApiResponse = null;
+            this.abortControllerApiResponse = undefined;
         } else {
             this.apiResponse();
         }
@@ -65,7 +65,9 @@ export default class Chat implements Icontroller {
 
         this.variableObject.systemMode.state = "tool-call";
 
-        for (const tool of this.variableObject.toolList.state) {
+        for (let a = 0; a < this.variableObject.toolList.state.length; a++) {
+            const tool = this.variableObject.toolList.state[a];
+
             if (tool.name === "document_parser") {
                 this.variableObject.toolSelected.state = tool;
 
@@ -90,18 +92,18 @@ export default class Chat implements Icontroller {
         this.variableObject.chatMessageList.state = chatMessageListState;
     };
 
-    private openWindowDocument = async (): Promise<void> => {
+    private windowOpenDocument = async (): Promise<void> => {
         const fileNameList = Object.keys(this.fileList);
 
         if (fileNameList.length > 0) {
             const fileName = fileNameList[0];
 
-            const windowLabel = helperSrc.appWindowLabelUnique("document", fileName);
+            const windowLabel = helperSrc.windowLabelUnique("document", fileName);
             const windowList = await getAllWindows();
 
             const route = "#/document";
 
-            await helperSrc.openWindow("document", fileName, route, {
+            await helperSrc.windowOpen("document", fileName, route, {
                 title: fileName,
                 url: route,
                 decorations: true,
@@ -114,7 +116,9 @@ export default class Chat implements Icontroller {
                 focus: true
             });
 
-            for (const window of windowList) {
+            for (let a = 0; a < windowList.length; a++) {
+                const window = windowList[a];
+
                 if (window.label === windowLabel) {
                     await emitTo(windowLabel, "document-content-update", [fileName, "-1"]);
 
@@ -197,7 +201,9 @@ export default class Chat implements Icontroller {
                 content: this.hookObject.elementInputMessageSend.value
             });
 
-            for (const chatHistoryList of this.variableObject.chatHistoryList.state) {
+            for (let a = 0; a < this.variableObject.chatHistoryList.state.length; a++) {
+                const chatHistoryList = this.variableObject.chatHistoryList.state[a];
+
                 if (chatHistoryList.role === "system" || chatHistoryList.role === "user") {
                     input.push({
                         role: chatHistoryList.role,
@@ -301,9 +307,9 @@ export default class Chat implements Icontroller {
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${session.data.aiBearerToken}`,
-                    Cookie: session.data.aiCookie,
+                    "ai-cookie": session.data.aiCookie,
                     "mcp-session-id": session.data.mcpSessionId,
-                    "cookie-mcp": session.data.mcpCookie
+                    "mcp-cookie": session.data.mcpCookie
                 },
                 body: JSON.stringify({
                     stream: true,
@@ -343,7 +349,9 @@ export default class Chat implements Icontroller {
                         const lineList = buffer.split(/\r?\n/);
                         buffer = lineList.pop() as string;
 
-                        for (const line of lineList) {
+                        for (let a = 0; a < lineList.length; a++) {
+                            const line = lineList[a];
+
                             if (line.startsWith("data:")) {
                                 const data = line.slice(5).trim();
 
@@ -468,7 +476,7 @@ export default class Chat implements Icontroller {
                                                             pageNumber: parser.terminalExecution
                                                         };
 
-                                                        await this.openWindowDocument();
+                                                        await this.windowOpenDocument();
 
                                                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
@@ -622,7 +630,7 @@ export default class Chat implements Icontroller {
         this.responseNoReason = "";
         this.responseMcpTool = {} as modelChat.ImcpTool;
 
-        this.abortControllerApiResponse = null;
+        this.abortControllerApiResponse = undefined;
 
         this.modelSelected = "";
         this.fileList = {};
@@ -676,7 +684,7 @@ export default class Chat implements Icontroller {
                 const fileName = event.payload.fileName;
 
                 if (fileName) {
-                    const windowLabel = helperSrc.appWindowLabelUnique("document", fileName);
+                    const windowLabel = helperSrc.windowLabelUnique("document", fileName);
 
                     if (Object.entries(this.fileList).length > 0) {
                         const fileName = Object.keys(this.fileList)[0];
@@ -688,7 +696,7 @@ export default class Chat implements Icontroller {
                     }
                 }
 
-                await this.openWindowDocument();
+                await this.windowOpenDocument();
             });
         })();
     }

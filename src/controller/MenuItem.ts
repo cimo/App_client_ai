@@ -18,15 +18,35 @@ export default class MenuItem implements Icontroller {
 
     // Method
     private clearUploadSuccess = (): void => {
-        this.variableObject.documentUploadStatusList.state = this.variableObject.documentUploadStatusList.state.filter(
-            (documentUpload) => documentUpload.status !== "Success"
-        );
-        this.variableObject.documentEmbeddingStatusList.state = this.variableObject.documentEmbeddingStatusList.state.filter(
-            (documentEmbedding) => documentEmbedding.status !== "Success"
-        );
-        this.variableObject.skillUploadStatusList.state = this.variableObject.skillUploadStatusList.state.filter(
-            (skillUpload) => skillUpload.status !== "Success"
-        );
+        const documentUploadFilteredList = [];
+
+        for (let a = 0; a < this.variableObject.documentUploadStatusList.state.length; a++) {
+            if (this.variableObject.documentUploadStatusList.state[a].status !== "Success") {
+                documentUploadFilteredList.push(this.variableObject.documentUploadStatusList.state[a]);
+            }
+        }
+
+        this.variableObject.documentUploadStatusList.state = documentUploadFilteredList;
+
+        const documentEmbeddingFilteredList = [];
+
+        for (let a = 0; a < this.variableObject.documentEmbeddingStatusList.state.length; a++) {
+            if (this.variableObject.documentEmbeddingStatusList.state[a].status !== "Success") {
+                documentEmbeddingFilteredList.push(this.variableObject.documentEmbeddingStatusList.state[a]);
+            }
+        }
+
+        this.variableObject.documentEmbeddingStatusList.state = documentEmbeddingFilteredList;
+
+        const skillUploadFilteredList = [];
+
+        for (let a = 0; a < this.variableObject.skillUploadStatusList.state.length; a++) {
+            if (this.variableObject.skillUploadStatusList.state[a].status !== "Success") {
+                skillUploadFilteredList.push(this.variableObject.skillUploadStatusList.state[a]);
+            }
+        }
+
+        this.variableObject.skillUploadStatusList.state = skillUploadFilteredList;
     };
 
     private onClickMenuDocument = (event: Event): void => {
@@ -56,10 +76,12 @@ export default class MenuItem implements Icontroller {
         const isConfirm = await this.controllerDialog.show("warning", `Are you sure you want to delete: '${fileName}'?`, false);
 
         if (isConfirm) {
-            const windowLabel = helperSrc.appWindowLabelUnique("document", fileName);
+            const windowLabel = helperSrc.windowLabelUnique("document", fileName);
             const windowList = await getAllWindows();
 
-            for (const window of windowList) {
+            for (let a = 0; a < windowList.length; a++) {
+                const window = windowList[a];
+
                 if (window.label === windowLabel) {
                     await window.close();
 
@@ -120,7 +142,9 @@ export default class MenuItem implements Icontroller {
             if (isConfirm) {
                 this.controllerMcp.apiSkillDelete(index, fileName);
 
-                for (const agent of agentList) {
+                for (let a = 0; a < agentList.length; a++) {
+                    const agent = agentList[a];
+
                     agent.skill = "";
 
                     this.controllerMcp.apiAgentUpdate(agent);
@@ -176,7 +200,9 @@ export default class MenuItem implements Icontroller {
         this.variableObject.taskSelected.state = {} as modelMcp.Itask;
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
 
-        for (const tool of this.variableObject.toolList.state) {
+        for (let a = 0; a < this.variableObject.toolList.state.length; a++) {
+            const tool = this.variableObject.toolList.state[a];
+
             if (tool.name === name) {
                 this.variableObject.toolSelected.state = tool;
 
@@ -209,7 +235,9 @@ export default class MenuItem implements Icontroller {
         this.variableObject.taskSelected.state = {} as modelMcp.Itask;
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
 
-        for (const task of this.variableObject.taskList.state) {
+        for (let a = 0; a < this.variableObject.taskList.state.length; a++) {
+            const task = this.variableObject.taskList.state[a];
+
             if (task.name === name) {
                 this.variableObject.taskSelected.state = task;
 
@@ -254,7 +282,9 @@ export default class MenuItem implements Icontroller {
     private onClickAgentEdit = (event: Event, id: number): void => {
         event.stopPropagation();
 
-        for (const agent of this.variableObject.agentList.state) {
+        for (let a = 0; a < this.variableObject.agentList.state.length; a++) {
+            const agent = this.variableObject.agentList.state[a];
+
             if (agent.id === id) {
                 this.variableObject.agentForm.state = agent;
 
@@ -313,7 +343,9 @@ export default class MenuItem implements Icontroller {
         this.variableObject.taskSelected.state = {} as modelMcp.Itask;
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
 
-        for (const agent of this.variableObject.agentList.state) {
+        for (let a = 0; a < this.variableObject.agentList.state.length; a++) {
+            const agent = this.variableObject.agentList.state[a];
+
             if (agent.id === id) {
                 if (agent.skill === "") {
                     await this.controllerDialog.show(
@@ -337,7 +369,7 @@ export default class MenuItem implements Icontroller {
     private openDocument = async (title: string): Promise<void> => {
         const route = "#/document";
 
-        await helperSrc.openWindow("document", title, route, {
+        await helperSrc.windowOpen("document", title, route, {
             title,
             url: route,
             decorations: true,
@@ -352,9 +384,9 @@ export default class MenuItem implements Icontroller {
     };
 
     private fileExtension = (fileName: string): string => {
-        const mimeType = helperSrc.readMimeType(fileName);
+        const fileDetail = helperSrc.fileDetail(fileName);
 
-        return mimeType.extension;
+        return fileDetail.extension;
     };
 
     private unselectAgent = (id: number): void => {
