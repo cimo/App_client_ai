@@ -13,7 +13,8 @@
         justify-items: center;
         gap: 8px;
         padding: 10px 25px;
-        height: 55px;
+        min-height: 55px;
+        max-height: 107px;
 
         .cls_icon {
             font-size: parameter.$fontSizeNormalPlus !important;
