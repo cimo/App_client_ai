@@ -10,12 +10,11 @@ export interface Ivariable {
     isMenuItemAgent: IvariableBind<boolean>;
     isMenuItemSkill: IvariableBind<boolean>;
     documentList: IvariableBind<modelMcp.IfileDetail[]>;
-    isDocumentUploading: IvariableBind<boolean>;
-    documentUploadStatusList: IvariableBind<modelMcp.IfileStatus[]>;
-    documentEmbeddingStatusList: IvariableBind<modelMcp.IfileStatus[]>;
+    isDocumentUpload: IvariableBind<boolean>;
+    isRagEmbeddingStart: IvariableBind<boolean>;
+    isRagGraphOpen: IvariableBind<boolean>;
     skillList: IvariableBind<modelMcp.IfileDetail[]>;
-    isSkillUploading: IvariableBind<boolean>;
-    skillUploadStatusList: IvariableBind<modelMcp.IfileStatus[]>;
+    isSkillUpload: IvariableBind<boolean>;
     toolList: IvariableBind<modelMcp.Itool[]>;
     toolSelected: IvariableBind<modelMcp.Itool>;
     taskList: IvariableBind<modelMcp.Itask[]>;
@@ -23,8 +22,8 @@ export interface Ivariable {
     agentList: IvariableBind<modelMcp.Iagent[]>;
     agentSelected: IvariableBind<modelMcp.Iagent>;
     agentForm: IvariableBind<modelMcp.Iagent>;
-    agentFormResult: IvariableBind<string>;
-    isAgentSelectSkill: IvariableBind<boolean>;
+    isAgentSkillSelect: IvariableBind<boolean>;
+    isAgentSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
 }
 
@@ -32,23 +31,26 @@ export interface Imethod {
     onClickMenuDocument: (event: Event) => void;
     onClickChipDocumentUpload: () => void;
     onClickDocumentDelete: (event: Event, index: number, fileName: string) => void;
+    onClickChipRagStart: () => void;
+    onClickChipRagGraph: () => void;
+    onClickRagGraphBack: (event: Event) => void;
     onClickMenuSkill: (event: Event) => void;
     onClickChipSkillUpload: () => void;
     onClickSkillDelete: (event: Event, index: number, fileName: string) => void;
     onClickSelectSkill: (event: Event) => void;
-    onClickSkillItem: (event: Event, fileName: string) => void;
-    onClickSelectSkillCancel: (event: Event) => void;
+    onClickSkillSelect: (event: Event, fileName: string) => void;
+    onClickSelectSkillBack: (event: Event) => void;
     onClickMenuTool: (event: Event) => void;
-    onClickTool: (name: string) => void;
+    onClickToolOpen: (name: string) => void;
     onClickMenuTask: (event: Event) => void;
-    onClickTask: (name: string) => void;
+    onClickTaskOpen: (name: string) => void;
     onClickMenuAgent: (event: Event) => void;
     onClickAgentCreate: (event: Event) => void;
     onClickAgentEdit: (event: Event, id: number) => void;
     onClickAgentDelete: (event: Event, index: number, id: number, name: string) => void;
     onClickAgentSave: (event: Event) => void;
     onClickAgentCancel: (event: Event) => void;
-    onClickAgent: (id: number) => void;
+    onClickAgentOpen: (id: number) => void;
     openDocument: (title: string) => void;
     fileExtension: (fileName: string) => string;
 }

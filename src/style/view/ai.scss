@@ -1,3 +1,5 @@
+@use "../setting/parameter.scss" as parameter;
+
 .view_ai {
     display: flex;
     flex-direction: column;
@@ -23,6 +25,10 @@
     }
 
     aside {
+        &:has(> .view_toast) {
+            z-index: parameter.$zIndexLevel1;
+        }
+
         .view_toast {
             .message_container {
                 position: absolute;

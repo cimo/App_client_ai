@@ -7,20 +7,32 @@ import viewToast from "../view/Toast";
 export default class Toast implements Icontroller {
     // Variable
     private variableObject: modelToast.Ivariable;
+    private methodObject: modelToast.Imethod;
 
     // Method
-    show(mode: string, message: string): void {
-        this.variableObject.mode.state = mode;
-        this.variableObject.message.state = message;
+    private onClickClose = (event: Event): void => {
+        event.stopPropagation();
 
-        setTimeout(() => {
-            this.variableObject.mode.state = "";
-            this.variableObject.message.state = "";
-        }, 3000);
+        this.variableObject.mode.state = "";
+        this.variableObject.messageList.state = [];
+    };
+
+    show(mode: string, messageList: string[], timeClose = 3000): void {
+        this.variableObject.mode.state = mode;
+        this.variableObject.messageList.state = messageList;
+        this.variableObject.timeClose.state = timeClose;
+
+        if (timeClose > 0) {
+            setTimeout(() => {
+                this.variableObject.mode.state = "";
+                this.variableObject.messageList.state = [];
+            }, timeClose);
+        }
     }
 
     constructor() {
         this.variableObject = {} as modelToast.Ivariable;
+        this.methodObject = {} as modelToast.Imethod;
     }
 
     hookObject = {} as modelToast.IelementHook;
@@ -29,10 +41,15 @@ export default class Toast implements Icontroller {
         this.variableObject = variableBind(
             {
                 mode: "",
-                message: ""
+                messageList: [],
+                timeClose: 0
             },
             this.constructor.name
         );
+
+        this.methodObject = {
+            onClickClose: this.onClickClose
+        };
     }
 
     variableEffect(watch: IvariableEffect): void {
@@ -40,7 +57,7 @@ export default class Toast implements Icontroller {
     }
 
     view(): IvirtualNode {
-        return viewToast(this.variableObject);
+        return viewToast(this.variableObject, this.methodObject);
     }
 
     event(): void {}

@@ -49,8 +49,6 @@ export interface IapiResponse {
 
 export interface Ivariable {
     isMessageSendAvailable: IvariableBind<boolean>;
-    mode: IvariableBind<string>;
-    message: IvariableBind<string>;
     chatMessageList: IvariableBind<IchatMessage[]>;
     chatHistoryList: IvariableBind<IchatInput[]>;
     systemMode: IvariableBind<string>;

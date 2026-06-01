@@ -22,7 +22,7 @@ export interface Ivariable {
 
 export interface Imethod {
     onInputChangePage: (event: KeyboardEvent) => void;
-    onClickChangePage: (pageDifference: number) => void;
+    onClickChangePage: (event: Event, difference: number) => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

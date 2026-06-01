@@ -75,7 +75,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                     <i class="cls_icon">chevron_left</i>
                                                                 </button>
                                                                 <span class="label">
-                                                                    RAG Citation {value.ragCitationTabIndex + 1} / {value.ragCitation.length}
+                                                                    {value.ragCitationTabIndex + 1} / {value.ragCitation.length}
                                                                 </span>
                                                                 <button
                                                                     onClick={() => {

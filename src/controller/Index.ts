@@ -58,7 +58,9 @@ export default class Index implements Icontroller {
         this.controllerAi.setControllerChat(this.controllerChat);
         this.controllerAi.setControllerMcp(this.controllerMcp);
         this.controllerAi.setControllerToast(this.controllerToast);
+        this.controllerMcp.setControllerToast(this.controllerToast);
         this.controllerMenuItem.setControllerMcp(this.controllerMcp);
+        this.controllerMenuItem.setControllerToast(this.controllerToast);
 
         this.appWindow = getCurrentWindow();
         this.appIsClosing = false;

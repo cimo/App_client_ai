@@ -34,9 +34,8 @@
                 content: "";
                 position: absolute;
                 left: 0;
-                top: 25%;
-                bottom: 25%;
                 width: 1px;
+                height: 20px;
             }
         }
 
@@ -50,31 +49,6 @@
             flex: 1 1 0;
             padding: 10px;
             text-align: center;
-
-            &.icon_delete {
-                flex: 0 0 40px;
-
-                .cls_icon {
-                    cursor: pointer;
-                }
-            }
-
-            &.name {
-                display: flex;
-                flex-direction: row;
-                align-content: center;
-                justify-content: start;
-                align-items: center;
-                justify-items: center;
-                gap: 10px;
-                word-break: break-word;
-                text-align: left !important;
-                cursor: pointer;
-
-                .icon {
-                    width: 40px;
-                }
-            }
         }
     }
 }

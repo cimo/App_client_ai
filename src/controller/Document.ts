@@ -17,36 +17,36 @@ export default class Document implements Icontroller {
     private appWindow: Window;
 
     // Method
-    private onClickChangePage = (pageDifference: number): void => {
-        const currentPage = parseInt(this.hookObject.elementInputPageNumber.value);
+    private onClickChangePage = (event: Event, difference: number): void => {
+        event.stopPropagation();
 
-        if (!isNaN(currentPage)) {
-            let newPage = currentPage + pageDifference;
+        const elementInputValue = this.hookObject.elementInputPageNumber.value;
+        const pageNumber = !isNaN(parseInt(elementInputValue)) ? parseInt(elementInputValue) : 1;
 
-            if (newPage < 1) {
-                newPage = 1;
-            } else if (newPage > this.variableObject.pageTotal.state) {
-                newPage = this.variableObject.pageTotal.state;
-            }
+        let pageNumberNew = pageNumber + difference;
 
-            this.hookObject.elementInputPageNumber.value = newPage.toString();
+        if (pageNumberNew < 1) {
+            pageNumberNew = 1;
+        } else if (pageNumberNew > this.variableObject.pageTotal.state) {
+            pageNumberNew = this.variableObject.pageTotal.state;
+        }
 
-            if (newPage !== currentPage) {
-                this.readContentData(newPage);
-            }
+        this.variableObject.pageNumber.state = pageNumberNew;
+
+        if (pageNumberNew !== pageNumber) {
+            this.readContentData(pageNumberNew);
         }
     };
 
     private onInputChangePage = (event: KeyboardEvent): void => {
-        const inputValue = this.hookObject.elementInputPageNumber.value.replace(/\D+/g, "");
-        this.hookObject.elementInputPageNumber.value = inputValue;
+        event.stopPropagation();
+
+        const elementInputValue = this.hookObject.elementInputPageNumber.value.replace(/\D+/g, "");
+        const pageNumber = !isNaN(parseInt(elementInputValue)) ? parseInt(elementInputValue) : 1;
+        this.variableObject.pageNumber.state = pageNumber;
 
         if (event.key === "Enter") {
-            const pageNumber = parseInt(inputValue);
-
-            if (!isNaN(pageNumber)) {
-                this.readContentData(pageNumber);
-            }
+            this.readContentData(pageNumber);
         }
     };
 

@@ -61,149 +61,147 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                 if (variableObject.isMenuItemDocument.state) {
                     result.push(
                         <div class="document_container">
-                            <div class="button_container">
-                                <button
-                                    onClick={() => {
-                                        methodObject.onClickChipDocumentUpload();
-                                    }}
-                                >
-                                    <i class="cls_icon">upload_file</i>
-                                    <p>Upload</p>
-                                </button>
-                            </div>
                             {(() => {
                                 const result: IvirtualNode[] = [];
 
-                                result.push(
-                                    <div class="upload_status">
-                                        {(() => {
-                                            const result: IvirtualNode[] = [];
+                                if (variableObject.isRagGraphOpen.state) {
+                                    result.push(
+                                        <div class="skill_container">
+                                            <div class="button_container">
+                                                <button
+                                                    onClick={(event: Event) => {
+                                                        methodObject.onClickRagGraphBack(event);
+                                                    }}
+                                                >
+                                                    <p>Back</p>
+                                                </button>
+                                            </div>
+                                            <div class="graph_container"></div>
+                                        </div>
+                                    );
+                                } else {
+                                    result.push(
+                                        <>
+                                            <div class="button_container">
+                                                <button
+                                                    onClick={() => {
+                                                        methodObject.onClickChipDocumentUpload();
+                                                    }}
+                                                    disabled={variableObject.isDocumentUpload.state}
+                                                >
+                                                    {(() => {
+                                                        const result: IvirtualNode[] = [];
 
-                                            if (variableObject.isDocumentUploading.state) {
-                                                result.push(<i class="cls_icon">update</i>);
-                                            } else if (variableObject.documentUploadStatusList.state.length > 0) {
-                                                result.push(
-                                                    <details key="0" open>
-                                                        <summary>
-                                                            <p>Upload result:</p>
-                                                        </summary>
-                                                        <ul class="file">
-                                                            {(() => {
-                                                                const result: IvirtualNode[] = [];
+                                                        if (variableObject.isDocumentUpload.state) {
+                                                            result.push(<i class="cls_icon">update</i>);
+                                                        } else {
+                                                            result.push(
+                                                                <>
+                                                                    <i class="cls_icon">upload_file</i>
+                                                                    <p>Upload</p>
+                                                                </>
+                                                            );
+                                                        }
 
-                                                                for (const [key, value] of Object.entries(
-                                                                    variableObject.documentUploadStatusList.state
-                                                                )) {
-                                                                    if (value.status !== "" && value.fileName !== "") {
-                                                                        result.push(
-                                                                            <li key={`upload_${key}`}>
-                                                                                <i class="cls_icon">file_present</i>
-                                                                                <p>
-                                                                                    [{value.status}] {value.fileName}
-                                                                                </p>
-                                                                            </li>
-                                                                        );
-                                                                    }
-                                                                }
+                                                        return result;
+                                                    })()}
+                                                </button>
+                                                <button
+                                                    class="rag"
+                                                    onClick={() => {
+                                                        methodObject.onClickChipRagStart();
+                                                    }}
+                                                    disabled={variableObject.isRagEmbeddingStart.state}
+                                                >
+                                                    {(() => {
+                                                        const result: IvirtualNode[] = [];
 
-                                                                return result;
-                                                            })()}
-                                                        </ul>
-                                                    </details>
-                                                );
-                                            }
+                                                        if (variableObject.isRagEmbeddingStart.state) {
+                                                            result.push(<i class="cls_icon">update</i>);
+                                                        } else {
+                                                            result.push(
+                                                                <>
+                                                                    <i class="cls_icon">storage</i>
+                                                                    <p>RAG - Start</p>
+                                                                </>
+                                                            );
+                                                        }
 
-                                            if (variableObject.documentEmbeddingStatusList.state.length > 0) {
-                                                result.push(
-                                                    <details key="1" open>
-                                                        <summary>
-                                                            <p>Embedding result:</p>
-                                                        </summary>
-                                                        <ul class="embedding">
-                                                            {(() => {
-                                                                const result: IvirtualNode[] = [];
+                                                        return result;
+                                                    })()}
+                                                </button>
+                                                <button
+                                                    class="rag"
+                                                    onClick={() => {
+                                                        methodObject.onClickChipRagGraph();
+                                                    }}
+                                                >
+                                                    <i class="cls_icon">analytics</i>
+                                                    <p>RAG - Graph</p>
+                                                </button>
+                                            </div>
+                                            <div class="table_flex">
+                                                <div class="row header">
+                                                    <div class="cell delete"></div>
+                                                    <div class="cell name">
+                                                        <p>Name</p>
+                                                    </div>
+                                                    <div class="cell date">
+                                                        <p>Date modified</p>
+                                                    </div>
+                                                    <div class="cell size">
+                                                        <p>Size</p>
+                                                    </div>
+                                                    <div class="cell button"></div>
+                                                </div>
+                                                <div class="list_container">
+                                                    {(() => {
+                                                        const result: IvirtualNode[] = [];
 
-                                                                for (const [key, value] of Object.entries(
-                                                                    variableObject.documentEmbeddingStatusList.state
-                                                                )) {
-                                                                    if (value.status !== "" && value.fileName !== "") {
-                                                                        result.push(
-                                                                            <li key={`embedding_${key}`}>
-                                                                                <i class="cls_icon">storage</i>
-                                                                                <p>
-                                                                                    [{value.status}] {value.fileName}
-                                                                                </p>
-                                                                            </li>
-                                                                        );
-                                                                    }
-                                                                }
+                                                        for (let a = 0; a < variableObject.documentList.state.length; a++) {
+                                                            const value = variableObject.documentList.state[a];
+                                                            const extension = methodObject.fileExtension(value.fileName);
 
-                                                                return result;
-                                                            })()}
-                                                        </ul>
-                                                    </details>
-                                                );
-                                            }
+                                                            result.push(
+                                                                <div key={a} class="row">
+                                                                    <div class="cell delete">
+                                                                        <i
+                                                                            class="cls_icon"
+                                                                            onClick={(event: Event) => {
+                                                                                methodObject.onClickDocumentDelete(event, a, value.fileName);
+                                                                            }}
+                                                                        >
+                                                                            delete
+                                                                        </i>
+                                                                    </div>
+                                                                    <div class="cell name">
+                                                                        <img class="icon" src={`/asset/image/icon_file/${extension}.svg`} />
+                                                                        <p>{value.fileName}</p>
+                                                                    </div>
+                                                                    <div class="cell date">
+                                                                        <p>{value.dateModified}</p>
+                                                                    </div>
+                                                                    <div class="cell size">
+                                                                        <p>{value.size}</p>
+                                                                    </div>
+                                                                    <div class="cell button">
+                                                                        <button onClick={() => methodObject.openDocument(value.fileName)}>
+                                                                            <p>Open</p>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        }
 
-                                            return result;
-                                        })()}
-                                    </div>
-                                );
-
+                                                        return result;
+                                                    })()}
+                                                </div>
+                                            </div>
+                                        </>
+                                    );
+                                }
                                 return result;
                             })()}
-                            <div class="table_flex">
-                                <div class="row header">
-                                    <div class="cell icon_delete"></div>
-                                    <div class="cell">
-                                        <p>Name</p>
-                                    </div>
-                                    <div class="cell">
-                                        <p>Date modified</p>
-                                    </div>
-                                    <div class="cell">
-                                        <p>Size</p>
-                                    </div>
-                                </div>
-                                <div class="list_container">
-                                    {(() => {
-                                        const result: IvirtualNode[] = [];
-
-                                        const list = Object.entries(variableObject.documentList.state);
-
-                                        for (const [key, value] of list) {
-                                            const extension = methodObject.fileExtension(value.fileName);
-
-                                            result.push(
-                                                <div key={key} class="row">
-                                                    <div class="cell icon_delete">
-                                                        <i
-                                                            class="cls_icon"
-                                                            onClick={(event: Event) => {
-                                                                methodObject.onClickDocumentDelete(event, Number(key), value.fileName);
-                                                            }}
-                                                        >
-                                                            delete
-                                                        </i>
-                                                    </div>
-                                                    <div class="cell name" onClick={() => methodObject.openDocument(value.fileName)}>
-                                                        <img class="icon" src={`/asset/image/icon_file/${extension}.svg`} />
-                                                        <p>{value.fileName}</p>
-                                                    </div>
-                                                    <div class="cell">
-                                                        <p>{value.dateModified}</p>
-                                                    </div>
-                                                    <div class="cell">
-                                                        <p>{value.size}</p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        }
-
-                                        return result;
-                                    })()}
-                                </div>
-                            </div>
                         </div>
                     );
                 } else if (variableObject.isMenuItemSkill.state) {
@@ -214,69 +212,36 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     onClick={() => {
                                         methodObject.onClickChipSkillUpload();
                                     }}
+                                    disabled={variableObject.isSkillUpload.state}
                                 >
-                                    <i class="cls_icon">upload_file</i>
-                                    <p>Upload</p>
+                                    {(() => {
+                                        const result: IvirtualNode[] = [];
+
+                                        if (variableObject.isSkillUpload.state) {
+                                            result.push(<i class="cls_icon">update</i>);
+                                        } else {
+                                            result.push(
+                                                <>
+                                                    <i class="cls_icon">upload_file</i>
+                                                    <p>Upload</p>
+                                                </>
+                                            );
+                                        }
+
+                                        return result;
+                                    })()}
                                 </button>
                             </div>
-                            {(() => {
-                                const result: IvirtualNode[] = [];
-
-                                result.push(
-                                    <div class="upload_status">
-                                        {(() => {
-                                            const result: IvirtualNode[] = [];
-                                            if (variableObject.isSkillUploading.state) {
-                                                result.push(<i class="cls_icon">update</i>);
-                                            } else if (variableObject.skillUploadStatusList.state.length > 0) {
-                                                result.push(
-                                                    <details open>
-                                                        <summary>
-                                                            <p>Upload result:</p>
-                                                        </summary>
-                                                        <ul class="file">
-                                                            {(() => {
-                                                                const result: IvirtualNode[] = [];
-
-                                                                for (const [key, value] of Object.entries(
-                                                                    variableObject.skillUploadStatusList.state
-                                                                )) {
-                                                                    if (value.status !== "" || value.fileName !== "") {
-                                                                        result.push(
-                                                                            <li key={key}>
-                                                                                <i class="cls_icon">file_present</i>
-                                                                                <p>
-                                                                                    [{value.status}] {value.fileName}
-                                                                                </p>
-                                                                            </li>
-                                                                        );
-                                                                    }
-                                                                }
-
-                                                                return result;
-                                                            })()}
-                                                        </ul>
-                                                    </details>
-                                                );
-                                            }
-
-                                            return result;
-                                        })()}
-                                    </div>
-                                );
-
-                                return result;
-                            })()}
                             <div class="table_flex">
                                 <div class="row header">
-                                    <div class="cell icon_delete"></div>
-                                    <div class="cell">
+                                    <div class="cell delete"></div>
+                                    <div class="cell name">
                                         <p>Name</p>
                                     </div>
-                                    <div class="cell">
+                                    <div class="cell date">
                                         <p>Date modified</p>
                                     </div>
-                                    <div class="cell">
+                                    <div class="cell size">
                                         <p>Size</p>
                                     </div>
                                 </div>
@@ -289,7 +254,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         for (const [key, value] of list) {
                                             result.push(
                                                 <div key={key} class="row">
-                                                    <div class="cell icon_delete">
+                                                    <div class="cell delete">
                                                         <i
                                                             class="cls_icon"
                                                             onClick={(event: Event) => {
@@ -299,14 +264,14 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                             delete
                                                         </i>
                                                     </div>
-                                                    <div class="cell name skill">
+                                                    <div class="cell name">
                                                         <img class="icon" src={`/asset/image/icon_file/md.svg`} />
                                                         <p>{value.fileName}</p>
                                                     </div>
-                                                    <div class="cell">
+                                                    <div class="cell date">
                                                         <p>{value.dateModified}</p>
                                                     </div>
-                                                    <div class="cell">
+                                                    <div class="cell size">
                                                         <p>{value.size}</p>
                                                     </div>
                                                 </div>
@@ -328,18 +293,22 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
 
                                     for (const [key, value] of Object.entries(variableObject.toolList.state)) {
                                         result.push(
-                                            <li
-                                                key={key}
-                                                class="chip"
-                                                onClick={() => {
-                                                    methodObject.onClickTool(value.name);
-                                                }}
-                                            >
+                                            <li key={key} class="chip">
                                                 <div class="top">
                                                     <img src={`/asset/image/icon_ui/${value.icon}`} />
                                                     <p>{value.name}</p>
+                                                    <i
+                                                        class="cls_icon"
+                                                        onClick={() => {
+                                                            methodObject.onClickToolOpen(value.name);
+                                                        }}
+                                                    >
+                                                        launch
+                                                    </i>
                                                 </div>
                                                 <p class="bottom">{value.description}</p>
+                                                <p class="label">Example:</p>
+                                                <p class="bottom">{value.example}</p>
                                             </li>
                                         );
                                     }
@@ -358,18 +327,22 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
 
                                     for (const [key, value] of Object.entries(variableObject.taskList.state)) {
                                         result.push(
-                                            <li
-                                                key={key}
-                                                class="chip"
-                                                onClick={() => {
-                                                    methodObject.onClickTask(value.name);
-                                                }}
-                                            >
+                                            <li key={key} class="chip">
                                                 <div class="top">
                                                     <img src={`/asset/image/icon_ui/${value.icon}`} />
                                                     <p>{value.name}</p>
+                                                    <i
+                                                        class="cls_icon"
+                                                        onClick={() => {
+                                                            methodObject.onClickTaskOpen(value.name);
+                                                        }}
+                                                    >
+                                                        launch
+                                                    </i>
                                                 </div>
                                                 <p class="bottom">{value.description}</p>
+                                                <p class="label">Example:</p>
+                                                <p class="bottom">{value.example}</p>
                                             </li>
                                         );
                                     }
@@ -385,13 +358,13 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                             {(() => {
                                 const result: IvirtualNode[] = [];
 
-                                if (variableObject.isAgentSelectSkill.state) {
+                                if (variableObject.isAgentSkillSelect.state) {
                                     result.push(
                                         <div class="skill_container">
                                             <div class="button_container">
                                                 <button
                                                     onClick={(event: Event) => {
-                                                        methodObject.onClickSelectSkillCancel(event);
+                                                        methodObject.onClickSelectSkillBack(event);
                                                     }}
                                                 >
                                                     <p>Back</p>
@@ -399,15 +372,16 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             </div>
                                             <div class="table_flex">
                                                 <div class="row header">
-                                                    <div class="cell">
+                                                    <div class="cell name">
                                                         <p>Name</p>
                                                     </div>
-                                                    <div class="cell">
+                                                    <div class="cell date">
                                                         <p>Date modified</p>
                                                     </div>
-                                                    <div class="cell">
+                                                    <div class="cell size">
                                                         <p>Size</p>
                                                     </div>
+                                                    <div class="cell button"></div>
                                                 </div>
                                                 <div class="list_container">
                                                     {(() => {
@@ -418,20 +392,24 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         for (const [key, value] of list) {
                                                             result.push(
                                                                 <div key={key} class="row">
-                                                                    <div
-                                                                        class="cell name"
-                                                                        onClick={(event: Event) => {
-                                                                            methodObject.onClickSkillItem(event, value.fileName);
-                                                                        }}
-                                                                    >
+                                                                    <div class="cell name">
                                                                         <img class="icon" src={`/asset/image/icon_file/md.svg`} />
                                                                         <p>{value.fileName}</p>
                                                                     </div>
-                                                                    <div class="cell">
+                                                                    <div class="cell date">
                                                                         <p>{value.dateModified}</p>
                                                                     </div>
-                                                                    <div class="cell">
+                                                                    <div class="cell size">
                                                                         <p>{value.size}</p>
+                                                                    </div>
+                                                                    <div class="cell button">
+                                                                        <button
+                                                                            onClick={(event: Event) => {
+                                                                                methodObject.onClickSkillSelect(event, value.fileName);
+                                                                            }}
+                                                                        >
+                                                                            <p>Open</p>
+                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                             );
@@ -484,16 +462,24 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     })()}
                                                 </div>
                                             </div>
-                                            <div class="form_message">
-                                                <p>{variableObject.agentFormResult.state}</p>
-                                            </div>
                                             <div class="form_button_container">
                                                 <button
                                                     onClick={(event: Event) => {
                                                         methodObject.onClickAgentSave(event);
                                                     }}
+                                                    disabled={variableObject.isAgentSave.state}
                                                 >
-                                                    <p>Save</p>
+                                                    {(() => {
+                                                        const result: IvirtualNode[] = [];
+
+                                                        if (variableObject.isAgentSave.state) {
+                                                            result.push(<i class="cls_icon">update</i>);
+                                                        } else {
+                                                            result.push(<p>Save</p>);
+                                                        }
+
+                                                        return result;
+                                                    })()}
                                                 </button>
                                                 <button
                                                     onClick={(event: Event) => {
@@ -526,16 +512,18 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
 
                                                     for (const [key, value] of list) {
                                                         result.push(
-                                                            <li
-                                                                key={key}
-                                                                class="chip"
-                                                                onClick={() => {
-                                                                    methodObject.onClickAgent(value.id);
-                                                                }}
-                                                            >
+                                                            <li key={key} class="chip agent">
                                                                 <div class="top">
                                                                     <img src={`/asset/image/icon_ui/agent.svg`} />
                                                                     <p>{value.name}</p>
+                                                                    <i
+                                                                        class="cls_icon"
+                                                                        onClick={() => {
+                                                                            methodObject.onClickAgentOpen(value.id);
+                                                                        }}
+                                                                    >
+                                                                        launch
+                                                                    </i>
                                                                     <i
                                                                         class="cls_icon"
                                                                         onClick={(event: Event) => {

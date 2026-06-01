@@ -11,49 +11,36 @@ import * as modelIndex from "../model/Index";
 import * as modelChat from "../model/Chat";
 import * as modelDocument from "../model/Document";
 import * as viewMcp from "../view/Mcp";
+import type Toast from "./Toast";
 
 export default class Mcp implements Icontroller {
     // Variable
     private variableObject: modelMcp.Ivariable;
     private methodObject: modelMcp.Imethod;
     private viewNodeEmpty: IvirtualNode;
+    private controllerToast: Toast;
 
     // Method
-    private apiEmbeddingCheck = async (fileName: string): Promise<string> => {
-        return fetch(`${helperSrc.URL_MCP}/api/embedding-check`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
-            },
-            body: JSON.stringify({ fileName }),
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
+    private showFileStatusMessage = (fileStatusList: modelMcp.IfileStatus[]): void => {
+        const messageList: string[] = [];
+        let mode = "success";
+
+        for (const fileStatus of fileStatusList) {
+            if (fileStatus.status === "Failed") {
+                mode = "error";
             }
-        })
-            .then(async (result) => {
-                this.variableObject.isOfflineMcp.state = false;
 
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+            messageList.push(`[${fileStatus.status}] ${fileStatus.fileName}`);
+        }
 
-                return resultJson.response.stdout;
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiEmbeddingCheck() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-
-                return "fail";
-            });
+        this.controllerToast.show(mode, messageList, 0);
     };
 
-    private startEmbeddingCheck = (embeddingListIndex: number): void => {
-        const fileName = this.variableObject.documentEmbeddingStatusList.state[embeddingListIndex].fileName;
+    private ragEmbeddingStartCheck = (fileStatusList: modelMcp.IfileStatus[], index: number): void => {
+        const fileName = fileStatusList[index].fileName;
 
         let isPolling = false;
-        let status = "ongoing";
+        let status = "";
 
         const interval = setInterval(async () => {
             if (isPolling) {
@@ -62,29 +49,51 @@ export default class Mcp implements Icontroller {
 
             isPolling = true;
 
-            status = await this.apiEmbeddingCheck(fileName);
-
-            if (status !== "ongoing") {
-                if (embeddingListIndex !== -1) {
-                    const embeddingListState = this.variableObject.documentEmbeddingStatusList.state.slice();
-
-                    if (status === "done") {
-                        embeddingListState[embeddingListIndex] = {
-                            ...embeddingListState[embeddingListIndex],
-                            status: "Success"
-                        };
-                    } else if (status === "fail") {
-                        embeddingListState[embeddingListIndex] = {
-                            ...embeddingListState[embeddingListIndex],
-                            status: "Failed"
-                        };
-                    }
-
-                    this.variableObject.documentEmbeddingStatusList.state = embeddingListState;
+            await fetch(`${helperSrc.URL_MCP}/api/rag-embedding-check`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "mcp-session-id": session.data.mcpSessionId,
+                    "mcp-cookie": session.data.mcpCookie
+                },
+                body: JSON.stringify({ fileName }),
+                danger: {
+                    acceptInvalidCerts: true,
+                    acceptInvalidHostnames: true
                 }
+            })
+                .then(async (result) => {
+                    this.variableObject.isOfflineMcp.state = false;
 
+                    const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+                    status = resultJson.response.stdout;
+
+                    fileStatusList[index].status = status;
+
+                    this.showFileStatusMessage(fileStatusList);
+                })
+                .catch((error: Error) => {
+                    helperSrc.writeLog("Mcp.ts - apiRagEmbeddingCheck() - fetch() - catch()", error.message);
+
+                    this.variableObject.isOfflineMcp.state = true;
+                });
+
+            if (status !== "Ongoing") {
                 if (interval) {
                     clearInterval(interval);
+                }
+
+                for (let a = 0; a < fileStatusList.length; a++) {
+                    if (fileStatusList[a].status === "Ongoing") {
+                        this.variableObject.isRagEmbeddingStart.state = true;
+
+                        break;
+                    }
+
+                    if (a === fileStatusList.length - 1) {
+                        this.variableObject.isRagEmbeddingStart.state = false;
+                    }
                 }
             }
 
@@ -214,9 +223,9 @@ export default class Mcp implements Icontroller {
         });
 
         if (pathFileList) {
-            this.variableObject.isDocumentUploading.state = true;
-            this.variableObject.documentUploadStatusList.state = [];
-            this.variableObject.documentEmbeddingStatusList.state = [];
+            this.variableObject.isDocumentUpload.state = true;
+
+            const uploadStatusList: modelMcp.IfileStatus[] = [];
 
             for (let a = 0; a < pathFileList.length; a++) {
                 const pathFile = pathFileList[a];
@@ -248,20 +257,16 @@ export default class Mcp implements Icontroller {
                         const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
                         if (resultJson.response.stdout !== "") {
-                            this.variableObject.isDocumentUploading.state = false;
-
                             const resultFile = JSON.parse(resultJson.response.stdout) as modelMcp.IfileStatus;
 
-                            this.variableObject.documentUploadStatusList.state.push(resultFile);
+                            uploadStatusList.push(resultFile);
 
                             this.apiDocumentList();
-
-                            if (fileDetail.category !== "image" && resultFile.status === "Success") {
-                                this.variableObject.documentEmbeddingStatusList.state.push({ fileName: resultFile.fileName, status: "Ongoing" });
-
-                                this.startEmbeddingCheck(this.variableObject.documentEmbeddingStatusList.state.length - 1);
-                            }
+                        } else {
+                            uploadStatusList.push({ fileName: fileDetail.fileName, status: "Failed" });
                         }
+
+                        this.showFileStatusMessage(uploadStatusList);
                     })
                     .catch((error: Error) => {
                         helperSrc.writeLog("Mcp.ts - apiDocumentUpload() - fetch() - catch()", error.message);
@@ -269,6 +274,8 @@ export default class Mcp implements Icontroller {
                         this.variableObject.isOfflineMcp.state = true;
                     });
             }
+
+            this.variableObject.isDocumentUpload.state = false;
         }
     };
 
@@ -364,6 +371,51 @@ export default class Mcp implements Icontroller {
             });
     };
 
+    apiRagEmbeddingStart = async (): Promise<void> => {
+        this.variableObject.isRagEmbeddingStart.state = true;
+
+        const embeddingStatusList: modelMcp.IfileStatus[] = [];
+
+        await fetch(`${helperSrc.URL_MCP}/api/rag-embedding-start`, {
+            method: "POST",
+            headers: {
+                "mcp-session-id": session.data.mcpSessionId,
+                Cookie: session.data.mcpCookie
+            },
+            body: "",
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (result) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+
+                if (resultJson.response.stdout !== "[]") {
+                    const resultStdout = JSON.parse(resultJson.response.stdout) as string[];
+
+                    for (let a = 0; a < resultStdout.length; a++) {
+                        embeddingStatusList.push({ fileName: resultStdout[a], status: "Ongoing" });
+
+                        this.showFileStatusMessage(embeddingStatusList);
+
+                        this.ragEmbeddingStartCheck(embeddingStatusList, a);
+                    }
+                } else {
+                    this.controllerToast.show("warning", ["No documents found for RAG."]);
+
+                    this.variableObject.isRagEmbeddingStart.state = false;
+                }
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiRagEmbeddingStart() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
     apiSkillUpload = async (): Promise<void> => {
         const pathFileList = await open({
             multiple: true,
@@ -371,8 +423,9 @@ export default class Mcp implements Icontroller {
         });
 
         if (pathFileList) {
-            this.variableObject.isSkillUploading.state = true;
-            this.variableObject.skillUploadStatusList.state = [];
+            this.variableObject.isSkillUpload.state = true;
+
+            const uploadStatusList: modelMcp.IfileStatus[] = [];
 
             for (let a = 0; a < pathFileList.length; a++) {
                 const pathFile = pathFileList[a];
@@ -402,13 +455,17 @@ export default class Mcp implements Icontroller {
 
                         const resultJson = (await result.json()) as modelIndex.IresponseBody;
 
-                        this.variableObject.isSkillUploading.state = false;
+                        if (resultJson.response.stdout !== "") {
+                            const resultFile = JSON.parse(resultJson.response.stdout) as modelMcp.IfileStatus;
 
-                        const resultFile = JSON.parse(resultJson.response.stdout) as modelMcp.IfileStatus;
+                            uploadStatusList.push(resultFile);
 
-                        this.variableObject.skillUploadStatusList.state.push(resultFile);
+                            this.apiSkillList();
+                        } else {
+                            uploadStatusList.push({ fileName: fileDetail.fileName, status: "Failed" });
+                        }
 
-                        this.apiSkillList();
+                        this.showFileStatusMessage(uploadStatusList);
                     })
                     .catch((error: Error) => {
                         helperSrc.writeLog("Mcp.ts - apiSkillUpload() - fetch() - catch()", error.message);
@@ -416,6 +473,8 @@ export default class Mcp implements Icontroller {
                         this.variableObject.isOfflineMcp.state = true;
                     });
             }
+
+            this.variableObject.isSkillUpload.state = false;
         }
     };
 
@@ -512,6 +571,8 @@ export default class Mcp implements Icontroller {
     };
 
     apiAgentCreate = async (agent: modelMcp.Iagent): Promise<void> => {
+        this.variableObject.isAgentSave.state = true;
+
         await fetch(`${helperSrc.URL_MCP}/api/agent-create`, {
             method: "POST",
             headers: {
@@ -539,8 +600,10 @@ export default class Mcp implements Icontroller {
 
                     this.variableObject.agentForm.state = {} as modelMcp.Iagent;
                 } else {
-                    this.variableObject.agentFormResult.state = "Failed to create agent.";
+                    this.controllerToast.show("error", ["Failed to create agent."]);
                 }
+
+                this.variableObject.isAgentSave.state = false;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiAgentCreate() - fetch() - catch()", error.message);
@@ -550,6 +613,8 @@ export default class Mcp implements Icontroller {
     };
 
     apiAgentUpdate = async (agent: modelMcp.Iagent): Promise<void> => {
+        this.variableObject.isAgentSave.state = true;
+
         await fetch(`${helperSrc.URL_MCP}/api/agent-update`, {
             method: "POST",
             headers: {
@@ -578,8 +643,10 @@ export default class Mcp implements Icontroller {
 
                     this.variableObject.agentForm.state = {} as modelMcp.Iagent;
                 } else {
-                    this.variableObject.agentFormResult.state = "Failed to save agent.";
+                    this.controllerToast.show("error", ["Failed to update agent."]);
                 }
+
+                this.variableObject.isAgentSave.state = false;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiAgentUpdate() - fetch() - catch()", error.message);
@@ -664,10 +731,16 @@ export default class Mcp implements Icontroller {
             });
     };
 
+    setControllerToast(controller: Toast): void {
+        this.controllerToast = controller;
+    }
+
     constructor() {
         this.variableObject = {} as modelMcp.Ivariable;
         this.methodObject = {} as modelMcp.Imethod;
         this.viewNodeEmpty = { tag: "div", propertyObject: {}, childrenList: [] };
+
+        this.controllerToast = {} as Toast;
     }
 
     hookObject = {} as modelMcp.IelementHook;
@@ -683,14 +756,12 @@ export default class Mcp implements Icontroller {
                 agentList: [],
                 agentSelected: {} as modelMcp.Iagent,
                 documentList: [],
-                isDocumentUploading: variableLink<boolean>("MenuItem"),
-                documentUploadStatusList: variableLink<modelMcp.IfileStatus[]>("MenuItem"),
-                documentEmbeddingStatusList: variableLink<modelMcp.IfileStatus[]>("MenuItem"),
+                isDocumentUpload: variableLink<boolean>("MenuItem"),
+                isRagEmbeddingStart: variableLink<boolean>("MenuItem"),
                 skillList: [],
-                isSkillUploading: variableLink<boolean>("MenuItem"),
-                skillUploadStatusList: variableLink<modelMcp.IfileStatus[]>("MenuItem"),
+                isSkillUpload: variableLink<boolean>("MenuItem"),
                 agentForm: variableLink<modelMcp.Iagent>("MenuItem"),
-                agentFormResult: variableLink<string>("MenuItem"),
+                isAgentSave: variableLink<boolean>("MenuItem"),
                 systemMode: variableLink<string>("Chat"),
                 chatMessageList: variableLink<modelChat.IchatMessage[]>("Chat")
             },

@@ -22,13 +22,11 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                         result.push(
                             <>
                                 <div class="pagination_container">
-                                    <i class="cls_icon" onClick={() => methodObject.onClickChangePage(-1)}>
+                                    <i class="cls_icon" onClick={(event: Event) => methodObject.onClickChangePage(event, -1)}>
                                         chevron_left
                                     </i>
                                     <input
                                         type="text"
-                                        inputmode="numeric"
-                                        pattern="[0-9]*"
                                         value={variableObject.pageNumber.state}
                                         onKeyUp={(event: KeyboardEvent) => {
                                             methodObject.onInputChangePage(event);
@@ -37,7 +35,7 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                                     />
                                     <span>/</span>
                                     <span class="page_total">{variableObject.pageTotal.state}</span>
-                                    <i class="cls_icon" onClick={() => methodObject.onClickChangePage(1)}>
+                                    <i class="cls_icon" onClick={(event: Event) => methodObject.onClickChangePage(event, 1)}>
                                         chevron_right
                                     </i>
                                 </div>

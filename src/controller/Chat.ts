@@ -149,7 +149,7 @@ export default class Chat implements Icontroller {
         //await invoke("test");
 
         if (!this.variableObject.isMessageSendAvailable.state && mode !== "rag") {
-            this.controllerToast.show("warning", "Wait for the current response to complete.");
+            this.controllerToast.show("warning", ["Wait for the current response to complete."]);
 
             return;
         }
@@ -239,7 +239,7 @@ export default class Chat implements Icontroller {
                 inputSystem = [
                     "You are a multilingual assistant tool executer that needs to reply ALWAYS with the user input language and you need to transform the user request in a action.",
                     `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}`,
-                    `Tool description: ${this.variableObject.toolSelected.state.description}`,
+                    `${this.variableObject.toolSelected.state.inputInstruction}`,
                     "You MUST return ONLY raw json WITHOUT wrap it in ```json",
                     `For ${this.variableObject.toolSelected.state.name} return ALWAYS the json with this format: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }`,
                     "You MUST NOT solve problems.",
@@ -250,7 +250,7 @@ export default class Chat implements Icontroller {
                 inputSystem = [
                     "You are a multilingual assistant task executer that needs to reply ALWAYS with the user input language and you need to transform the user request in a ordered list of actions.",
                     `You MUST use ONLY the following tool: ${this.variableObject.taskSelected.state.name}`,
-                    `Tool description: ${this.variableObject.taskSelected.state.description}`,
+                    `${this.variableObject.taskSelected.state.inputInstruction}`,
                     "You MUST return ONLY raw json WITHOUT wrap it in ```json",
                     `For ${this.variableObject.taskSelected.state.name} return ALWAYS the json with this format: { "list": [ { "name": "${this.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.taskSelected.state.argumentObject)} } ] }`,
                     "You MUST NOT solve problems.",
@@ -268,7 +268,6 @@ export default class Chat implements Icontroller {
 
                 inputSystem = [
                     skillDescription,
-                    "You MUST return ONLY raw json WITHOUT wrap it in ```json",
                     'If you find a tag [script](...) in the text you MUST stop and return ALWAYS the json with this format: { "action": { "script": true } }'
                 ].join("\n");
 
@@ -644,8 +643,6 @@ export default class Chat implements Icontroller {
         this.variableObject = variableBind(
             {
                 isMessageSendAvailable: true,
-                mode: variableLink<string>("Toast"),
-                message: variableLink<string>("Toast"),
                 chatMessageList: [],
                 chatHistoryList: [],
                 systemMode: "chat",

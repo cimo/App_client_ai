@@ -7,6 +7,7 @@ import * as modelMenuItem from "../model/MenuItem";
 import * as modelMcp from "../model/Mcp";
 import * as viewMenuItem from "../view/MenuItem";
 import type Mcp from "./Mcp";
+import type Toast from "./Toast";
 import ControllerDialog from "./Dialog";
 
 export default class MenuItem implements Icontroller {
@@ -14,41 +15,10 @@ export default class MenuItem implements Icontroller {
     private variableObject: modelMenuItem.Ivariable;
     private methodObject: modelMenuItem.Imethod;
     private controllerMcp: Mcp;
+    private controllerToast: Toast;
     private controllerDialog: ControllerDialog;
 
     // Method
-    private clearUploadSuccess = (): void => {
-        const documentUploadFilteredList = [];
-
-        for (let a = 0; a < this.variableObject.documentUploadStatusList.state.length; a++) {
-            if (this.variableObject.documentUploadStatusList.state[a].status !== "Success") {
-                documentUploadFilteredList.push(this.variableObject.documentUploadStatusList.state[a]);
-            }
-        }
-
-        this.variableObject.documentUploadStatusList.state = documentUploadFilteredList;
-
-        const documentEmbeddingFilteredList = [];
-
-        for (let a = 0; a < this.variableObject.documentEmbeddingStatusList.state.length; a++) {
-            if (this.variableObject.documentEmbeddingStatusList.state[a].status !== "Success") {
-                documentEmbeddingFilteredList.push(this.variableObject.documentEmbeddingStatusList.state[a]);
-            }
-        }
-
-        this.variableObject.documentEmbeddingStatusList.state = documentEmbeddingFilteredList;
-
-        const skillUploadFilteredList = [];
-
-        for (let a = 0; a < this.variableObject.skillUploadStatusList.state.length; a++) {
-            if (this.variableObject.skillUploadStatusList.state[a].status !== "Success") {
-                skillUploadFilteredList.push(this.variableObject.skillUploadStatusList.state[a]);
-            }
-        }
-
-        this.variableObject.skillUploadStatusList.state = skillUploadFilteredList;
-    };
-
     private onClickMenuDocument = (event: Event): void => {
         event.stopPropagation();
 
@@ -60,9 +30,7 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemSkill.state = false;
 
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-            this.variableObject.isAgentSelectSkill.state = false;
-
-            this.clearUploadSuccess();
+            this.variableObject.isAgentSkillSelect.state = false;
         });
     };
 
@@ -93,6 +61,20 @@ export default class MenuItem implements Icontroller {
         }
     };
 
+    private onClickChipRagStart = async (): Promise<void> => {
+        await this.controllerMcp.apiRagEmbeddingStart();
+    };
+
+    private onClickChipRagGraph = async (): Promise<void> => {
+        this.variableObject.isRagGraphOpen.state = true;
+    };
+
+    private onClickRagGraphBack = (event: Event): void => {
+        event.stopPropagation();
+
+        this.variableObject.isRagGraphOpen.state = false;
+    };
+
     private onClickMenuSkill = (event: Event): void => {
         event.stopPropagation();
 
@@ -104,9 +86,7 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemSkill.state = !this.variableObject.isMenuItemSkill.state;
 
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-            this.variableObject.isAgentSelectSkill.state = false;
-
-            this.clearUploadSuccess();
+            this.variableObject.isAgentSkillSelect.state = false;
         });
     };
 
@@ -162,22 +142,22 @@ export default class MenuItem implements Icontroller {
             this.variableObject.agentForm.state.name = this.hookObject.elementInputAgentName.value;
             this.variableObject.agentForm.state.description = this.hookObject.elementInputAgentDescription.value;
 
-            this.variableObject.isAgentSelectSkill.state = true;
+            this.variableObject.isAgentSkillSelect.state = true;
         });
     };
 
-    private onClickSkillItem = (event: Event, fileName: string): void => {
+    private onClickSkillSelect = (event: Event, fileName: string): void => {
         event.stopPropagation();
 
         this.variableObject.agentForm.state.skill = fileName;
 
-        this.variableObject.isAgentSelectSkill.state = false;
+        this.variableObject.isAgentSkillSelect.state = false;
     };
 
-    private onClickSelectSkillCancel = (event: Event): void => {
+    private onClickSelectSkillBack = (event: Event): void => {
         event.stopPropagation();
 
-        this.variableObject.isAgentSelectSkill.state = false;
+        this.variableObject.isAgentSkillSelect.state = false;
     };
 
     private onClickMenuTool = (event: Event): void => {
@@ -190,12 +170,10 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemSkill.state = false;
 
         this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-        this.variableObject.isAgentSelectSkill.state = false;
-
-        this.clearUploadSuccess();
+        this.variableObject.isAgentSkillSelect.state = false;
     };
 
-    private onClickTool = (name: string): void => {
+    private onClickToolOpen = (name: string): void => {
         this.variableObject.toolSelected.state = {} as modelMcp.Itool;
         this.variableObject.taskSelected.state = {} as modelMcp.Itask;
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
@@ -225,12 +203,10 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemSkill.state = false;
 
         this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-        this.variableObject.isAgentSelectSkill.state = false;
-
-        this.clearUploadSuccess();
+        this.variableObject.isAgentSkillSelect.state = false;
     };
 
-    private onClickTask = (name: string): void => {
+    private onClickTaskOpen = (name: string): void => {
         this.variableObject.toolSelected.state = {} as modelMcp.Itool;
         this.variableObject.taskSelected.state = {} as modelMcp.Itask;
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
@@ -261,9 +237,7 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemSkill.state = false;
 
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-            this.variableObject.isAgentSelectSkill.state = false;
-
-            this.clearUploadSuccess();
+            this.variableObject.isAgentSkillSelect.state = false;
         });
     };
 
@@ -276,7 +250,6 @@ export default class MenuItem implements Icontroller {
             description: "",
             skill: ""
         };
-        this.variableObject.agentFormResult.state = "";
     };
 
     private onClickAgentEdit = (event: Event, id: number): void => {
@@ -291,8 +264,6 @@ export default class MenuItem implements Icontroller {
                 break;
             }
         }
-
-        this.variableObject.agentFormResult.state = "";
     };
 
     private onClickAgentDelete = async (event: Event, index: number, id: number, name: string): Promise<void> => {
@@ -310,15 +281,21 @@ export default class MenuItem implements Icontroller {
     private onClickAgentSave = (event: Event): void => {
         event.stopPropagation();
 
+        const errorList = [];
+
         if (this.hookObject.elementInputAgentName.value === "") {
-            this.variableObject.agentFormResult.state = "Agent name is required.";
-        } else if (this.variableObject.agentForm.state.skill === "") {
-            this.variableObject.agentFormResult.state = "Agent skill is required.";
-        } else {
-            this.variableObject.agentFormResult.state = "";
+            errorList.push("Agent name is required.");
         }
 
-        if (this.variableObject.agentFormResult.state === "") {
+        if (this.hookObject.elementInputAgentDescription.value === "") {
+            errorList.push("Agent description is required.");
+        }
+
+        if (this.variableObject.agentForm.state.skill === "") {
+            errorList.push("Agent skill is required.");
+        }
+
+        if (errorList.length === 0) {
             this.variableObject.agentForm.state.name = this.hookObject.elementInputAgentName.value;
             this.variableObject.agentForm.state.description = this.hookObject.elementInputAgentDescription.value;
 
@@ -327,6 +304,8 @@ export default class MenuItem implements Icontroller {
             } else {
                 this.controllerMcp.apiAgentUpdate(this.variableObject.agentForm.state);
             }
+        } else {
+            this.controllerToast.show("error", errorList);
         }
     };
 
@@ -338,7 +317,7 @@ export default class MenuItem implements Icontroller {
         });
     };
 
-    private onClickAgent = async (id: number): Promise<void> => {
+    private onClickAgentOpen = async (id: number): Promise<void> => {
         this.variableObject.toolSelected.state = {} as modelMcp.Itool;
         this.variableObject.taskSelected.state = {} as modelMcp.Itask;
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
@@ -401,11 +380,16 @@ export default class MenuItem implements Icontroller {
         this.controllerMcp = controller;
     }
 
+    setControllerToast(controller: Toast): void {
+        this.controllerToast = controller;
+    }
+
     constructor() {
         this.variableObject = {} as modelMenuItem.Ivariable;
         this.methodObject = {} as modelMenuItem.Imethod;
 
         this.controllerMcp = {} as Mcp;
+        this.controllerToast = {} as Toast;
         this.controllerDialog = new ControllerDialog();
     }
 
@@ -420,12 +404,11 @@ export default class MenuItem implements Icontroller {
                 isMenuItemAgent: false,
                 isMenuItemSkill: false,
                 documentList: variableLink<modelMcp.IfileDetail[]>("Mcp"),
-                isDocumentUploading: false,
-                documentUploadStatusList: [],
-                documentEmbeddingStatusList: [],
+                isDocumentUpload: false,
+                isRagEmbeddingStart: false,
+                isRagGraphOpen: false,
                 skillList: variableLink<modelMcp.IfileDetail[]>("Mcp"),
-                isSkillUploading: false,
-                skillUploadStatusList: [],
+                isSkillUpload: false,
                 toolList: variableLink<modelMcp.Itool[]>("Mcp"),
                 toolSelected: variableLink<modelMcp.Itool>("Mcp"),
                 taskList: variableLink<modelMcp.Itask[]>("Mcp"),
@@ -433,8 +416,8 @@ export default class MenuItem implements Icontroller {
                 agentList: variableLink<modelMcp.Iagent[]>("Mcp"),
                 agentSelected: variableLink<modelMcp.Iagent>("Mcp"),
                 agentForm: {} as modelMcp.Iagent,
-                agentFormResult: "",
-                isAgentSelectSkill: false,
+                isAgentSkillSelect: false,
+                isAgentSave: false,
                 systemMode: variableLink<string>("Chat")
             },
             this.constructor.name
@@ -444,23 +427,26 @@ export default class MenuItem implements Icontroller {
             onClickMenuDocument: this.onClickMenuDocument,
             onClickChipDocumentUpload: this.onClickChipDocumentUpload,
             onClickDocumentDelete: this.onClickDocumentDelete,
+            onClickChipRagStart: this.onClickChipRagStart,
+            onClickChipRagGraph: this.onClickChipRagGraph,
+            onClickRagGraphBack: this.onClickRagGraphBack,
             onClickMenuSkill: this.onClickMenuSkill,
             onClickChipSkillUpload: this.onClickChipSkillUpload,
             onClickSkillDelete: this.onClickSkillDelete,
             onClickSelectSkill: this.onClickSelectSkill,
-            onClickSkillItem: this.onClickSkillItem,
-            onClickSelectSkillCancel: this.onClickSelectSkillCancel,
+            onClickSkillSelect: this.onClickSkillSelect,
+            onClickSelectSkillBack: this.onClickSelectSkillBack,
             onClickMenuTool: this.onClickMenuTool,
-            onClickTool: this.onClickTool,
+            onClickToolOpen: this.onClickToolOpen,
             onClickMenuTask: this.onClickMenuTask,
-            onClickTask: this.onClickTask,
+            onClickTaskOpen: this.onClickTaskOpen,
             onClickMenuAgent: this.onClickMenuAgent,
             onClickAgentCreate: this.onClickAgentCreate,
             onClickAgentEdit: this.onClickAgentEdit,
             onClickAgentDelete: this.onClickAgentDelete,
             onClickAgentSave: this.onClickAgentSave,
             onClickAgentCancel: this.onClickAgentCancel,
-            onClickAgent: this.onClickAgent,
+            onClickAgentOpen: this.onClickAgentOpen,
             openDocument: this.openDocument,
             fileExtension: this.fileExtension
         };

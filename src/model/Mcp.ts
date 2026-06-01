@@ -8,6 +8,8 @@ export interface Itool {
     argumentObject: Record<string, unknown>;
     icon: string;
     description: string;
+    example: string;
+    inputInstruction: string;
 }
 
 export interface Itask {
@@ -15,6 +17,8 @@ export interface Itask {
     argumentObject: Record<string, unknown>;
     icon: string;
     description: string;
+    example: string;
+    inputInstruction: string;
 }
 
 export interface Iagent {
@@ -71,14 +75,12 @@ export interface Ivariable {
     agentList: IvariableBind<Iagent[]>;
     agentSelected: IvariableBind<Iagent>;
     documentList: IvariableBind<IfileDetail[]>;
-    isDocumentUploading: IvariableBind<boolean>;
-    documentUploadStatusList: IvariableBind<IfileStatus[]>;
-    documentEmbeddingStatusList: IvariableBind<IfileStatus[]>;
+    isDocumentUpload: IvariableBind<boolean>;
+    isRagEmbeddingStart: IvariableBind<boolean>;
     skillList: IvariableBind<IfileDetail[]>;
-    isSkillUploading: IvariableBind<boolean>;
-    skillUploadStatusList: IvariableBind<IfileStatus[]>;
+    isSkillUpload: IvariableBind<boolean>;
     agentForm: IvariableBind<Iagent>;
-    agentFormResult: IvariableBind<string>;
+    isAgentSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
     chatMessageList: IvariableBind<modelChat.IchatMessage[]>;
 }

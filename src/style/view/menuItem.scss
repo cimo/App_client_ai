@@ -67,68 +67,53 @@
             gap: 5px;
 
             button {
-                width: 100px;
                 margin: 0px !important;
+
+                &.rag {
+                    width: 130px;
+                }
 
                 .cls_icon {
                     margin-right: 5px !important;
                 }
             }
         }
-    }
 
-    .document_container,
-    .skill_container {
-        .upload_status {
-            .cls_icon {
-                margin-bottom: 5px !important;
+        .table_flex {
+            & .delete {
+                flex: 0 0 40px;
+
+                .cls_icon {
+                    cursor: pointer;
+                }
             }
 
-            details {
-                padding: 5px;
-                width: fit-content;
-                margin: 5px 0;
-                border-radius: 8px;
+            & .name {
+                display: flex;
+                flex-direction: row;
+                align-content: center;
+                justify-content: start;
+                align-items: center;
+                justify-items: center;
+                gap: 10px;
+                word-break: break-word;
+                text-align: left !important;
 
-                summary {
-                    display: flex;
-                    flex-direction: row;
-                    align-content: center;
-                    justify-content: start;
-                    align-items: center;
-                    justify-items: center;
-                    cursor: pointer;
-
-                    .cls_icon {
-                        font-size: parameter.$fontSizeNormalPlus !important;
-                    }
+                .icon {
+                    width: 40px;
                 }
+            }
 
-                .file,
-                .embedding {
-                    display: flex;
-                    flex-direction: column;
-                    align-content: center;
-                    justify-content: center;
-                    align-items: start;
-                    justify-items: center;
-                    margin-top: 10px;
-                    gap: 0px;
+            & .date {
+                flex: 0 0 200px;
+            }
 
-                    li {
-                        display: flex;
-                        flex-direction: row;
-                        align-content: center;
-                        justify-content: center;
-                        align-items: center;
-                        justify-items: center;
+            & .size {
+                flex: 0 0 60px;
+            }
 
-                        .cls_icon {
-                            font-size: parameter.$fontSizeNormalPlus !important;
-                            margin-right: 5px !important;
-                        }
-                    }
-                }
+            & .button {
+                flex: 0 0 100px;
             }
         }
     }
@@ -155,9 +140,13 @@
                 justify-content: center;
                 align-items: stretch;
                 justify-items: center;
-                width: 275px;
-                height: 110px;
-                cursor: pointer;
+                width: 350px;
+                max-height: 250px;
+
+                &.agent {
+                    user-select: none !important;
+                    -webkit-user-select: none !important;
+                }
 
                 .top {
                     display: flex;
@@ -173,11 +162,17 @@
                         width: 35px;
                         height: 35px;
                         margin-right: 5px !important;
+                        cursor: pointer;
                     }
 
                     p {
                         text-align: left !important;
                     }
+                }
+
+                .label {
+                    margin-top: 10px;
+                    text-align: left;
                 }
 
                 .bottom {
@@ -232,7 +227,6 @@
                     margin: 5px 0 20px 0;
 
                     button {
-                        width: 100px;
                         margin: 0 10px 0 0 !important;
                     }
 
@@ -268,18 +262,7 @@
                 gap: 5px;
 
                 button {
-                    width: 100px;
                     margin: 0px !important;
-                }
-            }
-        }
-    }
-
-    .table_flex {
-        .row {
-            .cell {
-                &.name.skill {
-                    cursor: default !important;
                 }
             }
         }
@@ -299,25 +282,8 @@
     .view_menuItem_right {
         background-color: color.$darkRootBackground;
 
-        .document_container,
-        .skill_container {
-            .upload_status {
-                details {
-                    border: 1px solid color.$darkChatAssistantBoxBorder;
-                    background-color: color.$darkChatAssistantBoxBackground;
-                    color: color.$darkRootText;
-                }
-            }
-        }
-
         .agent_container {
             .agent_form {
-                .form_message {
-                    p {
-                        color: color.$darkErrorText;
-                    }
-                }
-
                 .form_field {
                     textarea {
                         border: 1px solid color.$darkChatMessageSendBorder;
