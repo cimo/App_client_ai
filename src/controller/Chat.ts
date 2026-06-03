@@ -450,7 +450,7 @@ export default class Chat implements Icontroller {
                                                     toolResponse.name === "automate_screenshot" ||
                                                     toolResponse.name === "automate_mouse_move" ||
                                                     toolResponse.name === "automate_mouse_click" ||
-                                                    toolResponse.name === "chrome" ||
+                                                    toolResponse.name === "browser_chrome" ||
                                                     toolResponse.name === "math_expression" ||
                                                     toolResponse.name === "ocr_execute" ||
                                                     toolResponse.name === "rag_store" ||
