@@ -66,16 +66,19 @@ export default class Ai implements Icontroller {
                 acceptInvalidHostnames: true
             }
         })
-            .then(async (result) => {
+            .then(async (resultApi) => {
                 this.variableObject.isOfflineAi.state = false;
 
-                const cookie = result.headers.get("set-cookie") || "";
+                const cookie = resultApi.headers.get("set-cookie");
 
-                session.writeAiSession(session.data.aiBearerToken, cookie);
+                if (cookie) {
+                    const resultJson = (await resultApi.json()) as modelIndex.IresponseBody;
+                    const stdout = resultJson.response.stdout;
 
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+                    session.writeAiSession(session.data.aiBearerToken, cookie);
 
-                this.variableObject.adUrl.state = resultJson.response.stdout;
+                    this.variableObject.adUrl.state = stdout;
+                }
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Ai.ts - apiLogin() - fetch() - catch()", error.message);
@@ -96,10 +99,10 @@ export default class Ai implements Icontroller {
                 acceptInvalidHostnames: true
             }
         })
-            .then(async (result) => {
+            .then(async (resultApi) => {
                 this.variableObject.isOfflineAi.state = false;
 
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
+                const resultJson = (await resultApi.json()) as modelIndex.IresponseBody;
 
                 // eslint-disable-next-line no-console
                 console.log("cimo - apiUserInfo()", resultJson);
@@ -123,13 +126,13 @@ export default class Ai implements Icontroller {
                 acceptInvalidHostnames: true
             }
         })
-            .then(async (result) => {
+            .then(async (resultApi) => {
                 this.variableObject.isOfflineAi.state = false;
 
-                const resultJson = (await result.json()) as modelIndex.IresponseBody;
-                const jsonParse = JSON.parse(resultJson.response.stdout) as string[];
+                const resultJson = (await resultApi.json()) as modelIndex.IresponseBody;
+                const stdout = JSON.parse(resultJson.response.stdout) as string[];
 
-                this.variableObject.modelList.state = jsonParse;
+                this.variableObject.modelList.state = stdout;
 
                 this.variableObject.modelSelected.state = this.modelDefault = this.variableObject.modelList.state[0];
 

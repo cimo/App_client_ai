@@ -35,7 +35,7 @@ export default class Dialog implements Icontroller {
     async show(mode: string, message: string, isConfirm: boolean): Promise<boolean> {
         const route = "#/dialog";
 
-        return await new Promise<boolean>(async (resolve) => {
+        return new Promise(async (resolve) => {
             const windowLabel = helperSrc.windowLabelUnique("dialog", mode);
 
             const unlistenReady = await listen(`dialog-${windowLabel}-ready`, async () => {

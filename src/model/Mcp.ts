@@ -47,7 +47,7 @@ export interface IragSearch {
 
 export interface IdocumentParser {
     fileName: string;
-    terminalExecution: string;
+    resultExecute: string;
 }
 
 export interface IfileStatus {

@@ -137,7 +137,6 @@ export default class Index implements Icontroller {
             }
 
             await this.controllerAi.apiUserInfo();
-
             await this.controllerAi.apiModel(false);
 
             if (!session.data.mcpCookie) {

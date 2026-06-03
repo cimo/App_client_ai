@@ -97,14 +97,14 @@ export default class MenuItem implements Icontroller {
     private onClickSkillDelete = async (event: Event, index: number, fileName: string): Promise<void> => {
         event.stopPropagation();
 
-        this.controllerMcp.apiAgentList().then(async (resultList) => {
+        this.controllerMcp.apiAgentList().then(async (resultApiList) => {
             let agentList = [];
             let agentNameList = [];
 
-            for (let a = 0; a < resultList.length; a++) {
-                if (resultList[a].skill === fileName) {
-                    agentList.push(resultList[a]);
-                    agentNameList.push(resultList[a].name);
+            for (let a = 0; a < resultApiList.length; a++) {
+                if (resultApiList[a].skill === fileName) {
+                    agentList.push(resultApiList[a]);
+                    agentNameList.push(resultApiList[a].name);
                 }
             }
 

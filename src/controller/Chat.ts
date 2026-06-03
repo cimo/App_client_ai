@@ -322,16 +322,16 @@ export default class Chat implements Icontroller {
                     acceptInvalidHostnames: true
                 }
             })
-                .then(async (result) => {
-                    const contentType = result.headers.get("Content-Type");
+                .then(async (resultApi) => {
+                    const contentType = resultApi.headers.get("Content-Type");
 
-                    if (!contentType || !contentType.includes("text/event-stream") || !result.body) {
+                    if (!contentType || !contentType.includes("text/event-stream") || !resultApi.body) {
                         helperSrc.writeLog("Chat.ts - apiResponse() - fetch() - Error", "Missing or invalid headers.");
 
                         return;
                     }
 
-                    const reader = result.body.getReader();
+                    const reader = resultApi.body.getReader();
                     const decoder = new TextDecoder("utf-8");
                     let buffer = "";
 
@@ -472,7 +472,7 @@ export default class Chat implements Icontroller {
 
                                                     if (Object.keys(parser).length > 0) {
                                                         this.fileList[parser.fileName] = {
-                                                            pageNumber: parser.terminalExecution
+                                                            pageNumber: parser.resultExecute
                                                         };
 
                                                         await this.windowOpenDocument();

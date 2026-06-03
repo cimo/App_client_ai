@@ -68,16 +68,16 @@ export default class Document implements Icontroller {
             return;
         }
 
-        const result = await this.controllerMcp.apiDocumentRead(fileDetail.fileName, pageNumber);
+        const documentReadObject = await this.controllerMcp.apiDocumentRead(fileDetail.fileName, pageNumber);
 
-        if (result) {
+        if (documentReadObject) {
             if (fileDetail.category === "image") {
-                this.variableObject.imageContent.state = result.fileContent;
+                this.variableObject.imageContent.state = documentReadObject.fileContent;
             } else {
-                this.variableObject.htmlContent.state = window.atob(result.fileContent);
+                this.variableObject.htmlContent.state = window.atob(documentReadObject.fileContent);
             }
 
-            this.variableObject.pageTotal.state = result.pageTotal;
+            this.variableObject.pageTotal.state = documentReadObject.pageTotal;
             this.variableObject.pageNumber.state = pageNumber;
             this.variableObject.isPageExist.state = true;
             this.variableObject.isLoadingPage.state = false;
@@ -93,7 +93,7 @@ export default class Document implements Icontroller {
 
         this.appWindow = getCurrentWindow();
 
-        this.appWindow.title().then(async (appWindowTitle) => {
+        this.appWindow.title().then((appWindowTitle) => {
             const interval = setInterval(async () => {
                 if (Object.keys(this.controllerMcp.getVariableObject()).length > 0) {
                     await this.readContentData(1);
@@ -137,19 +137,18 @@ export default class Document implements Icontroller {
     }
 
     event(): void {
-        (async () => {
-            await listen<string[]>("document-content-update", async (event) => {
-                this.appWindow.title().then(async (appWindowTitle) => {
-                    const fileName = event.payload[0];
-                    let pageNumber = parseInt(event.payload[1]);
-                    pageNumber = isNaN(pageNumber) ? 1 : pageNumber;
+        listen<string[]>("document-content-update", (event) => {
+            this.appWindow.title().then(async (appWindowTitle) => {
+                const fileName = event.payload[0];
 
-                    if (fileName === appWindowTitle) {
-                        await this.readContentData(pageNumber === -1 ? this.variableObject.pageNumber.state : pageNumber);
-                    }
-                });
+                let pageNumber = parseInt(event.payload[1]);
+                pageNumber = isNaN(pageNumber) ? 1 : pageNumber;
+
+                if (fileName === appWindowTitle) {
+                    await this.readContentData(pageNumber === -1 ? this.variableObject.pageNumber.state : pageNumber);
+                }
             });
-        })();
+        });
     }
 
     subControllerList(): Icontroller[] {
