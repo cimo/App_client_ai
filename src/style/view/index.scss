@@ -5,8 +5,15 @@ html,
 body,
 #jsmvcfw_app {
     display: flex;
+    flex-direction: row;
+    align-content: start;
+    justify-content: start;
+    align-items: stretch;
+    justify-items: start;
     min-height: 0;
     min-width: 0;
+    flex: 0 1 auto;
+
     width: 100%;
     height: 100%;
     overflow: hidden;
@@ -35,7 +42,7 @@ aside {
     display: flex;
     flex-direction: column;
     align-content: center;
-    justify-content: center;
+    justify-content: start;
     align-items: stretch;
     justify-items: center;
     min-height: 0;
@@ -101,6 +108,7 @@ aside {
         justify-items: center;
         min-height: 0;
         min-width: 0;
+        flex: 0 1 auto;
 
         padding: 10px;
         border-radius: 20px;
@@ -141,6 +149,7 @@ aside {
             justify-items: center;
             min-height: 0;
             min-width: 0;
+            flex: 0 1 auto;
 
             cursor: pointer;
 
@@ -157,15 +166,15 @@ aside {
         justify-content: space-between;
         align-items: center;
         justify-items: center;
-        min-height: 0;
+        min-height: 40px;
         min-width: 0;
+        flex: 0 1 auto;
 
-        height: 40px;
         padding: 10px;
         z-index: parameter.$zIndexLevel1;
     }
 
-    .center_container {
+    .main_container {
         display: flex;
         flex-direction: row;
         align-content: center;
@@ -192,7 +201,7 @@ aside {
             display: flex;
             flex-direction: column;
             align-content: center;
-            justify-content: center;
+            justify-content: start;
             align-items: stretch;
             justify-items: center;
             min-height: 0;
@@ -267,7 +276,7 @@ aside {
         box-shadow: color.$darkShadowHeader;
     }
 
-    .center_container {
+    .main_container {
         .left_container {
             border-right: 1px solid color.$darkRootBorder;
         }

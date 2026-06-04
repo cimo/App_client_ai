@@ -10,6 +10,7 @@
     justify-items: center;
     min-height: 0;
     min-width: 0;
+    flex: 0 1 auto;
 
     li {
         display: flex;
@@ -20,6 +21,7 @@
         justify-items: center;
         min-height: 0;
         min-width: 0;
+        flex: 0 1 auto;
 
         padding: 10px 0 10px 5px;
         cursor: pointer;
@@ -34,11 +36,12 @@
     display: flex;
     flex-direction: column;
     align-content: center;
-    justify-content: center;
+    justify-content: start;
     align-items: stretch;
     justify-items: center;
     min-height: 0;
     min-width: 0;
+    flex: 0 1 auto;
 
     position: fixed;
     padding: 10px;
@@ -63,6 +66,8 @@
         min-width: 0;
         flex: 1 1 auto;
 
+        align-self: stretch;
+
         .button_container {
             display: flex;
             flex-direction: row;
@@ -72,6 +77,7 @@
             justify-items: center;
             min-height: 0;
             min-width: 0;
+            flex: 0 1 auto;
 
             padding: 5px 10px;
             border-radius: 20px;
@@ -81,7 +87,7 @@
                 margin: 0px !important;
 
                 &.rag {
-                    width: 130px;
+                    width: 130px !important;
                 }
 
                 .cls_icon {
@@ -92,10 +98,10 @@
 
         .table_flex {
             & .delete {
-                flex: 0 0 40px;
+                flex: 0 0 40px !important;
 
                 .cls_icon {
-                    cursor: pointer;
+                    cursor: pointer !important;
                 }
             }
 
@@ -108,26 +114,27 @@
                 justify-items: center;
                 min-height: 0;
                 min-width: 0;
+                flex: 1 1 auto;
 
-                gap: 10px;
-                word-break: break-word;
+                gap: 10px !important;
+                word-break: break-word !important;
                 text-align: left !important;
 
                 .icon {
-                    width: 40px;
+                    width: 40px !important;
                 }
             }
 
             & .date {
-                flex: 0 0 200px;
+                flex: 0 0 200px !important;
             }
 
             & .size {
-                flex: 0 0 60px;
+                flex: 0 0 60px !important;
             }
 
             & .button {
-                flex: 0 0 100px;
+                flex: 0 0 100px !important;
             }
         }
     }
@@ -174,6 +181,7 @@
                     justify-items: center;
                     min-height: 0;
                     min-width: 0;
+                    flex: 0 1 auto;
 
                     margin-bottom: 10px;
 
@@ -208,6 +216,7 @@
                     justify-items: center;
                     min-height: 0;
                     min-width: 0;
+                    flex: 0 1 auto;
 
                     margin-top: 10px;
 
@@ -236,6 +245,7 @@
                 justify-items: center;
                 min-height: 0;
                 min-width: 0;
+                flex: 0 1 auto;
 
                 textarea {
                     width: 100%;
@@ -251,6 +261,7 @@
                     justify-items: center;
                     min-height: 0;
                     min-width: 0;
+                    flex: 0 1 auto;
 
                     margin: 5px 0 20px 0;
 
@@ -267,6 +278,7 @@
                         justify-items: center;
                         min-height: 0;
                         min-width: 0;
+                        flex: 0 1 auto;
 
                         img {
                             width: 20px;
@@ -286,6 +298,7 @@
                 justify-items: center;
                 min-height: 0;
                 min-width: 0;
+                flex: 0 1 auto;
 
                 padding: 5px 10px;
                 border-radius: 20px;

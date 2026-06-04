@@ -28,7 +28,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     <p>Click here for connect to AD.</p>
                 </div>
             </div>
-            <div class="center_container">
+            <div class="main_container">
                 <div class="left_container">
                     <aside jsmvcfw-controllerName="MenuItem" view="left" />
                 </div>
