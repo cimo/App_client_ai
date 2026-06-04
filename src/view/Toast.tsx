@@ -8,7 +8,7 @@ const viewToast = (variableObject: modelToast.Ivariable, methodObject: modelToas
         <div class="view_toast">
             <div class={`message_container ${variableObject.mode.state} ${variableObject.messageList.state.length > 0 ? "" : "none"}`}>
                 <i class="cls_icon">info</i>
-                <div class="list_container">
+                <div class="text">
                     {(() => {
                         const result: IvirtualNode[] = [];
 

@@ -356,7 +356,7 @@ export default class Chat implements Icontroller {
 
                                 const dataTrim = data.trim();
 
-                                if (dataTrim.length > 1 && dataTrim[0] === "{" && dataTrim[dataTrim.length - 1] === "}") {
+                                if (helperSrc.isJson(dataTrim)) {
                                     const dataTrimParse = JSON.parse(dataTrim) as modelChat.IapiResponse;
 
                                     if (dataTrimParse.type === "error") {
@@ -456,19 +456,18 @@ export default class Chat implements Icontroller {
                                                     toolResponse.name === "rag_store" ||
                                                     toolResponse.name === "rag_delete"
                                                 ) {
-                                                    const resultList = toolResponse.resultList as string[];
+                                                    const result = toolResponse.result as string;
 
                                                     const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
                                                     chatMessageListState[chatMessageIndex] = {
                                                         ...chatMessageListState[chatMessageIndex],
-                                                        assistantNoReason: resultList[0]
+                                                        assistantNoReason: result
                                                     };
 
                                                     this.variableObject.chatMessageList.state = chatMessageListState;
                                                 } else if (toolResponse.name === "document_parser") {
-                                                    const parserList = toolResponse.resultList as modelMcp.IdocumentParser[];
-                                                    const parser = parserList[0];
+                                                    const parser = toolResponse.result as modelMcp.IdocumentParser;
 
                                                     if (Object.keys(parser).length > 0) {
                                                         this.fileList[parser.fileName] = {
@@ -496,8 +495,7 @@ export default class Chat implements Icontroller {
                                                         this.variableObject.chatMessageList.state = chatMessageListState;
                                                     }
                                                 } else if (toolResponse.name === "rag_search") {
-                                                    const ragSearchList = toolResponse.resultList as modelMcp.IragSearch[];
-                                                    const ragSearch = ragSearchList[0];
+                                                    const ragSearch = toolResponse.result as modelMcp.IragSearch;
                                                     const citationList = ragSearch.citationList ?? [];
                                                     const relationList = ragSearch.relationList ?? [];
 
@@ -554,13 +552,13 @@ export default class Chat implements Icontroller {
                                                         this.variableObject.chatMessageList.state = chatMessageListState;
                                                     }
                                                 } else if (toolResponse.name === "security_scanner") {
-                                                    const resultList = toolResponse.resultList as string[];
+                                                    const result = toolResponse.result as string;
 
                                                     const chatMessageListState = this.variableObject.chatMessageList.state.slice();
 
                                                     chatMessageListState[chatMessageIndex] = {
                                                         ...chatMessageListState[chatMessageIndex],
-                                                        securityScanner: resultList[0]
+                                                        securityScanner: result
                                                     };
 
                                                     this.variableObject.chatMessageList.state = chatMessageListState;

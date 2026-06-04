@@ -37,6 +37,7 @@ aside {
     align-items: stretch;
     justify-items: center;
     flex: 1 1 auto;
+    min-width: 0;
 
     .cls_icon {
         display: block !important;
@@ -170,7 +171,6 @@ aside {
             align-items: center;
             justify-items: center;
             flex: 0 0 150px;
-            min-height: 0;
         }
 
         .right_container {
@@ -181,7 +181,6 @@ aside {
             align-items: stretch;
             justify-items: center;
             flex: 1 1 auto;
-            min-height: 0;
             min-width: 0;
 
             aside:has(> .view_ai) {
@@ -193,7 +192,6 @@ aside {
                 justify-items: center;
                 flex: 1 1 auto;
                 min-height: 0;
-                min-width: 0;
             }
         }
     }

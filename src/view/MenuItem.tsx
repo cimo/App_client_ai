@@ -154,7 +154,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     </div>
                                                     <div class="cell button"></div>
                                                 </div>
-                                                <div class="list_container">
+                                                <div class="body">
                                                     {(() => {
                                                         const result: IvirtualNode[] = [];
 
@@ -245,7 +245,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         <p>Size</p>
                                     </div>
                                 </div>
-                                <div class="list_container">
+                                <div class="body">
                                     {(() => {
                                         const result: IvirtualNode[] = [];
 
@@ -383,7 +383,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     </div>
                                                     <div class="cell button"></div>
                                                 </div>
-                                                <div class="list_container">
+                                                <div class="body">
                                                     {(() => {
                                                         const result: IvirtualNode[] = [];
 

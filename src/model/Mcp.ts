@@ -63,7 +63,7 @@ export interface IfileDetail {
 
 export interface IapiToolResponse {
     name: string;
-    resultList: [];
+    result: unknown;
 }
 
 export interface Ivariable {

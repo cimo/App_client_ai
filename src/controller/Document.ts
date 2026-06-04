@@ -70,7 +70,7 @@ export default class Document implements Icontroller {
 
         const documentReadObject = await this.controllerMcp.apiDocumentRead(fileDetail.fileName, pageNumber);
 
-        if (documentReadObject) {
+        if (documentReadObject.fileContent) {
             if (fileDetail.category === "image") {
                 this.variableObject.imageContent.state = documentReadObject.fileContent;
             } else {
@@ -82,6 +82,9 @@ export default class Document implements Icontroller {
             this.variableObject.isPageExist.state = true;
             this.variableObject.isLoadingPage.state = false;
             this.variableObject.isLoadingWindow.state = false;
+        } else {
+            this.variableObject.isPageExist.state = false;
+            this.variableObject.isLoadingPage.state = false;
         }
     };
 

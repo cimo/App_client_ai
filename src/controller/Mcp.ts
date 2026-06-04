@@ -360,18 +360,25 @@ export default class Mcp implements Icontroller {
                 acceptInvalidHostnames: true
             }
         })
-            .then(() => {
+            .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const documentFilteredList = [];
+                const resultJson = (await resultApi.json()) as modelIndex.IresponseBody;
+                const stdout = resultJson.response.stdout;
 
-                for (let a = 0; a < this.variableObject.documentList.state.length; a++) {
-                    if (a !== index) {
-                        documentFilteredList.push(this.variableObject.documentList.state[a]);
+                if (stdout === "ok") {
+                    const documentFilteredList = [];
+
+                    for (let a = 0; a < this.variableObject.documentList.state.length; a++) {
+                        if (a !== index) {
+                            documentFilteredList.push(this.variableObject.documentList.state[a]);
+                        }
                     }
-                }
 
-                this.variableObject.documentList.state = documentFilteredList;
+                    this.variableObject.documentList.state = documentFilteredList;
+                } else {
+                    this.controllerToast.show("error", ["Failed to delete document."]);
+                }
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiDocumentDelete() - fetch() - catch()", error.message);
@@ -561,18 +568,25 @@ export default class Mcp implements Icontroller {
                 acceptInvalidHostnames: true
             }
         })
-            .then(() => {
+            .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const skillFilteredList = [];
+                const resultJson = (await resultApi.json()) as modelIndex.IresponseBody;
+                const stdout = resultJson.response.stdout;
 
-                for (let a = 0; a < this.variableObject.skillList.state.length; a++) {
-                    if (a !== index) {
-                        skillFilteredList.push(this.variableObject.skillList.state[a]);
+                if (stdout === "ok") {
+                    const skillFilteredList = [];
+
+                    for (let a = 0; a < this.variableObject.skillList.state.length; a++) {
+                        if (a !== index) {
+                            skillFilteredList.push(this.variableObject.skillList.state[a]);
+                        }
                     }
-                }
 
-                this.variableObject.skillList.state = skillFilteredList;
+                    this.variableObject.skillList.state = skillFilteredList;
+                } else {
+                    this.controllerToast.show("error", ["Failed to delete skill."]);
+                }
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiSkillDelete() - fetch() - catch()", error.message);
