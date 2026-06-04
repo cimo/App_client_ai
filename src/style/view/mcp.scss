@@ -6,6 +6,9 @@
         justify-content: start;
         align-items: center;
         justify-items: center;
+        min-height: 0;
+        min-width: 0;
+
         padding: 10px 25px;
 
         .chip {

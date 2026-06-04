@@ -8,6 +8,8 @@
     justify-content: center;
     align-items: stretch;
     justify-items: center;
+    min-height: 0;
+    min-width: 0;
 
     li {
         display: flex;
@@ -16,6 +18,9 @@
         justify-content: start;
         align-items: center;
         justify-items: center;
+        min-height: 0;
+        min-width: 0;
+
         padding: 10px 0 10px 5px;
         cursor: pointer;
 
@@ -32,6 +37,8 @@
     justify-content: center;
     align-items: stretch;
     justify-items: center;
+    min-height: 0;
+    min-width: 0;
 
     position: fixed;
     padding: 10px;
@@ -52,8 +59,9 @@
         justify-content: start;
         align-items: stretch;
         justify-items: center;
-        flex: 1 1 auto;
         min-height: 0;
+        min-width: 0;
+        flex: 1 1 auto;
 
         .button_container {
             display: flex;
@@ -62,6 +70,9 @@
             justify-content: start;
             align-items: center;
             justify-items: center;
+            min-height: 0;
+            min-width: 0;
+
             padding: 5px 10px;
             border-radius: 20px;
             gap: 5px;
@@ -95,6 +106,9 @@
                 justify-content: start;
                 align-items: center;
                 justify-items: center;
+                min-height: 0;
+                min-width: 0;
+
                 gap: 10px;
                 word-break: break-word;
                 text-align: left !important;
@@ -128,8 +142,11 @@
             justify-content: center;
             align-items: stretch;
             justify-items: center;
-            flex-wrap: wrap;
+            min-height: 0;
+            min-width: 0;
             flex: 1 1 auto;
+
+            flex-wrap: wrap;
             gap: 12px;
             overflow-y: scroll;
             margin-top: 10px;
@@ -155,6 +172,9 @@
                     justify-content: center;
                     align-items: center;
                     justify-items: center;
+                    min-height: 0;
+                    min-width: 0;
+
                     margin-bottom: 10px;
 
                     img,
@@ -186,6 +206,9 @@
                     justify-content: center;
                     align-items: center;
                     justify-items: center;
+                    min-height: 0;
+                    min-width: 0;
+
                     margin-top: 10px;
 
                     img {
@@ -211,6 +234,8 @@
                 justify-content: start;
                 align-items: start;
                 justify-items: center;
+                min-height: 0;
+                min-width: 0;
 
                 textarea {
                     width: 100%;
@@ -224,6 +249,9 @@
                     justify-content: center;
                     align-items: center;
                     justify-items: center;
+                    min-height: 0;
+                    min-width: 0;
+
                     margin: 5px 0 20px 0;
 
                     button {
@@ -237,6 +265,8 @@
                         justify-content: center;
                         align-items: center;
                         justify-items: center;
+                        min-height: 0;
+                        min-width: 0;
 
                         img {
                             width: 20px;
@@ -254,6 +284,9 @@
                 justify-content: center;
                 align-items: center;
                 justify-items: center;
+                min-height: 0;
+                min-width: 0;
+
                 padding: 5px 10px;
                 border-radius: 20px;
                 white-space: break-spaces;

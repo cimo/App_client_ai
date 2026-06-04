@@ -5,6 +5,9 @@ button {
     justify-content: center;
     align-items: center;
     justify-items: center;
+    min-height: 0;
+    min-width: 0;
+
     width: fit-content;
     height: 36px;
     margin: 10px;

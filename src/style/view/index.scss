@@ -5,6 +5,8 @@ html,
 body,
 #jsmvcfw_app {
     display: flex;
+    min-height: 0;
+    min-width: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
@@ -36,8 +38,9 @@ aside {
     justify-content: center;
     align-items: stretch;
     justify-items: center;
-    flex: 1 1 auto;
+    min-height: 0;
     min-width: 0;
+    flex: 1 1 auto;
 
     .cls_icon {
         display: block !important;
@@ -96,6 +99,9 @@ aside {
         justify-content: center;
         align-items: center;
         justify-items: center;
+        min-height: 0;
+        min-width: 0;
+
         padding: 10px;
         border-radius: 20px;
         white-space: break-spaces;
@@ -133,6 +139,9 @@ aside {
             justify-content: center;
             align-items: center;
             justify-items: center;
+            min-height: 0;
+            min-width: 0;
+
             cursor: pointer;
 
             .cls_icon {
@@ -148,6 +157,9 @@ aside {
         justify-content: space-between;
         align-items: center;
         justify-items: center;
+        min-height: 0;
+        min-width: 0;
+
         height: 40px;
         padding: 10px;
         z-index: parameter.$zIndexLevel1;
@@ -160,8 +172,9 @@ aside {
         justify-content: center;
         align-items: stretch;
         justify-items: center;
-        flex: 1 1 auto;
         min-height: 0;
+        min-width: 0;
+        flex: 1 1 auto;
 
         .left_container {
             display: flex;
@@ -170,6 +183,8 @@ aside {
             justify-content: start;
             align-items: center;
             justify-items: center;
+            min-height: 0;
+            min-width: 0;
             flex: 0 0 150px;
         }
 
@@ -180,8 +195,9 @@ aside {
             justify-content: center;
             align-items: stretch;
             justify-items: center;
-            flex: 1 1 auto;
+            min-height: 0;
             min-width: 0;
+            flex: 1 1 auto;
 
             aside:has(> .view_ai) {
                 display: flex;
@@ -190,8 +206,9 @@ aside {
                 justify-content: center;
                 align-items: stretch;
                 justify-items: center;
-                flex: 1 1 auto;
                 min-height: 0;
+                min-width: 0;
+                flex: 1 1 auto;
             }
         }
     }

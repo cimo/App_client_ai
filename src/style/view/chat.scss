@@ -8,6 +8,8 @@
     justify-content: center;
     align-items: stretch;
     justify-items: center;
+    min-height: 0;
+    min-width: 0;
     flex: 1 1 auto;
 
     .bottom_limit {
@@ -22,7 +24,10 @@
         justify-content: start;
         align-items: stretch;
         justify-items: center;
+        min-height: 0;
+        min-width: 0;
         flex: 1 1 auto;
+
         padding: 0 25px;
         overflow-x: hidden;
         overflow-y: scroll;
@@ -35,6 +40,9 @@
                 justify-content: center;
                 align-items: end;
                 justify-items: center;
+                min-height: 0;
+                min-width: 0;
+
                 margin: 10px 0px;
 
                 .time {
@@ -55,6 +63,9 @@
                 justify-content: center;
                 align-items: start;
                 justify-items: center;
+                min-height: 0;
+                min-width: 0;
+
                 margin: 10px 0px;
 
                 details {
@@ -69,6 +80,9 @@
                         justify-content: start;
                         align-items: center;
                         justify-items: center;
+                        min-height: 0;
+                        min-width: 0;
+
                         cursor: pointer;
 
                         .cls_icon {
@@ -92,6 +106,9 @@
                             justify-content: start;
                             align-items: center;
                             justify-items: center;
+                            min-height: 0;
+                            min-width: 0;
+
                             gap: 8px;
                             margin: 10px 0 5px 0;
 
@@ -102,6 +119,8 @@
                                 justify-content: center;
                                 align-items: center;
                                 justify-items: center;
+                                min-height: 0;
+                                min-width: 0;
                             }
 
                             .label {
@@ -121,6 +140,8 @@
                                 justify-content: start;
                                 align-items: center;
                                 justify-items: center;
+                                min-height: 0;
+                                min-width: 0;
 
                                 .cls_icon {
                                     font-size: parameter.$fontSizeNormalPlus !important;
@@ -150,6 +171,9 @@
                             justify-content: start;
                             align-items: center;
                             justify-items: center;
+                            min-height: 0;
+                            min-width: 0;
+
                             margin-bottom: 8px;
 
                             .cls_icon {
@@ -170,6 +194,9 @@
                                 justify-content: start;
                                 align-items: center;
                                 justify-items: center;
+                                min-height: 0;
+                                min-width: 0;
+
                                 flex-wrap: wrap;
                                 gap: 6px;
                                 margin: 4px 0;
@@ -195,7 +222,11 @@
                     justify-content: start;
                     align-items: stretch;
                     justify-items: start;
+                    min-height: 0;
+                    min-width: 0;
+
                     overflow: scroll;
+                    width: 100%;
 
                     .security_scanner {
                         max-height: 500px;
@@ -216,6 +247,8 @@
     justify-content: center;
     align-items: stretch;
     justify-items: center;
+    min-height: 0;
+    min-width: 0;
 
     .message_send_container {
         display: flex;
@@ -224,6 +257,9 @@
         justify-content: center;
         align-items: stretch;
         justify-items: center;
+        min-height: 0;
+        min-width: 0;
+
         border-radius: 8px;
         width: 90%;
         align-self: center;
@@ -236,6 +272,9 @@
             justify-content: space-between;
             align-items: center;
             justify-items: center;
+            min-height: 0;
+            min-width: 0;
+
             height: 45px;
 
             .left {
@@ -245,6 +284,8 @@
                 justify-content: center;
                 align-items: center;
                 justify-items: center;
+                min-height: 0;
+                min-width: 0;
             }
 
             .right {
@@ -254,6 +295,8 @@
                 justify-content: center;
                 align-items: center;
                 justify-items: center;
+                min-height: 0;
+                min-width: 0;
             }
         }
     }

@@ -11,10 +11,11 @@
         justify-content: start;
         align-items: stretch;
         justify-items: center;
+        min-height: 55px;
+        min-width: 107px;
+
         gap: 8px;
         padding: 10px 25px;
-        min-height: 55px;
-        max-height: 107px;
 
         .cls_icon {
             font-size: parameter.$fontSizeNormalPlus !important;
@@ -31,7 +32,10 @@
             justify-content: center;
             align-items: start;
             justify-items: center;
+            min-height: 0;
+            min-width: 0;
             flex: 1 1 auto;
+
             overflow: auto;
 
             p {
