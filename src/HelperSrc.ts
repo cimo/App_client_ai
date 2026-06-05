@@ -392,10 +392,10 @@ export const windowOpen = async (
         return window;
     }
 
-    const unlisten = await listen<string>(`window-${windowLabel}-ready`, async () => {
+    const unlistenWindowReady = await listen<string>(`window-${windowLabel}-ready`, async () => {
         await emitTo(windowLabel, "window-data", route);
 
-        unlisten();
+        unlistenWindowReady();
     });
 
     return new WebviewWindow(windowLabel, windowOptions);

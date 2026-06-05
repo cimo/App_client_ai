@@ -1,6 +1,6 @@
 import { Icontroller, IvirtualNode, variableBind, variableLink, IvariableEffect } from "@cimo/jsmvcfw/dist/src/Main.js";
 import { fetch } from "@tauri-apps/plugin-http";
-import { listen, emitTo } from "@tauri-apps/api/event";
+import { listen, emitTo, UnlistenFn } from "@tauri-apps/api/event";
 import { getAllWindows } from "@tauri-apps/api/window";
 
 // Source
@@ -31,6 +31,8 @@ export default class Chat implements Icontroller {
     private fileList: modelChat.Ifile;
 
     private messageSentCount: number;
+
+    private unlistenWindowDocumentData: UnlistenFn | undefined = undefined;
 
     // Method
     private resetModelResponse = (mode?: string): void => {
@@ -674,26 +676,26 @@ export default class Chat implements Icontroller {
     }
 
     event(): void {
-        (async () => {
-            await listen<modelDocument.Idata>("document-data", async (event) => {
-                const fileName = event.payload.fileName;
+        listen<modelDocument.Idata>("document-data", async (event) => {
+            const fileName = event.payload.fileName;
 
-                if (fileName) {
-                    const windowLabel = helperSrc.windowLabelUnique("document", fileName);
+            if (fileName) {
+                const windowLabel = helperSrc.windowLabelUnique("document", fileName);
 
-                    if (Object.entries(this.fileList).length > 0) {
-                        const fileName = Object.keys(this.fileList)[0];
-                        const pageNumber = this.fileList[fileName].pageNumber;
+                if (Object.entries(this.fileList).length > 0) {
+                    const fileName = Object.keys(this.fileList)[0];
+                    const pageNumber = this.fileList[fileName].pageNumber;
 
-                        await emitTo(windowLabel, "document-content-update", [fileName, pageNumber]);
+                    await emitTo(windowLabel, "document-content-update", [fileName, pageNumber]);
 
-                        delete this.fileList[fileName];
-                    }
+                    delete this.fileList[fileName];
                 }
+            }
 
-                await this.windowOpenDocument();
-            });
-        })();
+            await this.windowOpenDocument();
+        }).then((unlistenFn) => {
+            this.unlistenWindowDocumentData = unlistenFn;
+        });
     }
 
     subControllerList(): Icontroller[] {
@@ -704,5 +706,11 @@ export default class Chat implements Icontroller {
 
     rendered(): void {}
 
-    destroy(): void {}
+    destroy(): void {
+        if (this.unlistenWindowDocumentData !== undefined) {
+            this.unlistenWindowDocumentData();
+
+            this.unlistenWindowDocumentData = undefined;
+        }
+    }
 }

@@ -1,6 +1,5 @@
 import { Icontroller, IvirtualNode, variableBind, IvariableEffect } from "@cimo/jsmvcfw/dist/src/Main.js";
-import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { listen, emitTo } from "@tauri-apps/api/event";
+import { listen, emitTo, UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 // Source
@@ -13,7 +12,7 @@ export default class Dialog implements Icontroller {
     private variableObject: modelDialog.Ivariable;
     private methodObject: modelDialog.Imethod;
 
-    private window: WebviewWindow;
+    private unlistenWindowData: UnlistenFn | undefined = undefined;
 
     // Method
     private async onClickOk(): Promise<void> {
@@ -32,25 +31,40 @@ export default class Dialog implements Icontroller {
         currentWindow.close();
     }
 
-    async show(mode: string, message: string, isConfirm: boolean): Promise<boolean> {
+    show(mode: string, message: string, isConfirm: boolean): Promise<boolean> {
         const route = "#/dialog";
 
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             const windowLabel = helperSrc.windowLabelUnique("dialog", mode);
 
-            const unlistenReady = await listen(`dialog-${windowLabel}-ready`, async () => {
-                await emitTo(windowLabel, "dialog-data", { mode, message, isConfirm });
+            let unlistenWindowReady: UnlistenFn | undefined = undefined;
+            let unlistenWindowResult: UnlistenFn | undefined = undefined;
 
-                unlistenReady();
+            listen(`dialog-${windowLabel}-ready`, () => {
+                emitTo(windowLabel, "dialog-data", { mode, message, isConfirm });
+
+                if (unlistenWindowReady !== undefined) {
+                    unlistenWindowReady();
+
+                    unlistenWindowReady = undefined;
+                }
+            }).then((unlistenFn) => {
+                unlistenWindowReady = unlistenFn;
             });
 
-            const unlistenResult = await listen<boolean>(`dialog-${windowLabel}-result`, (event) => {
+            listen<boolean>(`dialog-${windowLabel}-result`, (event) => {
                 resolve(event.payload);
 
-                unlistenResult();
+                if (unlistenWindowResult !== undefined) {
+                    unlistenWindowResult();
+
+                    unlistenWindowResult = undefined;
+                }
+            }).then((unlistenFn) => {
+                unlistenWindowResult = unlistenFn;
             });
 
-            this.window = await helperSrc.windowOpen("dialog", mode, route, {
+            helperSrc.windowOpen("dialog", mode, route, {
                 title: mode,
                 url: route,
                 decorations: true,
@@ -70,8 +84,6 @@ export default class Dialog implements Icontroller {
     constructor() {
         this.variableObject = {} as modelDialog.Ivariable;
         this.methodObject = {} as modelDialog.Imethod;
-
-        this.window = undefined as unknown as WebviewWindow;
     }
 
     hookObject = {} as modelDialog.IelementHook;
@@ -105,7 +117,9 @@ export default class Dialog implements Icontroller {
             this.variableObject.mode.state = event.payload.mode;
             this.variableObject.message.state = event.payload.message;
             this.variableObject.isConfirm.state = event.payload.isConfirm;
-        }).then(async () => {
+        }).then(async (unlistenFn) => {
+            this.unlistenWindowData = unlistenFn;
+
             const currentWindow = getCurrentWindow();
 
             await emitTo("main", `dialog-${currentWindow.label}-ready`);
@@ -118,5 +132,11 @@ export default class Dialog implements Icontroller {
 
     rendered(): void {}
 
-    destroy(): void {}
+    destroy(): void {
+        if (this.unlistenWindowData !== undefined) {
+            this.unlistenWindowData();
+
+            this.unlistenWindowData = undefined;
+        }
+    }
 }

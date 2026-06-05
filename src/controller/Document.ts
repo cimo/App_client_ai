@@ -1,6 +1,6 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
-import { getCurrentWindow, type Window } from "@tauri-apps/api/window";
-import { listen, emitTo } from "@tauri-apps/api/event";
+import { getCurrentWindow, CloseRequestedEvent, type Window } from "@tauri-apps/api/window";
+import { listen, emitTo, UnlistenFn } from "@tauri-apps/api/event";
 
 // Source
 import * as helperSrc from "../HelperSrc";
@@ -14,7 +14,10 @@ export default class Document implements Icontroller {
     private methodObject: modelDocument.Imethod;
     private controllerMcp: ControllerMcp;
 
-    private appWindow: Window;
+    private windowDocument: Window;
+    private windowDocumentTitle = "";
+
+    private unlistenWindowContentUpdate: UnlistenFn | undefined = undefined;
 
     // Method
     private onClickChangePage = (event: Event, difference: number): void => {
@@ -53,8 +56,8 @@ export default class Document implements Icontroller {
     private readContentData = async (pageNumber: number): Promise<void> => {
         this.variableObject.isLoadingPage.state = true;
 
-        const appWindowTitle = await this.appWindow.title();
-        const fileDetail = helperSrc.fileDetail(appWindowTitle);
+        const windowDocumentTitle = await this.windowDocument.title();
+        const fileDetail = helperSrc.fileDetail(windowDocumentTitle);
 
         if (pageNumber < 1) {
             this.variableObject.isPageExist.state = false;
@@ -94,18 +97,14 @@ export default class Document implements Icontroller {
 
         this.controllerMcp = new ControllerMcp();
 
-        this.appWindow = getCurrentWindow();
+        this.windowDocument = getCurrentWindow();
 
-        this.appWindow.title().then((appWindowTitle) => {
-            const interval = setInterval(async () => {
-                if (Object.keys(this.controllerMcp.getVariableObject()).length > 0) {
-                    await this.readContentData(1);
+        this.windowDocument.onCloseRequested(async (event: CloseRequestedEvent) => {
+            event.preventDefault();
 
-                    await emitTo("main", "document-data", { fileName: appWindowTitle });
+            await emitTo("main", "document-close", { fileName: this.windowDocumentTitle });
 
-                    clearInterval(interval);
-                }
-            }, 1000);
+            await this.windowDocument.destroy();
         });
     }
 
@@ -141,16 +140,18 @@ export default class Document implements Icontroller {
 
     event(): void {
         listen<string[]>("document-content-update", (event) => {
-            this.appWindow.title().then(async (appWindowTitle) => {
+            this.windowDocument.title().then(async (windowDocumentTitle) => {
                 const fileName = event.payload[0];
 
                 let pageNumber = parseInt(event.payload[1]);
                 pageNumber = isNaN(pageNumber) ? 1 : pageNumber;
 
-                if (fileName === appWindowTitle) {
+                if (windowDocumentTitle === fileName) {
                     await this.readContentData(pageNumber === -1 ? this.variableObject.pageNumber.state : pageNumber);
                 }
             });
+        }).then((unlistenFn) => {
+            this.unlistenWindowContentUpdate = unlistenFn;
         });
     }
 
@@ -162,7 +163,21 @@ export default class Document implements Icontroller {
         return resultList;
     }
 
-    rendered(): void {}
+    rendered(): void {
+        this.windowDocument.title().then(async (windowDocumentTitle) => {
+            this.windowDocumentTitle = windowDocumentTitle;
 
-    destroy(): void {}
+            await this.readContentData(1);
+
+            await emitTo("main", "document-data", { fileName: this.windowDocumentTitle });
+        });
+    }
+
+    destroy(): void {
+        if (this.unlistenWindowContentUpdate !== undefined) {
+            this.unlistenWindowContentUpdate();
+
+            this.unlistenWindowContentUpdate = undefined;
+        }
+    }
 }

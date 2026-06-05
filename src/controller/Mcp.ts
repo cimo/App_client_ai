@@ -108,10 +108,6 @@ export default class Mcp implements Icontroller {
         this.variableObject.systemMode.state = "chat";
     };
 
-    getVariableObject(): modelMcp.Ivariable {
-        return this.variableObject;
-    }
-
     apiLogin = async (): Promise<void> => {
         return fetch(`${helperSrc.URL_MCP}/login`, {
             method: "GET",

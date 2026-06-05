@@ -1,10 +1,12 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind, variableLink } from "@cimo/jsmvcfw/dist/src/Main.js";
 import { getAllWindows } from "@tauri-apps/api/window";
+import { listen, UnlistenFn } from "@tauri-apps/api/event";
 
 // Source
 import * as helperSrc from "../HelperSrc";
 import * as modelMenuItem from "../model/MenuItem";
 import * as modelMcp from "../model/Mcp";
+import * as modelDocument from "../model/Document";
 import * as viewMenuItem from "../view/MenuItem";
 import type Mcp from "./Mcp";
 import type Toast from "./Toast";
@@ -17,6 +19,9 @@ export default class MenuItem implements Icontroller {
     private controllerMcp: Mcp;
     private controllerToast: Toast;
     private controllerDialog: ControllerDialog;
+
+    private unlistenWindowDocumentData: UnlistenFn | undefined = undefined;
+    private unlistenWindowDocumentClose: UnlistenFn | undefined = undefined;
 
     // Method
     private onClickMenuDocument = (event: Event): void => {
@@ -345,7 +350,11 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private openDocument = async (title: string): Promise<void> => {
+    private windowOpenDocument = async (title: string): Promise<void> => {
+        if (!this.variableObject.documentOpenList.state.includes(title)) {
+            this.variableObject.documentOpenList.state = [...this.variableObject.documentOpenList.state, title];
+        }
+
         const route = "#/document";
 
         await helperSrc.windowOpen("document", title, route, {
@@ -404,6 +413,7 @@ export default class MenuItem implements Icontroller {
                 isMenuItemAgent: false,
                 isMenuItemSkill: false,
                 documentList: variableLink<modelMcp.IfileDetail[]>("Mcp"),
+                documentOpenList: [],
                 isDocumentUpload: false,
                 isRagEmbeddingStart: false,
                 isRagGraphOpen: false,
@@ -447,7 +457,7 @@ export default class MenuItem implements Icontroller {
             onClickAgentSave: this.onClickAgentSave,
             onClickAgentCancel: this.onClickAgentCancel,
             onClickAgentOpen: this.onClickAgentOpen,
-            openDocument: this.openDocument,
+            windowOpenDocument: this.windowOpenDocument,
             fileExtension: this.fileExtension
         };
     }
@@ -466,7 +476,33 @@ export default class MenuItem implements Icontroller {
         throw new Error(`Unsupported view: ${String(name)}`);
     }
 
-    event(): void {}
+    event(): void {
+        listen<modelDocument.Idata>("document-data", (eventData) => {
+            const fileName = eventData.payload.fileName;
+
+            if (fileName && !this.variableObject.documentOpenList.state.includes(fileName)) {
+                this.variableObject.documentOpenList.state = [...this.variableObject.documentOpenList.state, fileName];
+            }
+        }).then((unlistenFn) => {
+            this.unlistenWindowDocumentData = unlistenFn;
+        });
+
+        listen<modelDocument.Idata>("document-close", (eventData) => {
+            const fileName = eventData.payload.fileName;
+
+            const documentOpenFilteredList = [];
+
+            for (let a = 0; a < this.variableObject.documentOpenList.state.length; a++) {
+                if (this.variableObject.documentOpenList.state[a] !== fileName) {
+                    documentOpenFilteredList.push(this.variableObject.documentOpenList.state[a]);
+                }
+            }
+
+            this.variableObject.documentOpenList.state = documentOpenFilteredList;
+        }).then((unlistenFn) => {
+            this.unlistenWindowDocumentClose = unlistenFn;
+        });
+    }
 
     subControllerList(): Icontroller[] {
         const list: Icontroller[] = [];
@@ -476,5 +512,17 @@ export default class MenuItem implements Icontroller {
 
     rendered(): void {}
 
-    destroy(): void {}
+    destroy(): void {
+        if (this.unlistenWindowDocumentData !== undefined) {
+            this.unlistenWindowDocumentData();
+
+            this.unlistenWindowDocumentData = undefined;
+        }
+
+        if (this.unlistenWindowDocumentClose !== undefined) {
+            this.unlistenWindowDocumentClose();
+
+            this.unlistenWindowDocumentClose = undefined;
+        }
+    }
 }

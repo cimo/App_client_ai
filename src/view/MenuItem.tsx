@@ -185,7 +185,10 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                         <p>{value.size}</p>
                                                                     </div>
                                                                     <div class="cell button">
-                                                                        <button onClick={() => methodObject.openDocument(value.fileName)}>
+                                                                        <button
+                                                                            onClick={() => methodObject.windowOpenDocument(value.fileName)}
+                                                                            disabled={variableObject.documentOpenList.state.includes(value.fileName)}
+                                                                        >
                                                                             <p>Open</p>
                                                                         </button>
                                                                     </div>
@@ -408,7 +411,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                 methodObject.onClickSkillSelect(event, value.fileName);
                                                                             }}
                                                                         >
-                                                                            <p>Open</p>
+                                                                            <p>Select</p>
                                                                         </button>
                                                                     </div>
                                                                 </div>
@@ -444,7 +447,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                             methodObject.onClickSelectSkill(event);
                                                         }}
                                                     >
-                                                        <p>Select</p>
+                                                        <p>Apply</p>
                                                     </button>
                                                     {(() => {
                                                         const result: IvirtualNode[] = [];

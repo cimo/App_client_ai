@@ -25,8 +25,9 @@ export default class Index implements Icontroller {
     private controllerMenuItem: ControllerMenuItem;
     private controllerToast: ControllerToast;
 
-    private appWindow: Window;
-    private appIsClosing: boolean;
+    private windowApp: Window;
+
+    private isClosing: boolean;
 
     // Method
     private onClickAd = (event: Event): void => {
@@ -62,8 +63,9 @@ export default class Index implements Icontroller {
         this.controllerMenuItem.setControllerMcp(this.controllerMcp);
         this.controllerMenuItem.setControllerToast(this.controllerToast);
 
-        this.appWindow = getCurrentWindow();
-        this.appIsClosing = false;
+        this.windowApp = getCurrentWindow();
+
+        this.isClosing = false;
     }
 
     hookObject = {} as modelIndex.IelementHook;
@@ -93,16 +95,16 @@ export default class Index implements Icontroller {
     }
 
     event(): void {
-        this.appWindow.onCloseRequested(async (event: CloseRequestedEvent) => {
-            if (this.appIsClosing) {
+        this.windowApp.onCloseRequested(async (event: CloseRequestedEvent) => {
+            if (this.isClosing) {
                 return;
             }
 
             event.preventDefault();
 
-            this.appIsClosing = true;
+            this.isClosing = true;
 
-            if (this.appWindow.label === "main") {
+            if (this.windowApp.label === "main") {
                 const windowList = await getAllWindows();
 
                 for (let a = 0; a < windowList.length; a++) {
@@ -117,7 +119,7 @@ export default class Index implements Icontroller {
                 await this.controllerMcp.apiLogout();
             }
 
-            await this.appWindow.close();
+            await this.windowApp.close();
         });
     }
 

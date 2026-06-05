@@ -9,8 +9,9 @@ export interface Ivariable {
     isMenuItemTask: IvariableBind<boolean>;
     isMenuItemAgent: IvariableBind<boolean>;
     isMenuItemSkill: IvariableBind<boolean>;
-    documentList: IvariableBind<modelMcp.IfileDetail[]>;
     isDocumentUpload: IvariableBind<boolean>;
+    documentList: IvariableBind<modelMcp.IfileDetail[]>;
+    documentOpenList: IvariableBind<string[]>;
     isRagEmbeddingStart: IvariableBind<boolean>;
     isRagGraphOpen: IvariableBind<boolean>;
     skillList: IvariableBind<modelMcp.IfileDetail[]>;
@@ -51,7 +52,7 @@ export interface Imethod {
     onClickAgentSave: (event: Event) => void;
     onClickAgentCancel: (event: Event) => void;
     onClickAgentOpen: (id: number) => void;
-    openDocument: (title: string) => void;
+    windowOpenDocument: (title: string) => void;
     fileExtension: (fileName: string) => string;
 }
 
