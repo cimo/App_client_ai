@@ -7,13 +7,13 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
     return (
         <div class="view_document" jsmvcfw-controllerName="Document">
             <aside jsmvcfw-controllerName="Mcp" />
-            <div class="main_container">
+            <div class="main_wrapper">
                 {(() => {
                     const result: IvirtualNode[] = [];
 
                     if (variableObject.isLoadingWindow.state || variableObject.isLoadingPage.state) {
                         result.push(
-                            <div class="loading_container">
+                            <div class="loading_wrapper">
                                 <i class="cls_icon">update</i>
                                 <p>Loading...</p>
                             </div>
@@ -21,7 +21,7 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                     } else {
                         result.push(
                             <>
-                                <div class="pagination_container">
+                                <div class="pagination_wrapper">
                                     <i class="cls_icon" onClick={(event: Event) => methodObject.onClickChangePage(event, -1)}>
                                         chevron_left
                                     </i>
@@ -39,13 +39,13 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                                         chevron_right
                                     </i>
                                 </div>
-                                <div class="data_container">
+                                <div class="data_wrapper">
                                     {(() => {
                                         const result: IvirtualNode[] = [];
 
                                         if (!variableObject.isPageExist.state) {
                                             result.push(
-                                                <div class="message_container">
+                                                <div class="message_wrapper">
                                                     <i class="cls_icon">error</i>
                                                     <p>Page does not exist</p>
                                                 </div>

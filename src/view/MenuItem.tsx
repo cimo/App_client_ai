@@ -60,14 +60,14 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
 
                 if (variableObject.isMenuItemDocument.state) {
                     result.push(
-                        <div class="document_container">
+                        <div class="document_wrapper">
                             {(() => {
                                 const result: IvirtualNode[] = [];
 
                                 if (variableObject.isRagGraphOpen.state) {
                                     result.push(
-                                        <div class="skill_container">
-                                            <div class="button_container">
+                                        <div class="skill_wrapper">
+                                            <div class="button_wrapper">
                                                 <button
                                                     onClick={(event: Event) => {
                                                         methodObject.onClickRagGraphBack(event);
@@ -76,13 +76,13 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     <p>Back</p>
                                                 </button>
                                             </div>
-                                            <div class="graph_container"></div>
+                                            <div class="graph_wrapper"></div>
                                         </div>
                                     );
                                 } else {
                                     result.push(
                                         <>
-                                            <div class="button_container">
+                                            <div class="button_wrapper">
                                                 <button
                                                     onClick={() => {
                                                         methodObject.onClickChipDocumentUpload();
@@ -206,8 +206,8 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                     );
                 } else if (variableObject.isMenuItemSkill.state) {
                     result.push(
-                        <div class="skill_container">
-                            <div class="button_container">
+                        <div class="skill_wrapper">
+                            <div class="button_wrapper">
                                 <button
                                     onClick={() => {
                                         methodObject.onClickChipSkillUpload();
@@ -286,7 +286,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                     );
                 } else if (variableObject.isMenuItemTool.state) {
                     result.push(
-                        <div class="tool_container">
+                        <div class="tool_wrapper">
                             <ul>
                                 {(() => {
                                     const result: IvirtualNode[] = [];
@@ -320,7 +320,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                     );
                 } else if (variableObject.isMenuItemTask.state) {
                     result.push(
-                        <div class="task_container">
+                        <div class="task_wrapper">
                             <ul>
                                 {(() => {
                                     const result: IvirtualNode[] = [];
@@ -354,14 +354,14 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                     );
                 } else if (variableObject.isMenuItemAgent.state) {
                     result.push(
-                        <div class="agent_container">
+                        <div class="agent_wrapper">
                             {(() => {
                                 const result: IvirtualNode[] = [];
 
                                 if (variableObject.isAgentSkillSelect.state) {
                                     result.push(
-                                        <div class="skill_container">
-                                            <div class="button_container">
+                                        <div class="skill_wrapper">
+                                            <div class="button_wrapper">
                                                 <button
                                                     onClick={(event: Event) => {
                                                         methodObject.onClickSelectSkillBack(event);
@@ -438,7 +438,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             </div>
                                             <div class="form_field">
                                                 <p>Skill:</p>
-                                                <div class="select_container">
+                                                <div class="select_wrapper">
                                                     <button
                                                         onClick={(event: Event) => {
                                                             methodObject.onClickSelectSkill(event);
@@ -462,7 +462,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     })()}
                                                 </div>
                                             </div>
-                                            <div class="form_button_container">
+                                            <div class="form_button_wrapper">
                                                 <button
                                                     onClick={(event: Event) => {
                                                         methodObject.onClickAgentSave(event);
@@ -494,7 +494,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                 } else {
                                     result.push(
                                         <>
-                                            <div class="button_container">
+                                            <div class="button_wrapper">
                                                 <button
                                                     onClick={(event: Event) => {
                                                         methodObject.onClickAgentCreate(event);

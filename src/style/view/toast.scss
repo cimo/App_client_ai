@@ -4,7 +4,7 @@
 .view_toast {
     flex-shrink: 0;
 
-    .message_container {
+    .message_wrapper {
         display: flex;
         flex-direction: row;
         align-content: center;
@@ -47,7 +47,7 @@
 }
 
 :root[data-theme="dark"] {
-    .message_container {
+    .message_wrapper {
         &.warning {
             background-color: color.$darkToastWarningBackground;
             color: color.$darkToastWarningText;

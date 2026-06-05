@@ -12,7 +12,7 @@
     min-width: 0;
     flex: 1 1 auto;
 
-    .message_container {
+    .message_wrapper {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -37,7 +37,7 @@
         }
     }
 
-    .button_container {
+    .button_wrapper {
         display: flex;
         flex-direction: row;
         align-content: center;

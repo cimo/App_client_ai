@@ -332,10 +332,16 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const resultJson = (await resultApi.json()) as modelIndex.IresponseBody;
-                const stdout = JSON.parse(resultJson.response.stdout) as modelDocument.Iresult;
+                let result = {} as modelDocument.Iresult;
 
-                return stdout;
+                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const stdout = json.response.stdout;
+
+                if (stdout !== "ko") {
+                    result = JSON.parse(stdout) as modelDocument.Iresult;
+                }
+
+                return result;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiDocumentRead() - fetch() - catch()", error.message);
@@ -538,12 +544,18 @@ export default class Mcp implements Icontroller {
             }
         })
             .then(async (resultApi) => {
+                let result = "";
+
                 this.variableObject.isOfflineMcp.state = false;
 
-                const resultJson = (await resultApi.json()) as modelIndex.IresponseBody;
-                const stdout = resultJson.response.stdout;
+                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const stdout = json.response.stdout;
 
-                return stdout;
+                if (stdout !== "ko") {
+                    result = stdout;
+                }
+
+                return result;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiSkillRead() - fetch() - catch()", error.message);

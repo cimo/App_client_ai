@@ -51,11 +51,11 @@
     left: 150px;
     z-index: parameter.$zIndexLevel2;
 
-    .document_container,
-    .skill_container,
-    .tool_container,
-    .task_container,
-    .agent_container {
+    .document_wrapper,
+    .skill_wrapper,
+    .tool_wrapper,
+    .task_wrapper,
+    .agent_wrapper {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -68,7 +68,7 @@
 
         align-self: stretch;
 
-        .button_container {
+        .button_wrapper {
             display: flex;
             flex-direction: row;
             align-content: center;
@@ -139,9 +139,9 @@
         }
     }
 
-    .tool_container,
-    .task_container,
-    .agent_container {
+    .tool_wrapper,
+    .task_wrapper,
+    .agent_wrapper {
         ul {
             display: flex;
             flex-direction: row;
@@ -252,7 +252,7 @@
                     margin: 5px 0 20px 0;
                 }
 
-                .select_container {
+                .select_wrapper {
                     display: flex;
                     flex-direction: row;
                     align-content: center;
@@ -289,7 +289,7 @@
                 }
             }
 
-            .form_button_container {
+            .form_button_wrapper {
                 display: flex;
                 flex-direction: row;
                 align-content: center;
@@ -328,7 +328,7 @@
     .view_menuItem_right {
         background-color: color.$darkRootBackground;
 
-        .agent_container {
+        .agent_wrapper {
             .agent_form {
                 .form_field {
                     textarea {

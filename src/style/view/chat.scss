@@ -17,7 +17,7 @@
         flex-shrink: 0;
     }
 
-    .chat_container {
+    .chat_wrapper {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -33,7 +33,7 @@
         overflow-y: scroll;
 
         > div {
-            .chat_user_container {
+            .chat_user_wrapper {
                 display: flex;
                 flex-direction: column;
                 align-content: center;
@@ -57,7 +57,7 @@
                 }
             }
 
-            .chat_assistant_container {
+            .chat_assistant_wrapper {
                 display: flex;
                 flex-direction: column;
                 align-content: center;
@@ -101,8 +101,8 @@
                         }
                     }
 
-                    .citation_container {
-                        .pagination_container {
+                    .citation_wrapper {
+                        .pagination_wrapper {
                             display: flex;
                             flex-direction: row;
                             align-content: center;
@@ -166,7 +166,7 @@
                         }
                     }
 
-                    .relation_container {
+                    .relation_wrapper {
                         margin-top: 15px;
                         padding: 10px;
 
@@ -223,7 +223,7 @@
                     }
                 }
 
-                .scanner_container {
+                .scanner_wrapper {
                     display: flex;
                     flex-direction: column;
                     align-content: start;
@@ -260,7 +260,7 @@
     min-width: 0;
     flex: 0 1 auto;
 
-    .message_send_container {
+    .message_send_wrapper {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -276,7 +276,7 @@
         align-self: center;
         margin-bottom: 10px;
 
-        .action_container {
+        .action_wrapper {
             display: flex;
             flex-direction: row;
             align-content: center;
@@ -315,21 +315,21 @@
 }
 
 :root[data-theme="dark"] {
-    .chat_container {
+    .chat_wrapper {
         > div {
-            .chat_user_container {
+            .chat_user_wrapper {
                 .message {
                     border: 1px solid color.$darkRootBorder;
                 }
             }
 
-            .chat_assistant_container {
+            .chat_assistant_wrapper {
                 details {
                     border: 1px solid color.$darkChatAssistantBoxBorder;
                     background-color: color.$darkChatAssistantBoxBackground;
                     color: color.$darkRootText;
 
-                    .citation_container {
+                    .citation_wrapper {
                         .box {
                             background-color: color.$darkCitationBackground;
                             color: color.$darkCitationText;
@@ -340,7 +340,7 @@
                         }
                     }
 
-                    .relation_container {
+                    .relation_wrapper {
                         background-color: color.$darkCitationBackground;
                         color: color.$darkCitationText;
                     }
@@ -349,7 +349,7 @@
         }
     }
 
-    .message_send_container {
+    .message_send_wrapper {
         border: 1px solid color.$darkChatMessageSendBorder;
         box-shadow: color.$darkShadowMessageSend;
     }

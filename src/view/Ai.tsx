@@ -6,7 +6,7 @@ import * as modelAi from "../model/Ai";
 const viewAi = (variableObject: modelAi.Ivariable, methodObject: modelAi.Imethod): IvirtualNode => {
     return (
         <div class="view_ai">
-            <div class="header_container">
+            <div class="header_wrapper">
                 <p>Model selected: {variableObject.modelSelected.state}</p>
                 <div class="dropdown">
                     <i

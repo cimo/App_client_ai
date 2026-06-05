@@ -14,7 +14,7 @@
 
     overflow: hidden;
 
-    .main_container {
+    .main_wrapper {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -25,7 +25,7 @@
         min-width: 0;
         flex: 1 1 auto;
 
-        .loading_container {
+        .loading_wrapper {
             display: flex;
             flex-direction: column;
             align-content: center;
@@ -42,7 +42,7 @@
             }
         }
 
-        .pagination_container {
+        .pagination_wrapper {
             display: flex;
             flex-direction: row;
             align-content: center;
@@ -72,7 +72,7 @@
             }
         }
 
-        .data_container {
+        .data_wrapper {
             display: flex;
             flex-direction: column;
             align-content: center;
@@ -85,7 +85,7 @@
 
             overflow: hidden;
 
-            .message_container {
+            .message_wrapper {
                 display: flex;
                 flex-direction: column;
                 align-content: center;
@@ -113,7 +113,7 @@
 
 :root[data-theme="dark"] {
     .view_document {
-        .over_container {
+        .over_wrapper {
             background-color: color.$darkRootBackground;
         }
     }

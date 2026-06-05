@@ -7,7 +7,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
     return (
         <div class="view_index" jsmvcfw-controllerName="Index">
             <div
-                class={`over_container ${variableObject.isOfflineMcp.state || variableObject.isOfflineAi.state || variableObject.adUrl.state !== "" ? "" : "none"}`}
+                class={`over_wrapper ${variableObject.isOfflineMcp.state || variableObject.isOfflineAi.state || variableObject.adUrl.state !== "" ? "" : "none"}`}
             >
                 <div
                     class={variableObject.isOfflineMcp.state || variableObject.isOfflineAi.state ? "" : "none"}
@@ -28,11 +28,11 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     <p>Click here for connect to AD.</p>
                 </div>
             </div>
-            <div class="main_container">
-                <div class="left_container">
+            <div class="main_wrapper">
+                <div class="left_wrapper">
                     <aside jsmvcfw-controllerName="MenuItem" view="left" />
                 </div>
-                <div class="right_container">
+                <div class="right_wrapper">
                     <aside jsmvcfw-controllerName="Ai" />
                     <aside jsmvcfw-controllerName="MenuItem" view="right" />
                 </div>

@@ -8,7 +8,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
 
     return (
         <div class="view_chat_message">
-            <div class="chat_container" jsmvcfw-elementHookName="elementContainerMessageReceive">
+            <div class="chat_wrapper" jsmvcfw-elementHookName="elementContainerMessageReceive">
                 {(() => {
                     const result: IvirtualNode[] = [];
 
@@ -17,11 +17,11 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
 
                         result.push(
                             <div key={key} data-chat-index={key}>
-                                <div class={`chat_user_container ${value.user ? "" : "none"}`}>
+                                <div class={`chat_user_wrapper ${value.user ? "" : "none"}`}>
                                     <p class="time">{value.time}</p>
                                     <pre class="message">{value.user}</pre>
                                 </div>
-                                <div class="chat_assistant_container">
+                                <div class="chat_assistant_wrapper">
                                     <details class={value.mcpTool && value.mcpTool["name"] ? "" : "none"}>
                                         <summary>
                                             <i class="cls_icon">handyman</i>
@@ -62,8 +62,8 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                         <summary>
                                                             <p>Citation result:</p>
                                                         </summary>
-                                                        <div class="citation_container">
-                                                            <div class="pagination_container">
+                                                        <div class="citation_wrapper">
+                                                            <div class="pagination_wrapper">
                                                                 <button
                                                                     onClick={() => {
                                                                         methodObject.onClickCitationTab(
@@ -129,7 +129,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
 
                                                             if (value.ragRelationList && value.ragRelationList.length > 0) {
                                                                 result.push(
-                                                                    <div class="relation_container">
+                                                                    <div class="relation_wrapper">
                                                                         <p class="title">
                                                                             <i class="cls_icon">account_tree</i>
                                                                             <span>Relation:</span>
@@ -167,7 +167,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                 }
                                             } else if (value.securityScanner) {
                                                 result.push(
-                                                    <details open class="scanner_container">
+                                                    <details open class="scanner_wrapper">
                                                         <summary>
                                                             <p>Security scanner result:</p>
                                                         </summary>
@@ -197,9 +197,9 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
 export const input = (variableObject: modelChat.Ivariable, methodObject: modelChat.Imethod): IvirtualNode => {
     return (
         <div class="view_chat_input">
-            <div class="message_send_container">
+            <div class="message_send_wrapper">
                 <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
-                <div class="action_container">
+                <div class="action_wrapper">
                     <div class="left"></div>
                     <div class="right">
                         <button
