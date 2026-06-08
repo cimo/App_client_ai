@@ -39,7 +39,7 @@ const fileSize = (value: Uint8Array | number, isOnlyByte = true): string => {
     return result;
 };
 
-export const localeConfigurationObject: Record<string, { locale: string; currency: string; dateFormat: string }> = {
+export const localeConfigurationObject: modelHelperSrc.IlocaleConfiguration = {
     // Asia
     jp: { locale: "ja-JP", currency: "JPY", dateFormat: "a" },
     cn: { locale: "zh-CN", currency: "CNY", dateFormat: "a" },
@@ -81,7 +81,7 @@ export const localeFormat = (value: number | Date, isMonth = true, isDay = true,
         };
 
         return new Intl.NumberFormat(localeConfigurationObject[LOCALE].locale, formatOption).format(value);
-    } else if (value instanceof Date) {
+    } else if (value instanceof Date && !isNaN(value.getTime())) {
         let result = "";
 
         let formatOption: Intl.DateTimeFormatOptions = {

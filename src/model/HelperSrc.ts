@@ -1,3 +1,11 @@
+export interface IlocaleConfiguration {
+    [key: string]: {
+        locale: string;
+        currency: string;
+        dateFormat: string;
+    };
+}
+
 export interface IfileDetail {
     fileName: string;
     baseName: string;
