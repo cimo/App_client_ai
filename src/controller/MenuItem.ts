@@ -505,9 +505,9 @@ export default class MenuItem implements Icontroller {
     }
 
     subControllerList(): Icontroller[] {
-        const list: Icontroller[] = [];
+        const resultList: Icontroller[] = [];
 
-        return list;
+        return resultList;
     }
 
     rendered(): void {}

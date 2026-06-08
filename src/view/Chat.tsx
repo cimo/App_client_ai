@@ -10,12 +10,12 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
         <div class="view_chat_message">
             <div class="chat_wrapper" jsmvcfw-elementHookName="elementContainerMessageReceive">
                 {(() => {
-                    const result: IvirtualNode[] = [];
+                    const resultList: IvirtualNode[] = [];
 
                     for (const [key, value] of Object.entries(messageList)) {
                         const messageIndex = parseInt(key);
 
-                        result.push(
+                        resultList.push(
                             <div key={key} data-chat-index={key}>
                                 <div class={`chat_user_wrapper ${value.user ? "" : "none"}`}>
                                     <p class="time">{value.time}</p>
@@ -28,10 +28,10 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                             <p>Show tool</p>
                                         </summary>
                                         {(() => {
-                                            const result: IvirtualNode[] = [];
+                                            const resultList: IvirtualNode[] = [];
 
                                             if (value.mcpTool) {
-                                                result.push(
+                                                resultList.push(
                                                     <ul>
                                                         <li>Name: {value.mcpTool["name"]}</li>
                                                         <li>Argument: {value.mcpTool["arguments"]}</li>
@@ -40,7 +40,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                 );
                                             }
 
-                                            return result;
+                                            return resultList;
                                         })()}
                                     </details>
                                     <details class={value.assistantReason ? "" : "none"}>
@@ -51,13 +51,13 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                         <pre>{value.assistantReason}</pre>
                                     </details>
                                     {(() => {
-                                        const result: IvirtualNode[] = [];
+                                        const resultList: IvirtualNode[] = [];
 
-                                        if (value.assistantNoReason === "" && !value.ragCitation && !value.securityScanner) {
-                                            result.push(<i class="cls_icon">update</i>);
+                                        if (value.assistantNoReason === "" && !value.ragCitationList && !value.securityScanner) {
+                                            resultList.push(<i class="cls_icon">update</i>);
                                         } else if (typeof value.assistantNoReason === "string") {
-                                            if (value.ragCitation) {
-                                                result.push(
+                                            if (value.ragCitationList) {
+                                                resultList.push(
                                                     <details open>
                                                         <summary>
                                                             <p>Citation result:</p>
@@ -75,14 +75,17 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                     <i class="cls_icon">chevron_left</i>
                                                                 </button>
                                                                 <span class="label">
-                                                                    {value.ragCitationTabIndex + 1} / {value.ragCitation.length}
+                                                                    {value.ragCitationTabIndex + 1} / {value.ragCitationList.length}
                                                                 </span>
                                                                 <button
                                                                     onClick={() => {
-                                                                        if (value.ragCitation) {
+                                                                        if (value.ragCitationList) {
                                                                             methodObject.onClickCitationTab(
                                                                                 messageIndex,
-                                                                                Math.min(value.ragCitation.length - 1, value.ragCitationTabIndex + 1)
+                                                                                Math.min(
+                                                                                    value.ragCitationList.length - 1,
+                                                                                    value.ragCitationTabIndex + 1
+                                                                                )
                                                                             );
                                                                         }
                                                                     }}
@@ -91,11 +94,11 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                 </button>
                                                             </div>
                                                             {(() => {
-                                                                const result: IvirtualNode[] = [];
-                                                                const citation = value.ragCitation[value.ragCitationTabIndex];
+                                                                const resultList: IvirtualNode[] = [];
+                                                                const citation = value.ragCitationList[value.ragCitationTabIndex];
 
                                                                 if (citation && typeof citation !== "string") {
-                                                                    result.push(
+                                                                    resultList.push(
                                                                         <div class="box">
                                                                             <p class="title">
                                                                                 <i class="cls_icon">text_snippet</i>
@@ -121,14 +124,14 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                     );
                                                                 }
 
-                                                                return result;
+                                                                return resultList;
                                                             })()}
                                                         </div>
                                                         {(() => {
-                                                            const result: IvirtualNode[] = [];
+                                                            const resultList: IvirtualNode[] = [];
 
                                                             if (value.ragRelationList && value.ragRelationList.length > 0) {
-                                                                result.push(
+                                                                resultList.push(
                                                                     <div class="relation_wrapper">
                                                                         <p class="title">
                                                                             <i class="cls_icon">account_tree</i>
@@ -136,12 +139,12 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                         </p>
                                                                         <ul>
                                                                             {(() => {
-                                                                                const result: IvirtualNode[] = [];
+                                                                                const resultList: IvirtualNode[] = [];
 
-                                                                                const list = Object.entries(value.ragRelationList);
+                                                                                const entryList = Object.entries(value.ragRelationList);
 
-                                                                                for (const [key, value] of list) {
-                                                                                    result.push(
+                                                                                for (const [key, value] of entryList) {
+                                                                                    resultList.push(
                                                                                         <li key={key}>
                                                                                             <span class="source">{value.source}</span>
                                                                                             <span class="verb">{value.verb}</span>
@@ -150,23 +153,23 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                                     );
                                                                                 }
 
-                                                                                return result;
+                                                                                return resultList;
                                                                             })()}
                                                                         </ul>
                                                                     </div>
                                                                 );
                                                             }
 
-                                                            return result;
+                                                            return resultList;
                                                         })()}
                                                     </details>
                                                 );
 
                                                 if (value.assistantNoReason) {
-                                                    result.push(<pre>{value.assistantNoReason}</pre>);
+                                                    resultList.push(<pre>{value.assistantNoReason}</pre>);
                                                 }
                                             } else if (value.securityScanner) {
-                                                result.push(
+                                                resultList.push(
                                                     <details open class="scanner_wrapper">
                                                         <summary>
                                                             <p>Security scanner result:</p>
@@ -175,18 +178,18 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                     </details>
                                                 );
                                             } else {
-                                                result.push(<pre>{value.assistantNoReason}</pre>);
+                                                resultList.push(<pre>{value.assistantNoReason}</pre>);
                                             }
                                         }
 
-                                        return result;
+                                        return resultList;
                                     })()}
                                 </div>
                             </div>
                         );
                     }
 
-                    return result;
+                    return resultList;
                 })()}
                 <div class="bottom_limit" jsmvcfw-elementHookName="elementBottomLimit"></div>
             </div>

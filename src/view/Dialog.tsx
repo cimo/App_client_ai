@@ -19,10 +19,10 @@ const viewDialog = (variableObject: modelDialog.Ivariable, methodObject: modelDi
                     <p>OK</p>
                 </button>
                 {(() => {
-                    const result: IvirtualNode[] = [];
+                    const resultList: IvirtualNode[] = [];
 
                     if (!variableObject.isConfirm.state) {
-                        result.push(
+                        resultList.push(
                             <button
                                 onClick={() => {
                                     methodObject.onClickCancel();
@@ -33,7 +33,7 @@ const viewDialog = (variableObject: modelDialog.Ivariable, methodObject: modelDi
                         );
                     }
 
-                    return result;
+                    return resultList;
                 })()}
             </div>
         </div>

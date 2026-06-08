@@ -11,7 +11,7 @@ export const tool = (variableObject: modelMcp.Ivariable, methodObject: modelMcp.
                     class={`chip ${variableObject.toolSelected.state.name || variableObject.taskSelected.state.name || variableObject.agentSelected.state.name ? "" : "none"}`}
                 >
                     {(() => {
-                        const result: IvirtualNode[] = [];
+                        const resultList: IvirtualNode[] = [];
 
                         let nameSelected = "";
 
@@ -23,7 +23,7 @@ export const tool = (variableObject: modelMcp.Ivariable, methodObject: modelMcp.
                             nameSelected = variableObject.agentSelected.state.name;
                         }
 
-                        result.push(
+                        resultList.push(
                             <>
                                 <i
                                     class="cls_icon close"
@@ -37,7 +37,7 @@ export const tool = (variableObject: modelMcp.Ivariable, methodObject: modelMcp.
                             </>
                         );
 
-                        return result;
+                        return resultList;
                     })()}
                 </div>
             </div>

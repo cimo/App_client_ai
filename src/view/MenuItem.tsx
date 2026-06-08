@@ -1,6 +1,7 @@
 import { jsxFactory, jsxFragment, IvirtualNode } from "@cimo/jsmvcfw/dist/src/Main.js";
 
 // Source
+import * as helperSrc from "../HelperSrc";
 import * as modelMenuItem from "../model/MenuItem";
 
 export const left = (variableObject: modelMenuItem.Ivariable, methodObject: modelMenuItem.Imethod): IvirtualNode => {
@@ -56,16 +57,16 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
             class={`view_menuItem_right ${variableObject.isMenuItemDocument.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state || variableObject.isMenuItemSkill.state ? "" : "none"}`}
         >
             {(() => {
-                const result: IvirtualNode[] = [];
+                const resultList: IvirtualNode[] = [];
 
                 if (variableObject.isMenuItemDocument.state) {
-                    result.push(
+                    resultList.push(
                         <div class="document_wrapper">
                             {(() => {
-                                const result: IvirtualNode[] = [];
+                                const resultList: IvirtualNode[] = [];
 
                                 if (variableObject.isRagGraphOpen.state) {
-                                    result.push(
+                                    resultList.push(
                                         <div class="skill_wrapper">
                                             <div class="button_wrapper">
                                                 <button
@@ -80,7 +81,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         </div>
                                     );
                                 } else {
-                                    result.push(
+                                    resultList.push(
                                         <>
                                             <div class="button_wrapper">
                                                 <button
@@ -90,12 +91,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     disabled={variableObject.isDocumentUpload.state}
                                                 >
                                                     {(() => {
-                                                        const result: IvirtualNode[] = [];
+                                                        const resultList: IvirtualNode[] = [];
 
                                                         if (variableObject.isDocumentUpload.state) {
-                                                            result.push(<i class="cls_icon">update</i>);
+                                                            resultList.push(<i class="cls_icon">update</i>);
                                                         } else {
-                                                            result.push(
+                                                            resultList.push(
                                                                 <>
                                                                     <i class="cls_icon">upload_file</i>
                                                                     <p>Upload</p>
@@ -103,7 +104,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                             );
                                                         }
 
-                                                        return result;
+                                                        return resultList;
                                                     })()}
                                                 </button>
                                                 <button
@@ -114,12 +115,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     disabled={variableObject.isRagEmbeddingStart.state}
                                                 >
                                                     {(() => {
-                                                        const result: IvirtualNode[] = [];
+                                                        const resultList: IvirtualNode[] = [];
 
                                                         if (variableObject.isRagEmbeddingStart.state) {
-                                                            result.push(<i class="cls_icon">update</i>);
+                                                            resultList.push(<i class="cls_icon">update</i>);
                                                         } else {
-                                                            result.push(
+                                                            resultList.push(
                                                                 <>
                                                                     <i class="cls_icon">storage</i>
                                                                     <p>RAG - Start</p>
@@ -127,7 +128,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                             );
                                                         }
 
-                                                        return result;
+                                                        return resultList;
                                                     })()}
                                                 </button>
                                                 <button
@@ -156,13 +157,13 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                 </div>
                                                 <div class="body">
                                                     {(() => {
-                                                        const result: IvirtualNode[] = [];
+                                                        const resultList: IvirtualNode[] = [];
 
                                                         for (let a = 0; a < variableObject.documentList.state.length; a++) {
                                                             const value = variableObject.documentList.state[a];
                                                             const extension = methodObject.fileExtension(value.fileName);
 
-                                                            result.push(
+                                                            resultList.push(
                                                                 <div key={a} class="row">
                                                                     <div class="cell delete">
                                                                         <i
@@ -179,7 +180,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                         <p>{value.fileName}</p>
                                                                     </div>
                                                                     <div class="cell date">
-                                                                        <p>{value.dateModified}</p>
+                                                                        <p>{helperSrc.localeFormat(new Date(value.dateModified))}</p>
                                                                     </div>
                                                                     <div class="cell size">
                                                                         <p>{value.size}</p>
@@ -196,19 +197,19 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                             );
                                                         }
 
-                                                        return result;
+                                                        return resultList;
                                                     })()}
                                                 </div>
                                             </div>
                                         </>
                                     );
                                 }
-                                return result;
+                                return resultList;
                             })()}
                         </div>
                     );
                 } else if (variableObject.isMenuItemSkill.state) {
-                    result.push(
+                    resultList.push(
                         <div class="skill_wrapper">
                             <div class="button_wrapper">
                                 <button
@@ -218,12 +219,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     disabled={variableObject.isSkillUpload.state}
                                 >
                                     {(() => {
-                                        const result: IvirtualNode[] = [];
+                                        const resultList: IvirtualNode[] = [];
 
                                         if (variableObject.isSkillUpload.state) {
-                                            result.push(<i class="cls_icon">update</i>);
+                                            resultList.push(<i class="cls_icon">update</i>);
                                         } else {
-                                            result.push(
+                                            resultList.push(
                                                 <>
                                                     <i class="cls_icon">upload_file</i>
                                                     <p>Upload</p>
@@ -231,7 +232,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             );
                                         }
 
-                                        return result;
+                                        return resultList;
                                     })()}
                                 </button>
                             </div>
@@ -250,12 +251,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                 </div>
                                 <div class="body">
                                     {(() => {
-                                        const result: IvirtualNode[] = [];
+                                        const resultList: IvirtualNode[] = [];
 
-                                        const list = Object.entries(variableObject.skillList.state);
+                                        const entryList = Object.entries(variableObject.skillList.state);
 
-                                        for (const [key, value] of list) {
-                                            result.push(
+                                        for (const [key, value] of entryList) {
+                                            resultList.push(
                                                 <div key={key} class="row">
                                                     <div class="cell delete">
                                                         <i
@@ -281,21 +282,21 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             );
                                         }
 
-                                        return result;
+                                        return resultList;
                                     })()}
                                 </div>
                             </div>
                         </div>
                     );
                 } else if (variableObject.isMenuItemTool.state) {
-                    result.push(
+                    resultList.push(
                         <div class="tool_wrapper">
                             <ul>
                                 {(() => {
-                                    const result: IvirtualNode[] = [];
+                                    const resultList: IvirtualNode[] = [];
 
                                     for (const [key, value] of Object.entries(variableObject.toolList.state)) {
-                                        result.push(
+                                        resultList.push(
                                             <li key={key} class="chip">
                                                 <div class="top">
                                                     <img src={`/asset/image/icon_ui/${value.icon}`} />
@@ -316,20 +317,20 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         );
                                     }
 
-                                    return result;
+                                    return resultList;
                                 })()}
                             </ul>
                         </div>
                     );
                 } else if (variableObject.isMenuItemTask.state) {
-                    result.push(
+                    resultList.push(
                         <div class="task_wrapper">
                             <ul>
                                 {(() => {
-                                    const result: IvirtualNode[] = [];
+                                    const resultList: IvirtualNode[] = [];
 
                                     for (const [key, value] of Object.entries(variableObject.taskList.state)) {
-                                        result.push(
+                                        resultList.push(
                                             <li key={key} class="chip">
                                                 <div class="top">
                                                     <img src={`/asset/image/icon_ui/${value.icon}`} />
@@ -350,19 +351,19 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         );
                                     }
 
-                                    return result;
+                                    return resultList;
                                 })()}
                             </ul>
                         </div>
                     );
                 } else if (variableObject.isMenuItemAgent.state) {
-                    result.push(
+                    resultList.push(
                         <div class="agent_wrapper">
                             {(() => {
-                                const result: IvirtualNode[] = [];
+                                const resultList: IvirtualNode[] = [];
 
                                 if (variableObject.isAgentSkillSelect.state) {
-                                    result.push(
+                                    resultList.push(
                                         <div class="skill_wrapper">
                                             <div class="button_wrapper">
                                                 <button
@@ -388,12 +389,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                 </div>
                                                 <div class="body">
                                                     {(() => {
-                                                        const result: IvirtualNode[] = [];
+                                                        const resultList: IvirtualNode[] = [];
 
-                                                        const list = Object.entries(variableObject.skillList.state);
+                                                        const entryList = Object.entries(variableObject.skillList.state);
 
-                                                        for (const [key, value] of list) {
-                                                            result.push(
+                                                        for (const [key, value] of entryList) {
+                                                            resultList.push(
                                                                 <div key={key} class="row">
                                                                     <div class="cell name">
                                                                         <img class="icon" src={`/asset/image/icon_file/md.svg`} />
@@ -411,21 +412,21 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                 methodObject.onClickSkillSelect(event, value.fileName);
                                                                             }}
                                                                         >
-                                                                            <p>Select</p>
+                                                                            <p>Pick</p>
                                                                         </button>
                                                                     </div>
                                                                 </div>
                                                             );
                                                         }
 
-                                                        return result;
+                                                        return resultList;
                                                     })()}
                                                 </div>
                                             </div>
                                         </div>
                                     );
                                 } else if (Object.keys(variableObject.agentForm.state).length > 0) {
-                                    result.push(
+                                    resultList.push(
                                         <div class="agent_form">
                                             <div class="form_field">
                                                 <p>Name:</p>
@@ -447,13 +448,13 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                             methodObject.onClickSelectSkill(event);
                                                         }}
                                                     >
-                                                        <p>Apply</p>
+                                                        <p>Select</p>
                                                     </button>
                                                     {(() => {
-                                                        const result: IvirtualNode[] = [];
+                                                        const resultList: IvirtualNode[] = [];
 
                                                         if (variableObject.agentForm.state.skill !== "") {
-                                                            result.push(
+                                                            resultList.push(
                                                                 <div class="skill">
                                                                     <img src={`/asset/image/icon_ui/lightbulb.svg`} />
                                                                     <p>{variableObject.agentForm.state.skill}</p>
@@ -461,7 +462,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                             );
                                                         }
 
-                                                        return result;
+                                                        return resultList;
                                                     })()}
                                                 </div>
                                             </div>
@@ -473,15 +474,15 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     disabled={variableObject.isAgentSave.state}
                                                 >
                                                     {(() => {
-                                                        const result: IvirtualNode[] = [];
+                                                        const resultList: IvirtualNode[] = [];
 
                                                         if (variableObject.isAgentSave.state) {
-                                                            result.push(<i class="cls_icon">update</i>);
+                                                            resultList.push(<i class="cls_icon">update</i>);
                                                         } else {
-                                                            result.push(<p>Save</p>);
+                                                            resultList.push(<p>Save</p>);
                                                         }
 
-                                                        return result;
+                                                        return resultList;
                                                     })()}
                                                 </button>
                                                 <button
@@ -495,7 +496,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         </div>
                                     );
                                 } else {
-                                    result.push(
+                                    resultList.push(
                                         <>
                                             <div class="button_wrapper">
                                                 <button
@@ -509,12 +510,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             </div>
                                             <ul>
                                                 {(() => {
-                                                    const result: IvirtualNode[] = [];
+                                                    const resultList: IvirtualNode[] = [];
 
-                                                    const list = Object.entries(variableObject.agentList.state);
+                                                    const entryList = Object.entries(variableObject.agentList.state);
 
-                                                    for (const [key, value] of list) {
-                                                        result.push(
+                                                    for (const [key, value] of entryList) {
+                                                        resultList.push(
                                                             <li key={key} class="chip agent">
                                                                 <div class="top">
                                                                     <img src={`/asset/image/icon_ui/agent.svg`} />
@@ -546,10 +547,10 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                 </div>
                                                                 <p class="bottom">{value.description}</p>
                                                                 {(() => {
-                                                                    const result: IvirtualNode[] = [];
+                                                                    const resultList: IvirtualNode[] = [];
 
                                                                     if (value.skill !== "") {
-                                                                        result.push(
+                                                                        resultList.push(
                                                                             <div class="skill">
                                                                                 <img src={`/asset/image/icon_ui/lightbulb.svg`} />
                                                                                 <p>{value.skill}</p>
@@ -557,26 +558,26 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                         );
                                                                     }
 
-                                                                    return result;
+                                                                    return resultList;
                                                                 })()}
                                                             </li>
                                                         );
                                                     }
 
-                                                    return result;
+                                                    return resultList;
                                                 })()}
                                             </ul>
                                         </>
                                     );
                                 }
 
-                                return result;
+                                return resultList;
                             })()}
                         </div>
                     );
                 }
 
-                return result;
+                return resultList;
             })()}
         </div>
     );

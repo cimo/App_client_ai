@@ -9,17 +9,17 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
             <aside jsmvcfw-controllerName="Mcp" />
             <div class="main_wrapper">
                 {(() => {
-                    const result: IvirtualNode[] = [];
+                    const resultList: IvirtualNode[] = [];
 
                     if (variableObject.isLoadingWindow.state || variableObject.isLoadingPage.state) {
-                        result.push(
+                        resultList.push(
                             <div class="loading_wrapper">
                                 <i class="cls_icon">update</i>
                                 <p>Loading...</p>
                             </div>
                         );
                     } else {
-                        result.push(
+                        resultList.push(
                             <>
                                 <div class="pagination_wrapper">
                                     <i class="cls_icon" onClick={(event: Event) => methodObject.onClickChangePage(event, -1)}>
@@ -41,29 +41,29 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                                 </div>
                                 <div class="data_wrapper">
                                     {(() => {
-                                        const result: IvirtualNode[] = [];
+                                        const resultList: IvirtualNode[] = [];
 
                                         if (!variableObject.isPageExist.state) {
-                                            result.push(
+                                            resultList.push(
                                                 <div class="message_wrapper">
                                                     <i class="cls_icon">error</i>
                                                     <p>Page does not exist</p>
                                                 </div>
                                             );
                                         } else if (variableObject.htmlContent.state !== "") {
-                                            result.push(<iframe srcdoc={variableObject.htmlContent.state} sandbox="allow-scripts"></iframe>);
+                                            resultList.push(<iframe srcdoc={variableObject.htmlContent.state} sandbox="allow-scripts"></iframe>);
                                         } else if (variableObject.imageContent.state !== "") {
-                                            result.push(<img src={`data:image/png;base64,${variableObject.imageContent.state}`} />);
+                                            resultList.push(<img src={`data:image/png;base64,${variableObject.imageContent.state}`} />);
                                         }
 
-                                        return result;
+                                        return resultList;
                                     })()}
                                 </div>
                             </>
                         );
                     }
 
-                    return result;
+                    return resultList;
                 })()}
             </div>
         </div>

@@ -7,3 +7,13 @@ export interface IfileDetail {
     size: string;
     dateModified: string;
 }
+
+export interface IfileDetailSignature {
+    mimeType: string;
+    extension: string;
+    category: string;
+    magicByteList?: {
+        offset: number;
+        bytes: number[];
+    }[];
+}

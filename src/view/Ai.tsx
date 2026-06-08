@@ -21,10 +21,10 @@ const viewAi = (variableObject: modelAi.Ivariable, methodObject: modelAi.Imethod
                         <p class="title">Model list:</p>
                         <ul>
                             {(() => {
-                                const result: IvirtualNode[] = [];
+                                const resultList: IvirtualNode[] = [];
 
                                 for (const [key, value] of Object.entries(variableObject.modelList.state)) {
-                                    result.push(
+                                    resultList.push(
                                         <li
                                             key={key}
                                             onClick={() => {
@@ -36,7 +36,7 @@ const viewAi = (variableObject: modelAi.Ivariable, methodObject: modelAi.Imethod
                                     );
                                 }
 
-                                return result;
+                                return resultList;
                             })()}
                         </ul>
                     </div>

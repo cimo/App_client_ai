@@ -61,7 +61,7 @@ export interface IfileDetail {
     size: string;
 }
 
-export interface IapiToolResponse {
+export interface IapiResponseTool {
     name: string;
     result: unknown;
 }
@@ -87,6 +87,12 @@ export interface Ivariable {
 
 export interface Imethod {
     onClickChipClose: () => void;
+}
+
+export interface IviewEmpty {
+    tag: "div";
+    propertyObject: {};
+    childrenList: [];
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {}

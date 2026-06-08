@@ -22,7 +22,7 @@ export interface IchatMessage {
     assistantReason: string;
     assistantNoReason: string;
     mcpTool?: ImcpTool;
-    ragCitation: modelMcp.IragCitation[] | undefined;
+    ragCitationList: modelMcp.IragCitation[] | undefined;
     ragCitationTabIndex: number;
     ragRelationList: modelMcp.IragRelation[] | undefined;
     securityScanner: string;

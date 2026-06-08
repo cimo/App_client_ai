@@ -10,20 +10,20 @@ const viewToast = (variableObject: modelToast.Ivariable, methodObject: modelToas
                 <i class="cls_icon">info</i>
                 <div class="text">
                     {(() => {
-                        const result: IvirtualNode[] = [];
+                        const resultList: IvirtualNode[] = [];
 
                         for (const [key, value] of Object.entries(variableObject.messageList.state)) {
-                            result.push(<p key={key}>{value}</p>);
+                            resultList.push(<p key={key}>{value}</p>);
                         }
 
-                        return result;
+                        return resultList;
                     })()}
                 </div>
                 {(() => {
-                    const result: IvirtualNode[] = [];
+                    const resultList: IvirtualNode[] = [];
 
                     if (variableObject.timeClose.state === 0) {
-                        result.push(
+                        resultList.push(
                             <i
                                 class="cls_icon close"
                                 onClick={(event: Event) => {
@@ -35,7 +35,7 @@ const viewToast = (variableObject: modelToast.Ivariable, methodObject: modelToas
                         );
                     }
 
-                    return result;
+                    return resultList;
                 })()}
             </div>
         </div>

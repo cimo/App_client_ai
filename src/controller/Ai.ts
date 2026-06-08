@@ -72,8 +72,8 @@ export default class Ai implements Icontroller {
                 const cookie = resultApi.headers.get("set-cookie");
 
                 if (cookie) {
-                    const resultJson = (await resultApi.json()) as modelIndex.IresponseBody;
-                    const stdout = resultJson.response.stdout;
+                    const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                    const stdout = json.response.stdout;
 
                     session.writeAiSession(session.data.aiBearerToken, cookie);
 
@@ -102,10 +102,10 @@ export default class Ai implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineAi.state = false;
 
-                const resultJson = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelIndex.IresponseBody;
 
                 // eslint-disable-next-line no-console
-                console.log("cimo - apiUserInfo()", resultJson);
+                console.log("cimo - apiUserInfo()", json);
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Ai.ts - apiUserInfo() - fetch() - catch()", error.message);
@@ -129,10 +129,10 @@ export default class Ai implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineAi.state = false;
 
-                const resultJson = (await resultApi.json()) as modelIndex.IresponseBody;
-                const stdout = JSON.parse(resultJson.response.stdout) as string[];
+                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const stdoutList = JSON.parse(json.response.stdout) as string[];
 
-                this.variableObject.modelList.state = stdout;
+                this.variableObject.modelList.state = stdoutList;
 
                 this.variableObject.modelSelected.state = this.modelDefault = this.variableObject.modelList.state[0];
 
