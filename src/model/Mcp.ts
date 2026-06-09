@@ -61,6 +61,44 @@ export interface IfileDetail {
     size: string;
 }
 
+export interface IapiDocumentReadBody {
+    pageNumber: number;
+    fileName: string;
+}
+
+export interface IapiDocumentDeleteBody {
+    fileName: string;
+}
+
+export interface IapiRagEmbeddingCheckBody {
+    fileName: string;
+}
+
+export interface IapiSkillReadBody {
+    fileName: string;
+}
+
+export interface IapiSkillDeleteBody {
+    fileName: string;
+}
+
+export interface IapiAgentCreateBody {
+    name: string;
+    description: string;
+    skill: string;
+}
+
+export interface IapiAgentUpdateBody {
+    id: number;
+    name: string;
+    description: string;
+    skill: string;
+}
+
+export interface IapiAgentDeleteBody {
+    id: number;
+}
+
 export interface IapiResponseTool {
     name: string;
     result: unknown;
@@ -87,12 +125,6 @@ export interface Ivariable {
 
 export interface Imethod {
     onClickChipClose: () => void;
-}
-
-export interface IviewEmpty {
-    tag: "div";
-    propertyObject: {};
-    childrenList: [];
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {}

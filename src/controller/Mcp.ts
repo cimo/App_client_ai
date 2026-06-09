@@ -49,6 +49,8 @@ export default class Mcp implements Icontroller {
 
             isPolling = true;
 
+            const body: modelMcp.IapiRagEmbeddingCheckBody = { fileName };
+
             await fetch(`${helperSrc.URL_MCP}/api/rag-embedding-check`, {
                 method: "POST",
                 headers: {
@@ -56,7 +58,7 @@ export default class Mcp implements Icontroller {
                     "mcp-session-id": session.data.mcpSessionId,
                     "mcp-cookie": session.data.mcpCookie
                 },
-                body: JSON.stringify({ fileName }),
+                body: JSON.stringify(body),
                 danger: {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
@@ -310,6 +312,8 @@ export default class Mcp implements Icontroller {
     };
 
     apiDocumentRead = async (fileName: string, pageNumber: number): Promise<modelDocument.Iresult> => {
+        const body: modelMcp.IapiDocumentReadBody = { fileName, pageNumber };
+
         return fetch(`${helperSrc.URL_MCP}/api/document-read`, {
             method: "POST",
             headers: {
@@ -317,7 +321,7 @@ export default class Mcp implements Icontroller {
                 "mcp-session-id": session.data.mcpSessionId,
                 "mcp-cookie": session.data.mcpCookie
             },
-            body: JSON.stringify({ fileName, pageNumber }),
+            body: JSON.stringify(body),
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
@@ -347,6 +351,8 @@ export default class Mcp implements Icontroller {
     };
 
     apiDocumentDelete = (index: number, fileName: string): void => {
+        const body: modelMcp.IapiDocumentDeleteBody = { fileName };
+
         fetch(`${helperSrc.URL_MCP}/api/document-delete`, {
             method: "POST",
             headers: {
@@ -354,7 +360,7 @@ export default class Mcp implements Icontroller {
                 "mcp-session-id": session.data.mcpSessionId,
                 "mcp-cookie": session.data.mcpCookie
             },
-            body: JSON.stringify({ fileName }),
+            body: JSON.stringify(body),
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
@@ -524,6 +530,8 @@ export default class Mcp implements Icontroller {
     };
 
     apiSkillRead = async (fileName: string): Promise<string> => {
+        const body: modelMcp.IapiSkillReadBody = { fileName };
+
         return fetch(`${helperSrc.URL_MCP}/api/skill-read`, {
             method: "POST",
             headers: {
@@ -531,7 +539,7 @@ export default class Mcp implements Icontroller {
                 "mcp-session-id": session.data.mcpSessionId,
                 "mcp-cookie": session.data.mcpCookie
             },
-            body: JSON.stringify({ fileName }),
+            body: JSON.stringify(body),
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
@@ -561,6 +569,8 @@ export default class Mcp implements Icontroller {
     };
 
     apiSkillDelete = (index: number, fileName: string): void => {
+        const body: modelMcp.IapiSkillDeleteBody = { fileName };
+
         fetch(`${helperSrc.URL_MCP}/api/skill-delete`, {
             method: "POST",
             headers: {
@@ -568,7 +578,7 @@ export default class Mcp implements Icontroller {
                 "mcp-session-id": session.data.mcpSessionId,
                 "mcp-cookie": session.data.mcpCookie
             },
-            body: JSON.stringify({ fileName }),
+            body: JSON.stringify(body),
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
@@ -604,6 +614,12 @@ export default class Mcp implements Icontroller {
     apiAgentCreate = async (agent: modelMcp.Iagent): Promise<void> => {
         this.variableObject.isAgentSave.state = true;
 
+        const body: modelMcp.IapiAgentCreateBody = {
+            name: agent.name,
+            description: agent.description,
+            skill: agent.skill
+        };
+
         await fetch(`${helperSrc.URL_MCP}/api/agent-create`, {
             method: "POST",
             headers: {
@@ -611,11 +627,7 @@ export default class Mcp implements Icontroller {
                 "mcp-session-id": session.data.mcpSessionId,
                 "mcp-cookie": session.data.mcpCookie
             },
-            body: JSON.stringify({
-                name: agent.name,
-                description: agent.description,
-                skill: agent.skill
-            }),
+            body: JSON.stringify(body),
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
@@ -647,6 +659,13 @@ export default class Mcp implements Icontroller {
     apiAgentUpdate = async (agent: modelMcp.Iagent): Promise<void> => {
         this.variableObject.isAgentSave.state = true;
 
+        const body: modelMcp.IapiAgentUpdateBody = {
+            id: agent.id,
+            name: agent.name,
+            description: agent.description,
+            skill: agent.skill
+        };
+
         await fetch(`${helperSrc.URL_MCP}/api/agent-update`, {
             method: "POST",
             headers: {
@@ -654,12 +673,7 @@ export default class Mcp implements Icontroller {
                 "mcp-session-id": session.data.mcpSessionId,
                 "mcp-cookie": session.data.mcpCookie
             },
-            body: JSON.stringify({
-                id: agent.id,
-                name: agent.name,
-                description: agent.description,
-                skill: agent.skill
-            }),
+            body: JSON.stringify(body),
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
@@ -732,6 +746,8 @@ export default class Mcp implements Icontroller {
     };
 
     apiAgentDelete = (index: number, id: number): void => {
+        const body: modelMcp.IapiAgentDeleteBody = { id };
+
         fetch(`${helperSrc.URL_MCP}/api/agent-delete`, {
             method: "POST",
             headers: {
@@ -739,7 +755,7 @@ export default class Mcp implements Icontroller {
                 "mcp-session-id": session.data.mcpSessionId,
                 "mcp-cookie": session.data.mcpCookie
             },
-            body: JSON.stringify({ id }),
+            body: JSON.stringify(body),
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true

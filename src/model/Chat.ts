@@ -34,6 +34,13 @@ export interface Ifile {
     };
 }
 
+export interface IapiResponseBody {
+    stream: boolean;
+    model: string;
+    input: IchatInput[];
+    tools: unknown[];
+}
+
 export interface IapiResponse {
     type: string;
     response: {

@@ -303,6 +303,13 @@ export default class Chat implements Icontroller {
                 }
             );
 
+            const body: modelChat.IapiResponseBody = {
+                stream: true,
+                model: this.modelSelected,
+                input: inputList,
+                tools: []
+            };
+
             fetch(`${helperSrc.URL_AI}/api/response`, {
                 method: "POST",
                 headers: {
@@ -312,12 +319,7 @@ export default class Chat implements Icontroller {
                     "mcp-session-id": session.data.mcpSessionId,
                     "mcp-cookie": session.data.mcpCookie
                 },
-                body: JSON.stringify({
-                    stream: true,
-                    model: this.modelSelected,
-                    input: inputList,
-                    tools: []
-                }),
+                body: JSON.stringify(body),
                 signal: this.abortControllerApiResponse.signal,
                 danger: {
                     acceptInvalidCerts: true,
