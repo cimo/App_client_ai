@@ -86,7 +86,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             <div class="button_wrapper">
                                                 <button
                                                     onClick={() => {
-                                                        methodObject.onClickChipDocumentUpload();
+                                                        methodObject.onClickDocumentUpload();
                                                     }}
                                                     disabled={variableObject.isDocumentUpload.state}
                                                 >
@@ -108,9 +108,8 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     })()}
                                                 </button>
                                                 <button
-                                                    class="rag"
                                                     onClick={() => {
-                                                        methodObject.onClickChipRagStart();
+                                                        methodObject.onClickRagStart();
                                                     }}
                                                     disabled={variableObject.isRagEmbeddingStart.state}
                                                 >
@@ -132,17 +131,36 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     })()}
                                                 </button>
                                                 <button
-                                                    class="rag"
                                                     onClick={() => {
-                                                        methodObject.onClickChipRagGraph();
+                                                        methodObject.onClickRagGraph();
                                                     }}
                                                 >
                                                     <i class="cls_icon">analytics</i>
                                                     <p>RAG - Graph</p>
                                                 </button>
+                                                {(() => {
+                                                    const result: IvirtualNode[] = [];
+
+                                                    if (variableObject.documentSelectList.state.length > 0) {
+                                                        result.push(
+                                                            <button
+                                                                class="delete_selected"
+                                                                onClick={(event: Event) => {
+                                                                    methodObject.onClickDocumentDeleteSelected(event);
+                                                                }}
+                                                            >
+                                                                <i class="cls_icon">delete</i>
+                                                                <p>Delete selected</p>
+                                                            </button>
+                                                        );
+                                                    }
+
+                                                    return result;
+                                                })()}
                                             </div>
                                             <div class="table_flex">
                                                 <div class="row header">
+                                                    <div class="cell select"></div>
                                                     <div class="cell delete"></div>
                                                     <div class="cell name">
                                                         <p>Name</p>
@@ -161,15 +179,24 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
 
                                                         for (let a = 0; a < variableObject.documentList.state.length; a++) {
                                                             const value = variableObject.documentList.state[a];
-                                                            const extension = methodObject.fileExtension(value.fileName);
+                                                            const extension = helperSrc.fileDetail(value.fileName).extension;
 
                                                             resultList.push(
                                                                 <div key={a} class="row">
+                                                                    <div class="cell select">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={variableObject.documentSelectList.state.includes(value.fileName)}
+                                                                            onChange={(event: Event) => {
+                                                                                methodObject.onClickDocumentCheckbox(event, value.fileName);
+                                                                            }}
+                                                                        />
+                                                                    </div>
                                                                     <div class="cell delete">
                                                                         <i
                                                                             class="cls_icon"
                                                                             onClick={(event: Event) => {
-                                                                                methodObject.onClickDocumentDelete(event, a, value.fileName);
+                                                                                methodObject.onClickDocumentDelete(event, value.fileName);
                                                                             }}
                                                                         >
                                                                             delete
@@ -214,7 +241,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                             <div class="button_wrapper">
                                 <button
                                     onClick={() => {
-                                        methodObject.onClickChipSkillUpload();
+                                        methodObject.onClickSkillUpload();
                                     }}
                                     disabled={variableObject.isSkillUpload.state}
                                 >
@@ -235,9 +262,29 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         return resultList;
                                     })()}
                                 </button>
+                                {(() => {
+                                    const result: IvirtualNode[] = [];
+
+                                    if (variableObject.skillSelectList.state.length > 0) {
+                                        result.push(
+                                            <button
+                                                class="delete_selected"
+                                                onClick={(event: Event) => {
+                                                    methodObject.onClickSkillDeleteSelected(event);
+                                                }}
+                                            >
+                                                <i class="cls_icon">delete</i>
+                                                <p>Delete selected</p>
+                                            </button>
+                                        );
+                                    }
+
+                                    return result;
+                                })()}
                             </div>
                             <div class="table_flex">
                                 <div class="row header">
+                                    <div class="cell select"></div>
                                     <div class="cell delete"></div>
                                     <div class="cell name">
                                         <p>Name</p>
@@ -258,11 +305,20 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         for (const [key, value] of entryList) {
                                             resultList.push(
                                                 <div key={key} class="row">
+                                                    <div class="cell select">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={variableObject.skillSelectList.state.includes(value.fileName)}
+                                                            onChange={(event: Event) => {
+                                                                methodObject.onClickSkillCheckbox(event, value.fileName);
+                                                            }}
+                                                        />
+                                                    </div>
                                                     <div class="cell delete">
                                                         <i
                                                             class="cls_icon"
                                                             onClick={(event: Event) => {
-                                                                methodObject.onClickSkillDelete(event, Number(key), value.fileName);
+                                                                methodObject.onClickSkillDelete(event, value.fileName);
                                                             }}
                                                         >
                                                             delete
@@ -453,11 +509,11 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     {(() => {
                                                         const resultList: IvirtualNode[] = [];
 
-                                                        if (variableObject.agentForm.state.skill !== "") {
+                                                        if (variableObject.agentForm.state.skillName !== "") {
                                                             resultList.push(
                                                                 <div class="skill">
                                                                     <img src={`/asset/image/icon_ui/lightbulb.svg`} />
-                                                                    <p>{variableObject.agentForm.state.skill}</p>
+                                                                    <p>{variableObject.agentForm.state.skillName}</p>
                                                                 </div>
                                                             );
                                                         }
@@ -549,11 +605,11 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                 {(() => {
                                                                     const resultList: IvirtualNode[] = [];
 
-                                                                    if (value.skill !== "") {
+                                                                    if (value.skillName !== "") {
                                                                         resultList.push(
                                                                             <div class="skill">
                                                                                 <img src={`/asset/image/icon_ui/lightbulb.svg`} />
-                                                                                <p>{value.skill}</p>
+                                                                                <p>{value.skillName}</p>
                                                                             </div>
                                                                         );
                                                                     }

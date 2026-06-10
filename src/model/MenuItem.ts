@@ -3,6 +3,10 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 // Source
 import * as modelMcp from "../model/Mcp";
 
+export interface IagentObject {
+    [key: string]: modelMcp.Iagent[];
+}
+
 export interface Ivariable {
     isMenuItemDocument: IvariableBind<boolean>;
     isMenuItemTool: IvariableBind<boolean>;
@@ -12,9 +16,11 @@ export interface Ivariable {
     isDocumentUpload: IvariableBind<boolean>;
     documentList: IvariableBind<modelMcp.IfileDetail[]>;
     documentOpenList: IvariableBind<string[]>;
+    documentSelectList: IvariableBind<string[]>;
     isRagEmbeddingStart: IvariableBind<boolean>;
     isRagGraphOpen: IvariableBind<boolean>;
     skillList: IvariableBind<modelMcp.IfileDetail[]>;
+    skillSelectList: IvariableBind<string[]>;
     isSkillUpload: IvariableBind<boolean>;
     toolList: IvariableBind<modelMcp.Itool[]>;
     toolSelected: IvariableBind<modelMcp.Itool>;
@@ -30,14 +36,18 @@ export interface Ivariable {
 
 export interface Imethod {
     onClickMenuDocument: (event: Event) => void;
-    onClickChipDocumentUpload: () => void;
-    onClickDocumentDelete: (event: Event, index: number, fileName: string) => void;
-    onClickChipRagStart: () => void;
-    onClickChipRagGraph: () => void;
+    onClickDocumentUpload: () => void;
+    onClickDocumentCheckbox: (event: Event, fileName: string) => void;
+    onClickDocumentDelete: (event: Event, fileName: string) => void;
+    onClickDocumentDeleteSelected: (event: Event) => void;
+    onClickRagStart: () => void;
+    onClickRagGraph: () => void;
     onClickRagGraphBack: (event: Event) => void;
     onClickMenuSkill: (event: Event) => void;
-    onClickChipSkillUpload: () => void;
-    onClickSkillDelete: (event: Event, index: number, fileName: string) => void;
+    onClickSkillUpload: () => void;
+    onClickSkillCheckbox: (event: Event, fileName: string) => void;
+    onClickSkillDelete: (event: Event, fileName: string) => void;
+    onClickSkillDeleteSelected: (event: Event) => void;
     onClickSelectSkill: (event: Event) => void;
     onClickSkillSelect: (event: Event, fileName: string) => void;
     onClickSelectSkillBack: (event: Event) => void;
@@ -53,7 +63,6 @@ export interface Imethod {
     onClickAgentCancel: (event: Event) => void;
     onClickAgentOpen: (id: number) => void;
     windowOpenDocument: (title: string) => void;
-    fileExtension: (fileName: string) => string;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

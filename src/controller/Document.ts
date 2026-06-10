@@ -45,11 +45,13 @@ export default class Document implements Icontroller {
         event.stopPropagation();
 
         const elementInputValue = this.hookObject.elementInputPageNumber.value.replace(/\D+/g, "");
+        this.hookObject.elementInputPageNumber.value = elementInputValue;
+
         const pageNumber = !isNaN(parseInt(elementInputValue)) ? parseInt(elementInputValue) : 1;
         this.variableObject.pageNumber.state = pageNumber;
 
         if (event.key === "Enter") {
-            this.readContentData(pageNumber);
+            this.readContentData(this.variableObject.pageNumber.state);
         }
     };
 

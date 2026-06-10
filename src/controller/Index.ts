@@ -75,7 +75,8 @@ export default class Index implements Icontroller {
             {
                 adUrl: "",
                 isOfflineAi: variableLink<boolean>("Ai"),
-                isOfflineMcp: variableLink<boolean>("Mcp")
+                isOfflineMcp: variableLink<boolean>("Mcp"),
+                isViewHidden: true
             },
             this.constructor.name
         );
@@ -134,6 +135,10 @@ export default class Index implements Icontroller {
 
     rendered(): void {
         (async () => {
+            if (this.windowApp.label === "main") {
+                this.variableObject.isViewHidden.state = false;
+            }
+
             if (!session.data.aiCookie) {
                 await this.controllerAi.apiLogin();
             }

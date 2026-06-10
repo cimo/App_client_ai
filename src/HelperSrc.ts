@@ -403,4 +403,13 @@ export const windowOpen = async (
 
     return new WebviewWindow(windowLabel, windowOptions);
 };
+
+export const windowClose = async (label: string, title: string): Promise<void> => {
+    const windowLabel = windowLabelUnique(label, title);
+    const window = await WebviewWindow.getByLabel(windowLabel);
+
+    if (window) {
+        await window.close();
+    }
+};
 // Custom

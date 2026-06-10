@@ -22,8 +22,9 @@ export default class Mcp implements Icontroller {
 
     // Method
     private showFileStatusMessage = (fileStatusList: modelMcp.IfileStatus[]): void => {
-        const messageList: string[] = [];
         let mode = "success";
+
+        const messageList: string[] = [];
 
         for (const fileStatus of fileStatusList) {
             if (fileStatus.status === "Failed") {
@@ -39,15 +40,15 @@ export default class Mcp implements Icontroller {
     private ragEmbeddingStartCheck = (fileStatusList: modelMcp.IfileStatus[], index: number): void => {
         const fileName = fileStatusList[index].fileName;
 
-        let isPolling = false;
+        let isIntervalRunning = false;
         let stdout = "";
 
         const interval = setInterval(async () => {
-            if (isPolling) {
+            if (isIntervalRunning) {
                 return;
             }
 
-            isPolling = true;
+            isIntervalRunning = true;
 
             const body: modelMcp.IapiRagEmbeddingCheckBody = { fileName };
 
@@ -98,7 +99,7 @@ export default class Mcp implements Icontroller {
                 }
             }
 
-            isPolling = false;
+            isIntervalRunning = false;
         }, 1000);
     };
 
@@ -350,7 +351,7 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiDocumentDelete = (index: number, fileName: string): void => {
+    apiDocumentDelete = (fileName: string): void => {
         const body: modelMcp.IapiDocumentDeleteBody = { fileName };
 
         fetch(`${helperSrc.URL_MCP}/api/document-delete`, {
@@ -373,15 +374,15 @@ export default class Mcp implements Icontroller {
                 const stdout = json.response.stdout;
 
                 if (stdout === "ok") {
-                    const documentFilteredList = [];
+                    const filteredList = [];
 
                     for (let a = 0; a < this.variableObject.documentList.state.length; a++) {
-                        if (a !== index) {
-                            documentFilteredList.push(this.variableObject.documentList.state[a]);
+                        if (this.variableObject.documentList.state[a].fileName !== fileName) {
+                            filteredList.push(this.variableObject.documentList.state[a]);
                         }
                     }
 
-                    this.variableObject.documentList.state = documentFilteredList;
+                    this.variableObject.documentList.state = filteredList;
                 } else {
                     this.controllerToast.show("error", ["Failed to delete document."]);
                 }
@@ -396,7 +397,7 @@ export default class Mcp implements Icontroller {
     apiRagEmbeddingStart = async (): Promise<void> => {
         this.variableObject.isRagEmbeddingStart.state = true;
 
-        const embeddingStatusList: modelMcp.IfileStatus[] = [];
+        const fileStatusList: modelMcp.IfileStatus[] = [];
 
         await fetch(`${helperSrc.URL_MCP}/api/rag-embedding-start`, {
             method: "POST",
@@ -418,11 +419,11 @@ export default class Mcp implements Icontroller {
 
                 if (stdoutList.length > 0) {
                     for (let a = 0; a < stdoutList.length; a++) {
-                        embeddingStatusList.push({ fileName: stdoutList[a], status: "Ongoing" });
+                        fileStatusList.push({ fileName: stdoutList[a], status: "Ongoing" });
 
-                        this.showFileStatusMessage(embeddingStatusList);
+                        this.showFileStatusMessage(fileStatusList);
 
-                        this.ragEmbeddingStartCheck(embeddingStatusList, a);
+                        this.ragEmbeddingStartCheck(fileStatusList, a);
                     }
                 } else {
                     this.controllerToast.show("warning", ["No documents found for RAG."]);
@@ -568,7 +569,7 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiSkillDelete = (index: number, fileName: string): void => {
+    apiSkillDelete = (fileName: string): void => {
         const body: modelMcp.IapiSkillDeleteBody = { fileName };
 
         fetch(`${helperSrc.URL_MCP}/api/skill-delete`, {
@@ -591,15 +592,15 @@ export default class Mcp implements Icontroller {
                 const stdout = json.response.stdout;
 
                 if (stdout === "ok") {
-                    const skillFilteredList = [];
+                    const filteredList = [];
 
                     for (let a = 0; a < this.variableObject.skillList.state.length; a++) {
-                        if (a !== index) {
-                            skillFilteredList.push(this.variableObject.skillList.state[a]);
+                        if (this.variableObject.skillList.state[a].fileName !== fileName) {
+                            filteredList.push(this.variableObject.skillList.state[a]);
                         }
                     }
 
-                    this.variableObject.skillList.state = skillFilteredList;
+                    this.variableObject.skillList.state = filteredList;
                 } else {
                     this.controllerToast.show("error", ["Failed to delete skill."]);
                 }
@@ -617,7 +618,7 @@ export default class Mcp implements Icontroller {
         const body: modelMcp.IapiAgentCreateBody = {
             name: agent.name,
             description: agent.description,
-            skill: agent.skill
+            skillName: agent.skillName
         };
 
         await fetch(`${helperSrc.URL_MCP}/api/agent-create`, {
@@ -663,7 +664,7 @@ export default class Mcp implements Icontroller {
             id: agent.id,
             name: agent.name,
             description: agent.description,
-            skill: agent.skill
+            skillName: agent.skillName
         };
 
         await fetch(`${helperSrc.URL_MCP}/api/agent-update`, {
@@ -768,15 +769,15 @@ export default class Mcp implements Icontroller {
                 const stdout = json.response.stdout;
 
                 if (stdout === "ok") {
-                    const agentFilteredList = [];
+                    const filteredList = [];
 
                     for (let a = 0; a < this.variableObject.agentList.state.length; a++) {
                         if (a !== index) {
-                            agentFilteredList.push(this.variableObject.agentList.state[a]);
+                            filteredList.push(this.variableObject.agentList.state[a]);
                         }
                     }
 
-                    this.variableObject.agentList.state = agentFilteredList;
+                    this.variableObject.agentList.state = filteredList;
                 } else {
                     this.controllerToast.show("error", ["Failed to delete agent."]);
                 }

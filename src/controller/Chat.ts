@@ -260,7 +260,7 @@ export default class Chat implements Icontroller {
                     "You MUST NOT explain nothing."
                 ].join("\n");
             } else if (this.variableObject.systemMode.state === "agent-skill") {
-                const skillContent = await this.controllerMcp.apiSkillRead(this.variableObject.agentSelected.state.skill);
+                const skillContent = await this.controllerMcp.apiSkillRead(this.variableObject.agentSelected.state.skillName);
 
                 let skillDescription = "";
 
@@ -270,7 +270,7 @@ export default class Chat implements Icontroller {
 
                 inputSystem = [
                     skillDescription,
-                    'If you find a tag [script](...) in the text you MUST stop and return ALWAYS the json with this format: { "action": { "script": true } }'
+                    `If you find a tag [script](...) in the text you MUST stop and return ALWAYS ONLY the raw json WITHOUT wrap it in \`\`\`json and with this format: { "action": { "skillName": "${this.variableObject.agentSelected.state.skillName}", "scriptName": "" } } where the value of "scriptName" is ONLY the file inside the tag [script](...).`
                 ].join("\n");
 
                 const tagUserPromptStart = inputSystem.indexOf("[USER_PROMPT]");
@@ -500,8 +500,8 @@ export default class Chat implements Icontroller {
                                                     }
                                                 } else if (messageObject.name === "rag_search") {
                                                     const result = messageObject.result as modelMcp.IragSearch;
-                                                    const citationList = result.citationList ?? [];
-                                                    const relationList = result.relationList ?? [];
+                                                    const citationList = result.citationList;
+                                                    const relationList = result.relationList;
 
                                                     if (citationList.length > 0) {
                                                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();

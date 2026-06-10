@@ -11,6 +11,7 @@ export interface Ivariable {
     adUrl: IvariableBind<string>;
     isOfflineAi: IvariableBind<boolean>;
     isOfflineMcp: IvariableBind<boolean>;
+    isViewHidden: IvariableBind<boolean>;
 }
 
 export interface Imethod {

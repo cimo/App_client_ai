@@ -1,5 +1,4 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind, variableLink } from "@cimo/jsmvcfw/dist/src/Main.js";
-import { getAllWindows } from "@tauri-apps/api/window";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 
 // Source
@@ -39,38 +38,45 @@ export default class MenuItem implements Icontroller {
         });
     };
 
-    private onClickChipDocumentUpload = async (): Promise<void> => {
+    private onClickDocumentUpload = async (): Promise<void> => {
         await this.controllerMcp.apiDocumentUpload();
     };
 
-    private onClickDocumentDelete = async (event: Event, index: number, fileName: string): Promise<void> => {
+    private onClickDocumentCheckbox = async (event: Event, fileName: string): Promise<void> => {
         event.stopPropagation();
 
-        const isConfirm = await this.controllerDialog.show("warning", `Are you sure you want to delete: '${fileName}'?`, false);
+        if (!this.variableObject.documentSelectList.state.includes(fileName)) {
+            this.variableObject.documentSelectList.state.push(fileName);
+        } else {
+            const selectedList = [];
 
-        if (isConfirm) {
-            const windowLabel = helperSrc.windowLabelUnique("document", fileName);
-            const windowList = await getAllWindows();
-
-            for (let a = 0; a < windowList.length; a++) {
-                const window = windowList[a];
-
-                if (window.label === windowLabel) {
-                    await window.close();
-
-                    break;
+            for (let a = 0; a < this.variableObject.documentSelectList.state.length; a++) {
+                if (this.variableObject.documentSelectList.state[a] !== fileName) {
+                    selectedList.push(this.variableObject.documentSelectList.state[a]);
                 }
             }
 
-            this.controllerMcp.apiDocumentDelete(index, fileName);
+            this.variableObject.documentSelectList.state = selectedList;
         }
     };
 
-    private onClickChipRagStart = async (): Promise<void> => {
+    private onClickDocumentDelete = async (event: Event, fileName: string): Promise<void> => {
+        event.stopPropagation();
+
+        await this.dialogMessageDeleteDocument(fileName);
+    };
+
+    private onClickDocumentDeleteSelected = async (event: Event): Promise<void> => {
+        event.stopPropagation();
+
+        await this.dialogMessageDeleteDocument();
+    };
+
+    private onClickRagStart = async (): Promise<void> => {
         await this.controllerMcp.apiRagEmbeddingStart();
     };
 
-    private onClickChipRagGraph = async (): Promise<void> => {
+    private onClickRagGraph = async (): Promise<void> => {
         this.variableObject.isRagGraphOpen.state = true;
     };
 
@@ -95,48 +101,41 @@ export default class MenuItem implements Icontroller {
         });
     };
 
-    private onClickChipSkillUpload = async (): Promise<void> => {
+    private onClickSkillUpload = async (): Promise<void> => {
         await this.controllerMcp.apiSkillUpload();
     };
 
-    private onClickSkillDelete = async (event: Event, index: number, fileName: string): Promise<void> => {
+    private onClickSkillCheckbox = async (event: Event, fileName: string): Promise<void> => {
+        event.stopPropagation();
+
+        if (!this.variableObject.skillSelectList.state.includes(fileName)) {
+            this.variableObject.skillSelectList.state.push(fileName);
+        } else {
+            const selectedList = [];
+
+            for (let a = 0; a < this.variableObject.skillSelectList.state.length; a++) {
+                if (this.variableObject.skillSelectList.state[a] !== fileName) {
+                    selectedList.push(this.variableObject.skillSelectList.state[a]);
+                }
+            }
+
+            this.variableObject.skillSelectList.state = selectedList;
+        }
+    };
+
+    private onClickSkillDelete = async (event: Event, fileName: string): Promise<void> => {
         event.stopPropagation();
 
         this.controllerMcp.apiAgentList().then(async (resultApiList) => {
-            let agentList = [];
-            let agentNameList = [];
+            await this.dialogMessageDeleteSkill(resultApiList, fileName);
+        });
+    };
 
-            for (let a = 0; a < resultApiList.length; a++) {
-                if (resultApiList[a].skill === fileName) {
-                    agentList.push(resultApiList[a]);
-                    agentNameList.push(resultApiList[a].name);
-                }
-            }
+    private onClickSkillDeleteSelected = async (event: Event): Promise<void> => {
+        event.stopPropagation();
 
-            let dialogMessage = `Are you sure you want to delete: '${fileName}'?`;
-
-            if (agentList.length > 0) {
-                dialogMessage =
-                    `Skill is being used by the agent: ${agentNameList.join(", ")}. ` +
-                    "If you delete the skill, it will be removed in the agent. " +
-                    dialogMessage;
-            }
-
-            const isConfirm = await this.controllerDialog.show("warning", dialogMessage, false);
-
-            if (isConfirm) {
-                this.controllerMcp.apiSkillDelete(index, fileName);
-
-                for (let a = 0; a < agentList.length; a++) {
-                    const agent = agentList[a];
-
-                    agent.skill = "";
-
-                    this.controllerMcp.apiAgentUpdate(agent);
-
-                    this.unselectAgent(agent.id);
-                }
-            }
+        this.controllerMcp.apiAgentList().then(async (resultApiList) => {
+            await this.dialogMessageDeleteSkill(resultApiList);
         });
     };
 
@@ -154,7 +153,7 @@ export default class MenuItem implements Icontroller {
     private onClickSkillSelect = (event: Event, fileName: string): void => {
         event.stopPropagation();
 
-        this.variableObject.agentForm.state.skill = fileName;
+        this.variableObject.agentForm.state.skillName = fileName;
 
         this.variableObject.isAgentSkillSelect.state = false;
     };
@@ -253,7 +252,7 @@ export default class MenuItem implements Icontroller {
             id: -1,
             name: "",
             description: "",
-            skill: ""
+            skillName: ""
         };
     };
 
@@ -296,7 +295,7 @@ export default class MenuItem implements Icontroller {
             errorList.push("Agent description is required.");
         }
 
-        if (this.variableObject.agentForm.state.skill === "") {
+        if (this.variableObject.agentForm.state.skillName === "") {
             errorList.push("Agent skill is required.");
         }
 
@@ -331,7 +330,7 @@ export default class MenuItem implements Icontroller {
             const agent = this.variableObject.agentList.state[a];
 
             if (agent.id === id) {
-                if (agent.skill === "") {
+                if (agent.skillName === "") {
                     await this.controllerDialog.show(
                         "info",
                         `Agent '${agent.name}' does not have a selected skill. Please select a skill to use this agent.`,
@@ -371,17 +370,112 @@ export default class MenuItem implements Icontroller {
         });
     };
 
-    private fileExtension = (fileName: string): string => {
-        const fileDetail = helperSrc.fileDetail(fileName);
-
-        return fileDetail.extension;
-    };
-
     private unselectAgent = (id: number): void => {
         if (this.variableObject.agentSelected.state.id === id) {
             this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
 
             this.variableObject.systemMode.state = "chat";
+        }
+    };
+
+    private clearAgentSkill = (list: modelMcp.Iagent[]): void => {
+        for (let a = 0; a < list.length; a++) {
+            const agent = list[a];
+
+            agent.skillName = "";
+
+            this.controllerMcp.apiAgentUpdate(agent);
+
+            this.unselectAgent(agent.id);
+        }
+    };
+
+    private dialogMessageDeleteDocument = async (fileName?: string): Promise<void> => {
+        let dialogMessage = "";
+
+        if (fileName) {
+            dialogMessage = `Are you sure you want to delete: '${fileName}'?`;
+        } else {
+            dialogMessage = "Are you sure you want to delete the selected items?";
+        }
+
+        const isConfirm = await this.controllerDialog.show("warning", dialogMessage, false);
+
+        if (isConfirm) {
+            if (fileName) {
+                helperSrc.windowClose("document", fileName);
+
+                this.controllerMcp.apiDocumentDelete(fileName);
+            } else {
+                for (const fileName of this.variableObject.documentSelectList.state) {
+                    helperSrc.windowClose("document", fileName);
+
+                    this.controllerMcp.apiDocumentDelete(fileName);
+                }
+
+                this.variableObject.documentSelectList.state = [];
+            }
+        }
+    };
+
+    private dialogMessageDeleteSkill = async (resultList: modelMcp.Iagent[], fileName?: string): Promise<void> => {
+        let agentList = [];
+        let agentNameList = [];
+        let agentObject: modelMenuItem.IagentObject = {};
+
+        let dialogMessage = "";
+
+        if (fileName) {
+            for (let a = 0; a < resultList.length; a++) {
+                if (resultList[a].skillName === fileName) {
+                    agentList.push(resultList[a]);
+                    agentNameList.push(resultList[a].name);
+                }
+            }
+
+            dialogMessage = `Are you sure you want to delete: '${fileName}'?`;
+        } else {
+            for (const skillSelect of this.variableObject.skillSelectList.state) {
+                let agentList = [];
+
+                for (let a = 0; a < resultList.length; a++) {
+                    if (resultList[a].skillName === skillSelect) {
+                        agentList.push(resultList[a]);
+                    }
+                }
+
+                if (agentList.length > 0) {
+                    agentObject[skillSelect] = agentList;
+                }
+            }
+
+            dialogMessage = "Are you sure you want to delete the selected items?";
+        }
+
+        if (fileName && agentList.length > 0) {
+            dialogMessage = `Skill is being used by the agent: ${agentNameList.join(", ")}.\nIf you delete the skill, it will be removed in the agent.\n\n${dialogMessage}`;
+        } else if (!fileName && Object.keys(agentObject).length > 0) {
+            dialogMessage = `One of the selected skills is being used by an agent.\nIf you delete the skill, it will be removed in the agent.\n\n${dialogMessage}`;
+        }
+
+        const isConfirm = await this.controllerDialog.show("warning", dialogMessage, false);
+
+        if (isConfirm) {
+            if (fileName) {
+                this.controllerMcp.apiSkillDelete(fileName);
+
+                this.clearAgentSkill(agentList);
+            } else {
+                for (const skillSelect of this.variableObject.skillSelectList.state) {
+                    this.controllerMcp.apiSkillDelete(skillSelect);
+
+                    if (skillSelect in agentObject) {
+                        this.clearAgentSkill(agentObject[skillSelect]);
+                    }
+                }
+
+                this.variableObject.skillSelectList.state = [];
+            }
         }
     };
 
@@ -414,10 +508,12 @@ export default class MenuItem implements Icontroller {
                 isMenuItemSkill: false,
                 documentList: variableLink<modelMcp.IfileDetail[]>("Mcp"),
                 documentOpenList: [],
+                documentSelectList: [],
                 isDocumentUpload: false,
                 isRagEmbeddingStart: false,
                 isRagGraphOpen: false,
                 skillList: variableLink<modelMcp.IfileDetail[]>("Mcp"),
+                skillSelectList: [],
                 isSkillUpload: false,
                 toolList: variableLink<modelMcp.Itool[]>("Mcp"),
                 toolSelected: variableLink<modelMcp.Itool>("Mcp"),
@@ -435,14 +531,18 @@ export default class MenuItem implements Icontroller {
 
         this.methodObject = {
             onClickMenuDocument: this.onClickMenuDocument,
-            onClickChipDocumentUpload: this.onClickChipDocumentUpload,
+            onClickDocumentUpload: this.onClickDocumentUpload,
+            onClickDocumentCheckbox: this.onClickDocumentCheckbox,
             onClickDocumentDelete: this.onClickDocumentDelete,
-            onClickChipRagStart: this.onClickChipRagStart,
-            onClickChipRagGraph: this.onClickChipRagGraph,
+            onClickDocumentDeleteSelected: this.onClickDocumentDeleteSelected,
+            onClickRagStart: this.onClickRagStart,
+            onClickRagGraph: this.onClickRagGraph,
             onClickRagGraphBack: this.onClickRagGraphBack,
             onClickMenuSkill: this.onClickMenuSkill,
-            onClickChipSkillUpload: this.onClickChipSkillUpload,
+            onClickSkillUpload: this.onClickSkillUpload,
+            onClickSkillCheckbox: this.onClickSkillCheckbox,
             onClickSkillDelete: this.onClickSkillDelete,
+            onClickSkillDeleteSelected: this.onClickSkillDeleteSelected,
             onClickSelectSkill: this.onClickSelectSkill,
             onClickSkillSelect: this.onClickSkillSelect,
             onClickSelectSkillBack: this.onClickSelectSkillBack,
@@ -457,8 +557,7 @@ export default class MenuItem implements Icontroller {
             onClickAgentSave: this.onClickAgentSave,
             onClickAgentCancel: this.onClickAgentCancel,
             onClickAgentOpen: this.onClickAgentOpen,
-            windowOpenDocument: this.windowOpenDocument,
-            fileExtension: this.fileExtension
+            windowOpenDocument: this.windowOpenDocument
         };
     }
 
@@ -490,15 +589,15 @@ export default class MenuItem implements Icontroller {
         listen<modelDocument.Idata>("document-close", (eventData) => {
             const fileName = eventData.payload.fileName;
 
-            const documentOpenFilteredList = [];
+            const filteredList = [];
 
             for (let a = 0; a < this.variableObject.documentOpenList.state.length; a++) {
                 if (this.variableObject.documentOpenList.state[a] !== fileName) {
-                    documentOpenFilteredList.push(this.variableObject.documentOpenList.state[a]);
+                    filteredList.push(this.variableObject.documentOpenList.state[a]);
                 }
             }
 
-            this.variableObject.documentOpenList.state = documentOpenFilteredList;
+            this.variableObject.documentOpenList.state = filteredList;
         }).then((unlistenFn) => {
             this.unlistenWindowDocumentClose = unlistenFn;
         });

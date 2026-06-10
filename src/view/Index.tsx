@@ -5,7 +5,7 @@ import * as modelIndex from "../model/Index";
 
 const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelIndex.Imethod): IvirtualNode => {
     return (
-        <div class="view_index" jsmvcfw-controllerName="Index">
+        <div class={`view_index ${variableObject.isViewHidden.state ? "none" : ""}`} jsmvcfw-controllerName="Index">
             <div
                 class={`over_wrapper ${variableObject.isOfflineMcp.state || variableObject.isOfflineAi.state || variableObject.adUrl.state !== "" ? "" : "none"}`}
             >

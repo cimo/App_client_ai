@@ -86,8 +86,8 @@
             button {
                 margin: 0px !important;
 
-                &.rag {
-                    width: 130px !important;
+                &.delete_selected {
+                    margin-left: auto !important;
                 }
 
                 .cls_icon {
@@ -97,6 +97,17 @@
         }
 
         .table_flex {
+            & .select {
+                flex: 0 0 40px;
+
+                input[type="checkbox"] {
+                    all: revert;
+                    width: 16px;
+                    height: 16px;
+                    cursor: pointer;
+                }
+            }
+
             & .delete {
                 flex: 0 0 40px !important;
 
@@ -160,12 +171,10 @@
 
             .chip {
                 flex-direction: column;
-                align-content: center;
-                justify-content: center;
                 align-items: stretch;
-                justify-items: center;
-                width: 350px;
                 max-height: 250px;
+
+                width: 350px;
 
                 &.agent {
                     user-select: none !important;
