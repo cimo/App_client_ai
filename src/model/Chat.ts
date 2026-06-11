@@ -75,4 +75,8 @@ export interface IelementHook extends Record<string, Element | Element[]> {
     elementInputMessageSend: HTMLInputElement;
     elementContainerMessageReceive: HTMLElement;
     elementBottomLimit: HTMLElement;
+    elementMessageStreamReasonWrapper: HTMLElement;
+    elementMessageStreamReason: HTMLPreElement;
+    elementMessageStreamNoReason: HTMLPreElement;
+    elementIconUpdateMessageList: HTMLElement[];
 }

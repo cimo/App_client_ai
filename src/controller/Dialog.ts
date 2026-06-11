@@ -14,6 +14,8 @@ export default class Dialog implements Icontroller {
 
     private unlistenWindowData: UnlistenFn | undefined = undefined;
 
+    private isOpen = false;
+
     // Method
     private async onClickOk(): Promise<void> {
         const currentWindow = getCurrentWindow();
@@ -31,54 +33,70 @@ export default class Dialog implements Icontroller {
         currentWindow.close();
     }
 
+    getIsOpen(): boolean {
+        return this.isOpen;
+    }
+
     show(mode: string, message: string, isConfirm: boolean): Promise<boolean> {
-        const route = "#/dialog";
+        let result: Promise<boolean>;
 
-        return new Promise((resolve) => {
-            const windowLabel = helperSrc.windowLabelUnique("dialog", mode);
+        if (!this.isOpen) {
+            this.isOpen = true;
 
-            let unlistenWindowReady: UnlistenFn | undefined = undefined;
-            let unlistenWindowResult: UnlistenFn | undefined = undefined;
+            const route = "#/dialog";
 
-            listen(`dialog-${windowLabel}-ready`, () => {
-                emitTo(windowLabel, "dialog-data", { mode, message, isConfirm });
+            result = new Promise((resolve) => {
+                const windowLabel = helperSrc.windowLabelUnique("dialog", mode);
 
-                if (unlistenWindowReady !== undefined) {
-                    unlistenWindowReady();
+                let unlistenWindowReady: UnlistenFn | undefined = undefined;
+                let unlistenWindowResult: UnlistenFn | undefined = undefined;
 
-                    unlistenWindowReady = undefined;
-                }
-            }).then((unlistenFn) => {
-                unlistenWindowReady = unlistenFn;
+                listen(`dialog-${windowLabel}-ready`, () => {
+                    emitTo(windowLabel, "dialog-data", { mode, message, isConfirm });
+
+                    if (unlistenWindowReady !== undefined) {
+                        unlistenWindowReady();
+
+                        unlistenWindowReady = undefined;
+                    }
+                }).then((unlistenFn) => {
+                    unlistenWindowReady = unlistenFn;
+                });
+
+                listen<boolean>(`dialog-${windowLabel}-result`, (event) => {
+                    this.isOpen = false;
+
+                    resolve(event.payload);
+
+                    if (unlistenWindowResult !== undefined) {
+                        unlistenWindowResult();
+
+                        unlistenWindowResult = undefined;
+                    }
+                }).then((unlistenFn) => {
+                    unlistenWindowResult = unlistenFn;
+                });
+
+                helperSrc.windowOpen("dialog", mode, route, {
+                    title: mode,
+                    url: route,
+                    decorations: true,
+                    resizable: false,
+                    minimizable: false,
+                    closable: false,
+                    width: 400,
+                    height: 250,
+                    minWidth: 400,
+                    minHeight: 250,
+                    center: true,
+                    focus: true
+                });
             });
+        } else {
+            result = Promise.resolve(false);
+        }
 
-            listen<boolean>(`dialog-${windowLabel}-result`, (event) => {
-                resolve(event.payload);
-
-                if (unlistenWindowResult !== undefined) {
-                    unlistenWindowResult();
-
-                    unlistenWindowResult = undefined;
-                }
-            }).then((unlistenFn) => {
-                unlistenWindowResult = unlistenFn;
-            });
-
-            helperSrc.windowOpen("dialog", mode, route, {
-                title: mode,
-                url: route,
-                decorations: true,
-                resizable: false,
-                minimizable: false,
-                closable: false,
-                width: 400,
-                height: 250,
-                minWidth: 400,
-                minHeight: 250,
-                center: true,
-                focus: true
-            });
-        });
+        return result;
     }
 
     constructor() {

@@ -1,20 +1,20 @@
 button {
-    display: flex;
-    flex-direction: row;
-    align-content: center;
-    justify-content: center;
-    align-items: center;
-    justify-items: center;
-    min-height: 0;
-    min-width: 0;
-    flex: 0 1 auto;
+    display: flex !important;
+    flex-direction: row !important;
+    align-content: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+    justify-items: center !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    flex: 0 1 auto !important;
 
-    width: fit-content;
-    height: 36px;
-    margin: 10px;
-    cursor: pointer;
-    padding: 10px;
-    border-radius: 8px;
+    width: fit-content !important;
+    height: 36px !important;
+    margin: 10px !important;
+    cursor: pointer !important;
+    padding: 10px !important;
+    border-radius: 8px !important;
 
     &:disabled {
         cursor: not-allowed !important;

@@ -49,7 +49,7 @@ aside {
     min-width: 0;
     flex: 1 1 auto;
 
-    .cls_icon {
+    .cls_icon:not(.none) {
         display: block !important;
         height: 1em !important;
     }

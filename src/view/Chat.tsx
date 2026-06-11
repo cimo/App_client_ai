@@ -1,6 +1,7 @@
 import { jsxFactory, IvirtualNode } from "@cimo/jsmvcfw/dist/src/Main.js";
 
 // Source
+import * as helperSrc from "../HelperSrc";
 import * as modelChat from "../model/Chat";
 
 export const message = (variableObject: modelChat.Ivariable, methodObject: modelChat.Imethod): IvirtualNode => {
@@ -16,7 +17,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                         const messageIndex = parseInt(key);
 
                         resultList.push(
-                            <div key={key} data-chat-index={key}>
+                            <div key={key}>
                                 <div class={`chat_user_wrapper ${value.user ? "" : "none"}`}>
                                     <p class="time">{value.time}</p>
                                     <pre class="message">{value.user}</pre>
@@ -35,7 +36,14 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                     <ul>
                                                         <li>Name: {value.mcpTool["name"]}</li>
                                                         <li>Argument: {value.mcpTool["arguments"]}</li>
-                                                        <li>Output: {value.mcpTool["output"]}</li>
+                                                        <li>
+                                                            Output:
+                                                            <pre>
+                                                                {helperSrc.isJson(value.mcpTool["output"])
+                                                                    ? JSON.stringify(JSON.parse(value.mcpTool["output"]), null, 4)
+                                                                    : value.mcpTool["output"]}
+                                                            </pre>
+                                                        </li>
                                                     </ul>
                                                 );
                                             }
@@ -50,12 +58,19 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                         </summary>
                                         <pre>{value.assistantReason}</pre>
                                     </details>
+                                    <i
+                                        class={`cls_icon ${value.assistantNoReason === "" && !value.ragCitationList && !value.securityScanner ? "" : "none"}`}
+                                        jsmvcfw-elementHookName={`elementIconUpdateMessageList_${key}`}
+                                    >
+                                        update
+                                    </i>
                                     {(() => {
                                         const resultList: IvirtualNode[] = [];
 
-                                        if (value.assistantNoReason === "" && !value.ragCitationList && !value.securityScanner) {
-                                            resultList.push(<i class="cls_icon">update</i>);
-                                        } else if (typeof value.assistantNoReason === "string") {
+                                        if (
+                                            (value.assistantNoReason !== "" || value.ragCitationList || value.securityScanner) &&
+                                            typeof value.assistantNoReason === "string"
+                                        ) {
                                             if (value.ragCitationList) {
                                                 resultList.push(
                                                     <details open>
@@ -191,6 +206,16 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
 
                     return resultList;
                 })()}
+                <div class="chat_assistant_wrapper">
+                    <details class="none" jsmvcfw-elementHookName="elementMessageStreamReasonWrapper">
+                        <summary>
+                            <i class="cls_icon">generating_tokens</i>
+                            <p>Show reason</p>
+                        </summary>
+                        <pre jsmvcfw-elementHookName="elementMessageStreamReason"></pre>
+                    </details>
+                    <pre class="none" jsmvcfw-elementHookName="elementMessageStreamNoReason"></pre>
+                </div>
                 <div class="bottom_limit" jsmvcfw-elementHookName="elementBottomLimit"></div>
             </div>
         </div>

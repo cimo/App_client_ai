@@ -22,6 +22,8 @@ export default class MenuItem implements Icontroller {
     private unlistenWindowDocumentData: UnlistenFn | undefined = undefined;
     private unlistenWindowDocumentClose: UnlistenFn | undefined = undefined;
 
+    private isDialogDeleteSkillOpen = false;
+
     // Method
     private onClickMenuDocument = (event: Event): void => {
         event.stopPropagation();
@@ -63,13 +65,17 @@ export default class MenuItem implements Icontroller {
     private onClickDocumentDelete = async (event: Event, fileName: string): Promise<void> => {
         event.stopPropagation();
 
-        await this.dialogMessageDeleteDocument(fileName);
+        if (!this.controllerDialog.getIsOpen()) {
+            await this.dialogMessageDeleteDocument(fileName);
+        }
     };
 
     private onClickDocumentDeleteSelected = async (event: Event): Promise<void> => {
         event.stopPropagation();
 
-        await this.dialogMessageDeleteDocument();
+        if (!this.controllerDialog.getIsOpen()) {
+            await this.dialogMessageDeleteDocument();
+        }
     };
 
     private onClickRagStart = async (): Promise<void> => {
@@ -126,17 +132,29 @@ export default class MenuItem implements Icontroller {
     private onClickSkillDelete = async (event: Event, fileName: string): Promise<void> => {
         event.stopPropagation();
 
-        this.controllerMcp.apiAgentList().then(async (resultApiList) => {
-            await this.dialogMessageDeleteSkill(resultApiList, fileName);
-        });
+        if (!this.isDialogDeleteSkillOpen) {
+            this.isDialogDeleteSkillOpen = true;
+
+            this.controllerMcp.apiAgentList().then(async (resultApiList) => {
+                await this.dialogMessageDeleteSkill(resultApiList, fileName);
+
+                this.isDialogDeleteSkillOpen = false;
+            });
+        }
     };
 
     private onClickSkillDeleteSelected = async (event: Event): Promise<void> => {
         event.stopPropagation();
 
-        this.controllerMcp.apiAgentList().then(async (resultApiList) => {
-            await this.dialogMessageDeleteSkill(resultApiList);
-        });
+        if (!this.isDialogDeleteSkillOpen) {
+            this.isDialogDeleteSkillOpen = true;
+
+            this.controllerMcp.apiAgentList().then(async (resultApiList) => {
+                await this.dialogMessageDeleteSkill(resultApiList);
+
+                this.isDialogDeleteSkillOpen = false;
+            });
+        }
     };
 
     private onClickSelectSkill = (event: Event): void => {

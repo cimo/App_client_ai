@@ -32,10 +32,12 @@ export default class Chat implements Icontroller {
 
     private messageSentCount: number;
 
+    private isAutoScrollEnabled: boolean;
+
     private unlistenWindowDocumentData: UnlistenFn | undefined = undefined;
 
     // Method
-    private resetModelResponse = (mode?: string): void => {
+    private responseReset = (mode?: string): void => {
         this.responseId = "";
         this.responseReason = "";
         this.responseNoReason = "";
@@ -57,6 +59,30 @@ export default class Chat implements Icontroller {
         } else {
             this.apiResponse();
         }
+    };
+
+    private messageStreamReset = (): void => {
+        this.hookObject.elementMessageStreamReasonWrapper.classList.add("none");
+        this.hookObject.elementMessageStreamReason.textContent = "";
+
+        this.hookObject.elementMessageStreamNoReason.classList.add("none");
+        this.hookObject.elementMessageStreamNoReason.textContent = "";
+    };
+
+    private messageStreamShow = (chatMessageIndex: number): void => {
+        const elementIconUpdateMessage = this.hookObject.elementIconUpdateMessageList[chatMessageIndex];
+
+        if (elementIconUpdateMessage) {
+            elementIconUpdateMessage.classList.add("none");
+        }
+    };
+
+    private autoscroll = (): void => {
+        requestAnimationFrame(() => {
+            if (this.isAutoScrollEnabled) {
+                this.hookObject.elementBottomLimit.scrollIntoView({ block: "end", inline: "nearest" });
+            }
+        });
     };
 
     private onClickCitationLink = async (event: Event, fileName: string, chunk: string): Promise<void> => {
@@ -159,7 +185,7 @@ export default class Chat implements Icontroller {
         if ((prompt || this.hookObject.elementInputMessageSend.value) && this.modelSelected !== "") {
             this.abortControllerApiResponse = new AbortController();
 
-            this.resetModelResponse();
+            this.responseReset();
 
             this.messageSentCount++;
 
@@ -194,7 +220,9 @@ export default class Chat implements Icontroller {
 
             chatMessageIndex = this.variableObject.chatMessageList.state.length - 1;
 
-            this.autoscroll(false);
+            this.isAutoScrollEnabled = true;
+
+            this.autoscroll();
 
             const inputList: modelChat.IchatInput[] = [];
 
@@ -219,14 +247,16 @@ export default class Chat implements Icontroller {
                 }
             }*/
 
+            const systemModeRequest = this.variableObject.systemMode.state;
+
             let inputSystem = [
-                "You are a multilingual assistant that needs to reply with the user input language.",
+                "You are a multilingual assistant that needs to reply with the user prompt language.",
                 "You MUST NOT use tools and tasks."
             ].join("\n");
 
             if (mode === "rag") {
                 inputSystem = [
-                    "You are a multilingual RAG assistant that needs to reply ALWAYS with the user input language.",
+                    "You are a multilingual rag assistant.",
                     "You MUST answer EXCLUSIVELY using the content of the provided CITATION and RELATION without inventing or adding information from your side.",
                     "For EACH topic answer INDEPENDENTLY and SEPARATELY and write a dedicated section with the topic name as title, followed by bullet points.",
                     "You MUST NOT look for relationships or connections between entities unless the question explicitly asks for them.",
@@ -239,7 +269,7 @@ export default class Chat implements Icontroller {
 
             if (this.variableObject.systemMode.state === "tool-call") {
                 inputSystem = [
-                    "You are a multilingual assistant tool executer that needs to reply ALWAYS with the user input language and you need to transform the user request in a action.",
+                    "You are a multilingual assistant tool executer and you need to transform the user request in a action.",
                     `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}`,
                     `${this.variableObject.toolSelected.state.inputInstruction}`,
                     "You MUST return ONLY raw json WITHOUT wrap it in ```json",
@@ -250,7 +280,7 @@ export default class Chat implements Icontroller {
                 ].join("\n");
             } else if (this.variableObject.systemMode.state === "task-call") {
                 inputSystem = [
-                    "You are a multilingual assistant task executer that needs to reply ALWAYS with the user input language and you need to transform the user request in a ordered list of actions.",
+                    "You are a multilingual assistant task executer and you need to transform the user request in a ordered list of actions.",
                     `You MUST use ONLY the following tool: ${this.variableObject.taskSelected.state.name}`,
                     `${this.variableObject.taskSelected.state.inputInstruction}`,
                     "You MUST return ONLY raw json WITHOUT wrap it in ```json",
@@ -343,7 +373,7 @@ export default class Chat implements Icontroller {
                         const { value, done } = await reader.read();
 
                         if (done) {
-                            this.resetModelResponse("finish");
+                            this.responseReset("finish");
 
                             break;
                         }
@@ -376,7 +406,9 @@ export default class Chat implements Icontroller {
 
                                             this.variableObject.chatMessageList.state = chatMessageListState;
 
-                                            this.autoscroll(false);
+                                            this.messageStreamReset();
+
+                                            this.autoscroll();
                                         }
                                     } else if (dataTrimObject.type === "response.created") {
                                         const response = dataTrimObject.response;
@@ -390,16 +422,12 @@ export default class Chat implements Icontroller {
                                         if (delta) {
                                             this.responseReason += delta;
 
-                                            const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+                                            this.messageStreamShow(chatMessageIndex);
 
-                                            chatMessageListState[chatMessageIndex] = {
-                                                ...chatMessageListState[chatMessageIndex],
-                                                assistantReason: this.responseReason.trim()
-                                            };
+                                            this.hookObject.elementMessageStreamReasonWrapper.classList.remove("none");
+                                            this.hookObject.elementMessageStreamReason.textContent = this.responseReason.trim();
 
-                                            this.variableObject.chatMessageList.state = chatMessageListState;
-
-                                            this.autoscroll(true);
+                                            this.autoscroll();
                                         }
                                     } else if (dataTrimObject.type === "response.output_text.delta") {
                                         const delta = dataTrimObject.delta;
@@ -407,16 +435,12 @@ export default class Chat implements Icontroller {
                                         if (delta && (!prompt || mode === "rag")) {
                                             this.responseNoReason += delta;
 
-                                            const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+                                            this.messageStreamShow(chatMessageIndex);
 
-                                            chatMessageListState[chatMessageIndex] = {
-                                                ...chatMessageListState[chatMessageIndex],
-                                                assistantNoReason: this.responseNoReason.trim()
-                                            };
+                                            this.hookObject.elementMessageStreamNoReason.classList.remove("none");
+                                            this.hookObject.elementMessageStreamNoReason.textContent = this.responseNoReason.trim();
 
-                                            this.variableObject.chatMessageList.state = chatMessageListState;
-
-                                            this.autoscroll(true);
+                                            this.autoscroll();
                                         }
                                     } else if (dataTrimObject.type === "response.output_item.done") {
                                         const item = dataTrimObject.item;
@@ -439,16 +463,53 @@ export default class Chat implements Icontroller {
 
                                             this.variableObject.chatMessageList.state = chatMessageListState;
 
-                                            this.autoscroll(true);
+                                            this.autoscroll();
                                         }
                                     } else if (dataTrimObject.type === "response.completed") {
-                                        this.autoscroll(false);
+                                        const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                        let chatMessage = {
+                                            ...chatMessageListState[chatMessageIndex],
+                                            assistantReason: this.responseReason.trim()
+                                        };
+
+                                        if ((!prompt || mode === "rag") && systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
+                                            chatMessage = {
+                                                ...chatMessage,
+                                                assistantNoReason: this.responseNoReason.trim()
+                                            };
+                                        }
+
+                                        chatMessageListState[chatMessageIndex] = chatMessage;
+
+                                        this.variableObject.chatMessageList.state = chatMessageListState;
+
+                                        this.messageStreamReset();
+
+                                        this.autoscroll();
                                     } else if (dataTrimObject.type === "tool_response") {
                                         const message = dataTrimObject.response.message;
 
                                         if (message) {
                                             if (helperSrc.isJson(message)) {
                                                 const messageObject = JSON.parse(message) as modelMcp.IapiResponseTool;
+
+                                                this.responseMcpTool = {
+                                                    tool_call_id: "",
+                                                    type: "tool_response",
+                                                    name: messageObject.name,
+                                                    arguments: "",
+                                                    output: message
+                                                };
+
+                                                const chatMessageListToolState = this.variableObject.chatMessageList.state.slice();
+
+                                                chatMessageListToolState[chatMessageIndex] = {
+                                                    ...chatMessageListToolState[chatMessageIndex],
+                                                    mcpTool: this.responseMcpTool
+                                                };
+
+                                                this.variableObject.chatMessageList.state = chatMessageListToolState;
 
                                                 if (
                                                     messageObject.name === "automate_screenshot" ||
@@ -569,7 +630,7 @@ export default class Chat implements Icontroller {
                                                 }
                                             }
 
-                                            this.autoscroll(false);
+                                            this.autoscroll();
                                         }
                                     }
                                 }
@@ -580,7 +641,9 @@ export default class Chat implements Icontroller {
                 .catch((error: Error) => {
                     helperSrc.writeLog("Chat.ts - apiResponse() - fetch() - catch()", typeof error === "string" ? error : error.message);
 
-                    this.resetModelResponse("finish");
+                    this.responseReset("finish");
+
+                    this.messageStreamReset();
 
                     if (error.toString().toLowerCase() === "request cancelled") {
                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();
@@ -600,26 +663,6 @@ export default class Chat implements Icontroller {
         }
     };
 
-    autoscroll = (isAuto: boolean): void => {
-        const elementContainerMessageReceive = this.hookObject.elementContainerMessageReceive;
-        const elementBottomLimit = this.hookObject.elementBottomLimit;
-
-        const difference =
-            elementContainerMessageReceive.scrollHeight - (elementContainerMessageReceive.scrollTop + elementContainerMessageReceive.clientHeight);
-        const threshold = 10;
-        const isAtBottom = difference <= threshold;
-
-        elementContainerMessageReceive.dataset["autoScroll"] = isAtBottom ? "true" : "false";
-
-        requestAnimationFrame(() => {
-            if (elementContainerMessageReceive.dataset["autoScroll"] === "false" && isAuto) {
-                return;
-            }
-
-            elementBottomLimit.scrollIntoView({ block: "end", inline: "nearest" });
-        });
-    };
-
     constructor() {
         this.variableObject = {} as modelChat.Ivariable;
         this.methodObject = {} as modelChat.Imethod;
@@ -637,6 +680,8 @@ export default class Chat implements Icontroller {
         this.fileList = {} as modelChat.Ifile;
 
         this.messageSentCount = 0;
+
+        this.isAutoScrollEnabled = true;
     }
 
     hookObject = {} as modelChat.IelementHook;
@@ -678,6 +723,20 @@ export default class Chat implements Icontroller {
     }
 
     event(): void {
+        this.hookObject.elementContainerMessageReceive.addEventListener("wheel", (event: WheelEvent) => {
+            if (event.deltaY < 0) {
+                this.isAutoScrollEnabled = false;
+            }
+        });
+
+        this.hookObject.elementContainerMessageReceive.addEventListener("scroll", () => {
+            const difference =
+                this.hookObject.elementContainerMessageReceive.scrollHeight -
+                (this.hookObject.elementContainerMessageReceive.scrollTop + this.hookObject.elementContainerMessageReceive.clientHeight);
+
+            this.isAutoScrollEnabled = difference <= 10;
+        });
+
         listen<modelDocument.Idata>("document-data", async (event) => {
             const fileName = event.payload.fileName;
 

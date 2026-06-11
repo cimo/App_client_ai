@@ -70,6 +70,10 @@
 
                 margin: 10px 0px;
 
+                &:not(:has(> :not(.none))) {
+                    margin: 0;
+                }
+
                 details {
                     padding: 5px;
                     margin: 5px 0;

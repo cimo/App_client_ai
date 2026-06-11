@@ -98,13 +98,13 @@
 
         .table_flex {
             & .select {
-                flex: 0 0 40px;
+                flex: 0 0 40px !important;
 
                 input[type="checkbox"] {
-                    all: revert;
-                    width: 16px;
-                    height: 16px;
-                    cursor: pointer;
+                    all: revert !important;
+                    width: 16px !important;
+                    height: 16px !important;
+                    cursor: pointer !important;
                 }
             }
 
@@ -117,15 +117,15 @@
             }
 
             & .name {
-                display: flex;
-                flex-direction: row;
-                align-content: center;
-                justify-content: start;
-                align-items: center;
-                justify-items: center;
-                min-height: 0;
-                min-width: 0;
-                flex: 1 1 auto;
+                display: flex !important;
+                flex-direction: row !important;
+                align-content: center !important;
+                justify-content: start !important;
+                align-items: center !important;
+                justify-items: center !important;
+                min-height: 0 !important;
+                min-width: 0 !important;
+                flex: 1 1 auto !important;
 
                 gap: 10px !important;
                 word-break: break-word !important;
@@ -196,10 +196,10 @@
 
                     img,
                     .cls_icon {
-                        width: 35px;
-                        height: 35px;
+                        width: 35px !important;
+                        height: 35px !important;
                         margin-right: 5px !important;
-                        cursor: pointer;
+                        cursor: pointer !important;
                     }
 
                     p {
