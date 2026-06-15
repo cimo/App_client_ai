@@ -142,41 +142,6 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                 return resultList;
                                                             })()}
                                                         </div>
-                                                        {(() => {
-                                                            const resultList: IvirtualNode[] = [];
-
-                                                            if (value.ragRelationList && value.ragRelationList.length > 0) {
-                                                                resultList.push(
-                                                                    <div class="relation_wrapper">
-                                                                        <p class="title">
-                                                                            <i class="cls_icon">account_tree</i>
-                                                                            <span>Relation:</span>
-                                                                        </p>
-                                                                        <ul>
-                                                                            {(() => {
-                                                                                const resultList: IvirtualNode[] = [];
-
-                                                                                const entryList = Object.entries(value.ragRelationList);
-
-                                                                                for (const [key, value] of entryList) {
-                                                                                    resultList.push(
-                                                                                        <li key={key}>
-                                                                                            <span class="source">{value.source}</span>
-                                                                                            <span class="verb">{value.verb}</span>
-                                                                                            <span class="target">{value.target}</span>
-                                                                                        </li>
-                                                                                    );
-                                                                                }
-
-                                                                                return resultList;
-                                                                            })()}
-                                                                        </ul>
-                                                                    </div>
-                                                                );
-                                                            }
-
-                                                            return resultList;
-                                                        })()}
                                                     </details>
                                                 );
 

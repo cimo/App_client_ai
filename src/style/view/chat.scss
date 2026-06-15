@@ -169,62 +169,6 @@
                             }
                         }
                     }
-
-                    .relation_wrapper {
-                        margin-top: 15px;
-                        padding: 10px;
-
-                        .title {
-                            display: flex;
-                            flex-direction: row;
-                            align-content: center;
-                            justify-content: start;
-                            align-items: center;
-                            justify-items: center;
-                            min-height: 0;
-                            min-width: 0;
-                            flex: 0 1 auto;
-
-                            margin-bottom: 8px;
-
-                            .cls_icon {
-                                font-size: parameter.$fontSizeNormalPlus !important;
-                                margin-right: 5px !important;
-                            }
-                        }
-
-                        ul {
-                            list-style: none;
-                            padding: 0;
-                            margin: 0;
-
-                            li {
-                                display: flex;
-                                flex-direction: row;
-                                align-content: center;
-                                justify-content: start;
-                                align-items: center;
-                                justify-items: center;
-                                min-height: 0;
-                                min-width: 0;
-                                flex: 0 1 auto;
-
-                                flex-wrap: wrap;
-                                gap: 6px;
-                                margin: 4px 0;
-
-                                .source,
-                                .target {
-                                    font-weight: bold;
-                                }
-
-                                .verb {
-                                    font-style: italic;
-                                    opacity: 0.7;
-                                }
-                            }
-                        }
-                    }
                 }
 
                 .scanner_wrapper {
@@ -342,11 +286,6 @@
                                 color: color.$darkHyperLinkText;
                             }
                         }
-                    }
-
-                    .relation_wrapper {
-                        background-color: color.$darkCitationBackground;
-                        color: color.$darkCitationText;
                     }
                 }
             }

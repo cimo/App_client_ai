@@ -42,7 +42,7 @@ export interface IragRelation {
 
 export interface IragSearch {
     citationList: IragCitation[];
-    relationList: IragRelation[];
+    graphList: IragRelation[];
 }
 
 export interface IdocumentParser {

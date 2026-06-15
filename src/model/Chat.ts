@@ -24,7 +24,6 @@ export interface IchatMessage {
     mcpTool?: ImcpTool;
     ragCitationList: modelMcp.IragCitation[] | undefined;
     ragCitationTabIndex: number;
-    ragRelationList: modelMcp.IragRelation[] | undefined;
     securityScanner: string;
 }
 

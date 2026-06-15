@@ -212,7 +212,6 @@ export default class Chat implements Icontroller {
                         mcpTool: this.responseMcpTool,
                         ragCitationList: undefined,
                         ragCitationTabIndex: 0,
-                        ragRelationList: [],
                         securityScanner: ""
                     }
                 ];
@@ -257,9 +256,9 @@ export default class Chat implements Icontroller {
             if (mode === "rag") {
                 inputSystem = [
                     "You are a multilingual rag assistant.",
-                    "You MUST answer EXCLUSIVELY using the content of the provided CITATION and RELATION without inventing or adding information from your side.",
+                    "You MUST answer EXCLUSIVELY using the content of the provided CITATION and GRAPH without inventing or adding information from your side.",
+                    "You MAY use the connections between entities present in GRAPH when the question requires it, but you MUST NOT invent connections that are not explicitly present there.",
                     "For EACH topic answer INDEPENDENTLY and SEPARATELY and write a dedicated section with the topic name as title, followed by bullet points.",
-                    "You MUST NOT look for relationships or connections between entities unless the question explicitly asks for them.",
                     "You MUST NOT add commentary about missing information.",
                     "You MUST NOT solve problems.",
                     "You MUST NOT invent new actions.",
@@ -562,7 +561,7 @@ export default class Chat implements Icontroller {
                                                 } else if (messageObject.name === "rag_search") {
                                                     const result = messageObject.result as modelMcp.IragSearch;
                                                     const citationList = result.citationList;
-                                                    const relationList = result.relationList;
+                                                    const graphList = result.graphList;
 
                                                     if (citationList.length > 0) {
                                                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();
@@ -570,8 +569,7 @@ export default class Chat implements Icontroller {
                                                         chatMessageListState[chatMessageIndex] = {
                                                             ...chatMessageListState[chatMessageIndex],
                                                             ragCitationList: citationList,
-                                                            ragCitationTabIndex: 0,
-                                                            ragRelationList: relationList.length > 0 ? relationList : []
+                                                            ragCitationTabIndex: 0
                                                         };
 
                                                         this.variableObject.chatMessageList.state = chatMessageListState;
@@ -586,23 +584,23 @@ export default class Chat implements Icontroller {
 
                                                         const citationContext = citationContextList.join("\n---\n");
 
-                                                        let relationContext = "";
+                                                        let graphContext = "";
 
-                                                        if (relationList.length > 0) {
-                                                            const relationContextList: string[] = [];
+                                                        if (graphList.length > 0) {
+                                                            const graphContextList: string[] = [];
 
-                                                            for (let a = 0; a < Math.min(20, relationList.length); a++) {
-                                                                relationContextList.push(
-                                                                    `${relationList[a].source} ${relationList[a].verb} ${relationList[a].target}`
+                                                            for (let a = 0; a < Math.min(60, graphList.length); a++) {
+                                                                graphContextList.push(
+                                                                    `${graphList[a].source} ${graphList[a].verb} ${graphList[a].target}`
                                                                 );
                                                             }
 
-                                                            relationContext = relationContextList.join("\n");
+                                                            graphContext = graphContextList.join("\n");
                                                         }
 
                                                         this.apiResponse(
                                                             "rag",
-                                                            `CITATION:\n${citationContext}\n\nRELATION:\n${relationContext}\n\nText:\n${userPrompt}`
+                                                            `CITATION:\n${citationContext}\n\nGRAPH:\n${graphContext}\n\nText:\n${userPrompt}`
                                                         );
 
                                                         this.variableObject.systemMode.state = "tool-call";
