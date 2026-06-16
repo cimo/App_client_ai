@@ -34,14 +34,23 @@ export interface IragCitation {
     distance: number;
 }
 
+export interface IragNode {
+    name: string;
+    type: string;
+    description: string;
+}
+
 export interface IragRelation {
     source: string;
     verb: string;
     target: string;
+    description: string;
+    chunk: string;
 }
 
 export interface IragSearch {
     citationList: IragCitation[];
+    nodeList: IragNode[];
     graphList: IragRelation[];
 }
 

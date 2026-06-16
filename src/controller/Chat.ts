@@ -561,6 +561,7 @@ export default class Chat implements Icontroller {
                                                 } else if (messageObject.name === "rag_search") {
                                                     const result = messageObject.result as modelMcp.IragSearch;
                                                     const citationList = result.citationList;
+                                                    const nodeList = result.nodeList;
                                                     const graphList = result.graphList;
 
                                                     if (citationList.length > 0) {
@@ -584,15 +585,31 @@ export default class Chat implements Icontroller {
 
                                                         const citationContext = citationContextList.join("\n---\n");
 
+                                                        let nodeContext = "";
+
+                                                        if (nodeList.length > 0) {
+                                                            const nodeContextList: string[] = [];
+
+                                                            for (let a = 0; a < Math.min(20, nodeList.length); a++) {
+                                                                nodeContextList.push(`${nodeList[a].name}: ${nodeList[a].description}`);
+                                                            }
+
+                                                            nodeContext = nodeContextList.join("\n");
+                                                        }
+
                                                         let graphContext = "";
 
                                                         if (graphList.length > 0) {
                                                             const graphContextList: string[] = [];
 
                                                             for (let a = 0; a < Math.min(60, graphList.length); a++) {
-                                                                graphContextList.push(
-                                                                    `${graphList[a].source} ${graphList[a].verb} ${graphList[a].target}`
-                                                                );
+                                                                let graphLine = `${graphList[a].source} ${graphList[a].verb} ${graphList[a].target}`;
+
+                                                                if (graphList[a].description !== "") {
+                                                                    graphLine = `${graphLine} (${graphList[a].description})`;
+                                                                }
+
+                                                                graphContextList.push(graphLine);
                                                             }
 
                                                             graphContext = graphContextList.join("\n");
@@ -600,7 +617,7 @@ export default class Chat implements Icontroller {
 
                                                         this.apiResponse(
                                                             "rag",
-                                                            `CITATION:\n${citationContext}\n\nGRAPH:\n${graphContext}\n\nText:\n${userPrompt}`
+                                                            `CITATION:\n${citationContext}\n\nNODE:\n${nodeContext}\n\nGRAPH:\n${graphContext}\n\nText:\n${userPrompt}`
                                                         );
 
                                                         this.variableObject.systemMode.state = "tool-call";
