@@ -35,13 +35,12 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                 resultList.push(
                                                     <ul>
                                                         <li>Name: {value.mcpTool["name"]}</li>
-                                                        <li>Argument: {value.mcpTool["arguments"]}</li>
                                                         <li>
-                                                            Output:
+                                                            Argument:
                                                             <pre>
-                                                                {helperSrc.isJson(value.mcpTool["output"])
-                                                                    ? JSON.stringify(JSON.parse(value.mcpTool["output"]), null, 4)
-                                                                    : value.mcpTool["output"]}
+                                                                {helperSrc.isJson(value.mcpTool["arguments"])
+                                                                    ? JSON.stringify(JSON.parse(value.mcpTool["arguments"]), null, 4)
+                                                                    : value.mcpTool["arguments"]}
                                                             </pre>
                                                         </li>
                                                     </ul>

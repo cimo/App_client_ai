@@ -44,6 +44,8 @@ export interface IapiResponse {
     type: string;
     response: {
         id: string;
+        name: string;
+        arguments: string;
         message: string;
     };
     error: {

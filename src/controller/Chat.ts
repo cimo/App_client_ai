@@ -256,7 +256,8 @@ export default class Chat implements Icontroller {
             if (mode === "rag") {
                 inputSystem = [
                     "You are a multilingual rag assistant.",
-                    "You MUST answer EXCLUSIVELY using the content of the provided CITATION and GRAPH without inventing or adding information from your side.",
+                    "You MUST answer EXCLUSIVELY using the content of the provided CITATION, NODE and GRAPH without inventing or adding information from your side.",
+                    "NODE provides the entities and their descriptions, GRAPH provides the relations between them and CITATION provides the source text.",
                     "You MAY use the connections between entities present in GRAPH when the question requires it, but you MUST NOT invent connections that are not explicitly present there.",
                     "For EACH topic answer INDEPENDENTLY and SEPARATELY and write a dedicated section with the topic name as title, followed by bullet points.",
                     "You MUST NOT add commentary about missing information.",
@@ -392,6 +393,11 @@ export default class Chat implements Icontroller {
                                 if (helperSrc.isJson(dataTrim)) {
                                     const dataTrimObject = JSON.parse(dataTrim) as modelChat.IapiResponse;
 
+                                    if (dataTrimObject.response) {
+                                        // eslint-disable-next-line no-console
+                                        console.log("cimo", dataTrimObject.response.message);
+                                    }
+
                                     if (dataTrimObject.type === "error") {
                                         const error = dataTrimObject.error;
 
@@ -488,16 +494,17 @@ export default class Chat implements Icontroller {
                                         this.autoscroll();
                                     } else if (dataTrimObject.type === "tool_response") {
                                         const message = dataTrimObject.response.message;
+                                        const argument = dataTrimObject.response.arguments;
 
                                         if (message) {
                                             if (helperSrc.isJson(message)) {
                                                 const messageObject = JSON.parse(message) as modelMcp.IapiResponseTool;
 
                                                 this.responseMcpTool = {
-                                                    tool_call_id: "",
+                                                    ...this.responseMcpTool,
                                                     type: "tool_response",
                                                     name: messageObject.name,
-                                                    arguments: "",
+                                                    arguments: argument,
                                                     output: message
                                                 };
 
@@ -579,7 +586,7 @@ export default class Chat implements Icontroller {
 
                                                         const citationContextList: string[] = [];
 
-                                                        for (let a = 0; a < Math.min(6, citationList.length); a++) {
+                                                        for (let a = 0; a < citationList.length; a++) {
                                                             citationContextList.push(`[${citationList[a].fileName}]: ${citationList[a].chunk}`);
                                                         }
 
@@ -590,8 +597,14 @@ export default class Chat implements Icontroller {
                                                         if (nodeList.length > 0) {
                                                             const nodeContextList: string[] = [];
 
-                                                            for (let a = 0; a < Math.min(20, nodeList.length); a++) {
-                                                                nodeContextList.push(`${nodeList[a].name}: ${nodeList[a].description}`);
+                                                            for (let a = 0; a < nodeList.length; a++) {
+                                                                let nodeLine = nodeList[a].name;
+
+                                                                if (nodeList[a].type !== "") {
+                                                                    nodeLine = `${nodeLine} (${nodeList[a].type})`;
+                                                                }
+
+                                                                nodeContextList.push(`${nodeLine}: ${nodeList[a].description}`);
                                                             }
 
                                                             nodeContext = nodeContextList.join("\n");
@@ -602,7 +615,7 @@ export default class Chat implements Icontroller {
                                                         if (graphList.length > 0) {
                                                             const graphContextList: string[] = [];
 
-                                                            for (let a = 0; a < Math.min(60, graphList.length); a++) {
+                                                            for (let a = 0; a < graphList.length; a++) {
                                                                 let graphLine = `${graphList[a].source} ${graphList[a].verb} ${graphList[a].target}`;
 
                                                                 if (graphList[a].description !== "") {
