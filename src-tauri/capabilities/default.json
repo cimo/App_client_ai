@@ -31,6 +31,12 @@
             "identifier": "http:default",
             "allow": [
                 {
+                    "url": "http://host.docker.internal:1044/*"
+                },
+                {
+                    "url": "https://host.docker.internal:1044/*"
+                },
+                {
                     "url": "http://host.docker.internal:1046/*"
                 },
                 {

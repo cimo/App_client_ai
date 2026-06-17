@@ -3,6 +3,13 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 // Source
 import * as modelMcp from "./Mcp";
 
+export interface IapiResponseBody {
+    stream: boolean;
+    model: string;
+    input: IchatInput[];
+    tools: unknown[];
+}
+
 export interface ImcpTool {
     tool_call_id: string;
     type: string;
@@ -11,9 +18,10 @@ export interface ImcpTool {
     output: string;
 }
 
-export interface IchatInput {
-    role: string;
-    content: string | Array<{ type: string; text?: string; image_url?: string }>;
+export interface Iplaywright {
+    action: string;
+    nameList: string[];
+    stdout: string;
 }
 
 export interface IchatMessage {
@@ -25,6 +33,12 @@ export interface IchatMessage {
     ragCitationList: modelMcp.IragCitation[] | undefined;
     ragCitationTabIndex: number;
     securityScanner: string;
+    playwright: Iplaywright;
+}
+
+export interface IchatInput {
+    role: string;
+    content: string | Array<{ type: string; text?: string; image_url?: string }>;
 }
 
 export interface Ifile {
@@ -33,14 +47,7 @@ export interface Ifile {
     };
 }
 
-export interface IapiResponseBody {
-    stream: boolean;
-    model: string;
-    input: IchatInput[];
-    tools: unknown[];
-}
-
-export interface IapiResponse {
+export interface IllmResponse {
     type: string;
     response: {
         id: string;
@@ -64,12 +71,16 @@ export interface Ivariable {
     toolList: IvariableBind<modelMcp.Itool[]>;
     taskSelected: IvariableBind<modelMcp.Itask>;
     agentSelected: IvariableBind<modelMcp.Iagent>;
+    playwrightVideoSrc: IvariableBind<string>;
+    playwrightVideoName: IvariableBind<string>;
 }
 
 export interface Imethod {
     onClickButtonMessageSend: () => void;
     onClickCitationLink: (event: Event, fileName: string, chunk: string) => void;
     onClickCitationTab: (messageIndex: number, tabIndex: number) => void;
+    onClickPlaywrightVideoShow: (fileName: string) => void;
+    onErrorPlaywrightVideoFail: () => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

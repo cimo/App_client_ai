@@ -67,7 +67,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                         const resultList: IvirtualNode[] = [];
 
                                         if (
-                                            (value.assistantNoReason !== "" || value.ragCitationList || value.securityScanner) &&
+                                            (value.assistantNoReason !== "" || value.ragCitationList || value.securityScanner || value.playwright) &&
                                             typeof value.assistantNoReason === "string"
                                         ) {
                                             if (value.ragCitationList) {
@@ -109,6 +109,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                             </div>
                                                             {(() => {
                                                                 const resultList: IvirtualNode[] = [];
+
                                                                 const citation = value.ragCitationList[value.ragCitationTabIndex];
 
                                                                 if (citation && typeof citation !== "string") {
@@ -154,6 +155,65 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                             <p>Security scanner result:</p>
                                                         </summary>
                                                         <pre class="security_scanner">{value.securityScanner}</pre>
+                                                    </details>
+                                                );
+                                            } else if (value.playwright.action) {
+                                                resultList.push(
+                                                    <details open class="playwright_container">
+                                                        <summary>
+                                                            <p>Playwright result:</p>
+                                                        </summary>
+                                                        {(() => {
+                                                            const resultList: IvirtualNode[] = [];
+
+                                                            if (value.playwright.action === "listTest") {
+                                                                resultList.push(
+                                                                    <pre key={key} class="playwright">
+                                                                        {value.playwright.nameList.join("\n")}
+                                                                    </pre>
+                                                                );
+                                                            } else if (value.playwright.action === "run") {
+                                                                resultList.push(
+                                                                    <pre key={key} class="playwright">
+                                                                        {value.playwright.stdout}
+                                                                    </pre>
+                                                                );
+                                                            } else if (value.playwright.action === "listVideo") {
+                                                                for (const [keySub, valueSub] of Object.entries(value.playwright.nameList)) {
+                                                                    resultList.push(
+                                                                        <span key={keySub}>
+                                                                            <p onClick={() => methodObject.onClickPlaywrightVideoShow(valueSub)}>
+                                                                                {valueSub}
+                                                                            </p>
+                                                                            {(() => {
+                                                                                const resultList: IvirtualNode[] = [];
+
+                                                                                if (
+                                                                                    variableObject.playwrightVideoSrc.state !== "" &&
+                                                                                    variableObject.playwrightVideoName.state === valueSub
+                                                                                ) {
+                                                                                    resultList.push(
+                                                                                        <div>
+                                                                                            <video
+                                                                                                controls
+                                                                                                src={`${variableObject.playwrightVideoSrc.state}`}
+                                                                                                onerror={() => {
+                                                                                                    methodObject.onErrorPlaywrightVideoFail();
+                                                                                                }}
+                                                                                            ></video>
+                                                                                        </div>
+                                                                                    );
+                                                                                }
+
+                                                                                return resultList;
+                                                                            })()}
+                                                                        </span>
+                                                                    );
+                                                                }
+                                                            }
+
+                                                            return resultList;
+                                                        })()}
                                                     </details>
                                                 );
                                             } else {

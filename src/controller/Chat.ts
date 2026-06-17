@@ -25,7 +25,7 @@ export default class Chat implements Icontroller {
     private responseNoReason: string;
     private responseMcpTool: modelChat.ImcpTool;
 
-    private abortControllerApiResponse: AbortController | undefined;
+    private abortControllerLlmResponse: AbortController | undefined;
 
     private modelSelected: string;
     private fileList: modelChat.Ifile;
@@ -53,11 +53,11 @@ export default class Chat implements Icontroller {
     };
 
     private onClickButtonMessageSend = (): void => {
-        if (this.abortControllerApiResponse && this.responseId) {
-            this.abortControllerApiResponse.abort();
-            this.abortControllerApiResponse = undefined;
+        if (this.abortControllerLlmResponse && this.responseId) {
+            this.abortControllerLlmResponse.abort();
+            this.abortControllerLlmResponse = undefined;
         } else {
-            this.apiResponse();
+            this.llmResponse();
         }
     };
 
@@ -103,7 +103,7 @@ export default class Chat implements Icontroller {
             }
         }
 
-        this.apiResponse("", `Filename: ${fileName}. Search input: ${chunk}.`);
+        this.llmResponse("", `Filename: ${fileName}. Search input: ${chunk}.`);
 
         this.variableObject.systemMode.state = systemMode;
         this.variableObject.toolSelected.state = toolSelected;
@@ -170,7 +170,7 @@ export default class Chat implements Icontroller {
         this.modelSelected = modelSelected;
     }
 
-    apiResponse = async (mode?: string, prompt?: string): Promise<void> => {
+    llmResponse = async (mode?: string, prompt?: string): Promise<void> => {
         //const base64 = await invoke("test_screenshot");
         //this.variableObject.modelSelected.state = base64 as string;
 
@@ -183,7 +183,7 @@ export default class Chat implements Icontroller {
         }
 
         if ((prompt || this.hookObject.elementInputMessageSend.value) && this.modelSelected !== "") {
-            this.abortControllerApiResponse = new AbortController();
+            this.abortControllerLlmResponse = new AbortController();
 
             this.responseReset();
 
@@ -212,7 +212,8 @@ export default class Chat implements Icontroller {
                         mcpTool: this.responseMcpTool,
                         ragCitationList: undefined,
                         ragCitationTabIndex: 0,
-                        securityScanner: ""
+                        securityScanner: "",
+                        playwright: {} as modelChat.Iplaywright
                     }
                 ];
             }
@@ -272,7 +273,7 @@ export default class Chat implements Icontroller {
                     "You are a multilingual assistant tool executer and you need to transform the user request in a action.",
                     `You MUST use ONLY the following tool: ${this.variableObject.toolSelected.state.name}`,
                     `${this.variableObject.toolSelected.state.inputInstruction}`,
-                    "You MUST return ONLY raw json WITHOUT wrap it in ```json",
+                    "You MUST return ONLY raw json WITHOUT wrap it in ```json and you need change ONLY the 'argumentObject' value without toutch the 'name' default value.",
                     `For ${this.variableObject.toolSelected.state.name} return ALWAYS the json with this format: { "name": "${this.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.toolSelected.state.argumentObject)} }`,
                     "You MUST NOT solve problems.",
                     "You MUST NOT invent new actions.",
@@ -283,7 +284,7 @@ export default class Chat implements Icontroller {
                     "You are a multilingual assistant task executer and you need to transform the user request in a ordered list of actions.",
                     `You MUST use ONLY the following tool: ${this.variableObject.taskSelected.state.name}`,
                     `${this.variableObject.taskSelected.state.inputInstruction}`,
-                    "You MUST return ONLY raw json WITHOUT wrap it in ```json",
+                    "You MUST return ONLY raw json WITHOUT wrap it in ```json and you need change ONLY the 'argumentObject' value without toutch the 'name' default value.",
                     `For ${this.variableObject.taskSelected.state.name} return ALWAYS the json with this format: { "list": [ { "name": "${this.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(this.variableObject.taskSelected.state.argumentObject)} } ] }`,
                     "You MUST NOT solve problems.",
                     "You MUST NOT invent new actions.",
@@ -292,14 +293,8 @@ export default class Chat implements Icontroller {
             } else if (this.variableObject.systemMode.state === "agent-skill") {
                 const skillContent = await this.controllerMcp.apiSkillRead(this.variableObject.agentSelected.state.skillName);
 
-                let skillDescription = "";
-
-                if (skillContent) {
-                    skillDescription = window.atob(skillContent);
-                }
-
                 inputSystem = [
-                    skillDescription,
+                    window.atob(skillContent),
                     `If you find a tag [script](...) in the text you MUST stop and return ALWAYS ONLY the raw json WITHOUT wrap it in \`\`\`json and with this format: { "action": { "skillName": "${this.variableObject.agentSelected.state.skillName}", "scriptName": "" } } where the value of "scriptName" is ONLY the file inside the tag [script](...).`
                 ].join("\n");
 
@@ -350,7 +345,7 @@ export default class Chat implements Icontroller {
                     "mcp-cookie": session.data.mcpCookie
                 },
                 body: JSON.stringify(body),
-                signal: this.abortControllerApiResponse.signal,
+                signal: this.abortControllerLlmResponse.signal,
                 danger: {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
@@ -360,7 +355,7 @@ export default class Chat implements Icontroller {
                     const contentType = resultApi.headers.get("Content-Type");
 
                     if (!contentType || !contentType.includes("text/event-stream") || !resultApi.body) {
-                        helperSrc.writeLog("Chat.ts - apiResponse() - fetch() - Error", "Missing or invalid headers.");
+                        helperSrc.writeLog("Chat.ts - llmResponse() - fetch() - Error", "Missing or invalid headers.");
 
                         return;
                     }
@@ -391,7 +386,7 @@ export default class Chat implements Icontroller {
                                 const dataTrim = data.trim();
 
                                 if (helperSrc.isJson(dataTrim)) {
-                                    const dataTrimObject = JSON.parse(dataTrim) as modelChat.IapiResponse;
+                                    const dataTrimObject = JSON.parse(dataTrim) as modelChat.IllmResponse;
 
                                     if (dataTrimObject.response) {
                                         // eslint-disable-next-line no-console
@@ -498,7 +493,7 @@ export default class Chat implements Icontroller {
 
                                         if (message) {
                                             if (helperSrc.isJson(message)) {
-                                                const messageObject = JSON.parse(message) as modelMcp.IapiResponseTool;
+                                                const messageObject = JSON.parse(message) as modelMcp.IllmResponseTool;
 
                                                 this.responseMcpTool = {
                                                     ...this.responseMcpTool,
@@ -628,7 +623,7 @@ export default class Chat implements Icontroller {
                                                             graphContext = graphContextList.join("\n");
                                                         }
 
-                                                        this.apiResponse(
+                                                        this.llmResponse(
                                                             "rag",
                                                             `CITATION:\n${citationContext}\n\nNODE:\n${nodeContext}\n\nGRAPH:\n${graphContext}\n\nText:\n${userPrompt}`
                                                         );
@@ -655,6 +650,17 @@ export default class Chat implements Icontroller {
                                                     };
 
                                                     this.variableObject.chatMessageList.state = chatMessageListState;
+                                                } else if (messageObject.name === "playwright") {
+                                                    const result = messageObject.result as modelChat.Iplaywright;
+
+                                                    const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+                                                    chatMessageListState[chatMessageIndex] = {
+                                                        ...chatMessageListState[chatMessageIndex],
+                                                        playwright: result
+                                                    };
+
+                                                    this.variableObject.chatMessageList.state = chatMessageListState;
                                                 }
                                             }
 
@@ -667,7 +673,7 @@ export default class Chat implements Icontroller {
                     }
                 })
                 .catch((error: Error) => {
-                    helperSrc.writeLog("Chat.ts - apiResponse() - fetch() - catch()", typeof error === "string" ? error : error.message);
+                    helperSrc.writeLog("Chat.ts - llmResponse() - fetch() - catch()", typeof error === "string" ? error : error.message);
 
                     this.responseReset("finish");
 
@@ -702,7 +708,7 @@ export default class Chat implements Icontroller {
         this.responseNoReason = "";
         this.responseMcpTool = {} as modelChat.ImcpTool;
 
-        this.abortControllerApiResponse = undefined;
+        this.abortControllerLlmResponse = undefined;
 
         this.modelSelected = "";
         this.fileList = {} as modelChat.Ifile;
@@ -724,7 +730,9 @@ export default class Chat implements Icontroller {
                 toolSelected: variableLink<modelMcp.Itool>("Mcp"),
                 toolList: variableLink<modelMcp.Itool[]>("Mcp"),
                 taskSelected: variableLink<modelMcp.Itask>("Mcp"),
-                agentSelected: variableLink<modelMcp.Iagent>("Mcp")
+                agentSelected: variableLink<modelMcp.Iagent>("Mcp"),
+                playwrightVideoSrc: variableLink<string>("Mcp"),
+                playwrightVideoName: variableLink<string>("Mcp")
             },
             this.constructor.name
         );
@@ -732,7 +740,9 @@ export default class Chat implements Icontroller {
         this.methodObject = {
             onClickButtonMessageSend: this.onClickButtonMessageSend,
             onClickCitationLink: this.onClickCitationLink,
-            onClickCitationTab: this.onClickCitationTab
+            onClickCitationTab: this.onClickCitationTab,
+            onClickPlaywrightVideoShow: this.controllerMcp.playwrightVideoShow,
+            onErrorPlaywrightVideoFail: this.controllerMcp.playwrightVideoFail
         };
     }
 

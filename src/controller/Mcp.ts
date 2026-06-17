@@ -109,6 +109,71 @@ export default class Mcp implements Icontroller {
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
 
         this.variableObject.systemMode.state = "chat";
+
+        this.apiPLaywrightLogout().then(() => {
+            this.variableObject.playwrightVideoSrc.state = "";
+        });
+    };
+
+    private apiPLaywrightLogin = async (): Promise<void> => {
+        return fetch(`${helperSrc.URL_MS_AUTOMATE_TEST}/login`, {
+            method: "GET",
+            maxRedirections: 0,
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                const cookie = resultApi.headers.get("set-cookie");
+
+                if (cookie) {
+                    session.writeMsAutomateTestSession(cookie.split(";")[0]);
+                }
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiPLaywrightLogin() - catch()", error);
+            });
+    };
+
+    private apiPLaywrightVideoBlobUrl = async (fileName: string): Promise<string | void> => {
+        return fetch(`${helperSrc.URL_MS_AUTOMATE_TEST}/file/${fileName}`, {
+            method: "GET",
+            headers: {
+                Cookie: session.data.msAutomateTestCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                const blob = await resultApi.blob();
+
+                return URL.createObjectURL(blob);
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiPLaywrightVideoBlobUrl() - catch()", error);
+            });
+    };
+
+    private apiPLaywrightLogout = async (): Promise<void> => {
+        return fetch(`${helperSrc.URL_MS_AUTOMATE_TEST}/logout`, {
+            method: "GET",
+            headers: {
+                Cookie: session.data.msAutomateTestCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(() => {
+                session.deleteMsAutomateTestSession();
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiPLaywrightLogout() - fetch() - catch()", error);
+            });
     };
 
     apiLogin = async (): Promise<void> => {
@@ -181,7 +246,7 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelIndex.IresponseBody;
-                const stdoutList = JSON.parse(json.response.stdout) as modelMcp.Itool[];
+                const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.toolList.state = stdoutList;
             })
@@ -208,7 +273,7 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelIndex.IresponseBody;
-                const stdoutList = JSON.parse(json.response.stdout) as modelMcp.Itask[];
+                const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.taskList.state = stdoutList;
             })
@@ -297,7 +362,7 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelIndex.IresponseBody;
-                const stdoutList = JSON.parse(json.response.stdout) as modelMcp.IfileDetail[];
+                const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.documentList.state = stdoutList;
 
@@ -337,7 +402,7 @@ export default class Mcp implements Icontroller {
                 const stdout = json.response.stdout;
 
                 if (stdout !== "ko") {
-                    resultStdoutObject = JSON.parse(stdout) as modelDocument.Iresult;
+                    resultStdoutObject = JSON.parse(stdout);
                 }
 
                 return resultStdoutObject;
@@ -415,7 +480,7 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelIndex.IresponseBody;
-                const stdoutList = JSON.parse(json.response.stdout) as string[];
+                const stdoutList = JSON.parse(json.response.stdout);
 
                 if (stdoutList.length > 0) {
                     for (let a = 0; a < stdoutList.length; a++) {
@@ -515,7 +580,7 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelIndex.IresponseBody;
-                const stdoutList = JSON.parse(json.response.stdout) as modelMcp.IfileDetail[];
+                const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.skillList.state = stdoutList;
 
@@ -640,7 +705,7 @@ export default class Mcp implements Icontroller {
                 const json = (await resultApi.json()) as modelIndex.IresponseBody;
                 const stdout = json.response.stdout;
 
-                if (stdout === "ok") {
+                if (stdout !== "ko") {
                     this.apiAgentList();
 
                     this.variableObject.agentForm.state = {} as modelMcp.Iagent;
@@ -686,7 +751,7 @@ export default class Mcp implements Icontroller {
                 const json = (await resultApi.json()) as modelIndex.IresponseBody;
                 const stdout = json.response.stdout;
 
-                if (stdout === "ok") {
+                if (stdout !== "ko") {
                     this.apiAgentList();
 
                     this.variableObject.agentForm.state = {} as modelMcp.Iagent;
@@ -719,7 +784,7 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelIndex.IresponseBody;
-                const stdoutList = JSON.parse(json.response.stdout) as modelMcp.Iagent[];
+                const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.agentList.state = stdoutList;
 
@@ -768,7 +833,7 @@ export default class Mcp implements Icontroller {
                 const json = (await resultApi.json()) as modelIndex.IresponseBody;
                 const stdout = json.response.stdout;
 
-                if (stdout === "ok") {
+                if (stdout !== "ko") {
                     const filteredList = [];
 
                     for (let a = 0; a < this.variableObject.agentList.state.length; a++) {
@@ -787,6 +852,19 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = true;
             });
+    };
+
+    playwrightVideoShow = (fileName: string) => {
+        this.apiPLaywrightLogin().then(async () => {
+            const blobUrl = await this.apiPLaywrightVideoBlobUrl(fileName);
+
+            this.variableObject.playwrightVideoSrc.state = blobUrl || "";
+            this.variableObject.playwrightVideoName.state = fileName;
+        });
+    };
+
+    playwrightVideoFail = () => {
+        this.controllerToast.show("error", ["Content protected, need to be authenticated to view it."]);
     };
 
     setControllerToast(controller: Toast): void {
@@ -821,7 +899,9 @@ export default class Mcp implements Icontroller {
                 agentForm: variableLink<modelMcp.Iagent>("MenuItem"),
                 isAgentSave: variableLink<boolean>("MenuItem"),
                 systemMode: variableLink<string>("Chat"),
-                chatMessageList: variableLink<modelChat.IchatMessage[]>("Chat")
+                chatMessageList: variableLink<modelChat.IchatMessage[]>("Chat"),
+                playwrightVideoSrc: "",
+                playwrightVideoName: ""
             },
             this.constructor.name
         );

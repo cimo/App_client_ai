@@ -3,4 +3,5 @@ export interface Idata {
     aiCookie: string;
     mcpSessionId: string;
     mcpCookie: string;
+    msAutomateTestCookie: string;
 }

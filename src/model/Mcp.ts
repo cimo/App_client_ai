@@ -3,6 +3,44 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 // Source
 import * as modelChat from "./Chat";
 
+export interface IapiDocumentReadBody {
+    pageNumber: number;
+    fileName: string;
+}
+
+export interface IapiDocumentDeleteBody {
+    fileName: string;
+}
+
+export interface IapiRagEmbeddingCheckBody {
+    fileName: string;
+}
+
+export interface IapiSkillReadBody {
+    fileName: string;
+}
+
+export interface IapiSkillDeleteBody {
+    fileName: string;
+}
+
+export interface IapiAgentCreateBody {
+    name: string;
+    description: string;
+    skillName: string;
+}
+
+export interface IapiAgentUpdateBody {
+    id: number;
+    name: string;
+    description: string;
+    skillName: string;
+}
+
+export interface IapiAgentDeleteBody {
+    id: number;
+}
+
 export interface Itool {
     name: string;
     argumentObject: Record<string, unknown>;
@@ -70,45 +108,7 @@ export interface IfileDetail {
     size: string;
 }
 
-export interface IapiDocumentReadBody {
-    pageNumber: number;
-    fileName: string;
-}
-
-export interface IapiDocumentDeleteBody {
-    fileName: string;
-}
-
-export interface IapiRagEmbeddingCheckBody {
-    fileName: string;
-}
-
-export interface IapiSkillReadBody {
-    fileName: string;
-}
-
-export interface IapiSkillDeleteBody {
-    fileName: string;
-}
-
-export interface IapiAgentCreateBody {
-    name: string;
-    description: string;
-    skillName: string;
-}
-
-export interface IapiAgentUpdateBody {
-    id: number;
-    name: string;
-    description: string;
-    skillName: string;
-}
-
-export interface IapiAgentDeleteBody {
-    id: number;
-}
-
-export interface IapiResponseTool {
+export interface IllmResponseTool {
     name: string;
     result: unknown;
 }
@@ -130,6 +130,8 @@ export interface Ivariable {
     isAgentSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
     chatMessageList: IvariableBind<modelChat.IchatMessage[]>;
+    playwrightVideoSrc: IvariableBind<string>;
+    playwrightVideoName: IvariableBind<string>;
 }
 
 export interface Imethod {

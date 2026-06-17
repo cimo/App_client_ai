@@ -7,7 +7,8 @@ export const data: modelSession.Idata = {
     aiBearerToken: readStorage<string>("ai-bearer-token") || "",
     aiCookie: readStorage<string>("ai-cookie") || "",
     mcpSessionId: readStorage<string>("mcp-session-id") || "",
-    mcpCookie: readStorage<string>("mcp-cookie") || ""
+    mcpCookie: readStorage<string>("mcp-cookie") || "",
+    msAutomateTestCookie: readStorage<string>("ms-automate-test") || ""
 };
 
 export const syncFromStorage = (): void => {
@@ -15,6 +16,7 @@ export const syncFromStorage = (): void => {
     data.aiCookie = readStorage<string>("ai-cookie") || "";
     data.mcpSessionId = readStorage<string>("mcp-session-id") || "";
     data.mcpCookie = readStorage<string>("mcp-cookie") || "";
+    data.msAutomateTestCookie = readStorage<string>("ms-automate-test") || "";
 };
 
 export const writeAiSession = (bearerToken: string, cookie: string): void => {
@@ -49,6 +51,18 @@ export const deleteMcpSession = (): void => {
     deleteStorage("mcp-cookie");
 };
 
+export const writeMsAutomateTestSession = (cookie: string): void => {
+    data.msAutomateTestCookie = cookie;
+
+    writeStorage("ms-automate-test", cookie);
+};
+
+export const deleteMsAutomateTestSession = (): void => {
+    data.msAutomateTestCookie = "";
+
+    deleteStorage("ms-automate-test");
+};
+
 window.addEventListener("storage", (event: StorageEvent) => {
     if (!event.key) return;
 
@@ -65,5 +79,8 @@ window.addEventListener("storage", (event: StorageEvent) => {
     }
     if (event.key === `${appLabel}_mcp-cookie`) {
         data.mcpCookie = readStorage<string>("mcp-cookie") || "";
+    }
+    if (event.key === `${appLabel}_ms-automate-test`) {
+        data.msAutomateTestCookie = readStorage<string>("ms-automate-test") || "";
     }
 });

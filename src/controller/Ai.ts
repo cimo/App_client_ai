@@ -130,7 +130,7 @@ export default class Ai implements Icontroller {
                 this.variableObject.isOfflineAi.state = false;
 
                 const json = (await resultApi.json()) as modelIndex.IresponseBody;
-                const stdoutList = JSON.parse(json.response.stdout) as string[];
+                const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.modelList.state = stdoutList;
 

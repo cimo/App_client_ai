@@ -177,12 +177,11 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     {(() => {
                                                         const resultList: IvirtualNode[] = [];
 
-                                                        for (let a = 0; a < variableObject.documentList.state.length; a++) {
-                                                            const value = variableObject.documentList.state[a];
+                                                        for (const [key, value] of Object.entries(variableObject.documentList.state)) {
                                                             const extension = helperSrc.fileDetail(value.fileName).extension;
 
                                                             resultList.push(
-                                                                <div key={a} class="row">
+                                                                <div key={key} class="row">
                                                                     <div class="cell select">
                                                                         <input
                                                                             type="checkbox"
