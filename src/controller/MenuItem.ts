@@ -34,6 +34,8 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemTask.state = false;
             this.variableObject.isMenuItemAgent.state = false;
             this.variableObject.isMenuItemSkill.state = false;
+            this.variableObject.isMenuItemUser.state = false;
+            this.variableObject.isMenuItemSetting.state = false;
 
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSkillSelect.state = false;
@@ -101,6 +103,8 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemTask.state = false;
             this.variableObject.isMenuItemAgent.state = false;
             this.variableObject.isMenuItemSkill.state = !this.variableObject.isMenuItemSkill.state;
+            this.variableObject.isMenuItemUser.state = false;
+            this.variableObject.isMenuItemSetting.state = false;
 
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSkillSelect.state = false;
@@ -190,6 +194,8 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemTask.state = false;
         this.variableObject.isMenuItemAgent.state = false;
         this.variableObject.isMenuItemSkill.state = false;
+        this.variableObject.isMenuItemUser.state = false;
+        this.variableObject.isMenuItemSetting.state = false;
 
         this.variableObject.agentForm.state = {} as modelMcp.Iagent;
         this.variableObject.isAgentSkillSelect.state = false;
@@ -223,6 +229,8 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemTask.state = !this.variableObject.isMenuItemTask.state;
         this.variableObject.isMenuItemAgent.state = false;
         this.variableObject.isMenuItemSkill.state = false;
+        this.variableObject.isMenuItemUser.state = false;
+        this.variableObject.isMenuItemSetting.state = false;
 
         this.variableObject.agentForm.state = {} as modelMcp.Iagent;
         this.variableObject.isAgentSkillSelect.state = false;
@@ -257,6 +265,8 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemTask.state = false;
             this.variableObject.isMenuItemAgent.state = !this.variableObject.isMenuItemAgent.state;
             this.variableObject.isMenuItemSkill.state = false;
+            this.variableObject.isMenuItemUser.state = false;
+            this.variableObject.isMenuItemSetting.state = false;
 
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSkillSelect.state = false;
@@ -365,6 +375,87 @@ export default class MenuItem implements Icontroller {
                 break;
             }
         }
+    };
+
+    private onClickMenuUser = (event: Event): void => {
+        event.stopPropagation();
+
+        this.variableObject.isMenuItemDocument.state = false;
+        this.variableObject.isMenuItemTool.state = false;
+        this.variableObject.isMenuItemTask.state = false;
+        this.variableObject.isMenuItemAgent.state = false;
+        this.variableObject.isMenuItemSkill.state = false;
+        this.variableObject.isMenuItemUser.state = !this.variableObject.isMenuItemUser.state;
+        this.variableObject.isMenuItemSetting.state = false;
+
+        this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+        this.variableObject.isAgentSkillSelect.state = false;
+    };
+
+    private onClickUserUpdate = (event: Event): void => {
+        event.stopPropagation();
+
+        const errorList = [];
+
+        if (this.hookObject.elementInputUserEmail.value === "") {
+            errorList.push("User email is required.");
+        }
+
+        if (errorList.length === 0) {
+            this.variableObject.userInfo.state.email = this.hookObject.elementInputUserEmail.value;
+            this.variableObject.userInfo.state.password = this.hookObject.elementInputUserPassword.value;
+
+            this.controllerMcp.apiUserUpdate(this.variableObject.userInfo.state);
+        } else {
+            this.controllerToast.show("error", errorList);
+        }
+    };
+
+    private onClickUserCancel = (event: Event): void => {
+        event.stopPropagation();
+
+        this.variableObject.isMenuItemUser.state = false;
+    };
+
+    private onClickSettingSave = (event: Event): void => {
+        event.stopPropagation();
+
+        const errorList: string[] = [];
+
+        const apiId = parseInt(this.hookObject.elementSelectSettingApiId.value);
+
+        if (isNaN(apiId)) {
+            errorList.push("Selected API is invalid.");
+        }
+
+        if (errorList.length === 0) {
+            this.variableObject.settingInfo.state.apiId = apiId;
+
+            this.controllerMcp.apiSettingUpdate(this.variableObject.settingInfo.state);
+        } else {
+            this.controllerToast.show("error", errorList);
+        }
+    };
+
+    private onClickSettingCancel = (event: Event): void => {
+        event.stopPropagation();
+
+        this.variableObject.isMenuItemSetting.state = false;
+    };
+
+    private onClickMenuSetting = (event: Event): void => {
+        event.stopPropagation();
+
+        this.variableObject.isMenuItemDocument.state = false;
+        this.variableObject.isMenuItemTool.state = false;
+        this.variableObject.isMenuItemTask.state = false;
+        this.variableObject.isMenuItemAgent.state = false;
+        this.variableObject.isMenuItemSkill.state = false;
+        this.variableObject.isMenuItemUser.state = false;
+        this.variableObject.isMenuItemSetting.state = !this.variableObject.isMenuItemSetting.state;
+
+        this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+        this.variableObject.isAgentSkillSelect.state = false;
     };
 
     private windowOpenDocument = async (title: string): Promise<void> => {
@@ -524,6 +615,8 @@ export default class MenuItem implements Icontroller {
                 isMenuItemTask: false,
                 isMenuItemAgent: false,
                 isMenuItemSkill: false,
+                isMenuItemUser: false,
+                isMenuItemSetting: false,
                 documentList: variableLink<modelMcp.IfileDetail[]>("Mcp"),
                 documentOpenList: [],
                 documentSelectList: [],
@@ -542,6 +635,10 @@ export default class MenuItem implements Icontroller {
                 agentForm: {} as modelMcp.Iagent,
                 isAgentSkillSelect: false,
                 isAgentSave: false,
+                userInfo: variableLink<modelMcp.Iuser>("Mcp"),
+                isUserUpdate: false,
+                settingInfo: variableLink<modelMcp.Isetting>("Mcp"),
+                isSettingSave: false,
                 systemMode: variableLink<string>("Chat")
             },
             this.constructor.name
@@ -575,6 +672,12 @@ export default class MenuItem implements Icontroller {
             onClickAgentSave: this.onClickAgentSave,
             onClickAgentCancel: this.onClickAgentCancel,
             onClickAgentOpen: this.onClickAgentOpen,
+            onClickMenuUser: this.onClickMenuUser,
+            onClickUserUpdate: this.onClickUserUpdate,
+            onClickUserCancel: this.onClickUserCancel,
+            onClickMenuSetting: this.onClickMenuSetting,
+            onClickSettingSave: this.onClickSettingSave,
+            onClickSettingCancel: this.onClickSettingCancel,
             windowOpenDocument: this.windowOpenDocument
         };
     }

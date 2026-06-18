@@ -87,33 +87,6 @@ export default class Ai implements Icontroller {
             });
     };
 
-    apiUserInfo = async (): Promise<void> => {
-        return fetch(`${helperSrc.URL_AI}/user-info`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${session.data.aiBearerToken}`,
-                "ai-cookie": session.data.aiCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (resultApi) => {
-                this.variableObject.isOfflineAi.state = false;
-
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
-
-                // eslint-disable-next-line no-console
-                console.log("cimo - apiUserInfo()", json);
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Ai.ts - apiUserInfo() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineAi.state = true;
-            });
-    };
-
     apiModel = async (isShowDropdown: boolean): Promise<void> => {
         return fetch(`${helperSrc.URL_AI}/api/model`, {
             method: "GET",

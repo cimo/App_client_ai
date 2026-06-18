@@ -30,7 +30,35 @@ export default class Index implements Icontroller {
     private isClosing: boolean;
 
     // Method
-    private onClickAd = (event: Event): void => {
+    private onClickLoginBasic = async (event: Event): Promise<void> => {
+        event.preventDefault();
+
+        const username = this.hookObject.elementInputUsername.value;
+        const password = this.hookObject.elementInputPassword.value;
+
+        if (!username || !password) {
+            this.controllerToast.show("error", ["Please enter username and password."]);
+
+            return;
+        }
+
+        const isLogin = await this.controllerMcp.apiLogin(username, password);
+
+        if (isLogin) {
+            await this.controllerMcp.apiUserInfo();
+            await this.controllerMcp.apiSettingInfo();
+            await this.controllerMcp.apiTool();
+            await this.controllerMcp.apiTask();
+
+            if (!session.data.aiCookie) {
+                await this.controllerAi.apiLogin();
+            }
+
+            await this.controllerAi.apiModel(false);
+        }
+    };
+
+    private onClickLoginAd = async (event: Event): Promise<void> => {
         event.preventDefault();
 
         if (helperSrc.IS_DEBUG) {
@@ -76,13 +104,15 @@ export default class Index implements Icontroller {
                 adUrl: "",
                 isOfflineAi: variableLink<boolean>("Ai"),
                 isOfflineMcp: variableLink<boolean>("Mcp"),
+                isLogin: variableLink<boolean>("Mcp"),
                 isViewHidden: true
             },
             this.constructor.name
         );
 
         this.methodObject = {
-            onClickAd: this.onClickAd,
+            onClickLoginBasic: this.onClickLoginBasic,
+            onClickLoginAd: this.onClickLoginAd,
             onClickRefreshPage: this.onClickRefreshPage
         };
     }
@@ -135,23 +165,22 @@ export default class Index implements Icontroller {
 
     rendered(): void {
         (async () => {
+            if (session.data.mcpCookie && session.data.mcpSessionId) {
+                this.variableObject.isLogin.state = true;
+
+                await this.controllerMcp.apiUserInfo();
+                await this.controllerMcp.apiSettingInfo();
+                await this.controllerMcp.apiTool();
+                await this.controllerMcp.apiTask();
+            }
+
+            if (session.data.aiCookie && session.data.aiBearerToken) {
+                await this.controllerAi.apiModel(false);
+            }
+
             if (this.windowApp.label === "main") {
                 this.variableObject.isViewHidden.state = false;
             }
-
-            if (!session.data.aiCookie) {
-                await this.controllerAi.apiLogin();
-            }
-
-            await this.controllerAi.apiUserInfo();
-            await this.controllerAi.apiModel(false);
-
-            if (!session.data.mcpCookie) {
-                await this.controllerMcp.apiLogin();
-            }
-
-            await this.controllerMcp.apiTool();
-            await this.controllerMcp.apiTask();
         })();
     }
 

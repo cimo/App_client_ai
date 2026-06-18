@@ -3,6 +3,11 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 // Source
 import * as modelChat from "./Chat";
 
+export interface IapiLoginBody {
+    username: string;
+    password: string;
+}
+
 export interface IapiDocumentReadBody {
     pageNumber: number;
     fileName: string;
@@ -41,6 +46,22 @@ export interface IapiAgentDeleteBody {
     id: number;
 }
 
+export interface IapiUserUpdateBody {
+    id: number;
+    email: string;
+    password: string;
+}
+
+export interface IapiSettingUpdateBody {
+    id: number;
+    apiId: number;
+}
+
+export interface IloginSession {
+    mcpSessionId: string;
+    message: string;
+}
+
 export interface Itool {
     name: string;
     argumentObject: Record<string, unknown>;
@@ -64,6 +85,17 @@ export interface Iagent {
     name: string;
     description: string;
     skillName: string;
+}
+
+export interface Iuser {
+    id: number;
+    email: string;
+    password?: string;
+}
+
+export interface Isetting {
+    id: number;
+    apiId: number;
 }
 
 export interface IragCitation {
@@ -115,6 +147,7 @@ export interface IllmResponseTool {
 
 export interface Ivariable {
     isOfflineMcp: IvariableBind<boolean>;
+    isLogin: IvariableBind<boolean>;
     toolList: IvariableBind<Itool[]>;
     toolSelected: IvariableBind<Itool>;
     taskList: IvariableBind<Itask[]>;
@@ -128,6 +161,10 @@ export interface Ivariable {
     isSkillUpload: IvariableBind<boolean>;
     agentForm: IvariableBind<Iagent>;
     isAgentSave: IvariableBind<boolean>;
+    userInfo: IvariableBind<Iuser>;
+    isUserUpdate: IvariableBind<boolean>;
+    settingInfo: IvariableBind<Isetting>;
+    isSettingSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
     chatMessageList: IvariableBind<modelChat.IchatMessage[]>;
     playwrightVideoSrc: IvariableBind<string>;

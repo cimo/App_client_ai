@@ -176,33 +176,54 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiLogin = async (): Promise<void> => {
+    apiLogin = async (username: string, password: string): Promise<boolean> => {
+        const body: modelMcp.IapiLoginBody = {
+            username,
+            password
+        };
+
         return fetch(`${helperSrc.URL_MCP}/login`, {
-            method: "GET",
+            method: "POST",
             headers: {
+                "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId
             },
+            body: JSON.stringify(body),
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
             }
         })
             .then(async (resultApi) => {
+                let result = false;
+
                 this.variableObject.isOfflineMcp.state = false;
 
                 const cookie = resultApi.headers.get("set-cookie");
 
                 if (cookie) {
                     const json = (await resultApi.json()) as modelIndex.IresponseBody;
-                    const stdout = json.response.stdout;
+                    const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IloginSession;
 
-                    session.writeMcpSession(stdout, cookie);
+                    if (stdoutObject.mcpSessionId !== "") {
+                        this.variableObject.isLogin.state = true;
+
+                        session.writeMcpSession(stdoutObject.mcpSessionId, cookie);
+
+                        result = true;
+                    } else if (stdoutObject.mcpSessionId === "" && stdoutObject.message !== "") {
+                        this.controllerToast.show("error", [stdoutObject.message]);
+                    }
                 }
+
+                return result;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiLogin() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
+
+                return false;
             });
     };
 
@@ -854,6 +875,151 @@ export default class Mcp implements Icontroller {
             });
     };
 
+    apiUserInfo = (): void => {
+        fetch(`${helperSrc.URL_MCP}/api/user-info`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const stdout = JSON.parse(json.response.stdout) as modelMcp.Iuser;
+
+                this.variableObject.userInfo.state = stdout;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiUserInfo() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
+    apiUserUpdate = async (user: modelMcp.Iuser): Promise<void> => {
+        this.variableObject.isUserUpdate.state = true;
+
+        const body: modelMcp.IapiUserUpdateBody = {
+            id: user.id,
+            email: user.email,
+            password: user.password || ""
+        };
+
+        await fetch(`${helperSrc.URL_MCP}/api/user-update`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie
+            },
+            body: JSON.stringify(body),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const stdout = json.response.stdout;
+
+                if (stdout === "ok") {
+                    this.apiUserInfo();
+
+                    this.controllerToast.show("success", ["User updated successfully."]);
+                } else {
+                    this.controllerToast.show("error", ["Failed to update user."]);
+                }
+
+                this.variableObject.isUserUpdate.state = false;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiUserUpdate() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
+    apiSettingInfo = (): void => {
+        fetch(`${helperSrc.URL_MCP}/api/setting-info`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const stdout = JSON.parse(json.response.stdout) as modelMcp.Isetting;
+
+                this.variableObject.settingInfo.state = stdout;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiSettingInfo() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
+    apiSettingUpdate = async (setting: modelMcp.Isetting): Promise<void> => {
+        this.variableObject.isSettingSave.state = true;
+
+        const body: modelMcp.IapiSettingUpdateBody = {
+            id: setting.id,
+            apiId: setting.apiId
+        };
+
+        await fetch(`${helperSrc.URL_MCP}/api/setting-update`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie
+            },
+            body: JSON.stringify(body),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const stdout = json.response.stdout;
+
+                if (stdout === "ok") {
+                    this.apiSettingInfo();
+
+                    this.controllerToast.show("success", ["Setting updated successfully."]);
+                } else {
+                    this.controllerToast.show("error", ["Failed to update setting."]);
+                }
+
+                this.variableObject.isSettingSave.state = false;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiSettingUpdate() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
     playwrightVideoShow = (fileName: string) => {
         this.apiPLaywrightLogin().then(async () => {
             const blobUrl = await this.apiPLaywrightVideoBlobUrl(fileName);
@@ -885,6 +1051,7 @@ export default class Mcp implements Icontroller {
         this.variableObject = variableBind(
             {
                 isOfflineMcp: false,
+                isLogin: false,
                 toolList: [],
                 toolSelected: {} as modelMcp.Itool,
                 taskList: [],
@@ -898,6 +1065,10 @@ export default class Mcp implements Icontroller {
                 isSkillUpload: variableLink<boolean>("MenuItem"),
                 agentForm: variableLink<modelMcp.Iagent>("MenuItem"),
                 isAgentSave: variableLink<boolean>("MenuItem"),
+                userInfo: {} as modelMcp.Iuser,
+                isUserUpdate: variableLink<boolean>("MenuItem"),
+                settingInfo: {} as modelMcp.Isetting,
+                isSettingSave: variableLink<boolean>("MenuItem"),
                 systemMode: variableLink<string>("Chat"),
                 chatMessageList: variableLink<modelChat.IchatMessage[]>("Chat"),
                 playwrightVideoSrc: "",

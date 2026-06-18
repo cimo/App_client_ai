@@ -11,12 +11,17 @@ export interface Ivariable {
     adUrl: IvariableBind<string>;
     isOfflineAi: IvariableBind<boolean>;
     isOfflineMcp: IvariableBind<boolean>;
+    isLogin: IvariableBind<boolean>;
     isViewHidden: IvariableBind<boolean>;
 }
 
 export interface Imethod {
-    onClickAd: (event: Event) => void;
+    onClickLoginBasic: (event: Event) => void;
+    onClickLoginAd: (event: Event) => void;
     onClickRefreshPage: () => void;
 }
 
-export interface IelementHook extends Record<string, Element | Element[]> {}
+export interface IelementHook extends Record<string, Element | Element[]> {
+    elementInputUsername: HTMLInputElement;
+    elementInputPassword: HTMLInputElement;
+}

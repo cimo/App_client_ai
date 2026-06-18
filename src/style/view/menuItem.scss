@@ -55,7 +55,9 @@
     .skill_wrapper,
     .tool_wrapper,
     .task_wrapper,
-    .agent_wrapper {
+    .agent_wrapper,
+    .user_wrapper,
+    .setting_wrapper {
         display: flex;
         flex-direction: column;
         align-content: center;
@@ -322,6 +324,59 @@
             }
         }
     }
+
+    .user_wrapper,
+    .setting_wrapper {
+        .form_field {
+            display: flex;
+            flex-direction: column;
+            align-content: center;
+            justify-content: start;
+            align-items: start;
+            justify-items: center;
+            min-height: 0;
+            min-width: 0;
+            flex: 0 1 auto;
+
+            input {
+                width: 100%;
+                margin: 5px 0 20px 0;
+
+                &::placeholder {
+                    opacity: 0.5;
+                }
+            }
+
+            select {
+                all: revert !important;
+                width: 100% !important;
+                margin: 5px 0 20px 0 !important;
+            }
+        }
+
+        .form_button_wrapper {
+            display: flex;
+            flex-direction: row;
+            align-content: center;
+            justify-content: center;
+            align-items: center;
+            justify-items: center;
+            min-height: 0;
+            min-width: 0;
+            flex: 0 1 auto;
+
+            padding: 5px 10px;
+            border-radius: 20px;
+            white-space: break-spaces;
+            word-break: break-word;
+            overflow-y: auto;
+            gap: 5px;
+
+            button {
+                margin: 0px !important;
+            }
+        }
+    }
 }
 
 :root[data-theme="dark"] {
@@ -344,6 +399,24 @@
                         border: 1px solid color.$darkChatMessageSendBorder;
                         box-shadow: color.$darkShadowMessageSend;
                     }
+                }
+            }
+        }
+
+        .user_wrapper {
+            .form_field {
+                input {
+                    border: 1px solid color.$darkChatMessageSendBorder;
+                    box-shadow: color.$darkShadowMessageSend;
+                }
+            }
+        }
+
+        .setting_wrapper {
+            .form_field {
+                select {
+                    border: 1px solid color.$darkChatMessageSendBorder !important;
+                    box-shadow: color.$darkShadowMessageSend !important;
                 }
             }
         }

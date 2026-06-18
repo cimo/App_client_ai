@@ -295,7 +295,7 @@ export default class Chat implements Icontroller {
 
                 inputSystem = [
                     window.atob(skillContent),
-                    `If you find a tag [script](...) in the text you MUST stop and return ALWAYS ONLY the raw json WITHOUT wrap it in \`\`\`json and with this format: { "action": { "skillName": "${this.variableObject.agentSelected.state.skillName}", "scriptName": "" } } where the value of "scriptName" is ONLY the file inside the tag [script](...).`
+                    `ONLY if you find a tag [script](...) in the user prompt, you MUST stop and return ONLY the raw json WITHOUT wrap it in \`\`\`json and with this format: { "action": { "skillName": "${this.variableObject.agentSelected.state.skillName}", "scriptName": "" } } where the value of "scriptName" is ONLY the file inside the tag [script](...).`
                 ].join("\n");
 
                 const tagUserPromptStart = inputSystem.indexOf("[USER_PROMPT]");

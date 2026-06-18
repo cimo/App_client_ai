@@ -47,6 +47,22 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
             >
                 <i class="cls_icon">smart_toy</i> <p>Agent</p>
             </li>
+            <li
+                class={variableObject.isMenuItemUser.state ? "active" : ""}
+                onClick={(event: Event) => {
+                    methodObject.onClickMenuUser(event);
+                }}
+            >
+                <i class="cls_icon">account_circle</i> <p>User</p>
+            </li>
+            <li
+                class={variableObject.isMenuItemSetting.state ? "active" : ""}
+                onClick={(event: Event) => {
+                    methodObject.onClickMenuSetting(event);
+                }}
+            >
+                <i class="cls_icon">settings</i> <p>Setting</p>
+            </li>
         </ul>
     );
 };
@@ -54,7 +70,7 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
 export const right = (variableObject: modelMenuItem.Ivariable, methodObject: modelMenuItem.Imethod): IvirtualNode => {
     return (
         <div
-            class={`view_menuItem_right ${variableObject.isMenuItemDocument.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state || variableObject.isMenuItemSkill.state ? "" : "none"}`}
+            class={`view_menuItem_right ${variableObject.isMenuItemDocument.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state || variableObject.isMenuItemSkill.state || variableObject.isMenuItemUser.state || variableObject.isMenuItemSetting.state ? "" : "none"}`}
         >
             {(() => {
                 const resultList: IvirtualNode[] = [];
@@ -628,6 +644,101 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
 
                                 return resultList;
                             })()}
+                        </div>
+                    );
+                } else if (variableObject.isMenuItemUser.state) {
+                    resultList.push(
+                        <div class="user_wrapper">
+                            <div class="form_field">
+                                <p>Email:</p>
+                                <input
+                                    value={variableObject.userInfo.state.email}
+                                    jsmvcfw-elementHookName="elementInputUserEmail"
+                                    placeholder="Email"
+                                ></input>
+                            </div>
+                            <div class="form_field">
+                                <p>Password:</p>
+                                <input
+                                    value={variableObject.userInfo.state.password}
+                                    jsmvcfw-elementHookName="elementInputUserPassword"
+                                    placeholder="Password"
+                                    type="password"
+                                ></input>
+                            </div>
+                            <div class="form_button_wrapper">
+                                <button
+                                    onClick={(event: Event) => {
+                                        methodObject.onClickUserUpdate(event);
+                                    }}
+                                    disabled={variableObject.isUserUpdate.state}
+                                >
+                                    {(() => {
+                                        const resultList: IvirtualNode[] = [];
+
+                                        if (variableObject.isUserUpdate.state) {
+                                            resultList.push(<i class="cls_icon">update</i>);
+                                        } else {
+                                            resultList.push(<p>Update</p>);
+                                        }
+
+                                        return resultList;
+                                    })()}
+                                </button>
+                                <button
+                                    onClick={(event: Event) => {
+                                        methodObject.onClickUserCancel(event);
+                                    }}
+                                >
+                                    <p>Cancel</p>
+                                </button>
+                            </div>
+                        </div>
+                    );
+                } else if (variableObject.isMenuItemSetting.state) {
+                    resultList.push(
+                        <div class="setting_wrapper">
+                            <div class="form_field">
+                                <p>API:</p>
+                                <select value={variableObject.settingInfo.state.apiId} jsmvcfw-elementHookName="elementSelectSettingApiId">
+                                    <option value="1" selected={variableObject.settingInfo.state.apiId === 1}>
+                                        Local
+                                    </option>
+                                    <option value="2" selected={variableObject.settingInfo.state.apiId === 2}>
+                                        Anthropic
+                                    </option>
+                                    <option value="3" selected={variableObject.settingInfo.state.apiId === 3}>
+                                        OpenAI
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form_button_wrapper">
+                                <button
+                                    onClick={(event: Event) => {
+                                        methodObject.onClickSettingSave(event);
+                                    }}
+                                    disabled={variableObject.isSettingSave.state}
+                                >
+                                    {(() => {
+                                        const resultList: IvirtualNode[] = [];
+
+                                        if (variableObject.isSettingSave.state) {
+                                            resultList.push(<i class="cls_icon">update</i>);
+                                        } else {
+                                            resultList.push(<p>Save</p>);
+                                        }
+
+                                        return resultList;
+                                    })()}
+                                </button>
+                                <button
+                                    onClick={(event: Event) => {
+                                        methodObject.onClickSettingCancel(event);
+                                    }}
+                                >
+                                    <p>Cancel</p>
+                                </button>
+                            </div>
                         </div>
                     );
                 }

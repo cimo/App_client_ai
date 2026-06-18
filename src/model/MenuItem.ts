@@ -13,6 +13,8 @@ export interface Ivariable {
     isMenuItemTask: IvariableBind<boolean>;
     isMenuItemAgent: IvariableBind<boolean>;
     isMenuItemSkill: IvariableBind<boolean>;
+    isMenuItemUser: IvariableBind<boolean>;
+    isMenuItemSetting: IvariableBind<boolean>;
     isDocumentUpload: IvariableBind<boolean>;
     documentList: IvariableBind<modelMcp.IfileDetail[]>;
     documentOpenList: IvariableBind<string[]>;
@@ -31,6 +33,10 @@ export interface Ivariable {
     agentForm: IvariableBind<modelMcp.Iagent>;
     isAgentSkillSelect: IvariableBind<boolean>;
     isAgentSave: IvariableBind<boolean>;
+    userInfo: IvariableBind<modelMcp.Iuser>;
+    isUserUpdate: IvariableBind<boolean>;
+    settingInfo: IvariableBind<modelMcp.Isetting>;
+    isSettingSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
 }
 
@@ -62,10 +68,19 @@ export interface Imethod {
     onClickAgentSave: (event: Event) => void;
     onClickAgentCancel: (event: Event) => void;
     onClickAgentOpen: (id: number) => void;
+    onClickMenuUser: (event: Event) => void;
+    onClickUserUpdate: (event: Event) => void;
+    onClickUserCancel: (event: Event) => void;
+    onClickMenuSetting: (event: Event) => void;
+    onClickSettingSave: (event: Event) => void;
+    onClickSettingCancel: (event: Event) => void;
     windowOpenDocument: (title: string) => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {
     elementInputAgentName: HTMLInputElement;
     elementInputAgentDescription: HTMLInputElement;
+    elementInputUserEmail: HTMLInputElement;
+    elementInputUserPassword: HTMLInputElement;
+    elementSelectSettingApiId: HTMLSelectElement;
 }

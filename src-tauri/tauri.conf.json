@@ -13,9 +13,9 @@
                 "decorations": true,
                 "resizable": true,
                 "width": 900,
-                "height": 650,
+                "height": 670,
                 "minWidth": 900,
-                "minHeight": 650
+                "minHeight": 670
             }
         ],
         "security": {
