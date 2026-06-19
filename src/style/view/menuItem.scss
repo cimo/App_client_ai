@@ -196,11 +196,14 @@
 
                     margin-bottom: 10px;
 
-                    img,
-                    .cls_icon {
+                    img {
                         width: 35px !important;
                         height: 35px !important;
                         margin-right: 5px !important;
+                    }
+
+                    .cls_icon {
+                        margin: 5px !important;
                         cursor: pointer !important;
                     }
 

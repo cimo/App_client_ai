@@ -52,15 +52,6 @@ export default class Chat implements Icontroller {
         }
     };
 
-    private onClickButtonMessageSend = (): void => {
-        if (this.abortControllerLlmResponse && this.responseId) {
-            this.abortControllerLlmResponse.abort();
-            this.abortControllerLlmResponse = undefined;
-        } else {
-            this.llmResponse();
-        }
-    };
-
     private messageStreamReset = (): void => {
         this.hookObject.elementMessageStreamReasonWrapper.classList.add("none");
         this.hookObject.elementMessageStreamReason.textContent = "";
@@ -69,11 +60,18 @@ export default class Chat implements Icontroller {
         this.hookObject.elementMessageStreamNoReason.textContent = "";
     };
 
-    private messageStreamShow = (chatMessageIndex: number): void => {
-        const elementIconUpdateMessage = this.hookObject.elementIconUpdateMessageList[chatMessageIndex];
+    private messageLoadingHide = (chatMessageIndex: number): void => {
+        const chatMessage = this.variableObject.chatMessageList.state[chatMessageIndex];
 
-        if (elementIconUpdateMessage) {
-            elementIconUpdateMessage.classList.add("none");
+        if (chatMessage && chatMessage.isLoading) {
+            const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+            chatMessageListState[chatMessageIndex] = {
+                ...chatMessageListState[chatMessageIndex],
+                isLoading: false
+            };
+
+            this.variableObject.chatMessageList.state = chatMessageListState;
         }
     };
 
@@ -83,41 +81,6 @@ export default class Chat implements Icontroller {
                 this.hookObject.elementBottomLimit.scrollIntoView({ block: "end", inline: "nearest" });
             }
         });
-    };
-
-    private onClickCitationLink = async (event: Event, fileName: string, chunk: string): Promise<void> => {
-        event.preventDefault();
-
-        const systemMode = this.variableObject.systemMode.state;
-        const toolSelected = this.variableObject.toolSelected.state;
-
-        this.variableObject.systemMode.state = "tool-call";
-
-        for (let a = 0; a < this.variableObject.toolList.state.length; a++) {
-            const tool = this.variableObject.toolList.state[a];
-
-            if (tool.name === "document_parser") {
-                this.variableObject.toolSelected.state = tool;
-
-                break;
-            }
-        }
-
-        this.llmResponse("", `Filename: ${fileName}. Search input: ${chunk}.`);
-
-        this.variableObject.systemMode.state = systemMode;
-        this.variableObject.toolSelected.state = toolSelected;
-    };
-
-    private onClickCitationTab = (messageIndex: number, tabIndex: number): void => {
-        const chatMessageListState = this.variableObject.chatMessageList.state.slice();
-
-        chatMessageListState[messageIndex] = {
-            ...chatMessageListState[messageIndex],
-            ragCitationTabIndex: tabIndex
-        };
-
-        this.variableObject.chatMessageList.state = chatMessageListState;
     };
 
     private windowOpenDocument = async (): Promise<void> => {
@@ -156,6 +119,50 @@ export default class Chat implements Icontroller {
                 }
             }
         }
+    };
+
+    private onClickButtonMessageSend = (): void => {
+        if (this.abortControllerLlmResponse && this.responseId) {
+            this.abortControllerLlmResponse.abort();
+            this.abortControllerLlmResponse = undefined;
+        } else {
+            this.llmResponse();
+        }
+    };
+
+    private onClickCitationLink = async (event: Event, fileName: string, chunk: string): Promise<void> => {
+        event.preventDefault();
+
+        const systemMode = this.variableObject.systemMode.state;
+        const toolSelected = this.variableObject.toolSelected.state;
+
+        this.variableObject.systemMode.state = "tool-call";
+
+        for (let a = 0; a < this.variableObject.toolList.state.length; a++) {
+            const tool = this.variableObject.toolList.state[a];
+
+            if (tool.name === "document_parser") {
+                this.variableObject.toolSelected.state = tool;
+
+                break;
+            }
+        }
+
+        this.llmResponse("", `Filename: ${fileName}. Search input: ${chunk}.`);
+
+        this.variableObject.systemMode.state = systemMode;
+        this.variableObject.toolSelected.state = toolSelected;
+    };
+
+    private onClickCitationTab = (messageIndex: number, tabIndex: number): void => {
+        const chatMessageListState = this.variableObject.chatMessageList.state.slice();
+
+        chatMessageListState[messageIndex] = {
+            ...chatMessageListState[messageIndex],
+            ragCitationTabIndex: tabIndex
+        };
+
+        this.variableObject.chatMessageList.state = chatMessageListState;
     };
 
     setControllerMcp(controller: Mcp): void {
@@ -205,6 +212,7 @@ export default class Chat implements Icontroller {
                 this.variableObject.chatMessageList.state = [
                     ...this.variableObject.chatMessageList.state,
                     {
+                        isLoading: true,
                         time: time,
                         user: userPrompt,
                         assistantReason: this.responseReason,
@@ -370,6 +378,10 @@ export default class Chat implements Icontroller {
                         if (done) {
                             this.responseReset("finish");
 
+                            if (this.variableObject.isMessageSendAvailable.state) {
+                                this.messageLoadingHide(chatMessageIndex);
+                            }
+
                             break;
                         }
 
@@ -422,10 +434,12 @@ export default class Chat implements Icontroller {
                                         if (delta) {
                                             this.responseReason += delta;
 
-                                            this.messageStreamShow(chatMessageIndex);
-
                                             this.hookObject.elementMessageStreamReasonWrapper.classList.remove("none");
                                             this.hookObject.elementMessageStreamReason.textContent = this.responseReason.trim();
+
+                                            if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
+                                                this.messageLoadingHide(chatMessageIndex);
+                                            }
 
                                             this.autoscroll();
                                         }
@@ -435,10 +449,12 @@ export default class Chat implements Icontroller {
                                         if (delta && (!prompt || mode === "rag")) {
                                             this.responseNoReason += delta;
 
-                                            this.messageStreamShow(chatMessageIndex);
+                                            if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
+                                                this.hookObject.elementMessageStreamNoReason.classList.remove("none");
+                                                this.hookObject.elementMessageStreamNoReason.textContent = this.responseNoReason.trim();
 
-                                            this.hookObject.elementMessageStreamNoReason.classList.remove("none");
-                                            this.hookObject.elementMessageStreamNoReason.textContent = this.responseNoReason.trim();
+                                                this.messageLoadingHide(chatMessageIndex);
+                                            }
 
                                             this.autoscroll();
                                         }
@@ -462,6 +478,8 @@ export default class Chat implements Icontroller {
                                             };
 
                                             this.variableObject.chatMessageList.state = chatMessageListState;
+
+                                            this.messageLoadingHide(chatMessageIndex);
 
                                             this.autoscroll();
                                         }
@@ -511,6 +529,8 @@ export default class Chat implements Icontroller {
                                                 };
 
                                                 this.variableObject.chatMessageList.state = chatMessageListToolState;
+
+                                                this.messageLoadingHide(chatMessageIndex);
 
                                                 if (
                                                     messageObject.name === "automate_screenshot" ||
@@ -678,6 +698,10 @@ export default class Chat implements Icontroller {
                     this.responseReset("finish");
 
                     this.messageStreamReset();
+
+                    if (this.variableObject.isMessageSendAvailable.state) {
+                        this.messageLoadingHide(chatMessageIndex);
+                    }
 
                     if (error.toString().toLowerCase() === "request cancelled") {
                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();

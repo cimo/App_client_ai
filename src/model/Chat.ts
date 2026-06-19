@@ -25,6 +25,7 @@ export interface Iplaywright {
 }
 
 export interface IchatMessage {
+    isLoading: boolean;
     time: string;
     user: string;
     assistantReason: string;
@@ -90,5 +91,4 @@ export interface IelementHook extends Record<string, Element | Element[]> {
     elementMessageStreamReasonWrapper: HTMLElement;
     elementMessageStreamReason: HTMLPreElement;
     elementMessageStreamNoReason: HTMLPreElement;
-    elementIconUpdateMessageList: HTMLElement[];
 }

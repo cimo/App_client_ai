@@ -76,7 +76,7 @@
 
                 details {
                     padding: 5px;
-                    margin: 5px 0;
+                    margin: 15px 0 0 0;
                     border-radius: 8px;
 
                     summary {
@@ -102,6 +102,10 @@
 
                         li {
                             margin: 2px 0;
+
+                            pre {
+                                margin: 0;
+                            }
                         }
                     }
 
@@ -185,7 +189,7 @@
                     overflow: scroll;
                     width: 100%;
 
-                    .security_scanner {
+                    pre {
                         max-height: 500px;
                         word-break: unset !important;
                         white-space: pre !important;

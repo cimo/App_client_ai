@@ -23,6 +23,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                     <pre class="message">{value.user}</pre>
                                 </div>
                                 <div class="chat_assistant_wrapper">
+                                    <i class={`cls_icon ${value.isLoading ? "" : "none"}`}>update</i>
                                     <details class={value.mcpTool && value.mcpTool["name"] ? "" : "none"}>
                                         <summary>
                                             <i class="cls_icon">handyman</i>
@@ -34,9 +35,11 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                             if (value.mcpTool) {
                                                 resultList.push(
                                                     <ul>
-                                                        <li>Name: {value.mcpTool["name"]}</li>
                                                         <li>
-                                                            Argument:
+                                                            <b>Name:</b> {value.mcpTool["name"]}
+                                                        </li>
+                                                        <li>
+                                                            <b>Argument:</b>
                                                             <pre>
                                                                 {helperSrc.isJson(value.mcpTool["arguments"])
                                                                     ? JSON.stringify(JSON.parse(value.mcpTool["arguments"]), null, 4)
@@ -57,17 +60,14 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                         </summary>
                                         <pre>{value.assistantReason}</pre>
                                     </details>
-                                    <i
-                                        class={`cls_icon ${value.assistantNoReason === "" && !value.ragCitationList && !value.securityScanner ? "" : "none"}`}
-                                        jsmvcfw-elementHookName={`elementIconUpdateMessageList_${key}`}
-                                    >
-                                        update
-                                    </i>
                                     {(() => {
                                         const resultList: IvirtualNode[] = [];
 
                                         if (
-                                            (value.assistantNoReason !== "" || value.ragCitationList || value.securityScanner || value.playwright) &&
+                                            (value.assistantNoReason !== "" ||
+                                                value.ragCitationList ||
+                                                value.securityScanner ||
+                                                value.playwright.action) &&
                                             typeof value.assistantNoReason === "string"
                                         ) {
                                             if (value.ragCitationList) {
@@ -154,7 +154,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                         <summary>
                                                             <p>Security scanner result:</p>
                                                         </summary>
-                                                        <pre class="security_scanner">{value.securityScanner}</pre>
+                                                        <pre>{value.securityScanner}</pre>
                                                     </details>
                                                 );
                                             } else if (value.playwright.action) {
