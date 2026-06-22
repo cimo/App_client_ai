@@ -112,10 +112,8 @@ export interface IragNode {
 
 export interface IragRelation {
     source: string;
-    verb: string;
     target: string;
     description: string;
-    chunk: string;
 }
 
 export interface IragSearch {

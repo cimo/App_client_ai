@@ -631,7 +631,7 @@ export default class Chat implements Icontroller {
                                                             const graphContextList: string[] = [];
 
                                                             for (let a = 0; a < graphList.length; a++) {
-                                                                let graphLine = `${graphList[a].source} ${graphList[a].verb} ${graphList[a].target}`;
+                                                                let graphLine = `${graphList[a].source} ${graphList[a].target}`;
 
                                                                 if (graphList[a].description !== "") {
                                                                     graphLine = `${graphLine} (${graphList[a].description})`;
