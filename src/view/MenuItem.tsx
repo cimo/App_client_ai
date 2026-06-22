@@ -81,22 +81,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                             {(() => {
                                 const resultList: IvirtualNode[] = [];
 
-                                if (variableObject.isRagGraphOpen.state) {
-                                    resultList.push(
-                                        <div class="skill_wrapper">
-                                            <div class="button_wrapper">
-                                                <button
-                                                    onClick={(event: Event) => {
-                                                        methodObject.onClickRagGraphBack(event);
-                                                    }}
-                                                >
-                                                    <p>Back</p>
-                                                </button>
-                                            </div>
-                                            <div class="graph_wrapper"></div>
-                                        </div>
-                                    );
-                                } else {
+                                if (!variableObject.isRagGraphOpen.state) {
                                     resultList.push(
                                         <>
                                             <div class="button_wrapper">
@@ -242,6 +227,41 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         return resultList;
                                                     })()}
                                                 </div>
+                                            </div>
+                                        </>
+                                    );
+                                } else {
+                                    resultList.push(
+                                        <>
+                                            <div class="button_wrapper">
+                                                <button
+                                                    onClick={(event: Event) => {
+                                                        methodObject.onClickRagGraphBack(event);
+                                                    }}
+                                                >
+                                                    <p>Back</p>
+                                                </button>
+                                            </div>
+                                            <div class="ragGraphify_wrapper">
+                                                {(() => {
+                                                    const resultList: IvirtualNode[] = [];
+
+                                                    if (variableObject.ragGraphHtml.state !== "ko") {
+                                                        if (variableObject.isRagGraphHtmlLoading.state) {
+                                                            resultList.push(
+                                                                <div class="loading_wrapper">
+                                                                    <i class="cls_icon">update</i>
+                                                                </div>
+                                                            );
+                                                        } else {
+                                                            resultList.push(
+                                                                <iframe srcdoc={variableObject.ragGraphHtml.state} sandbox="allow-scripts"></iframe>
+                                                            );
+                                                        }
+                                                    }
+
+                                                    return resultList;
+                                                })()}
                                             </div>
                                         </>
                                     );
@@ -435,7 +455,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
 
                                 if (variableObject.isAgentSkillSelect.state) {
                                     resultList.push(
-                                        <div class="skill_wrapper">
+                                        <>
                                             <div class="button_wrapper">
                                                 <button
                                                     onClick={(event: Event) => {
@@ -494,7 +514,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     })()}
                                                 </div>
                                             </div>
-                                        </div>
+                                        </>
                                     );
                                 } else if (Object.keys(variableObject.agentForm.state).length > 0) {
                                     resultList.push(

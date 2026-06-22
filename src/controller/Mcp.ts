@@ -524,6 +524,35 @@ export default class Mcp implements Icontroller {
             });
     };
 
+    apiRagGraph = async (): Promise<string> => {
+        return fetch(`${helperSrc.URL_MCP}/api/rag-graph`, {
+            method: "GET",
+            headers: {
+                "mcp-session-id": session.data.mcpSessionId,
+                Cookie: session.data.mcpCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const stdout = json.response.stdout;
+
+                return stdout;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiRagGraph() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+
+                return "";
+            });
+    };
+
     apiSkillUpload = async (): Promise<void> => {
         const pathFileList = await open({
             multiple: true,

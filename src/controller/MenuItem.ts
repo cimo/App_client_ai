@@ -86,6 +86,10 @@ export default class MenuItem implements Icontroller {
 
     private onClickRagGraph = async (): Promise<void> => {
         this.variableObject.isRagGraphOpen.state = true;
+
+        this.variableObject.isRagGraphHtmlLoading.state = true;
+        this.variableObject.ragGraphHtml.state = await this.controllerMcp.apiRagGraph();
+        this.variableObject.isRagGraphHtmlLoading.state = false;
     };
 
     private onClickRagGraphBack = (event: Event): void => {
@@ -623,6 +627,8 @@ export default class MenuItem implements Icontroller {
                 isDocumentUpload: false,
                 isRagEmbeddingStart: false,
                 isRagGraphOpen: false,
+                isRagGraphHtmlLoading: false,
+                ragGraphHtml: "",
                 skillList: variableLink<modelMcp.IfileDetail[]>("Mcp"),
                 skillSelectList: [],
                 isSkillUpload: false,

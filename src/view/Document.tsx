@@ -15,7 +15,6 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                         resultList.push(
                             <div class="loading_wrapper">
                                 <i class="cls_icon">update</i>
-                                <p>Loading...</p>
                             </div>
                         );
                     } else {
