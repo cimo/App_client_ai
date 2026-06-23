@@ -42,36 +42,6 @@
             }
         }
 
-        .pagination_wrapper {
-            display: flex;
-            flex-direction: row;
-            align-content: center;
-            justify-content: center;
-            align-items: center;
-            justify-items: center;
-            min-height: 0;
-            min-width: 0;
-            flex: 0 1 auto;
-
-            gap: 8px;
-            margin: 10px;
-
-            .cls_icon {
-                cursor: pointer !important;
-            }
-
-            input,
-            .page_total {
-                width: 50px;
-                padding: 5px;
-                text-align: center;
-            }
-
-            .page_total {
-                display: inline-block;
-            }
-        }
-
         .data_wrapper {
             display: flex;
             flex-direction: column;

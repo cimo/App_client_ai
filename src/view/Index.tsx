@@ -20,26 +20,30 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     <p>Click here for re-connect.</p>
                 </div>
                 <div class={`login_wrapper ${!variableObject.isLogin.state ? "" : "none"}`}>
-                    <div class={`login_form_wrapper ${helperSrc.IS_DEBUG ? "" : "none"}`}>
-                        <input jsmvcfw-elementHookName="elementInputUsername" placeholder="Username"></input>
-                        <input jsmvcfw-elementHookName="elementInputPassword" placeholder="Password" type="password"></input>
-                    </div>
-                    <div class="form_button_wrapper">
-                        <button
-                            class={helperSrc.IS_DEBUG ? "" : "none"}
-                            onClick={(event: Event) => {
-                                methodObject.onClickLoginBasic(event);
-                            }}
-                        >
-                            <p>Basic Login</p>
-                        </button>
-                        <button
-                            onClick={(event: Event) => {
-                                methodObject.onClickLoginAd(event);
-                            }}
-                        >
-                            <p>AD Login</p>
-                        </button>
+                    <div class="form_wrapper">
+                        <div class={`field ${helperSrc.IS_DEBUG ? "" : "none"}`}>
+                            <input jsmvcfw-elementHookName="elementInputUsername" placeholder="Username"></input>
+                        </div>
+                        <div class={`field ${helperSrc.IS_DEBUG ? "" : "none"}`}>
+                            <input jsmvcfw-elementHookName="elementInputPassword" placeholder="Password" type="password"></input>
+                        </div>
+                        <div class="button_wrapper">
+                            <button
+                                class={helperSrc.IS_DEBUG ? "" : "none"}
+                                onClick={() => {
+                                    methodObject.onClickLoginBasic();
+                                }}
+                            >
+                                <p>Basic Login</p>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    methodObject.onClickLoginAd();
+                                }}
+                            >
+                                <p>AD Login</p>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

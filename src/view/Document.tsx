@@ -21,7 +21,7 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                         resultList.push(
                             <>
                                 <div class="pagination_wrapper">
-                                    <i class="cls_icon" onClick={(event: Event) => methodObject.onClickChangePage(event, -1)}>
+                                    <i class="cls_icon" onClick={() => methodObject.onClickChangePage(-1)}>
                                         chevron_left
                                     </i>
                                     <input
@@ -34,7 +34,7 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                                     />
                                     <span>/</span>
                                     <span class="page_total">{variableObject.pageTotal.state}</span>
-                                    <i class="cls_icon" onClick={(event: Event) => methodObject.onClickChangePage(event, 1)}>
+                                    <i class="cls_icon" onClick={() => methodObject.onClickChangePage(1)}>
                                         chevron_right
                                     </i>
                                 </div>

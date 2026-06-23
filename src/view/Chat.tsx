@@ -5,7 +5,7 @@ import * as helperSrc from "../HelperSrc";
 import * as modelChat from "../model/Chat";
 
 export const message = (variableObject: modelChat.Ivariable, methodObject: modelChat.Imethod): IvirtualNode => {
-    const messageList: modelChat.IchatMessage[] = variableObject.chatMessageList.state;
+    const messageList: modelChat.IdataMessage[] = variableObject.chatMessageList.state;
 
     return (
         <div class="view_chat_message">
@@ -124,9 +124,8 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                             <a
                                                                                 class="link"
                                                                                 href="#"
-                                                                                onClick={(event: Event) => {
+                                                                                onClick={() => {
                                                                                     methodObject.onClickCitationLink(
-                                                                                        event,
                                                                                         citation.fileName,
                                                                                         citation.chunk
                                                                                     );

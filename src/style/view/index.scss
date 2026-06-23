@@ -164,32 +164,7 @@ aside {
         }
 
         .login_wrapper {
-            .login_form_wrapper {
-                display: flex;
-                flex-direction: column;
-                align-content: center;
-                justify-content: center;
-                align-items: center;
-                justify-items: center;
-
-                input {
-                    width: 400px;
-                    margin: 5px 0 5px 0;
-
-                    &::placeholder {
-                        opacity: 0.5;
-                    }
-                }
-            }
-
-            .form_button_wrapper {
-                display: flex;
-                flex-direction: row;
-                align-content: center;
-                justify-content: center;
-                align-items: center;
-                justify-items: center;
-            }
+            width: 100%;
         }
     }
 
@@ -303,15 +278,6 @@ aside {
 
     .over_wrapper {
         background-color: color.$darkRootBackground;
-
-        .login_wrapper {
-            .login_form_wrapper {
-                input {
-                    border: 1px solid color.$darkChatMessageSendBorder;
-                    box-shadow: color.$darkShadowMessageSend;
-                }
-            }
-        }
     }
 
     .header_wrapper {

@@ -130,9 +130,7 @@ export default class Chat implements Icontroller {
         }
     };
 
-    private onClickCitationLink = async (event: Event, fileName: string, chunk: string): Promise<void> => {
-        event.preventDefault();
-
+    private onClickCitationLink = async (fileName: string, chunk: string): Promise<void> => {
         const systemMode = this.variableObject.systemMode.state;
         const toolSelected = this.variableObject.toolSelected.state;
 
@@ -232,7 +230,7 @@ export default class Chat implements Icontroller {
 
             this.autoscroll();
 
-            const inputList: modelChat.IchatInput[] = [];
+            const inputList: modelChat.IdataInput[] = [];
 
             /*this.variableObject.chatHistoryList.state.push({
                 role: "user",
@@ -336,7 +334,7 @@ export default class Chat implements Icontroller {
                 }
             );
 
-            const body: modelChat.IapiResponseBody = {
+            const body: modelChat.IapiDataResponseBody = {
                 stream: true,
                 model: this.modelSelected,
                 input: inputList,
@@ -399,11 +397,6 @@ export default class Chat implements Icontroller {
 
                                 if (helperSrc.isJson(dataTrim)) {
                                     const dataTrimObject = JSON.parse(dataTrim) as modelChat.IllmResponse;
-
-                                    if (dataTrimObject.response) {
-                                        // eslint-disable-next-line no-console
-                                        console.log("cimo", dataTrimObject.response.message);
-                                    }
 
                                     if (dataTrimObject.type === "error") {
                                         const error = dataTrimObject.error;

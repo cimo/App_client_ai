@@ -1,0 +1,47 @@
+@use "setting/parameter.scss" as parameter;
+
+.view_pagination {
+    display: flex !important;
+    flex-direction: row !important;
+    align-content: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+    justify-items: center !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+
+    gap: 8px !important;
+
+    button {
+        display: flex !important;
+        flex-direction: row !important;
+        align-content: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+        justify-items: center !important;
+        min-height: 0 !important;
+        min-width: 0 !important;
+        flex: 0 1 auto !important;
+    }
+
+    .label {
+        font-size: parameter.$fontSizeSmall !important;
+        white-space: nowrap !important;
+    }
+
+    .cls_icon {
+        cursor: pointer !important;
+    }
+
+    input,
+    .page_total {
+        width: 50px !important;
+        padding: 5px !important;
+        text-align: center !important;
+    }
+
+    .page_total {
+        display: inline-block !important;
+    }
+}

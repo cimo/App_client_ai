@@ -1,5 +1,5 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind, variableLink } from "@cimo/jsmvcfw/dist/src/Main.js";
-import { getCurrentWindow, CloseRequestedEvent, type Window, getAllWindows } from "@tauri-apps/api/window";
+import { getCurrentWindow, type Window, getAllWindows } from "@tauri-apps/api/window";
 //import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
@@ -30,9 +30,7 @@ export default class Index implements Icontroller {
     private isClosing: boolean;
 
     // Method
-    private onClickLoginBasic = async (event: Event): Promise<void> => {
-        event.preventDefault();
-
+    private onClickLoginBasic = async (): Promise<void> => {
         const username = this.hookObject.elementInputUsername.value;
         const password = this.hookObject.elementInputPassword.value;
 
@@ -45,8 +43,9 @@ export default class Index implements Icontroller {
         const isLogin = await this.controllerMcp.apiLogin(username, password);
 
         if (isLogin) {
-            await this.controllerMcp.apiUserInfo();
-            await this.controllerMcp.apiSettingInfo();
+            this.controllerMcp.apiUserInfo();
+            this.controllerMcp.apiSettingInfo();
+
             await this.controllerMcp.apiTool();
             await this.controllerMcp.apiTask();
 
@@ -58,9 +57,7 @@ export default class Index implements Icontroller {
         }
     };
 
-    private onClickLoginAd = async (event: Event): Promise<void> => {
-        event.preventDefault();
-
+    private onClickLoginAd = async (): Promise<void> => {
         if (helperSrc.IS_DEBUG) {
             this.variableObject.adUrl.state = "";
         } else {
@@ -126,12 +123,10 @@ export default class Index implements Icontroller {
     }
 
     event(): void {
-        this.windowApp.onCloseRequested(async (event: CloseRequestedEvent) => {
+        this.windowApp.onCloseRequested(async () => {
             if (this.isClosing) {
                 return;
             }
-
-            event.preventDefault();
 
             this.isClosing = true;
 
@@ -168,8 +163,9 @@ export default class Index implements Icontroller {
             if (session.data.mcpCookie && session.data.mcpSessionId) {
                 this.variableObject.isLogin.state = true;
 
-                await this.controllerMcp.apiUserInfo();
-                await this.controllerMcp.apiSettingInfo();
+                this.controllerMcp.apiUserInfo();
+                this.controllerMcp.apiSettingInfo();
+
                 await this.controllerMcp.apiTool();
                 await this.controllerMcp.apiTask();
             }

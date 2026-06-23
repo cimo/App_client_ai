@@ -68,6 +68,7 @@
         min-width: 0;
         flex: 1 1 auto;
 
+        margin-top: 10px;
         align-self: stretch;
 
         .button_wrapper {
@@ -79,9 +80,9 @@
             justify-items: center;
             min-height: 0;
             min-width: 0;
-            flex: 0 1 auto;
+            flex: 0 0 auto;
 
-            padding: 5px 10px;
+            margin: 0 10px 10px 10px;
             border-radius: 20px;
             gap: 5px;
 
@@ -148,6 +149,10 @@
 
             & .button {
                 flex: 0 0 100px !important;
+
+                button {
+                    margin: 0 !important;
+                }
             }
         }
     }
@@ -171,7 +176,9 @@
 
     .tool_wrapper,
     .task_wrapper,
-    .agent_wrapper {
+    .agent_wrapper,
+    .user_wrapper,
+    .setting_wrapper {
         ul {
             display: flex;
             flex-direction: row;
@@ -186,7 +193,6 @@
             flex-wrap: wrap;
             gap: 12px;
             overflow-y: scroll;
-            margin-top: 10px;
 
             .chip {
                 flex-direction: column;
@@ -264,25 +270,8 @@
             }
         }
 
-        .agent_form {
-            width: 100%;
-
-            .form_field {
-                display: flex;
-                flex-direction: column;
-                align-content: center;
-                justify-content: start;
-                align-items: start;
-                justify-items: center;
-                min-height: 0;
-                min-width: 0;
-                flex: 0 1 auto;
-
-                textarea {
-                    width: 100%;
-                    margin: 5px 0 20px 0;
-                }
-
+        .form_wrapper {
+            .field {
                 .select_wrapper {
                     display: flex;
                     flex-direction: row;
@@ -319,82 +308,10 @@
                     }
                 }
             }
-
-            .form_button_wrapper {
-                display: flex;
-                flex-direction: row;
-                align-content: center;
-                justify-content: center;
-                align-items: center;
-                justify-items: center;
-                min-height: 0;
-                min-width: 0;
-                flex: 0 1 auto;
-
-                padding: 5px 10px;
-                border-radius: 20px;
-                white-space: break-spaces;
-                word-break: break-word;
-                overflow-y: auto;
-                gap: 5px;
-
-                button {
-                    margin: 0px !important;
-                }
-            }
-        }
-    }
-
-    .user_wrapper,
-    .setting_wrapper {
-        .form_field {
-            display: flex;
-            flex-direction: column;
-            align-content: center;
-            justify-content: start;
-            align-items: start;
-            justify-items: center;
-            min-height: 0;
-            min-width: 0;
-            flex: 0 1 auto;
-
-            input {
-                width: 100%;
-                margin: 5px 0 20px 0;
-
-                &::placeholder {
-                    opacity: 0.5;
-                }
-            }
-
-            select {
-                all: revert !important;
-                width: 100% !important;
-                margin: 5px 0 20px 0 !important;
-            }
         }
 
-        .form_button_wrapper {
-            display: flex;
-            flex-direction: row;
-            align-content: center;
-            justify-content: center;
-            align-items: center;
-            justify-items: center;
-            min-height: 0;
-            min-width: 0;
-            flex: 0 1 auto;
-
-            padding: 5px 10px;
-            border-radius: 20px;
-            white-space: break-spaces;
-            word-break: break-word;
-            overflow-y: auto;
-            gap: 5px;
-
-            button {
-                margin: 0px !important;
-            }
+        .skill_wrapper {
+            margin-top: 0 !important;
         }
     }
 }
@@ -411,34 +328,5 @@
 
     .view_menuItem_right {
         background-color: color.$darkRootBackground;
-
-        .agent_wrapper {
-            .agent_form {
-                .form_field {
-                    textarea {
-                        border: 1px solid color.$darkChatMessageSendBorder;
-                        box-shadow: color.$darkShadowMessageSend;
-                    }
-                }
-            }
-        }
-
-        .user_wrapper {
-            .form_field {
-                input {
-                    border: 1px solid color.$darkChatMessageSendBorder;
-                    box-shadow: color.$darkShadowMessageSend;
-                }
-            }
-        }
-
-        .setting_wrapper {
-            .form_field {
-                select {
-                    border: 1px solid color.$darkChatMessageSendBorder !important;
-                    box-shadow: color.$darkShadowMessageSend !important;
-                }
-            }
-        }
     }
 }

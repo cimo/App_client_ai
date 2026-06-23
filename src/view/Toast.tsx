@@ -26,8 +26,8 @@ const viewToast = (variableObject: modelToast.Ivariable, methodObject: modelToas
                         resultList.push(
                             <i
                                 class="cls_icon close"
-                                onClick={(event: Event) => {
-                                    methodObject.onClickClose(event);
+                                onClick={() => {
+                                    methodObject.onClickClose();
                                 }}
                             >
                                 close

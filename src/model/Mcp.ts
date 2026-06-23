@@ -3,7 +3,7 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 // Source
 import * as modelChat from "./Chat";
 
-export interface IapiLoginBody {
+export interface IapiServerLoginBody {
     username: string;
     password: string;
 }
@@ -57,7 +57,7 @@ export interface IapiSettingUpdateBody {
     apiId: number;
 }
 
-export interface IloginSession {
+export interface IuserLoginSession {
     mcpSessionId: string;
     message: string;
 }
@@ -164,7 +164,7 @@ export interface Ivariable {
     settingInfo: IvariableBind<Isetting>;
     isSettingSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
-    chatMessageList: IvariableBind<modelChat.IchatMessage[]>;
+    chatMessageList: IvariableBind<modelChat.IdataMessage[]>;
     playwrightVideoSrc: IvariableBind<string>;
     playwrightVideoName: IvariableBind<string>;
 }

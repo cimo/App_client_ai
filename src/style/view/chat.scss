@@ -110,38 +110,6 @@
                     }
 
                     .citation_wrapper {
-                        .pagination_wrapper {
-                            display: flex;
-                            flex-direction: row;
-                            align-content: center;
-                            justify-content: start;
-                            align-items: center;
-                            justify-items: center;
-                            min-height: 0;
-                            min-width: 0;
-                            flex: 0 1 auto;
-
-                            gap: 8px;
-                            margin: 10px 0 5px 0;
-
-                            button {
-                                display: flex;
-                                flex-direction: row;
-                                align-content: center;
-                                justify-content: center;
-                                align-items: center;
-                                justify-items: center;
-                                min-height: 0;
-                                min-width: 0;
-                                flex: 0 1 auto;
-                            }
-
-                            .label {
-                                font-size: parameter.$fontSizeSmall;
-                                white-space: nowrap;
-                            }
-                        }
-
                         .box {
                             margin-top: 10px;
                             padding: 10px;

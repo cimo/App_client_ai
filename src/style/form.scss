@@ -1,0 +1,98 @@
+@use "setting/color.scss" as color;
+
+.form_wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-content: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+    justify-items: center !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    flex: 0 1 auto !important;
+
+    .field {
+        display: flex !important;
+        flex-direction: column !important;
+        align-content: center !important;
+        justify-content: start !important;
+        align-items: start !important;
+        justify-items: center !important;
+        min-height: 0 !important;
+        min-width: 0 !important;
+        flex: 0 1 auto !important;
+
+        align-self: stretch !important;
+        margin: 0 25% !important;
+
+        .label {
+            width: 100% !important;
+            white-space: break-spaces !important;
+            word-break: break-word !important;
+        }
+
+        input {
+            width: 100% !important;
+            margin: 5px 0 20px 0 !important;
+
+            &::placeholder {
+                opacity: 0.5 !important;
+            }
+        }
+
+        select {
+            all: revert !important;
+            width: 100% !important;
+            margin: 5px 0 20px 0 !important;
+        }
+
+        textarea {
+            width: 100% !important;
+            margin: 5px 0 20px 0 !important;
+        }
+    }
+
+    .button_wrapper {
+        display: flex !important;
+        flex-direction: row !important;
+        align-content: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+        justify-items: center !important;
+        min-height: 0 !important;
+        min-width: 0 !important;
+        flex: 0 1 auto !important;
+
+        padding: 5px 10px !important;
+        border-radius: 20px !important;
+        white-space: break-spaces !important;
+        word-break: break-word !important;
+        overflow-y: auto !important;
+        gap: 5px !important;
+
+        button {
+            margin: 0px !important;
+        }
+    }
+}
+
+:root[data-theme="dark"] {
+    .form_wrapper {
+        .field {
+            input {
+                border: 1px solid color.$darkChatMessageSendBorder !important;
+                box-shadow: color.$darkShadowMessageSend !important;
+            }
+
+            select {
+                border: 1px solid color.$darkChatMessageSendBorder !important;
+                box-shadow: color.$darkShadowMessageSend !important;
+            }
+
+            textarea {
+                border: 1px solid color.$darkChatMessageSendBorder !important;
+                box-shadow: color.$darkShadowMessageSend !important;
+            }
+        }
+    }
+}

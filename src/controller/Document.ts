@@ -1,5 +1,5 @@
 import { Icontroller, IvariableEffect, IvirtualNode, variableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
-import { getCurrentWindow, CloseRequestedEvent, type Window } from "@tauri-apps/api/window";
+import { getCurrentWindow, type Window } from "@tauri-apps/api/window";
 import { listen, emitTo, UnlistenFn } from "@tauri-apps/api/event";
 
 // Source
@@ -20,9 +20,7 @@ export default class Document implements Icontroller {
     private unlistenWindowContentUpdate: UnlistenFn | undefined = undefined;
 
     // Method
-    private onClickChangePage = (event: Event, difference: number): void => {
-        event.stopPropagation();
-
+    private onClickChangePage = (difference: number): void => {
         const elementInputValue = this.hookObject.elementInputPageNumber.value;
         const pageNumber = !isNaN(parseInt(elementInputValue)) ? parseInt(elementInputValue) : 1;
 
@@ -42,13 +40,10 @@ export default class Document implements Icontroller {
     };
 
     private onInputChangePage = (event: KeyboardEvent): void => {
-        event.stopPropagation();
-
         const elementInputValue = this.hookObject.elementInputPageNumber.value.replace(/\D+/g, "");
         this.hookObject.elementInputPageNumber.value = elementInputValue;
 
-        const pageNumber = !isNaN(parseInt(elementInputValue)) ? parseInt(elementInputValue) : 1;
-        this.variableObject.pageNumber.state = pageNumber;
+        this.variableObject.pageNumber.state = !isNaN(parseInt(elementInputValue)) ? parseInt(elementInputValue) : 1;
 
         if (event.key === "Enter") {
             this.readContentData(this.variableObject.pageNumber.state);
@@ -101,9 +96,7 @@ export default class Document implements Icontroller {
 
         this.windowDocument = getCurrentWindow();
 
-        this.windowDocument.onCloseRequested(async (event: CloseRequestedEvent) => {
-            event.preventDefault();
-
+        this.windowDocument.onCloseRequested(async () => {
             await emitTo("main", "document-close", { fileName: this.windowDocumentTitle });
 
             await this.windowDocument.destroy();
@@ -127,8 +120,8 @@ export default class Document implements Icontroller {
         );
 
         this.methodObject = {
-            onInputChangePage: this.onInputChangePage,
-            onClickChangePage: this.onClickChangePage
+            onClickChangePage: this.onClickChangePage,
+            onInputChangePage: this.onInputChangePage
         };
     }
 

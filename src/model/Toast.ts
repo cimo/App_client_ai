@@ -7,7 +7,7 @@ export interface Ivariable {
 }
 
 export interface Imethod {
-    onClickClose: (event: Event) => void;
+    onClickClose: () => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {}

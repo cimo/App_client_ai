@@ -10,9 +10,7 @@ export default class Toast implements Icontroller {
     private methodObject: modelToast.Imethod;
 
     // Method
-    private onClickClose = (event: Event): void => {
-        event.stopPropagation();
-
+    private onClickClose = (): void => {
         this.variableObject.mode.state = "";
         this.variableObject.messageList.state = [];
     };

@@ -6,8 +6,8 @@ import { fetch } from "@tauri-apps/plugin-http";
 // Source
 import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
+import * as modelHelperSrc from "../model/HelperSrc.js";
 import * as modelMcp from "../model/Mcp";
-import * as modelIndex from "../model/Index";
 import * as modelChat from "../model/Chat";
 import * as modelDocument from "../model/Document";
 import * as viewMcp from "../view/Mcp";
@@ -37,11 +37,10 @@ export default class Mcp implements Icontroller {
         this.controllerToast.show(mode, messageList, 0);
     };
 
-    private ragEmbeddingStartCheck = (fileStatusList: modelMcp.IfileStatus[], index: number): void => {
+    private apiRagEmbeddingCheck = (fileStatusList: modelMcp.IfileStatus[], index: number): void => {
         const fileName = fileStatusList[index].fileName;
 
         let isIntervalRunning = false;
-        let stdout = "";
 
         const interval = setInterval(async () => {
             if (isIntervalRunning) {
@@ -68,36 +67,36 @@ export default class Mcp implements Icontroller {
                 .then(async (resultApi) => {
                     this.variableObject.isOfflineMcp.state = false;
 
-                    const json = (await resultApi.json()) as modelIndex.IresponseBody;
-                    stdout = json.response.stdout;
+                    const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                    const stdout = json.response.stdout;
 
                     fileStatusList[index].status = stdout;
 
                     this.showFileStatusMessage(fileStatusList);
+
+                    if (stdout !== "Ongoing") {
+                        if (interval) {
+                            clearInterval(interval);
+                        }
+
+                        for (let a = 0; a < fileStatusList.length; a++) {
+                            if (fileStatusList[a].status === "Ongoing") {
+                                this.variableObject.isRagEmbeddingStart.state = true;
+
+                                break;
+                            }
+
+                            if (a === fileStatusList.length - 1) {
+                                this.variableObject.isRagEmbeddingStart.state = false;
+                            }
+                        }
+                    }
                 })
                 .catch((error: Error) => {
                     helperSrc.writeLog("Mcp.ts - apiRagEmbeddingCheck() - fetch() - catch()", error.message);
 
                     this.variableObject.isOfflineMcp.state = true;
                 });
-
-            if (stdout !== "Ongoing") {
-                if (interval) {
-                    clearInterval(interval);
-                }
-
-                for (let a = 0; a < fileStatusList.length; a++) {
-                    if (fileStatusList[a].status === "Ongoing") {
-                        this.variableObject.isRagEmbeddingStart.state = true;
-
-                        break;
-                    }
-
-                    if (a === fileStatusList.length - 1) {
-                        this.variableObject.isRagEmbeddingStart.state = false;
-                    }
-                }
-            }
 
             isIntervalRunning = false;
         }, 1000);
@@ -177,7 +176,7 @@ export default class Mcp implements Icontroller {
     };
 
     apiLogin = async (username: string, password: string): Promise<boolean> => {
-        const body: modelMcp.IapiLoginBody = {
+        const body: modelMcp.IapiServerLoginBody = {
             username,
             password
         };
@@ -202,8 +201,8 @@ export default class Mcp implements Icontroller {
                 const cookie = resultApi.headers.get("set-cookie");
 
                 if (cookie) {
-                    const json = (await resultApi.json()) as modelIndex.IresponseBody;
-                    const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IloginSession;
+                    const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                    const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IuserLoginSession;
 
                     if (stdoutObject.mcpSessionId !== "") {
                         this.variableObject.isLogin.state = true;
@@ -266,7 +265,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.toolList.state = stdoutList;
@@ -293,7 +292,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.taskList.state = stdoutList;
@@ -343,13 +342,11 @@ export default class Mcp implements Icontroller {
                     .then(async (resultApi) => {
                         this.variableObject.isOfflineMcp.state = false;
 
-                        const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                        const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                         const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IfileStatus;
 
                         if (stdoutObject.fileName !== "") {
                             uploadStatusList.push(stdoutObject);
-
-                            this.apiDocumentList();
                         } else {
                             uploadStatusList.push({ fileName: fileDetail.fileName, status: "Failed" });
                         }
@@ -382,7 +379,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.documentList.state = stdoutList;
@@ -398,7 +395,7 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiDocumentRead = async (fileName: string, pageNumber: number): Promise<modelDocument.Iresult> => {
+    apiDocumentRead = async (fileName: string, pageNumber: number): Promise<modelDocument.IdataRead> => {
         const body: modelMcp.IapiDocumentReadBody = { fileName, pageNumber };
 
         return fetch(`${helperSrc.URL_MCP}/api/document-read`, {
@@ -417,9 +414,9 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                let resultStdoutObject = {} as modelDocument.Iresult;
+                let resultStdoutObject = {} as modelDocument.IdataRead;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = json.response.stdout;
 
                 if (stdout !== "ko") {
@@ -433,14 +430,14 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = true;
 
-                return {} as modelDocument.Iresult;
+                return {} as modelDocument.IdataRead;
             });
     };
 
-    apiDocumentDelete = (fileName: string): void => {
+    apiDocumentDelete = async (fileName: string): Promise<void> => {
         const body: modelMcp.IapiDocumentDeleteBody = { fileName };
 
-        fetch(`${helperSrc.URL_MCP}/api/document-delete`, {
+        await fetch(`${helperSrc.URL_MCP}/api/document-delete`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -456,20 +453,10 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = json.response.stdout;
 
-                if (stdout === "ok") {
-                    const filteredList = [];
-
-                    for (let a = 0; a < this.variableObject.documentList.state.length; a++) {
-                        if (this.variableObject.documentList.state[a].fileName !== fileName) {
-                            filteredList.push(this.variableObject.documentList.state[a]);
-                        }
-                    }
-
-                    this.variableObject.documentList.state = filteredList;
-                } else {
+                if (stdout === "ko") {
                     this.controllerToast.show("error", ["Failed to delete document."]);
                 }
             })
@@ -485,7 +472,7 @@ export default class Mcp implements Icontroller {
 
         const fileStatusList: modelMcp.IfileStatus[] = [];
 
-        await fetch(`${helperSrc.URL_MCP}/api/rag-embedding-start`, {
+        fetch(`${helperSrc.URL_MCP}/api/rag-embedding-start`, {
             method: "POST",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
@@ -500,7 +487,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 if (stdoutList.length > 0) {
@@ -509,7 +496,7 @@ export default class Mcp implements Icontroller {
 
                         this.showFileStatusMessage(fileStatusList);
 
-                        this.ragEmbeddingStartCheck(fileStatusList, a);
+                        this.apiRagEmbeddingCheck(fileStatusList, a);
                     }
                 } else {
                     this.controllerToast.show("warning", ["No documents found for RAG."]);
@@ -539,7 +526,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = json.response.stdout;
 
                 return stdout;
@@ -590,13 +577,11 @@ export default class Mcp implements Icontroller {
                     .then(async (resultApi) => {
                         this.variableObject.isOfflineMcp.state = false;
 
-                        const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                        const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                         const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IfileStatus;
 
                         if (stdoutObject.fileName !== "") {
                             uploadStatusList.push(stdoutObject);
-
-                            this.apiSkillList();
                         } else {
                             uploadStatusList.push({ fileName: fileDetail.fileName, status: "Failed" });
                         }
@@ -629,7 +614,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.skillList.state = stdoutList;
@@ -666,7 +651,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = json.response.stdout;
 
                 if (stdout !== "ko") {
@@ -684,10 +669,10 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiSkillDelete = (fileName: string): void => {
+    apiSkillDelete = async (fileName: string): Promise<void> => {
         const body: modelMcp.IapiSkillDeleteBody = { fileName };
 
-        fetch(`${helperSrc.URL_MCP}/api/skill-delete`, {
+        await fetch(`${helperSrc.URL_MCP}/api/skill-delete`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -703,20 +688,10 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = json.response.stdout;
 
-                if (stdout === "ok") {
-                    const filteredList = [];
-
-                    for (let a = 0; a < this.variableObject.skillList.state.length; a++) {
-                        if (this.variableObject.skillList.state[a].fileName !== fileName) {
-                            filteredList.push(this.variableObject.skillList.state[a]);
-                        }
-                    }
-
-                    this.variableObject.skillList.state = filteredList;
-                } else {
+                if (stdout === "ko") {
                     this.controllerToast.show("error", ["Failed to delete skill."]);
                 }
             })
@@ -752,7 +727,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = json.response.stdout;
 
                 if (stdout !== "ko") {
@@ -798,7 +773,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = json.response.stdout;
 
                 if (stdout !== "ko") {
@@ -833,7 +808,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.agentList.state = stdoutList;
@@ -880,7 +855,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = json.response.stdout;
 
                 if (stdout !== "ko") {
@@ -920,7 +895,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = JSON.parse(json.response.stdout) as modelMcp.Iuser;
 
                 this.variableObject.userInfo.state = stdout;
@@ -957,7 +932,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = json.response.stdout;
 
                 if (stdout === "ok") {
@@ -993,7 +968,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = JSON.parse(json.response.stdout) as modelMcp.Isetting;
 
                 this.variableObject.settingInfo.state = stdout;
@@ -1029,7 +1004,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = json.response.stdout;
 
                 if (stdout === "ok") {
@@ -1099,7 +1074,7 @@ export default class Mcp implements Icontroller {
                 settingInfo: {} as modelMcp.Isetting,
                 isSettingSave: variableLink<boolean>("MenuItem"),
                 systemMode: variableLink<string>("Chat"),
-                chatMessageList: variableLink<modelChat.IchatMessage[]>("Chat"),
+                chatMessageList: variableLink<modelChat.IdataMessage[]>("Chat"),
                 playwrightVideoSrc: "",
                 playwrightVideoName: ""
             },

@@ -9,56 +9,56 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
         <ul class="view_menuItem_left">
             <li
                 class={variableObject.isMenuItemDocument.state ? "active" : ""}
-                onClick={(event: Event) => {
-                    methodObject.onClickMenuDocument(event);
+                onClick={() => {
+                    methodObject.onClickMenuDocument();
                 }}
             >
                 <i class="cls_icon">file_present</i> <p>Document</p>
             </li>
             <li
                 class={variableObject.isMenuItemSkill.state ? "active" : ""}
-                onClick={(event: Event) => {
-                    methodObject.onClickMenuSkill(event);
+                onClick={() => {
+                    methodObject.onClickMenuSkill();
                 }}
             >
                 <i class="cls_icon">lightbulb</i> <p>Skill</p>
             </li>
             <li
                 class={variableObject.isMenuItemTool.state ? "active" : ""}
-                onClick={(event: Event) => {
-                    methodObject.onClickMenuTool(event);
+                onClick={() => {
+                    methodObject.onClickMenuTool();
                 }}
             >
                 <i class="cls_icon">construction</i> <p>Tool</p>
             </li>
             <li
                 class={variableObject.isMenuItemTask.state ? "active" : ""}
-                onClick={(event: Event) => {
-                    methodObject.onClickMenuTask(event);
+                onClick={() => {
+                    methodObject.onClickMenuTask();
                 }}
             >
                 <i class="cls_icon">assignment</i> <p>Task</p>
             </li>
             <li
                 class={variableObject.isMenuItemAgent.state ? "active" : ""}
-                onClick={(event: Event) => {
-                    methodObject.onClickMenuAgent(event);
+                onClick={() => {
+                    methodObject.onClickMenuAgent();
                 }}
             >
                 <i class="cls_icon">smart_toy</i> <p>Agent</p>
             </li>
             <li
                 class={variableObject.isMenuItemUser.state ? "active" : ""}
-                onClick={(event: Event) => {
-                    methodObject.onClickMenuUser(event);
+                onClick={() => {
+                    methodObject.onClickMenuUser();
                 }}
             >
                 <i class="cls_icon">account_circle</i> <p>User</p>
             </li>
             <li
                 class={variableObject.isMenuItemSetting.state ? "active" : ""}
-                onClick={(event: Event) => {
-                    methodObject.onClickMenuSetting(event);
+                onClick={() => {
+                    methodObject.onClickMenuSetting();
                 }}
             >
                 <i class="cls_icon">settings</i> <p>Setting</p>
@@ -80,6 +80,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                         <div class="document_wrapper">
                             {(() => {
                                 const resultList: IvirtualNode[] = [];
+
+                                // eslint-disable-next-line no-console
+                                console.log("cimo", variableObject.isRagGraphOpen.state);
 
                                 if (!variableObject.isRagGraphOpen.state) {
                                     resultList.push(
@@ -146,8 +149,8 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         result.push(
                                                             <button
                                                                 class="delete_selected"
-                                                                onClick={(event: Event) => {
-                                                                    methodObject.onClickDocumentDeleteSelected(event);
+                                                                onClick={() => {
+                                                                    methodObject.onClickDocumentDeleteSelected();
                                                                 }}
                                                             >
                                                                 <i class="cls_icon">delete</i>
@@ -187,16 +190,16 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                         <input
                                                                             type="checkbox"
                                                                             checked={variableObject.documentSelectList.state.includes(value.fileName)}
-                                                                            onChange={(event: Event) => {
-                                                                                methodObject.onClickDocumentCheckbox(event, value.fileName);
+                                                                            onChange={() => {
+                                                                                methodObject.onClickDocumentCheckbox(value.fileName);
                                                                             }}
                                                                         />
                                                                     </div>
                                                                     <div class="cell delete">
                                                                         <i
                                                                             class="cls_icon"
-                                                                            onClick={(event: Event) => {
-                                                                                methodObject.onClickDocumentDelete(event, value.fileName);
+                                                                            onClick={() => {
+                                                                                methodObject.onClickDocumentDelete(value.fileName);
                                                                             }}
                                                                         >
                                                                             delete
@@ -228,6 +231,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     })()}
                                                 </div>
                                             </div>
+                                            <aside jsmvcfw-controllerName="Pagination" jsmvcfw-parentView="right" />
                                         </>
                                     );
                                 } else {
@@ -235,8 +239,8 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         <>
                                             <div class="button_wrapper">
                                                 <button
-                                                    onClick={(event: Event) => {
-                                                        methodObject.onClickRagGraphBack(event);
+                                                    onClick={() => {
+                                                        methodObject.onClickRagGraphBack();
                                                     }}
                                                 >
                                                     <p>Back</p>
@@ -266,6 +270,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         </>
                                     );
                                 }
+
                                 return resultList;
                             })()}
                         </div>
@@ -304,8 +309,8 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         result.push(
                                             <button
                                                 class="delete_selected"
-                                                onClick={(event: Event) => {
-                                                    methodObject.onClickSkillDeleteSelected(event);
+                                                onClick={() => {
+                                                    methodObject.onClickSkillDeleteSelected();
                                                 }}
                                             >
                                                 <i class="cls_icon">delete</i>
@@ -335,25 +340,23 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     {(() => {
                                         const resultList: IvirtualNode[] = [];
 
-                                        const entryList = Object.entries(variableObject.skillList.state);
-
-                                        for (const [key, value] of entryList) {
+                                        for (const [key, value] of Object.entries(variableObject.skillList.state)) {
                                             resultList.push(
                                                 <div key={key} class="row">
                                                     <div class="cell select">
                                                         <input
                                                             type="checkbox"
                                                             checked={variableObject.skillSelectList.state.includes(value.fileName)}
-                                                            onChange={(event: Event) => {
-                                                                methodObject.onClickSkillCheckbox(event, value.fileName);
+                                                            onChange={() => {
+                                                                methodObject.onClickSkillCheckbox(value.fileName);
                                                             }}
                                                         />
                                                     </div>
                                                     <div class="cell delete">
                                                         <i
                                                             class="cls_icon"
-                                                            onClick={(event: Event) => {
-                                                                methodObject.onClickSkillDelete(event, value.fileName);
+                                                            onClick={() => {
+                                                                methodObject.onClickSkillDelete(value.fileName);
                                                             }}
                                                         >
                                                             delete
@@ -377,6 +380,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     })()}
                                 </div>
                             </div>
+                            <aside jsmvcfw-controllerName="Pagination" jsmvcfw-parentView="right" />
                         </div>
                     );
                 } else if (variableObject.isMenuItemTool.state) {
@@ -458,8 +462,8 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         <>
                                             <div class="button_wrapper">
                                                 <button
-                                                    onClick={(event: Event) => {
-                                                        methodObject.onClickSelectSkillBack(event);
+                                                    onClick={() => {
+                                                        methodObject.onClickSelectSkillBack();
                                                     }}
                                                 >
                                                     <p>Back</p>
@@ -482,9 +486,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     {(() => {
                                                         const resultList: IvirtualNode[] = [];
 
-                                                        const entryList = Object.entries(variableObject.skillList.state);
-
-                                                        for (const [key, value] of entryList) {
+                                                        for (const [key, value] of Object.entries(variableObject.skillList.state)) {
                                                             resultList.push(
                                                                 <div key={key} class="row">
                                                                     <div class="cell name">
@@ -499,8 +501,8 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     </div>
                                                                     <div class="cell button">
                                                                         <button
-                                                                            onClick={(event: Event) => {
-                                                                                methodObject.onClickSkillSelect(event, value.fileName);
+                                                                            onClick={() => {
+                                                                                methodObject.onClickSkillSelect(value.fileName);
                                                                             }}
                                                                         >
                                                                             <p>Pick</p>
@@ -514,29 +516,30 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     })()}
                                                 </div>
                                             </div>
+                                            <aside jsmvcfw-controllerName="Pagination" jsmvcfw-parentView="right" />
                                         </>
                                     );
                                 } else if (Object.keys(variableObject.agentForm.state).length > 0) {
                                     resultList.push(
-                                        <div class="agent_form">
-                                            <div class="form_field">
-                                                <p>Name:</p>
+                                        <div class="form_wrapper">
+                                            <div class="field">
+                                                <p class="label">Name:</p>
                                                 <textarea jsmvcfw-elementHookName="elementInputAgentName" rows="1">
                                                     {variableObject.agentForm.state.name}
                                                 </textarea>
                                             </div>
-                                            <div class="form_field">
-                                                <p>Description:</p>
+                                            <div class="field">
+                                                <p class="label">Description:</p>
                                                 <textarea jsmvcfw-elementHookName="elementInputAgentDescription" rows="4">
                                                     {variableObject.agentForm.state.description}
                                                 </textarea>
                                             </div>
-                                            <div class="form_field">
-                                                <p>Skill:</p>
+                                            <div class="field">
+                                                <p class="label">Skill:</p>
                                                 <div class="select_wrapper">
                                                     <button
-                                                        onClick={(event: Event) => {
-                                                            methodObject.onClickSelectSkill(event);
+                                                        onClick={() => {
+                                                            methodObject.onClickSelectSkill();
                                                         }}
                                                     >
                                                         <p>Select</p>
@@ -557,10 +560,10 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     })()}
                                                 </div>
                                             </div>
-                                            <div class="form_button_wrapper">
+                                            <div class="button_wrapper">
                                                 <button
-                                                    onClick={(event: Event) => {
-                                                        methodObject.onClickAgentSave(event);
+                                                    onClick={() => {
+                                                        methodObject.onClickAgentSave();
                                                     }}
                                                     disabled={variableObject.isAgentSave.state}
                                                 >
@@ -577,8 +580,8 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     })()}
                                                 </button>
                                                 <button
-                                                    onClick={(event: Event) => {
-                                                        methodObject.onClickAgentCancel(event);
+                                                    onClick={() => {
+                                                        methodObject.onClickAgentCancel();
                                                     }}
                                                 >
                                                     <p>Cancel</p>
@@ -591,8 +594,8 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         <>
                                             <div class="button_wrapper">
                                                 <button
-                                                    onClick={(event: Event) => {
-                                                        methodObject.onClickAgentCreate(event);
+                                                    onClick={() => {
+                                                        methodObject.onClickAgentCreate();
                                                     }}
                                                 >
                                                     <i class="cls_icon">add</i>
@@ -621,16 +624,16 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     </i>
                                                                     <i
                                                                         class="cls_icon"
-                                                                        onClick={(event: Event) => {
-                                                                            methodObject.onClickAgentEdit(event, value.id);
+                                                                        onClick={() => {
+                                                                            methodObject.onClickAgentEdit(value.id);
                                                                         }}
                                                                     >
                                                                         edit
                                                                     </i>
                                                                     <i
                                                                         class="cls_icon"
-                                                                        onClick={(event: Event) => {
-                                                                            methodObject.onClickAgentDelete(event, Number(key), value.id, value.name);
+                                                                        onClick={() => {
+                                                                            methodObject.onClickAgentDelete(Number(key), value.id, value.name);
                                                                         }}
                                                                     >
                                                                         delete
@@ -669,95 +672,99 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                 } else if (variableObject.isMenuItemUser.state) {
                     resultList.push(
                         <div class="user_wrapper">
-                            <div class="form_field">
-                                <p>Email:</p>
-                                <input
-                                    value={variableObject.userInfo.state.email}
-                                    jsmvcfw-elementHookName="elementInputUserEmail"
-                                    placeholder="Email"
-                                ></input>
-                            </div>
-                            <div class="form_field">
-                                <p>Password:</p>
-                                <input
-                                    value={variableObject.userInfo.state.password}
-                                    jsmvcfw-elementHookName="elementInputUserPassword"
-                                    placeholder="Password"
-                                    type="password"
-                                ></input>
-                            </div>
-                            <div class="form_button_wrapper">
-                                <button
-                                    onClick={(event: Event) => {
-                                        methodObject.onClickUserUpdate(event);
-                                    }}
-                                    disabled={variableObject.isUserUpdate.state}
-                                >
-                                    {(() => {
-                                        const resultList: IvirtualNode[] = [];
+                            <div class="form_wrapper">
+                                <div class="field">
+                                    <p class="label">Email:</p>
+                                    <input
+                                        value={variableObject.userInfo.state.email}
+                                        jsmvcfw-elementHookName="elementInputUserEmail"
+                                        placeholder="Email"
+                                    ></input>
+                                </div>
+                                <div class="field">
+                                    <p class="label">Password:</p>
+                                    <input
+                                        value={variableObject.userInfo.state.password}
+                                        jsmvcfw-elementHookName="elementInputUserPassword"
+                                        placeholder="Password"
+                                        type="password"
+                                    ></input>
+                                </div>
+                                <div class="button_wrapper">
+                                    <button
+                                        onClick={() => {
+                                            methodObject.onClickUserUpdate();
+                                        }}
+                                        disabled={variableObject.isUserUpdate.state}
+                                    >
+                                        {(() => {
+                                            const resultList: IvirtualNode[] = [];
 
-                                        if (variableObject.isUserUpdate.state) {
-                                            resultList.push(<i class="cls_icon">update</i>);
-                                        } else {
-                                            resultList.push(<p>Update</p>);
-                                        }
+                                            if (variableObject.isUserUpdate.state) {
+                                                resultList.push(<i class="cls_icon">update</i>);
+                                            } else {
+                                                resultList.push(<p>Update</p>);
+                                            }
 
-                                        return resultList;
-                                    })()}
-                                </button>
-                                <button
-                                    onClick={(event: Event) => {
-                                        methodObject.onClickUserCancel(event);
-                                    }}
-                                >
-                                    <p>Cancel</p>
-                                </button>
+                                            return resultList;
+                                        })()}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            methodObject.onClickUserCancel();
+                                        }}
+                                    >
+                                        <p>Cancel</p>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     );
                 } else if (variableObject.isMenuItemSetting.state) {
                     resultList.push(
                         <div class="setting_wrapper">
-                            <div class="form_field">
-                                <p>API:</p>
-                                <select value={variableObject.settingInfo.state.apiId} jsmvcfw-elementHookName="elementSelectSettingApiId">
-                                    <option value="1" selected={variableObject.settingInfo.state.apiId === 1}>
-                                        Local
-                                    </option>
-                                    <option value="2" selected={variableObject.settingInfo.state.apiId === 2}>
-                                        Anthropic
-                                    </option>
-                                    <option value="3" selected={variableObject.settingInfo.state.apiId === 3}>
-                                        OpenAI
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="form_button_wrapper">
-                                <button
-                                    onClick={(event: Event) => {
-                                        methodObject.onClickSettingSave(event);
-                                    }}
-                                    disabled={variableObject.isSettingSave.state}
-                                >
-                                    {(() => {
-                                        const resultList: IvirtualNode[] = [];
+                            <div class="form_wrapper">
+                                <div class="field">
+                                    <p class="label">API:</p>
+                                    <select value={variableObject.settingInfo.state.apiId} jsmvcfw-elementHookName="elementSelectSettingApiId">
+                                        <option value="1" selected={variableObject.settingInfo.state.apiId === 1}>
+                                            Local
+                                        </option>
+                                        <option value="2" selected={variableObject.settingInfo.state.apiId === 2}>
+                                            Anthropic
+                                        </option>
+                                        <option value="3" selected={variableObject.settingInfo.state.apiId === 3}>
+                                            OpenAI
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="button_wrapper">
+                                    <button
+                                        onClick={() => {
+                                            methodObject.onClickSettingSave();
+                                        }}
+                                        disabled={variableObject.isSettingSave.state}
+                                    >
+                                        {(() => {
+                                            const resultList: IvirtualNode[] = [];
 
-                                        if (variableObject.isSettingSave.state) {
-                                            resultList.push(<i class="cls_icon">update</i>);
-                                        } else {
-                                            resultList.push(<p>Save</p>);
-                                        }
+                                            if (variableObject.isSettingSave.state) {
+                                                resultList.push(<i class="cls_icon">update</i>);
+                                            } else {
+                                                resultList.push(<p>Save</p>);
+                                            }
 
-                                        return resultList;
-                                    })()}
-                                </button>
-                                <button
-                                    onClick={(event: Event) => {
-                                        methodObject.onClickSettingCancel(event);
-                                    }}
-                                >
-                                    <p>Cancel</p>
-                                </button>
+                                            return resultList;
+                                        })()}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            methodObject.onClickSettingCancel();
+                                        }}
+                                    >
+                                        <p>Cancel</p>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     );

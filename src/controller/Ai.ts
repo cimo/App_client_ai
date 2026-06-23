@@ -4,8 +4,8 @@ import { fetch } from "@tauri-apps/plugin-http";
 // Source
 import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
+import * as modelHelperSrc from "../model/HelperSrc.js";
 import * as modelAi from "../model/Ai";
-import * as modelIndex from "../model/Index";
 import viewAi from "../view/Ai";
 import type Mcp from "./Mcp";
 import type Chat from "./Chat";
@@ -72,7 +72,7 @@ export default class Ai implements Icontroller {
                 const cookie = resultApi.headers.get("set-cookie");
 
                 if (cookie) {
-                    const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                    const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                     const stdout = json.response.stdout;
 
                     session.writeAiSession(session.data.aiBearerToken, cookie);
@@ -102,7 +102,7 @@ export default class Ai implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineAi.state = false;
 
-                const json = (await resultApi.json()) as modelIndex.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.modelList.state = stdoutList;

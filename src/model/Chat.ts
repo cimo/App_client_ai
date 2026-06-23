@@ -3,11 +3,29 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 // Source
 import * as modelMcp from "./Mcp";
 
-export interface IapiResponseBody {
+export interface IapiDataResponseBody {
     stream: boolean;
     model: string;
-    input: IchatInput[];
+    input: IdataInput[];
     tools: unknown[];
+}
+
+export interface IdataMessage {
+    isLoading: boolean;
+    time: string;
+    user: string;
+    assistantReason: string;
+    assistantNoReason: string;
+    mcpTool?: ImcpTool;
+    ragCitationList: modelMcp.IragCitation[] | undefined;
+    ragCitationTabIndex: number;
+    securityScanner: string;
+    playwright: Iplaywright;
+}
+
+export interface IdataInput {
+    role: string;
+    content: string | Array<{ type: string; text?: string; image_url?: string }>;
 }
 
 export interface ImcpTool {
@@ -22,24 +40,6 @@ export interface Iplaywright {
     action: string;
     nameList: string[];
     stdout: string;
-}
-
-export interface IchatMessage {
-    isLoading: boolean;
-    time: string;
-    user: string;
-    assistantReason: string;
-    assistantNoReason: string;
-    mcpTool?: ImcpTool;
-    ragCitationList: modelMcp.IragCitation[] | undefined;
-    ragCitationTabIndex: number;
-    securityScanner: string;
-    playwright: Iplaywright;
-}
-
-export interface IchatInput {
-    role: string;
-    content: string | Array<{ type: string; text?: string; image_url?: string }>;
 }
 
 export interface Ifile {
@@ -65,8 +65,8 @@ export interface IllmResponse {
 
 export interface Ivariable {
     isMessageSendAvailable: IvariableBind<boolean>;
-    chatMessageList: IvariableBind<IchatMessage[]>;
-    chatHistoryList: IvariableBind<IchatInput[]>;
+    chatMessageList: IvariableBind<IdataMessage[]>;
+    chatHistoryList: IvariableBind<IdataInput[]>;
     systemMode: IvariableBind<string>;
     toolSelected: IvariableBind<modelMcp.Itool>;
     toolList: IvariableBind<modelMcp.Itool[]>;
@@ -78,7 +78,7 @@ export interface Ivariable {
 
 export interface Imethod {
     onClickButtonMessageSend: () => void;
-    onClickCitationLink: (event: Event, fileName: string, chunk: string) => void;
+    onClickCitationLink: (fileName: string, chunk: string) => void;
     onClickCitationTab: (messageIndex: number, tabIndex: number) => void;
     onClickPlaywrightVideoShow: (fileName: string) => void;
     onErrorPlaywrightVideoFail: () => void;

@@ -5,7 +5,7 @@ export interface Idata {
     pageNumber: number;
 }
 
-export interface Iresult {
+export interface IdataRead {
     fileContent: string;
     pageTotal: number;
 }
@@ -21,8 +21,8 @@ export interface Ivariable {
 }
 
 export interface Imethod {
+    onClickChangePage: (difference: number) => void;
     onInputChangePage: (event: KeyboardEvent) => void;
-    onClickChangePage: (event: Event, difference: number) => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {
