@@ -575,9 +575,9 @@ export default class Chat implements Icontroller {
                                                     }
                                                 } else if (messageObject.name === "rag_search") {
                                                     const result = messageObject.result as modelMcp.IragSearch;
-                                                    const citationList = result.citationList;
-                                                    const nodeList = result.nodeList;
-                                                    const graphList = result.graphList;
+                                                    const citationList = result.citationList ? result.citationList : [];
+                                                    const nodeList = result.nodeList ? result.nodeList : [];
+                                                    const graphList = result.graphList ? result.graphList : [];
 
                                                     if (citationList.length > 0) {
                                                         const chatMessageListState = this.variableObject.chatMessageList.state.slice();

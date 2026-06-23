@@ -6,10 +6,10 @@ import * as modelToast from "../model/Toast";
 const viewToast = (variableObject: modelToast.Ivariable, methodObject: modelToast.Imethod): IvirtualNode => {
     return (
         <div class="view_toast">
-            <div class={`message_wrapper ${variableObject.mode.state} ${variableObject.messageList.state.length > 0 ? "" : "none"}`}>
+            <div class={() => `message_wrapper ${variableObject.mode.state} ${variableObject.messageList.state.length > 0 ? "" : "none"}`}>
                 <i class="cls_icon">info</i>
                 <div class="text">
-                    {(() => {
+                    {() => {
                         const resultList: IvirtualNode[] = [];
 
                         for (const [key, value] of Object.entries(variableObject.messageList.state)) {
@@ -17,9 +17,9 @@ const viewToast = (variableObject: modelToast.Ivariable, methodObject: modelToas
                         }
 
                         return resultList;
-                    })()}
+                    }}
                 </div>
-                {(() => {
+                {() => {
                     const resultList: IvirtualNode[] = [];
 
                     if (variableObject.timeClose.state === 0) {
@@ -36,7 +36,7 @@ const viewToast = (variableObject: modelToast.Ivariable, methodObject: modelToas
                     }
 
                     return resultList;
-                })()}
+                }}
             </div>
         </div>
     );

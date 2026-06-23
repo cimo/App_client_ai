@@ -5,15 +5,13 @@ import * as helperSrc from "../HelperSrc";
 import * as modelChat from "../model/Chat";
 
 export const message = (variableObject: modelChat.Ivariable, methodObject: modelChat.Imethod): IvirtualNode => {
-    const messageList: modelChat.IdataMessage[] = variableObject.chatMessageList.state;
-
     return (
         <div class="view_chat_message">
             <div class="chat_wrapper" jsmvcfw-elementHookName="elementContainerMessageReceive">
-                {(() => {
+                {() => {
                     const resultList: IvirtualNode[] = [];
 
-                    for (const [key, value] of Object.entries(messageList)) {
+                    for (const [key, value] of Object.entries(variableObject.chatMessageList.state)) {
                         const messageIndex = parseInt(key);
 
                         resultList.push(
@@ -29,7 +27,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                             <i class="cls_icon">handyman</i>
                                             <p>Show tool</p>
                                         </summary>
-                                        {(() => {
+                                        {() => {
                                             const resultList: IvirtualNode[] = [];
 
                                             if (value.mcpTool) {
@@ -51,7 +49,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                             }
 
                                             return resultList;
-                                        })()}
+                                        }}
                                     </details>
                                     <details class={value.assistantReason ? "" : "none"}>
                                         <summary>
@@ -60,7 +58,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                         </summary>
                                         <pre>{value.assistantReason}</pre>
                                     </details>
-                                    {(() => {
+                                    {() => {
                                         const resultList: IvirtualNode[] = [];
 
                                         if (
@@ -107,8 +105,12 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                     <i class="cls_icon">chevron_right</i>
                                                                 </button>
                                                             </div>
-                                                            {(() => {
+                                                            {() => {
                                                                 const resultList: IvirtualNode[] = [];
+
+                                                                if (!value.ragCitationList) {
+                                                                    return resultList;
+                                                                }
 
                                                                 const citation = value.ragCitationList[value.ragCitationTabIndex];
 
@@ -139,7 +141,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                 }
 
                                                                 return resultList;
-                                                            })()}
+                                                            }}
                                                         </div>
                                                     </details>
                                                 );
@@ -162,7 +164,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                         <summary>
                                                             <p>Playwright result:</p>
                                                         </summary>
-                                                        {(() => {
+                                                        {() => {
                                                             const resultList: IvirtualNode[] = [];
 
                                                             if (value.playwright.action === "listTest") {
@@ -184,7 +186,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                             <p onClick={() => methodObject.onClickPlaywrightVideoShow(valueSub)}>
                                                                                 {valueSub}
                                                                             </p>
-                                                                            {(() => {
+                                                                            {() => {
                                                                                 const resultList: IvirtualNode[] = [];
 
                                                                                 if (
@@ -205,14 +207,14 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                                 }
 
                                                                                 return resultList;
-                                                                            })()}
+                                                                            }}
                                                                         </span>
                                                                     );
                                                                 }
                                                             }
 
                                                             return resultList;
-                                                        })()}
+                                                        }}
                                                     </details>
                                                 );
                                             } else {
@@ -221,14 +223,14 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                         }
 
                                         return resultList;
-                                    })()}
+                                    }}
                                 </div>
                             </div>
                         );
                     }
 
                     return resultList;
-                })()}
+                }}
                 <div class="chat_assistant_wrapper">
                     <details class="none" jsmvcfw-elementHookName="elementMessageStreamReasonWrapper">
                         <summary>
@@ -258,7 +260,7 @@ export const input = (variableObject: modelChat.Ivariable, methodObject: modelCh
                                 methodObject.onClickButtonMessageSend();
                             }}
                         >
-                            <i class="cls_icon">{variableObject.isMessageSendAvailable.state ? "play_arrow" : "stop"}</i>
+                            <i class="cls_icon">{() => (variableObject.isMessageSendAvailable.state ? "play_arrow" : "stop")}</i>
                         </button>
                     </div>
                 </div>

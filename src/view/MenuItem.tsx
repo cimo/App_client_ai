@@ -8,7 +8,7 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
     return (
         <ul class="view_menuItem_left">
             <li
-                class={variableObject.isMenuItemDocument.state ? "active" : ""}
+                class={() => (variableObject.isMenuItemDocument.state ? "active" : "")}
                 onClick={() => {
                     methodObject.onClickMenuDocument();
                 }}
@@ -16,7 +16,7 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
                 <i class="cls_icon">file_present</i> <p>Document</p>
             </li>
             <li
-                class={variableObject.isMenuItemSkill.state ? "active" : ""}
+                class={() => (variableObject.isMenuItemSkill.state ? "active" : "")}
                 onClick={() => {
                     methodObject.onClickMenuSkill();
                 }}
@@ -24,7 +24,7 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
                 <i class="cls_icon">lightbulb</i> <p>Skill</p>
             </li>
             <li
-                class={variableObject.isMenuItemTool.state ? "active" : ""}
+                class={() => (variableObject.isMenuItemTool.state ? "active" : "")}
                 onClick={() => {
                     methodObject.onClickMenuTool();
                 }}
@@ -32,7 +32,7 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
                 <i class="cls_icon">construction</i> <p>Tool</p>
             </li>
             <li
-                class={variableObject.isMenuItemTask.state ? "active" : ""}
+                class={() => (variableObject.isMenuItemTask.state ? "active" : "")}
                 onClick={() => {
                     methodObject.onClickMenuTask();
                 }}
@@ -40,7 +40,7 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
                 <i class="cls_icon">assignment</i> <p>Task</p>
             </li>
             <li
-                class={variableObject.isMenuItemAgent.state ? "active" : ""}
+                class={() => (variableObject.isMenuItemAgent.state ? "active" : "")}
                 onClick={() => {
                     methodObject.onClickMenuAgent();
                 }}
@@ -48,7 +48,7 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
                 <i class="cls_icon">smart_toy</i> <p>Agent</p>
             </li>
             <li
-                class={variableObject.isMenuItemUser.state ? "active" : ""}
+                class={() => (variableObject.isMenuItemUser.state ? "active" : "")}
                 onClick={() => {
                     methodObject.onClickMenuUser();
                 }}
@@ -56,7 +56,7 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
                 <i class="cls_icon">account_circle</i> <p>User</p>
             </li>
             <li
-                class={variableObject.isMenuItemSetting.state ? "active" : ""}
+                class={() => (variableObject.isMenuItemSetting.state ? "active" : "")}
                 onClick={() => {
                     methodObject.onClickMenuSetting();
                 }}
@@ -70,19 +70,18 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
 export const right = (variableObject: modelMenuItem.Ivariable, methodObject: modelMenuItem.Imethod): IvirtualNode => {
     return (
         <div
-            class={`view_menuItem_right ${variableObject.isMenuItemDocument.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state || variableObject.isMenuItemSkill.state || variableObject.isMenuItemUser.state || variableObject.isMenuItemSetting.state ? "" : "none"}`}
+            class={() =>
+                `view_menuItem_right ${variableObject.isMenuItemDocument.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state || variableObject.isMenuItemSkill.state || variableObject.isMenuItemUser.state || variableObject.isMenuItemSetting.state ? "" : "none"}`
+            }
         >
-            {(() => {
+            {() => {
                 const resultList: IvirtualNode[] = [];
 
                 if (variableObject.isMenuItemDocument.state) {
                     resultList.push(
                         <div class="document_wrapper">
-                            {(() => {
+                            {() => {
                                 const resultList: IvirtualNode[] = [];
-
-                                // eslint-disable-next-line no-console
-                                console.log("cimo", variableObject.isRagGraphOpen.state);
 
                                 if (!variableObject.isRagGraphOpen.state) {
                                     resultList.push(
@@ -92,9 +91,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     onClick={() => {
                                                         methodObject.onClickDocumentUpload();
                                                     }}
-                                                    disabled={variableObject.isDocumentUpload.state}
+                                                    disabled={() => variableObject.isDocumentUpload.state}
                                                 >
-                                                    {(() => {
+                                                    {() => {
                                                         const resultList: IvirtualNode[] = [];
 
                                                         if (variableObject.isDocumentUpload.state) {
@@ -109,15 +108,15 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         }
 
                                                         return resultList;
-                                                    })()}
+                                                    }}
                                                 </button>
                                                 <button
                                                     onClick={() => {
                                                         methodObject.onClickRagStart();
                                                     }}
-                                                    disabled={variableObject.isRagEmbeddingStart.state}
+                                                    disabled={() => variableObject.isRagEmbeddingStart.state}
                                                 >
-                                                    {(() => {
+                                                    {() => {
                                                         const resultList: IvirtualNode[] = [];
 
                                                         if (variableObject.isRagEmbeddingStart.state) {
@@ -132,7 +131,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         }
 
                                                         return resultList;
-                                                    })()}
+                                                    }}
                                                 </button>
                                                 <button
                                                     onClick={() => {
@@ -142,7 +141,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     <i class="cls_icon">analytics</i>
                                                     <p>RAG - Graph</p>
                                                 </button>
-                                                {(() => {
+                                                {() => {
                                                     const result: IvirtualNode[] = [];
 
                                                     if (variableObject.documentSelectList.state.length > 0) {
@@ -160,7 +159,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     }
 
                                                     return result;
-                                                })()}
+                                                }}
                                             </div>
                                             <div class="table_flex">
                                                 <div class="row header">
@@ -178,7 +177,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     <div class="cell button"></div>
                                                 </div>
                                                 <div class="body">
-                                                    {(() => {
+                                                    {() => {
                                                         const resultList: IvirtualNode[] = [];
 
                                                         for (const [key, value] of Object.entries(variableObject.documentList.state)) {
@@ -189,7 +188,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     <div class="cell select">
                                                                         <input
                                                                             type="checkbox"
-                                                                            checked={variableObject.documentSelectList.state.includes(value.fileName)}
+                                                                            checked={() =>
+                                                                                variableObject.documentSelectList.state.includes(value.fileName)
+                                                                            }
                                                                             onChange={() => {
                                                                                 methodObject.onClickDocumentCheckbox(value.fileName);
                                                                             }}
@@ -218,7 +219,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     <div class="cell button">
                                                                         <button
                                                                             onClick={() => methodObject.windowOpenDocument(value.fileName)}
-                                                                            disabled={variableObject.documentOpenList.state.includes(value.fileName)}
+                                                                            disabled={() =>
+                                                                                variableObject.documentOpenList.state.includes(value.fileName)
+                                                                            }
                                                                         >
                                                                             <p>Open</p>
                                                                         </button>
@@ -228,7 +231,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         }
 
                                                         return resultList;
-                                                    })()}
+                                                    }}
                                                 </div>
                                             </div>
                                             <aside jsmvcfw-controllerName="Pagination" jsmvcfw-parentView="right" />
@@ -247,7 +250,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                 </button>
                                             </div>
                                             <div class="ragGraphify_wrapper">
-                                                {(() => {
+                                                {() => {
                                                     const resultList: IvirtualNode[] = [];
 
                                                     if (variableObject.ragGraphHtml.state !== "ko") {
@@ -259,20 +262,23 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                             );
                                                         } else {
                                                             resultList.push(
-                                                                <iframe srcdoc={variableObject.ragGraphHtml.state} sandbox="allow-scripts"></iframe>
+                                                                <iframe
+                                                                    srcdoc={() => variableObject.ragGraphHtml.state}
+                                                                    sandbox="allow-scripts"
+                                                                ></iframe>
                                                             );
                                                         }
                                                     }
 
                                                     return resultList;
-                                                })()}
+                                                }}
                                             </div>
                                         </>
                                     );
                                 }
 
                                 return resultList;
-                            })()}
+                            }}
                         </div>
                     );
                 } else if (variableObject.isMenuItemSkill.state) {
@@ -283,9 +289,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     onClick={() => {
                                         methodObject.onClickSkillUpload();
                                     }}
-                                    disabled={variableObject.isSkillUpload.state}
+                                    disabled={() => variableObject.isSkillUpload.state}
                                 >
-                                    {(() => {
+                                    {() => {
                                         const resultList: IvirtualNode[] = [];
 
                                         if (variableObject.isSkillUpload.state) {
@@ -300,9 +306,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         }
 
                                         return resultList;
-                                    })()}
+                                    }}
                                 </button>
-                                {(() => {
+                                {() => {
                                     const result: IvirtualNode[] = [];
 
                                     if (variableObject.skillSelectList.state.length > 0) {
@@ -320,7 +326,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     }
 
                                     return result;
-                                })()}
+                                }}
                             </div>
                             <div class="table_flex">
                                 <div class="row header">
@@ -337,7 +343,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     </div>
                                 </div>
                                 <div class="body">
-                                    {(() => {
+                                    {() => {
                                         const resultList: IvirtualNode[] = [];
 
                                         for (const [key, value] of Object.entries(variableObject.skillList.state)) {
@@ -346,7 +352,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     <div class="cell select">
                                                         <input
                                                             type="checkbox"
-                                                            checked={variableObject.skillSelectList.state.includes(value.fileName)}
+                                                            checked={() => variableObject.skillSelectList.state.includes(value.fileName)}
                                                             onChange={() => {
                                                                 methodObject.onClickSkillCheckbox(value.fileName);
                                                             }}
@@ -377,7 +383,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         }
 
                                         return resultList;
-                                    })()}
+                                    }}
                                 </div>
                             </div>
                             <aside jsmvcfw-controllerName="Pagination" jsmvcfw-parentView="right" />
@@ -387,7 +393,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                     resultList.push(
                         <div class="tool_wrapper">
                             <ul>
-                                {(() => {
+                                {() => {
                                     const resultList: IvirtualNode[] = [];
 
                                     for (const [key, value] of Object.entries(variableObject.toolList.state)) {
@@ -413,7 +419,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     }
 
                                     return resultList;
-                                })()}
+                                }}
                             </ul>
                         </div>
                     );
@@ -421,7 +427,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                     resultList.push(
                         <div class="task_wrapper">
                             <ul>
-                                {(() => {
+                                {() => {
                                     const resultList: IvirtualNode[] = [];
 
                                     for (const [key, value] of Object.entries(variableObject.taskList.state)) {
@@ -447,14 +453,14 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     }
 
                                     return resultList;
-                                })()}
+                                }}
                             </ul>
                         </div>
                     );
                 } else if (variableObject.isMenuItemAgent.state) {
                     resultList.push(
                         <div class="agent_wrapper">
-                            {(() => {
+                            {() => {
                                 const resultList: IvirtualNode[] = [];
 
                                 if (variableObject.isAgentSkillSelect.state) {
@@ -483,7 +489,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     <div class="cell button"></div>
                                                 </div>
                                                 <div class="body">
-                                                    {(() => {
+                                                    {() => {
                                                         const resultList: IvirtualNode[] = [];
 
                                                         for (const [key, value] of Object.entries(variableObject.skillList.state)) {
@@ -513,7 +519,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         }
 
                                                         return resultList;
-                                                    })()}
+                                                    }}
                                                 </div>
                                             </div>
                                             <aside jsmvcfw-controllerName="Pagination" jsmvcfw-parentView="right" />
@@ -544,7 +550,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     >
                                                         <p>Select</p>
                                                     </button>
-                                                    {(() => {
+                                                    {() => {
                                                         const resultList: IvirtualNode[] = [];
 
                                                         if (variableObject.agentForm.state.skillName !== "") {
@@ -557,7 +563,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         }
 
                                                         return resultList;
-                                                    })()}
+                                                    }}
                                                 </div>
                                             </div>
                                             <div class="button_wrapper">
@@ -565,9 +571,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     onClick={() => {
                                                         methodObject.onClickAgentSave();
                                                     }}
-                                                    disabled={variableObject.isAgentSave.state}
+                                                    disabled={() => variableObject.isAgentSave.state}
                                                 >
-                                                    {(() => {
+                                                    {() => {
                                                         const resultList: IvirtualNode[] = [];
 
                                                         if (variableObject.isAgentSave.state) {
@@ -577,7 +583,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         }
 
                                                         return resultList;
-                                                    })()}
+                                                    }}
                                                 </button>
                                                 <button
                                                     onClick={() => {
@@ -603,7 +609,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                 </button>
                                             </div>
                                             <ul>
-                                                {(() => {
+                                                {() => {
                                                     const resultList: IvirtualNode[] = [];
 
                                                     const entryList = Object.entries(variableObject.agentList.state);
@@ -640,7 +646,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     </i>
                                                                 </div>
                                                                 <p class="bottom">{value.description}</p>
-                                                                {(() => {
+                                                                {() => {
                                                                     const resultList: IvirtualNode[] = [];
 
                                                                     if (value.skillName !== "") {
@@ -653,20 +659,20 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     }
 
                                                                     return resultList;
-                                                                })()}
+                                                                }}
                                                             </li>
                                                         );
                                                     }
 
                                                     return resultList;
-                                                })()}
+                                                }}
                                             </ul>
                                         </>
                                     );
                                 }
 
                                 return resultList;
-                            })()}
+                            }}
                         </div>
                     );
                 } else if (variableObject.isMenuItemUser.state) {
@@ -676,7 +682,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                 <div class="field">
                                     <p class="label">Email:</p>
                                     <input
-                                        value={variableObject.userInfo.state.email}
+                                        value={() => variableObject.userInfo.state.email}
                                         jsmvcfw-elementHookName="elementInputUserEmail"
                                         placeholder="Email"
                                     ></input>
@@ -684,7 +690,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                 <div class="field">
                                     <p class="label">Password:</p>
                                     <input
-                                        value={variableObject.userInfo.state.password}
+                                        value={() => variableObject.userInfo.state.password}
                                         jsmvcfw-elementHookName="elementInputUserPassword"
                                         placeholder="Password"
                                         type="password"
@@ -695,9 +701,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         onClick={() => {
                                             methodObject.onClickUserUpdate();
                                         }}
-                                        disabled={variableObject.isUserUpdate.state}
+                                        disabled={() => variableObject.isUserUpdate.state}
                                     >
-                                        {(() => {
+                                        {() => {
                                             const resultList: IvirtualNode[] = [];
 
                                             if (variableObject.isUserUpdate.state) {
@@ -707,7 +713,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             }
 
                                             return resultList;
-                                        })()}
+                                        }}
                                     </button>
                                     <button
                                         onClick={() => {
@@ -726,14 +732,14 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                             <div class="form_wrapper">
                                 <div class="field">
                                     <p class="label">API:</p>
-                                    <select value={variableObject.settingInfo.state.apiId} jsmvcfw-elementHookName="elementSelectSettingApiId">
-                                        <option value="1" selected={variableObject.settingInfo.state.apiId === 1}>
+                                    <select value={() => variableObject.settingInfo.state.apiId} jsmvcfw-elementHookName="elementSelectSettingApiId">
+                                        <option value="1" selected={() => variableObject.settingInfo.state.apiId === 1}>
                                             Local
                                         </option>
-                                        <option value="2" selected={variableObject.settingInfo.state.apiId === 2}>
+                                        <option value="2" selected={() => variableObject.settingInfo.state.apiId === 2}>
                                             Anthropic
                                         </option>
-                                        <option value="3" selected={variableObject.settingInfo.state.apiId === 3}>
+                                        <option value="3" selected={() => variableObject.settingInfo.state.apiId === 3}>
                                             OpenAI
                                         </option>
                                     </select>
@@ -743,9 +749,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         onClick={() => {
                                             methodObject.onClickSettingSave();
                                         }}
-                                        disabled={variableObject.isSettingSave.state}
+                                        disabled={() => variableObject.isSettingSave.state}
                                     >
-                                        {(() => {
+                                        {() => {
                                             const resultList: IvirtualNode[] = [];
 
                                             if (variableObject.isSettingSave.state) {
@@ -755,7 +761,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             }
 
                                             return resultList;
-                                        })()}
+                                        }}
                                     </button>
                                     <button
                                         onClick={() => {
@@ -771,7 +777,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                 }
 
                 return resultList;
-            })()}
+            }}
         </div>
     );
 };

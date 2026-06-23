@@ -7,8 +7,8 @@ const viewDialog = (variableObject: modelDialog.Ivariable, methodObject: modelDi
     return (
         <div class="view_dialog">
             <div class="message_wrapper">
-                <i class="cls_icon">{variableObject.mode.state}</i>
-                <p>{variableObject.message.state}</p>
+                <i class="cls_icon">{() => variableObject.mode.state}</i>
+                <p>{() => variableObject.message.state}</p>
             </div>
             <div class="button_wrapper">
                 <button
@@ -18,7 +18,7 @@ const viewDialog = (variableObject: modelDialog.Ivariable, methodObject: modelDi
                 >
                     <p>OK</p>
                 </button>
-                {(() => {
+                {() => {
                     const resultList: IvirtualNode[] = [];
 
                     if (!variableObject.isConfirm.state) {
@@ -34,7 +34,7 @@ const viewDialog = (variableObject: modelDialog.Ivariable, methodObject: modelDi
                     }
 
                     return resultList;
-                })()}
+                }}
             </div>
         </div>
     );

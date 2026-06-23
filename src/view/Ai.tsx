@@ -7,7 +7,7 @@ const viewAi = (variableObject: modelAi.Ivariable, methodObject: modelAi.Imethod
     return (
         <div class="view_ai">
             <div class="header_wrapper">
-                <p>Model selected: {variableObject.modelSelected.state}</p>
+                <p>Model selected: {() => variableObject.modelSelected.state}</p>
                 <div class="dropdown">
                     <i
                         class="cls_icon"
@@ -17,10 +17,10 @@ const viewAi = (variableObject: modelAi.Ivariable, methodObject: modelAi.Imethod
                     >
                         schema
                     </i>
-                    <div class={`menu bottom-left ${variableObject.isOpenDropdownModelList.state ? "" : "none"}`}>
+                    <div class={() => `menu bottom-left ${variableObject.isOpenDropdownModelList.state ? "" : "none"}`}>
                         <p class="title">Model list:</p>
                         <ul>
-                            {(() => {
+                            {() => {
                                 const resultList: IvirtualNode[] = [];
 
                                 for (const [key, value] of Object.entries(variableObject.modelList.state)) {
@@ -37,7 +37,7 @@ const viewAi = (variableObject: modelAi.Ivariable, methodObject: modelAi.Imethod
                                 }
 
                                 return resultList;
-                            })()}
+                            }}
                         </ul>
                     </div>
                 </div>

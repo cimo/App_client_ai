@@ -8,7 +8,7 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
         <div class="view_document" jsmvcfw-controllerName="Document">
             <aside jsmvcfw-controllerName="Mcp" />
             <div class="main_wrapper">
-                {(() => {
+                {() => {
                     const resultList: IvirtualNode[] = [];
 
                     if (variableObject.isLoadingWindow.state || variableObject.isLoadingPage.state) {
@@ -26,20 +26,20 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                                     </i>
                                     <input
                                         type="text"
-                                        value={variableObject.pageNumber.state}
+                                        value={() => variableObject.pageNumber.state}
                                         onKeyUp={(event: KeyboardEvent) => {
                                             methodObject.onInputChangePage(event);
                                         }}
                                         jsmvcfw-elementHookName="elementInputPageNumber"
                                     />
                                     <span>/</span>
-                                    <span class="page_total">{variableObject.pageTotal.state}</span>
+                                    <span class="page_total">{() => variableObject.pageTotal.state}</span>
                                     <i class="cls_icon" onClick={() => methodObject.onClickChangePage(1)}>
                                         chevron_right
                                     </i>
                                 </div>
                                 <div class="data_wrapper">
-                                    {(() => {
+                                    {() => {
                                         const resultList: IvirtualNode[] = [];
 
                                         if (!variableObject.isPageExist.state) {
@@ -50,20 +50,22 @@ const viewDocument = (variableObject: modelDocument.Ivariable, methodObject: mod
                                                 </div>
                                             );
                                         } else if (variableObject.htmlContent.state !== "") {
-                                            resultList.push(<iframe srcdoc={variableObject.htmlContent.state} sandbox="allow-scripts"></iframe>);
+                                            resultList.push(
+                                                <iframe srcdoc={() => variableObject.htmlContent.state} sandbox="allow-scripts"></iframe>
+                                            );
                                         } else if (variableObject.imageContent.state !== "") {
-                                            resultList.push(<img src={`data:image/png;base64,${variableObject.imageContent.state}`} />);
+                                            resultList.push(<img src={() => `data:image/png;base64,${variableObject.imageContent.state}`} />);
                                         }
 
                                         return resultList;
-                                    })()}
+                                    }}
                                 </div>
                             </>
                         );
                     }
 
                     return resultList;
-                })()}
+                }}
             </div>
         </div>
     );

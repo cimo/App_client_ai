@@ -11,14 +11,14 @@ const viewPagination = (variableObject: modelPagination.Ivariable, methodObject:
             </button>
             <input
                 type="text"
-                value={variableObject.pageNumber.state}
+                value={() => variableObject.pageNumber.state}
                 onKeyUp={(event: KeyboardEvent) => {
                     methodObject.onInputChangePage(event);
                 }}
                 jsmvcfw-elementHookName="elementInputPageNumber"
             />
             <span>/</span>
-            <span class="page_total">{variableObject.pageTotal.state}</span>
+            <span class="page_total">{() => variableObject.pageTotal.state}</span>
             <button onClick={() => methodObject.onClickChangePage(1)}>
                 <i class="cls_icon">chevron_right</i>
             </button>

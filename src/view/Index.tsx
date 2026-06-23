@@ -6,12 +6,14 @@ import * as modelIndex from "../model/Index";
 
 const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelIndex.Imethod): IvirtualNode => {
     return (
-        <div class={`view_index ${variableObject.isViewHidden.state ? "none" : ""}`} jsmvcfw-controllerName="Index">
+        <div class={() => `view_index ${variableObject.isViewHidden.state ? "none" : ""}`} jsmvcfw-controllerName="Index">
             <div
-                class={`over_wrapper ${!variableObject.isLogin.state || variableObject.isOfflineMcp.state || variableObject.isOfflineAi.state ? "" : "none"}`}
+                class={() =>
+                    `over_wrapper ${!variableObject.isLogin.state || variableObject.isOfflineMcp.state || variableObject.isOfflineAi.state ? "" : "none"}`
+                }
             >
                 <div
-                    class={`reconnect_wrapper ${variableObject.isOfflineMcp.state || variableObject.isOfflineAi.state ? "" : "none"}`}
+                    class={() => `reconnect_wrapper ${variableObject.isOfflineMcp.state || variableObject.isOfflineAi.state ? "" : "none"}`}
                     onClick={() => {
                         methodObject.onClickRefreshPage();
                     }}
@@ -19,7 +21,7 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                     <i class="cls_icon">report_off</i>
                     <p>Click here for re-connect.</p>
                 </div>
-                <div class={`login_wrapper ${!variableObject.isLogin.state ? "" : "none"}`}>
+                <div class={() => `login_wrapper ${!variableObject.isLogin.state ? "" : "none"}`}>
                     <div class="form_wrapper">
                         <div class={`field ${helperSrc.IS_DEBUG ? "" : "none"}`}>
                             <input jsmvcfw-elementHookName="elementInputUsername" placeholder="Username"></input>
