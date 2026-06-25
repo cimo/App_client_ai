@@ -107,11 +107,13 @@ export default class Mcp implements Icontroller {
         this.variableObject.taskSelected.state = {} as modelMcp.Itask;
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
 
-        this.variableObject.systemMode.state = "chat";
+        if (session.data.msAutomateTestCookie) {
+            this.apiPLaywrightLogout().then(() => {
+                this.variableObject.playwrightVideoSrc.state = "";
+            });
+        }
 
-        this.apiPLaywrightLogout().then(() => {
-            this.variableObject.playwrightVideoSrc.state = "";
-        });
+        this.variableObject.systemMode.state = "chat";
     };
 
     private apiPLaywrightLogin = async (): Promise<void> => {
