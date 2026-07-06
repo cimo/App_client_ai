@@ -3,7 +3,7 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 // Source
 import * as modelMcp from "../model/Mcp";
 
-export interface IagentObject {
+export interface Iagent {
     [key: string]: modelMcp.Iagent[];
 }
 
@@ -83,7 +83,8 @@ export interface Imethod {
 export interface IelementHook extends Record<string, Element | Element[]> {
     elementInputAgentName: HTMLInputElement;
     elementInputAgentDescription: HTMLInputElement;
-    elementInputUserEmail: HTMLInputElement;
+    elementInputUserName: HTMLInputElement;
+    elementInputUserSurname: HTMLInputElement;
     elementInputUserPassword: HTMLInputElement;
     elementSelectSettingApiId: HTMLSelectElement;
 }

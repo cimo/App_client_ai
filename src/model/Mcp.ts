@@ -9,7 +9,6 @@ export interface IapiServerLoginBody {
 }
 
 export interface IapiDocumentReadBody {
-    pageNumber: number;
     fileName: string;
 }
 
@@ -48,7 +47,8 @@ export interface IapiAgentDeleteBody {
 
 export interface IapiUserUpdateBody {
     id: number;
-    email: string;
+    name: string;
+    surname: string;
     password: string;
 }
 
@@ -90,6 +90,8 @@ export interface Iagent {
 export interface Iuser {
     id: number;
     email: string;
+    name: string;
+    surname: string;
     password?: string;
 }
 
@@ -124,7 +126,7 @@ export interface IragSearch {
 
 export interface IdocumentParser {
     fileName: string;
-    resultExecute: string;
+    searchInput: string;
 }
 
 export interface IfileStatus {
@@ -164,7 +166,7 @@ export interface Ivariable {
     settingInfo: IvariableBind<Isetting>;
     isSettingSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
-    chatMessageList: IvariableBind<modelChat.IdataMessage[]>;
+    messageList: IvariableBind<modelChat.IdataMessage[]>;
     playwrightVideoSrc: IvariableBind<string>;
     playwrightVideoName: IvariableBind<string>;
 }

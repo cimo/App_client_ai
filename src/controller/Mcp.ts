@@ -125,7 +125,7 @@ export default class Mcp implements Icontroller {
                 acceptInvalidHostnames: true
             }
         })
-            .then(async (resultApi) => {
+            .then((resultApi) => {
                 const cookie = resultApi.headers.get("set-cookie");
 
                 if (cookie) {
@@ -397,8 +397,8 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiDocumentRead = async (fileName: string, pageNumber: number): Promise<modelDocument.IdataRead> => {
-        const body: modelMcp.IapiDocumentReadBody = { fileName, pageNumber };
+    apiDocumentRead = async (fileName: string): Promise<modelDocument.IdataRead> => {
+        const body: modelMcp.IapiDocumentReadBody = { fileName };
 
         return fetch(`${helperSrc.URL_MCP}/api/document-read`, {
             method: "POST",
@@ -469,7 +469,7 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiRagEmbeddingStart = async (): Promise<void> => {
+    apiRagEmbeddingStart = (): void => {
         this.variableObject.isRagEmbeddingStart.state = true;
 
         const fileStatusList: modelMcp.IfileStatus[] = [];
@@ -704,7 +704,7 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiAgentCreate = async (agent: modelMcp.Iagent): Promise<void> => {
+    apiAgentCreate = (agent: modelMcp.Iagent): void => {
         this.variableObject.isAgentSave.state = true;
 
         const body: modelMcp.IapiAgentCreateBody = {
@@ -713,7 +713,7 @@ export default class Mcp implements Icontroller {
             skillName: agent.skillName
         };
 
-        await fetch(`${helperSrc.URL_MCP}/api/agent-create`, {
+        fetch(`${helperSrc.URL_MCP}/api/agent-create`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -749,7 +749,7 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiAgentUpdate = async (agent: modelMcp.Iagent): Promise<void> => {
+    apiAgentUpdate = (agent: modelMcp.Iagent): void => {
         this.variableObject.isAgentSave.state = true;
 
         const body: modelMcp.IapiAgentUpdateBody = {
@@ -759,7 +759,7 @@ export default class Mcp implements Icontroller {
             skillName: agent.skillName
         };
 
-        await fetch(`${helperSrc.URL_MCP}/api/agent-update`, {
+        fetch(`${helperSrc.URL_MCP}/api/agent-update`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -909,16 +909,17 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiUserUpdate = async (user: modelMcp.Iuser): Promise<void> => {
+    apiUserUpdate = (user: modelMcp.Iuser): void => {
         this.variableObject.isUserUpdate.state = true;
 
         const body: modelMcp.IapiUserUpdateBody = {
             id: user.id,
-            email: user.email,
+            name: user.name,
+            surname: user.surname,
             password: user.password || ""
         };
 
-        await fetch(`${helperSrc.URL_MCP}/api/user-update`, {
+        fetch(`${helperSrc.URL_MCP}/api/user-update`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -982,7 +983,7 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiSettingUpdate = async (setting: modelMcp.Isetting): Promise<void> => {
+    apiSettingUpdate = (setting: modelMcp.Isetting): void => {
         this.variableObject.isSettingSave.state = true;
 
         const body: modelMcp.IapiSettingUpdateBody = {
@@ -990,7 +991,7 @@ export default class Mcp implements Icontroller {
             apiId: setting.apiId
         };
 
-        await fetch(`${helperSrc.URL_MCP}/api/setting-update`, {
+        fetch(`${helperSrc.URL_MCP}/api/setting-update`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -1076,7 +1077,7 @@ export default class Mcp implements Icontroller {
                 settingInfo: {} as modelMcp.Isetting,
                 isSettingSave: variableLink<boolean>("MenuItem"),
                 systemMode: variableLink<string>("Chat"),
-                chatMessageList: variableLink<modelChat.IdataMessage[]>("Chat"),
+                messageList: variableLink<modelChat.IdataMessage[]>("Chat"),
                 playwrightVideoSrc: "",
                 playwrightVideoName: ""
             },

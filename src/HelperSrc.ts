@@ -396,8 +396,8 @@ export const windowOpen = async (
         return window;
     }
 
-    const unlistenWindowReady = await listen<string>(`window-${windowLabel}-ready`, async () => {
-        await emitTo(windowLabel, "window-data", route);
+    const unlistenWindowReady = await listen<string>(`window-${windowLabel}-ready`, () => {
+        emitTo(windowLabel, "window-data", route);
 
         unlistenWindowReady();
     });

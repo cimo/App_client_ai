@@ -530,9 +530,11 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         <div class="form_wrapper">
                                             <div class="field">
                                                 <p class="label">Name:</p>
-                                                <textarea jsmvcfw-elementHookName="elementInputAgentName" rows="1">
-                                                    {variableObject.agentForm.state.name}
-                                                </textarea>
+                                                <input
+                                                    value={() => variableObject.agentForm.state.name}
+                                                    jsmvcfw-elementHookName="elementInputAgentName"
+                                                    placeholder="Name"
+                                                ></input>
                                             </div>
                                             <div class="field">
                                                 <p class="label">Description:</p>
@@ -681,10 +683,24 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                             <div class="form_wrapper">
                                 <div class="field">
                                     <p class="label">Email:</p>
+                                    <input value={() => variableObject.userInfo.state.email} type="text" readonly></input>
+                                </div>
+                                <div class="field">
+                                    <p class="label">Name:</p>
                                     <input
-                                        value={() => variableObject.userInfo.state.email}
-                                        jsmvcfw-elementHookName="elementInputUserEmail"
-                                        placeholder="Email"
+                                        value={() => variableObject.userInfo.state.name}
+                                        jsmvcfw-elementHookName="elementInputUserName"
+                                        placeholder="Name"
+                                        type="text"
+                                    ></input>
+                                </div>
+                                <div class="field">
+                                    <p class="label">Surname:</p>
+                                    <input
+                                        value={() => variableObject.userInfo.state.surname}
+                                        jsmvcfw-elementHookName="elementInputUserSurname"
+                                        placeholder="Surname"
+                                        type="text"
                                     ></input>
                                 </div>
                                 <div class="field">

@@ -57,7 +57,7 @@ export default class Index implements Icontroller {
         }
     };
 
-    private onClickLoginAd = async (): Promise<void> => {
+    private onClickLoginAd = (): void => {
         if (helperSrc.IS_DEBUG) {
             this.variableObject.adUrl.state = "";
         } else {

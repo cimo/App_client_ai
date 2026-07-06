@@ -54,10 +54,10 @@ listen<string>("window-data", (event) => {
 
         unlistenWindowData = undefined;
     }
-}).then(async (unlistenFn) => {
+}).then((unlistenFn) => {
     unlistenWindowData = unlistenFn;
 
     if (currentWindow.label !== "main") {
-        await emitTo("main", `window-${currentWindow.label}-ready`);
+        emitTo("main", `window-${currentWindow.label}-ready`);
     }
 });

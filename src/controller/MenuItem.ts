@@ -24,8 +24,6 @@ export default class MenuItem implements Icontroller {
     private unlistenWindowDocumentData: UnlistenFn | undefined = undefined;
     private unlistenWindowDocumentClose: UnlistenFn | undefined = undefined;
 
-    private isDialogDeleteSkillOpen = false;
-
     // Method
     private paginationUpdateList = async (mode: string, list?: modelMcp.IfileDetail[]): Promise<void> => {
         if (mode === "initialize" && list) {
@@ -78,7 +76,7 @@ export default class MenuItem implements Icontroller {
         this.paginationUpdateList("update");
     };
 
-    private onClickDocumentCheckbox = async (fileName: string): Promise<void> => {
+    private onClickDocumentCheckbox = (fileName: string): void => {
         if (!this.variableObject.documentSelectList.state.includes(fileName)) {
             this.variableObject.documentSelectList.state.push(fileName);
         } else {
@@ -94,9 +92,9 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private onClickDocumentDelete = async (fileName: string): Promise<void> => {
+    private onClickDocumentDelete = (fileName: string): void => {
         if (!this.controllerDialog.getIsOpen()) {
-            await this.dialogMessageDeleteDocument(fileName);
+            this.dialogMessageDeleteDocument(fileName);
         }
     };
 
@@ -145,7 +143,7 @@ export default class MenuItem implements Icontroller {
         this.paginationUpdateList("update");
     };
 
-    private onClickSkillCheckbox = async (fileName: string): Promise<void> => {
+    private onClickSkillCheckbox = (fileName: string): void => {
         if (!this.variableObject.skillSelectList.state.includes(fileName)) {
             this.variableObject.skillSelectList.state.push(fileName);
         } else {
@@ -161,26 +159,18 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private onClickSkillDelete = async (fileName: string): Promise<void> => {
-        if (!this.isDialogDeleteSkillOpen) {
-            this.isDialogDeleteSkillOpen = true;
-
-            this.controllerMcp.apiAgentList().then(async (resultApiList) => {
-                await this.dialogMessageDeleteSkill(resultApiList, fileName);
-
-                this.isDialogDeleteSkillOpen = false;
+    private onClickSkillDelete = (fileName: string): void => {
+        if (!this.controllerDialog.getIsOpen()) {
+            this.controllerMcp.apiAgentList().then((resultApiList) => {
+                this.dialogMessageDeleteSkill(resultApiList, fileName);
             });
         }
     };
 
-    private onClickSkillDeleteSelected = async (): Promise<void> => {
-        if (!this.isDialogDeleteSkillOpen) {
-            this.isDialogDeleteSkillOpen = true;
-
-            this.controllerMcp.apiAgentList().then(async (resultApiList) => {
-                await this.dialogMessageDeleteSkill(resultApiList);
-
-                this.isDialogDeleteSkillOpen = false;
+    private onClickSkillDeleteSelected = (): void => {
+        if (!this.controllerDialog.getIsOpen()) {
+            this.controllerMcp.apiAgentList().then((resultApiList) => {
+                this.dialogMessageDeleteSkill(resultApiList);
             });
         }
     };
@@ -353,7 +343,7 @@ export default class MenuItem implements Icontroller {
         });
     };
 
-    private onClickAgentOpen = async (id: number): Promise<void> => {
+    private onClickAgentOpen = (id: number): void => {
         this.variableObject.toolSelected.state = {} as modelMcp.Itool;
         this.variableObject.taskSelected.state = {} as modelMcp.Itask;
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
@@ -363,7 +353,7 @@ export default class MenuItem implements Icontroller {
 
             if (agent.id === id) {
                 if (agent.skillName === "") {
-                    await this.controllerDialog.show(
+                    this.controllerDialog.show(
                         "info",
                         `Agent '${agent.name}' does not have a selected skill. Please select a skill to use this agent.`,
                         true
@@ -397,12 +387,17 @@ export default class MenuItem implements Icontroller {
     private onClickUserUpdate = (): void => {
         const errorList = [];
 
-        if (this.hookObject.elementInputUserEmail.value === "") {
-            errorList.push("User email is required.");
+        if (this.hookObject.elementInputUserName.value === "") {
+            errorList.push("User name is required.");
+        }
+
+        if (this.hookObject.elementInputUserSurname.value === "") {
+            errorList.push("User surname is required.");
         }
 
         if (errorList.length === 0) {
-            this.variableObject.userInfo.state.email = this.hookObject.elementInputUserEmail.value;
+            this.variableObject.userInfo.state.name = this.hookObject.elementInputUserName.value;
+            this.variableObject.userInfo.state.surname = this.hookObject.elementInputUserSurname.value;
             this.variableObject.userInfo.state.password = this.hookObject.elementInputUserPassword.value;
 
             this.controllerMcp.apiUserUpdate(this.variableObject.userInfo.state);
@@ -450,14 +445,14 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isAgentSkillSelect.state = false;
     };
 
-    private windowOpenDocument = async (title: string): Promise<void> => {
+    private windowOpenDocument = (title: string): void => {
         if (!this.variableObject.documentOpenList.state.includes(title)) {
             this.variableObject.documentOpenList.state = [...this.variableObject.documentOpenList.state, title];
         }
 
         const route = "#/document";
 
-        await helperSrc.windowOpen("document", title, route, {
+        helperSrc.windowOpen("document", title, route, {
             title,
             url: route,
             decorations: true,
@@ -524,7 +519,7 @@ export default class MenuItem implements Icontroller {
     private dialogMessageDeleteSkill = async (resultList: modelMcp.Iagent[], fileName?: string): Promise<void> => {
         let agentList = [];
         let agentNameList = [];
-        let agentObject = {} as modelMenuItem.IagentObject;
+        let agentObject = {} as modelMenuItem.Iagent;
 
         let dialogMessage = "";
 
@@ -687,7 +682,7 @@ export default class MenuItem implements Icontroller {
         watch([
             {
                 variableList: ["pageNumber"],
-                action: async () => {
+                action: () => {
                     this.paginationUpdateList("update");
                 }
             }

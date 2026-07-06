@@ -17,18 +17,18 @@ export default class Dialog implements Icontroller {
     private isOpen = false;
 
     // Method
-    private async onClickOk(): Promise<void> {
+    private onClickOk(): void {
         const currentWindow = getCurrentWindow();
 
-        await emitTo("main", `dialog-${currentWindow.label}-result`, true);
+        emitTo("main", `dialog-${currentWindow.label}-result`, true);
 
         currentWindow.close();
     }
 
-    private async onClickCancel(): Promise<void> {
+    private onClickCancel(): void {
         const currentWindow = getCurrentWindow();
 
-        await emitTo("main", `dialog-${currentWindow.label}-result`, false);
+        emitTo("main", `dialog-${currentWindow.label}-result`, false);
 
         currentWindow.close();
     }
@@ -135,12 +135,12 @@ export default class Dialog implements Icontroller {
             this.variableObject.mode.state = event.payload.mode;
             this.variableObject.message.state = event.payload.message;
             this.variableObject.isConfirm.state = event.payload.isConfirm;
-        }).then(async (unlistenFn) => {
+        }).then((unlistenFn) => {
             this.unlistenWindowData = unlistenFn;
 
             const currentWindow = getCurrentWindow();
 
-            await emitTo("main", `dialog-${currentWindow.label}-ready`);
+            emitTo("main", `dialog-${currentWindow.label}-ready`);
         });
     }
 

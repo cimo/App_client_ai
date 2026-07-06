@@ -1,5 +1,16 @@
 import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 
+interface IpdfViewerApplicationEventBus {
+    dispatch: (name: string, data: Record<string, unknown>) => void;
+}
+
+interface IpdfViewerApplicationFindBar {
+    open?: () => void;
+    findField?: { value: string };
+    entireWord?: { checked: boolean };
+    highlightAll?: { checked: boolean };
+}
+
 export interface Idata {
     fileName?: string;
     pageNumber: number;
@@ -10,21 +21,23 @@ export interface IdataRead {
     pageTotal: number;
 }
 
+export interface IpdfViewerApplication {
+    eventBus: IpdfViewerApplicationEventBus;
+    findBar?: IpdfViewerApplicationFindBar;
+}
+
+export interface IpdfViewerWindow extends Window {
+    PDFViewerApplication?: IpdfViewerApplication;
+}
+
 export interface Ivariable {
     isLoadingWindow: IvariableBind<boolean>;
-    isLoadingPage: IvariableBind<boolean>;
-    isPageExist: IvariableBind<boolean>;
-    htmlContent: IvariableBind<string>;
+    pdfContent: IvariableBind<string>;
     imageContent: IvariableBind<string>;
-    pageNumber: IvariableBind<number>;
-    pageTotal: IvariableBind<number>;
 }
 
-export interface Imethod {
-    onClickChangePage: (difference: number) => void;
-    onInputChangePage: (event: KeyboardEvent) => void;
-}
+export interface Imethod {}
 
 export interface IelementHook extends Record<string, Element | Element[]> {
-    elementInputPageNumber: HTMLInputElement;
+    elementPdfViewer: HTMLIFrameElement;
 }

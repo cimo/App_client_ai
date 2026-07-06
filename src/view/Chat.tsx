@@ -11,7 +11,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                 {() => {
                     const resultList: IvirtualNode[] = [];
 
-                    for (const [key, value] of Object.entries(variableObject.chatMessageList.state)) {
+                    for (const [key, value] of Object.entries(variableObject.messageList.state)) {
                         const messageIndex = parseInt(key);
 
                         resultList.push(
@@ -75,7 +75,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                             <p>Citation result:</p>
                                                         </summary>
                                                         <div class="citation_wrapper">
-                                                            <div class="pagination_wrapper">
+                                                            <div class="view_pagination">
                                                                 <button
                                                                     onClick={() => {
                                                                         methodObject.onClickCitationTab(
@@ -126,8 +126,9 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                                             <a
                                                                                 class="link"
                                                                                 href="#"
-                                                                                onClick={() => {
+                                                                                onClick={(event: Event) => {
                                                                                     methodObject.onClickCitationLink(
+                                                                                        event,
                                                                                         citation.fileName,
                                                                                         citation.chunk
                                                                                     );

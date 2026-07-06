@@ -44,7 +44,7 @@ export interface Iplaywright {
 
 export interface Ifile {
     [key: string]: {
-        pageNumber: string;
+        searchInput: string;
     };
 }
 
@@ -65,8 +65,8 @@ export interface IllmResponse {
 
 export interface Ivariable {
     isMessageSendAvailable: IvariableBind<boolean>;
-    chatMessageList: IvariableBind<IdataMessage[]>;
-    chatHistoryList: IvariableBind<IdataInput[]>;
+    messageList: IvariableBind<IdataMessage[]>;
+    historyList: IvariableBind<IdataInput[]>;
     systemMode: IvariableBind<string>;
     toolSelected: IvariableBind<modelMcp.Itool>;
     toolList: IvariableBind<modelMcp.Itool[]>;
@@ -78,7 +78,7 @@ export interface Ivariable {
 
 export interface Imethod {
     onClickButtonMessageSend: () => void;
-    onClickCitationLink: (fileName: string, chunk: string) => void;
+    onClickCitationLink: (event: Event, fileName: string, chunk: string) => void;
     onClickCitationTab: (messageIndex: number, tabIndex: number) => void;
     onClickPlaywrightVideoShow: (fileName: string) => void;
     onErrorPlaywrightVideoFail: () => void;
