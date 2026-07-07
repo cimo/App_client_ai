@@ -137,9 +137,24 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     onClick={() => {
                                                         methodObject.onClickRagGraph();
                                                     }}
+                                                    disabled={() => variableObject.isRagEmbeddingStart.state}
                                                 >
-                                                    <i class="cls_icon">analytics</i>
-                                                    <p>RAG - Graph</p>
+                                                    {() => {
+                                                        const resultList: IvirtualNode[] = [];
+
+                                                        if (variableObject.isRagEmbeddingStart.state) {
+                                                            resultList.push(<i class="cls_icon">update</i>);
+                                                        } else {
+                                                            resultList.push(
+                                                                <>
+                                                                    <i class="cls_icon">analytics</i>
+                                                                    <p>RAG - Graph</p>
+                                                                </>
+                                                            );
+                                                        }
+
+                                                        return resultList;
+                                                    }}
                                                 </button>
                                                 {() => {
                                                     const result: IvirtualNode[] = [];

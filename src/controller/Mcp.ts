@@ -22,19 +22,15 @@ export default class Mcp implements Icontroller {
 
     // Method
     private showFileStatusMessage = (fileStatusList: modelMcp.IfileStatus[]): void => {
-        let mode = "success";
-
         const messageList: string[] = [];
 
         for (const fileStatus of fileStatusList) {
             if (fileStatus.status === "Failed") {
-                mode = "error";
+                messageList.push(`[${fileStatus.status}] ${fileStatus.fileName}`);
             }
-
-            messageList.push(`[${fileStatus.status}] ${fileStatus.fileName}`);
         }
 
-        this.controllerToast.show(mode, messageList, 0);
+        this.controllerToast.show("error", messageList, 0);
     };
 
     private apiRagEmbeddingCheck = (fileStatusList: modelMcp.IfileStatus[], index: number): void => {
@@ -495,8 +491,6 @@ export default class Mcp implements Icontroller {
                 if (stdoutList.length > 0) {
                     for (let a = 0; a < stdoutList.length; a++) {
                         fileStatusList.push({ fileName: stdoutList[a], status: "Ongoing" });
-
-                        this.showFileStatusMessage(fileStatusList);
 
                         this.apiRagEmbeddingCheck(fileStatusList, a);
                     }
