@@ -145,6 +145,11 @@ export interface IllmResponseTool {
     result: unknown;
 }
 
+export interface Illm {
+    id: number;
+    name: string;
+}
+
 export interface Ivariable {
     isOfflineMcp: IvariableBind<boolean>;
     isLogin: IvariableBind<boolean>;
@@ -163,6 +168,7 @@ export interface Ivariable {
     isAgentSave: IvariableBind<boolean>;
     userInfo: IvariableBind<Iuser>;
     isUserUpdate: IvariableBind<boolean>;
+    llmList: IvariableBind<Illm[]>;
     settingInfo: IvariableBind<Isetting>;
     isSettingSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;

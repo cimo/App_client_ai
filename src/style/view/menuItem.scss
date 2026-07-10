@@ -93,7 +93,7 @@
                     margin-left: auto !important;
                 }
 
-                .cls_icon {
+                .cls_icon:has(+ p) {
                     margin-right: 5px !important;
                 }
             }
@@ -101,7 +101,11 @@
 
         .table_flex {
             & .select {
-                flex: 0 0 40px !important;
+                flex: 0 0 60px !important;
+
+                button {
+                    margin: 0 !important;
+                }
 
                 input[type="checkbox"] {
                     all: revert !important;
@@ -197,6 +201,7 @@
             .chip {
                 flex-direction: column;
                 align-items: stretch;
+                justify-content: start;
                 max-height: 250px;
 
                 width: 350px;

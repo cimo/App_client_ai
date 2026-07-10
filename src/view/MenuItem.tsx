@@ -178,7 +178,34 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             </div>
                                             <div class="table_flex">
                                                 <div class="row header">
-                                                    <div class="cell select"></div>
+                                                    <div class="cell select">
+                                                        {() => {
+                                                            const resultList: IvirtualNode[] = [];
+
+                                                            if (variableObject.documentList.state.length > 0) {
+                                                                resultList.push(
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            methodObject.onClickToggleSelectAll("document");
+                                                                        }}
+                                                                    >
+                                                                        <i class="cls_icon">
+                                                                            {() =>
+                                                                                methodObject.selectAllCheck(
+                                                                                    variableObject.documentList.state,
+                                                                                    variableObject.documentSelectList.state
+                                                                                )
+                                                                                    ? "check_box_outline_blank"
+                                                                                    : "check_box"
+                                                                            }
+                                                                        </i>
+                                                                    </button>
+                                                                );
+                                                            }
+
+                                                            return resultList;
+                                                        }}
+                                                    </div>
                                                     <div class="cell delete"></div>
                                                     <div class="cell name">
                                                         <p>Name</p>
@@ -345,7 +372,34 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                             </div>
                             <div class="table_flex">
                                 <div class="row header">
-                                    <div class="cell select"></div>
+                                    <div class="cell select">
+                                        {() => {
+                                            const resultList: IvirtualNode[] = [];
+
+                                            if (variableObject.skillList.state.length > 0) {
+                                                resultList.push(
+                                                    <button
+                                                        onClick={() => {
+                                                            methodObject.onClickToggleSelectAll("skill");
+                                                        }}
+                                                    >
+                                                        <i class="cls_icon">
+                                                            {() =>
+                                                                methodObject.selectAllCheck(
+                                                                    variableObject.skillList.state,
+                                                                    variableObject.skillSelectList.state
+                                                                )
+                                                                    ? "check_box_outline_blank"
+                                                                    : "check_box"
+                                                            }
+                                                        </i>
+                                                    </button>
+                                                );
+                                            }
+
+                                            return resultList;
+                                        }}
+                                    </div>
                                     <div class="cell delete"></div>
                                     <div class="cell name">
                                         <p>Name</p>
@@ -762,17 +816,25 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                         <div class="setting_wrapper">
                             <div class="form_wrapper">
                                 <div class="field">
-                                    <p class="label">API:</p>
+                                    <p class="label">LLM:</p>
                                     <select value={() => variableObject.settingInfo.state.apiId} jsmvcfw-elementHookName="elementSelectSettingApiId">
-                                        <option value="1" selected={() => variableObject.settingInfo.state.apiId === 1}>
-                                            Local
-                                        </option>
-                                        <option value="2" selected={() => variableObject.settingInfo.state.apiId === 2}>
-                                            Anthropic
-                                        </option>
-                                        <option value="3" selected={() => variableObject.settingInfo.state.apiId === 3}>
-                                            OpenAI
-                                        </option>
+                                        {() => {
+                                            const resultList: IvirtualNode[] = [];
+
+                                            for (const [key, value] of Object.entries(variableObject.llmList.state)) {
+                                                resultList.push(
+                                                    <option
+                                                        key={key}
+                                                        value={value.id}
+                                                        selected={() => variableObject.settingInfo.state.apiId === value.id}
+                                                    >
+                                                        {value.name}
+                                                    </option>
+                                                );
+                                            }
+
+                                            return resultList;
+                                        }}
                                     </select>
                                 </div>
                                 <div class="button_wrapper">

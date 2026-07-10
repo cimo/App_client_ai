@@ -53,6 +53,20 @@ export default class MenuItem implements Icontroller {
         }
     };
 
+    private selectAllCheck = (fileDetailList: modelMcp.IfileDetail[], selectList: string[]): boolean => {
+        let isResult = true;
+
+        for (const fileDetail of fileDetailList) {
+            if (!selectList.includes(fileDetail.fileName)) {
+                isResult = false;
+
+                break;
+            }
+        }
+
+        return isResult;
+    };
+
     private onClickMenuDocument = (): void => {
         this.controllerMcp.apiDocumentSelect().then(() => {
             this.variableObject.isMenuItemDocument.state = !this.variableObject.isMenuItemDocument.state;
@@ -432,7 +446,9 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemSetting.state = false;
     };
 
-    private onClickMenuSetting = (): void => {
+    private onClickMenuSetting = async (): Promise<void> => {
+        await this.controllerMcp.apiLlmSelect();
+
         this.variableObject.isMenuItemDocument.state = false;
         this.variableObject.isMenuItemTool.state = false;
         this.variableObject.isMenuItemTask.state = false;
@@ -443,6 +459,41 @@ export default class MenuItem implements Icontroller {
 
         this.variableObject.agentForm.state = {} as modelMcp.Iagent;
         this.variableObject.isAgentSkillSelect.state = false;
+    };
+
+    private onClickToggleSelectAll = (mode: string): void => {
+        let fileDetailList: modelMcp.IfileDetail[] = [];
+        let selectList: string[] = [];
+
+        if (mode === "document") {
+            fileDetailList = this.variableObject.documentList.state;
+            selectList = this.variableObject.documentSelectList.state;
+        } else if (mode === "skill") {
+            fileDetailList = this.variableObject.skillList.state;
+            selectList = this.variableObject.skillSelectList.state;
+        }
+
+        if (this.selectAllCheck(fileDetailList, selectList)) {
+            for (const fileDetail of fileDetailList) {
+                const index = selectList.indexOf(fileDetail.fileName);
+
+                if (index !== -1) {
+                    selectList.splice(index, 1);
+                }
+            }
+        } else {
+            for (const fileDetail of fileDetailList) {
+                if (!selectList.includes(fileDetail.fileName)) {
+                    selectList.push(fileDetail.fileName);
+                }
+            }
+        }
+
+        if (mode === "document") {
+            this.variableObject.documentSelectList.state = selectList;
+        } else if (mode === "skill") {
+            this.variableObject.skillSelectList.state = selectList;
+        }
     };
 
     private windowOpenDocument = (title: string): void => {
@@ -632,6 +683,7 @@ export default class MenuItem implements Icontroller {
                 isAgentSave: false,
                 userInfo: variableLink<modelMcp.Iuser>("Mcp"),
                 isUserUpdate: false,
+                llmList: variableLink<modelMcp.Illm[]>("Mcp"),
                 settingInfo: variableLink<modelMcp.Isetting>("Mcp"),
                 isSettingSave: false,
                 systemMode: variableLink<string>("Chat"),
@@ -641,6 +693,7 @@ export default class MenuItem implements Icontroller {
         );
 
         this.methodObject = {
+            selectAllCheck: this.selectAllCheck,
             onClickMenuDocument: this.onClickMenuDocument,
             onClickDocumentUpload: this.onClickDocumentUpload,
             onClickDocumentCheckbox: this.onClickDocumentCheckbox,
@@ -674,6 +727,7 @@ export default class MenuItem implements Icontroller {
             onClickMenuSetting: this.onClickMenuSetting,
             onClickSettingSave: this.onClickSettingSave,
             onClickSettingCancel: this.onClickSettingCancel,
+            onClickToggleSelectAll: this.onClickToggleSelectAll,
             windowOpenDocument: this.windowOpenDocument
         };
     }

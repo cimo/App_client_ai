@@ -37,6 +37,7 @@ export interface Ivariable {
     isAgentSave: IvariableBind<boolean>;
     userInfo: IvariableBind<modelMcp.Iuser>;
     isUserUpdate: IvariableBind<boolean>;
+    llmList: IvariableBind<modelMcp.Illm[]>;
     settingInfo: IvariableBind<modelMcp.Isetting>;
     isSettingSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
@@ -44,6 +45,7 @@ export interface Ivariable {
 }
 
 export interface Imethod {
+    selectAllCheck: (fileDetailList: modelMcp.IfileDetail[], selectList: string[]) => boolean;
     onClickMenuDocument: () => void;
     onClickDocumentUpload: () => void;
     onClickDocumentCheckbox: (fileName: string) => void;
@@ -74,9 +76,10 @@ export interface Imethod {
     onClickMenuUser: () => void;
     onClickUserUpdate: () => void;
     onClickUserCancel: () => void;
-    onClickMenuSetting: () => void;
+    onClickMenuSetting: () => Promise<void>;
     onClickSettingSave: () => void;
     onClickSettingCancel: () => void;
+    onClickToggleSelectAll: (mode: string) => void;
     windowOpenDocument: (title: string) => void;
 }
 

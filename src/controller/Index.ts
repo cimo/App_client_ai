@@ -30,6 +30,14 @@ export default class Index implements Icontroller {
     private isClosing: boolean;
 
     // Method
+    private mcpApi = async (): Promise<void> => {
+        this.controllerMcp.apiUserInfo();
+        this.controllerMcp.apiSettingInfo();
+
+        await this.controllerMcp.apiTool();
+        await this.controllerMcp.apiTask();
+    };
+
     private onClickLoginBasic = async (): Promise<void> => {
         const username = this.hookObject.elementInputUsername.value;
         const password = this.hookObject.elementInputPassword.value;
@@ -43,11 +51,7 @@ export default class Index implements Icontroller {
         const isLogin = await this.controllerMcp.apiLogin(username, password);
 
         if (isLogin) {
-            this.controllerMcp.apiUserInfo();
-            this.controllerMcp.apiSettingInfo();
-
-            await this.controllerMcp.apiTool();
-            await this.controllerMcp.apiTask();
+            await this.mcpApi();
 
             if (!session.data.aiCookie) {
                 await this.controllerAi.apiLogin();
@@ -163,11 +167,7 @@ export default class Index implements Icontroller {
             if (session.data.mcpCookie && session.data.mcpSessionId) {
                 this.variableObject.isLogin.state = true;
 
-                this.controllerMcp.apiUserInfo();
-                this.controllerMcp.apiSettingInfo();
-
-                await this.controllerMcp.apiTool();
-                await this.controllerMcp.apiTask();
+                await this.mcpApi();
             }
 
             if (session.data.aiCookie && session.data.aiBearerToken) {

@@ -949,6 +949,37 @@ export default class Mcp implements Icontroller {
             });
     };
 
+    apiLlmSelect = async (): Promise<modelMcp.Illm[]> => {
+        return fetch(`${helperSrc.URL_MCP}/api/llm-list`, {
+            method: "GET",
+            headers: {
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const stdoutList = JSON.parse(json.response.stdout);
+
+                this.variableObject.llmList.state = stdoutList;
+
+                return this.variableObject.llmList.state;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiLlmSelect() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+
+                return [];
+            });
+    };
+
     apiSettingInfo = (): void => {
         fetch(`${helperSrc.URL_MCP}/api/setting-info`, {
             method: "GET",
@@ -1068,6 +1099,7 @@ export default class Mcp implements Icontroller {
                 isAgentSave: variableLink<boolean>("MenuItem"),
                 userInfo: {} as modelMcp.Iuser,
                 isUserUpdate: variableLink<boolean>("MenuItem"),
+                llmList: [],
                 settingInfo: {} as modelMcp.Isetting,
                 isSettingSave: variableLink<boolean>("MenuItem"),
                 systemMode: variableLink<string>("Chat"),
