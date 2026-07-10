@@ -362,7 +362,7 @@ export default class Mcp implements Icontroller {
         }
     };
 
-    apiDocumentList = async (): Promise<modelMcp.IfileDetail[]> => {
+    apiDocumentSelect = async (): Promise<modelMcp.IfileDetail[]> => {
         return fetch(`${helperSrc.URL_MCP}/api/document-list`, {
             method: "GET",
             headers: {
@@ -385,7 +385,7 @@ export default class Mcp implements Icontroller {
                 return this.variableObject.documentList.state;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiDocumentList() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiDocumentSelect() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
 
@@ -595,7 +595,7 @@ export default class Mcp implements Icontroller {
         }
     };
 
-    apiSkillList = async (): Promise<modelMcp.IfileDetail[]> => {
+    apiSkillSelect = async (): Promise<modelMcp.IfileDetail[]> => {
         return fetch(`${helperSrc.URL_MCP}/api/skill-list`, {
             method: "GET",
             headers: {
@@ -618,7 +618,7 @@ export default class Mcp implements Icontroller {
                 return this.variableObject.skillList.state;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiSkillList() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiSkillSelect() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
 
@@ -727,7 +727,7 @@ export default class Mcp implements Icontroller {
                 const stdout = json.response.stdout;
 
                 if (stdout !== "ko") {
-                    this.apiAgentList();
+                    this.apiAgentSelect();
 
                     this.variableObject.agentForm.state = {} as modelMcp.Iagent;
                 } else {
@@ -773,7 +773,7 @@ export default class Mcp implements Icontroller {
                 const stdout = json.response.stdout;
 
                 if (stdout !== "ko") {
-                    this.apiAgentList();
+                    this.apiAgentSelect();
 
                     this.variableObject.agentForm.state = {} as modelMcp.Iagent;
                 } else {
@@ -789,7 +789,7 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiAgentList = async (): Promise<modelMcp.Iagent[]> => {
+    apiAgentSelect = async (): Promise<modelMcp.Iagent[]> => {
         return fetch(`${helperSrc.URL_MCP}/api/agent-list`, {
             method: "GET",
             headers: {
@@ -824,7 +824,7 @@ export default class Mcp implements Icontroller {
                 return this.variableObject.agentList.state;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiAgentList() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiAgentSelect() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
 

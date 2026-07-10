@@ -39,7 +39,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                         <li>
                                                             <b>Argument:</b>
                                                             <pre>
-                                                                {helperSrc.isJson(value.mcpTool["arguments"])
+                                                                {helperSrc.jsonCheck(value.mcpTool["arguments"])
                                                                     ? JSON.stringify(JSON.parse(value.mcpTool["arguments"]), null, 4)
                                                                     : value.mcpTool["arguments"]}
                                                             </pre>

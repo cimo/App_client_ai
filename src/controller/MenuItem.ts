@@ -25,7 +25,7 @@ export default class MenuItem implements Icontroller {
     private unlistenWindowDocumentClose: UnlistenFn | undefined = undefined;
 
     // Method
-    private paginationUpdateList = async (mode: string, list?: modelMcp.IfileDetail[]): Promise<void> => {
+    private paginationUpdate = async (mode: string, list?: modelMcp.IfileDetail[]): Promise<void> => {
         if (mode === "initialize" && list) {
             this.variableObject.pageNumber.state = 1;
         }
@@ -34,7 +34,7 @@ export default class MenuItem implements Icontroller {
             let documentList = list;
 
             if (mode === "update") {
-                documentList = await this.controllerMcp.apiDocumentList();
+                documentList = await this.controllerMcp.apiDocumentSelect();
             }
 
             if (documentList) {
@@ -44,7 +44,7 @@ export default class MenuItem implements Icontroller {
             let skillList = list;
 
             if (mode === "update") {
-                skillList = await this.controllerMcp.apiSkillList();
+                skillList = await this.controllerMcp.apiSkillSelect();
             }
 
             if (skillList) {
@@ -54,7 +54,7 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuDocument = (): void => {
-        this.controllerMcp.apiDocumentList().then(() => {
+        this.controllerMcp.apiDocumentSelect().then(() => {
             this.variableObject.isMenuItemDocument.state = !this.variableObject.isMenuItemDocument.state;
             this.variableObject.isMenuItemTool.state = false;
             this.variableObject.isMenuItemTask.state = false;
@@ -66,14 +66,14 @@ export default class MenuItem implements Icontroller {
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSkillSelect.state = false;
 
-            this.paginationUpdateList("initialize", this.variableObject.documentList.state);
+            this.paginationUpdate("initialize", this.variableObject.documentList.state);
         });
     };
 
     private onClickDocumentUpload = async (): Promise<void> => {
         await this.controllerMcp.apiDocumentUpload();
 
-        this.paginationUpdateList("update");
+        this.paginationUpdate("update");
     };
 
     private onClickDocumentCheckbox = (fileName: string): void => {
@@ -121,7 +121,7 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuSkill = (): void => {
-        this.controllerMcp.apiSkillList().then(() => {
+        this.controllerMcp.apiSkillSelect().then(() => {
             this.variableObject.isMenuItemDocument.state = false;
             this.variableObject.isMenuItemTool.state = false;
             this.variableObject.isMenuItemTask.state = false;
@@ -133,14 +133,14 @@ export default class MenuItem implements Icontroller {
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSkillSelect.state = false;
 
-            this.paginationUpdateList("initialize", this.variableObject.skillList.state);
+            this.paginationUpdate("initialize", this.variableObject.skillList.state);
         });
     };
 
     private onClickSkillUpload = async (): Promise<void> => {
         await this.controllerMcp.apiSkillUpload();
 
-        this.paginationUpdateList("update");
+        this.paginationUpdate("update");
     };
 
     private onClickSkillCheckbox = (fileName: string): void => {
@@ -161,7 +161,7 @@ export default class MenuItem implements Icontroller {
 
     private onClickSkillDelete = (fileName: string): void => {
         if (!this.controllerDialog.getIsOpen()) {
-            this.controllerMcp.apiAgentList().then((resultApiList) => {
+            this.controllerMcp.apiAgentSelect().then((resultApiList) => {
                 this.dialogMessageDeleteSkill(resultApiList, fileName);
             });
         }
@@ -169,20 +169,20 @@ export default class MenuItem implements Icontroller {
 
     private onClickSkillDeleteSelected = (): void => {
         if (!this.controllerDialog.getIsOpen()) {
-            this.controllerMcp.apiAgentList().then((resultApiList) => {
+            this.controllerMcp.apiAgentSelect().then((resultApiList) => {
                 this.dialogMessageDeleteSkill(resultApiList);
             });
         }
     };
 
     private onClickSelectSkill = (): void => {
-        this.controllerMcp.apiSkillList().then(() => {
+        this.controllerMcp.apiSkillSelect().then(() => {
             this.variableObject.agentForm.state.name = this.hookObject.elementInputAgentName.value;
             this.variableObject.agentForm.state.description = this.hookObject.elementInputAgentDescription.value;
 
             this.variableObject.isAgentSkillSelect.state = true;
 
-            this.paginationUpdateList("initialize", this.variableObject.skillList.state);
+            this.paginationUpdate("initialize", this.variableObject.skillList.state);
         });
     };
 
@@ -263,7 +263,7 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuAgent = (): void => {
-        this.controllerMcp.apiAgentList().then(() => {
+        this.controllerMcp.apiAgentSelect().then(() => {
             this.variableObject.isMenuItemDocument.state = false;
             this.variableObject.isMenuItemTool.state = false;
             this.variableObject.isMenuItemTask.state = false;
@@ -338,7 +338,7 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickAgentCancel = (): void => {
-        this.controllerMcp.apiAgentList().then(() => {
+        this.controllerMcp.apiAgentSelect().then(() => {
             this.variableObject.agentForm.state = {} as modelMcp.Iagent;
         });
     };
@@ -512,7 +512,7 @@ export default class MenuItem implements Icontroller {
                 this.variableObject.documentSelectList.state = [];
             }
 
-            this.paginationUpdateList("update");
+            this.paginationUpdate("update");
         }
     };
 
@@ -575,7 +575,7 @@ export default class MenuItem implements Icontroller {
                 this.variableObject.skillSelectList.state = [];
             }
 
-            this.paginationUpdateList("update");
+            this.paginationUpdate("update");
         }
     };
 
@@ -683,7 +683,7 @@ export default class MenuItem implements Icontroller {
             {
                 variableList: ["pageNumber"],
                 action: () => {
-                    this.paginationUpdateList("update");
+                    this.paginationUpdate("update");
                 }
             }
         ]);

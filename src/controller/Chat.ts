@@ -377,7 +377,7 @@ export default class Chat implements Icontroller {
 
                                 const dataTrim = data.trim();
 
-                                if (helperSrc.isJson(dataTrim)) {
+                                if (helperSrc.jsonCheck(dataTrim)) {
                                     const dataTrimObject = JSON.parse(dataTrim) as modelChat.IllmResponse;
 
                                     if (dataTrimObject.type === "error") {
@@ -485,7 +485,7 @@ export default class Chat implements Icontroller {
                                         const argument = dataTrimObject.response.arguments;
 
                                         if (message) {
-                                            if (helperSrc.isJson(message)) {
+                                            if (helperSrc.jsonCheck(message)) {
                                                 const messageObject = JSON.parse(message) as modelMcp.IllmResponseTool;
 
                                                 this.responseMcpTool = {
