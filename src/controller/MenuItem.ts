@@ -119,7 +119,7 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickRagStart = (): void => {
-        this.controllerMcp.apiRagEmbeddingStart();
+        this.controllerMcp.apiRagStart();
     };
 
     private onClickRagGraph = async (): Promise<void> => {
@@ -665,7 +665,7 @@ export default class MenuItem implements Icontroller {
                 documentOpenList: [],
                 documentSelectList: [],
                 isDocumentUpload: false,
-                isRagEmbeddingStart: false,
+                isRagStart: false,
                 isRagGraphOpen: false,
                 isRagGraphHtmlLoading: false,
                 ragGraphHtml: "",

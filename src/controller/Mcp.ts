@@ -33,7 +33,7 @@ export default class Mcp implements Icontroller {
         this.controllerToast.show("error", messageList, 0);
     };
 
-    private apiRagEmbeddingCheck = (fileStatusList: modelMcp.IfileStatus[], index: number): void => {
+    private apiRagCheck = (fileStatusList: modelMcp.IfileStatus[], index: number): void => {
         const fileName = fileStatusList[index].fileName;
 
         let isIntervalRunning = false;
@@ -45,9 +45,9 @@ export default class Mcp implements Icontroller {
 
             isIntervalRunning = true;
 
-            const body: modelMcp.IapiRagEmbeddingCheckBody = { fileName };
+            const body: modelMcp.IapiRagCheckBody = { fileName };
 
-            await fetch(`${helperSrc.URL_MCP}/api/rag-embedding-check`, {
+            await fetch(`${helperSrc.URL_MCP}/api/rag-check`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -77,19 +77,19 @@ export default class Mcp implements Icontroller {
 
                         for (let a = 0; a < fileStatusList.length; a++) {
                             if (fileStatusList[a].status === "Ongoing") {
-                                this.variableObject.isRagEmbeddingStart.state = true;
+                                this.variableObject.isRagStart.state = true;
 
                                 break;
                             }
 
                             if (a === fileStatusList.length - 1) {
-                                this.variableObject.isRagEmbeddingStart.state = false;
+                                this.variableObject.isRagStart.state = false;
                             }
                         }
                     }
                 })
                 .catch((error: Error) => {
-                    helperSrc.writeLog("Mcp.ts - apiRagEmbeddingCheck() - fetch() - catch()", error.message);
+                    helperSrc.writeLog("Mcp.ts - apiRagCheck() - fetch() - catch()", error.message);
 
                     this.variableObject.isOfflineMcp.state = true;
                 });
@@ -465,12 +465,12 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiRagEmbeddingStart = (): void => {
-        this.variableObject.isRagEmbeddingStart.state = true;
+    apiRagStart = (): void => {
+        this.variableObject.isRagStart.state = true;
 
         const fileStatusList: modelMcp.IfileStatus[] = [];
 
-        fetch(`${helperSrc.URL_MCP}/api/rag-embedding-start`, {
+        fetch(`${helperSrc.URL_MCP}/api/rag-start`, {
             method: "POST",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
@@ -492,16 +492,16 @@ export default class Mcp implements Icontroller {
                     for (let a = 0; a < stdoutList.length; a++) {
                         fileStatusList.push({ fileName: stdoutList[a], status: "Ongoing" });
 
-                        this.apiRagEmbeddingCheck(fileStatusList, a);
+                        this.apiRagCheck(fileStatusList, a);
                     }
                 } else {
                     this.controllerToast.show("warning", ["No documents found for RAG."]);
 
-                    this.variableObject.isRagEmbeddingStart.state = false;
+                    this.variableObject.isRagStart.state = false;
                 }
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiRagEmbeddingStart() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiRagStart() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
             });
@@ -1092,7 +1092,7 @@ export default class Mcp implements Icontroller {
                 agentSelected: {} as modelMcp.Iagent,
                 documentList: [],
                 isDocumentUpload: variableLink<boolean>("MenuItem"),
-                isRagEmbeddingStart: variableLink<boolean>("MenuItem"),
+                isRagStart: variableLink<boolean>("MenuItem"),
                 skillList: [],
                 isSkillUpload: variableLink<boolean>("MenuItem"),
                 agentForm: variableLink<modelMcp.Iagent>("MenuItem"),

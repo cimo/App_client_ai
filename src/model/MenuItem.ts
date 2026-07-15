@@ -19,7 +19,7 @@ export interface Ivariable {
     documentList: IvariableBind<modelMcp.IfileDetail[]>;
     documentOpenList: IvariableBind<string[]>;
     documentSelectList: IvariableBind<string[]>;
-    isRagEmbeddingStart: IvariableBind<boolean>;
+    isRagStart: IvariableBind<boolean>;
     isRagGraphOpen: IvariableBind<boolean>;
     isRagGraphHtmlLoading: IvariableBind<boolean>;
     ragGraphHtml: IvariableBind<string>;

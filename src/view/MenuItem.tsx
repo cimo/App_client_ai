@@ -114,12 +114,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     onClick={() => {
                                                         methodObject.onClickRagStart();
                                                     }}
-                                                    disabled={() => variableObject.isRagEmbeddingStart.state}
+                                                    disabled={() => variableObject.isRagStart.state}
                                                 >
                                                     {() => {
                                                         const resultList: IvirtualNode[] = [];
 
-                                                        if (variableObject.isRagEmbeddingStart.state) {
+                                                        if (variableObject.isRagStart.state) {
                                                             resultList.push(<i class="cls_icon">update</i>);
                                                         } else {
                                                             resultList.push(
@@ -137,12 +137,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     onClick={() => {
                                                         methodObject.onClickRagGraph();
                                                     }}
-                                                    disabled={() => variableObject.isRagEmbeddingStart.state}
+                                                    disabled={() => variableObject.isRagStart.state}
                                                 >
                                                     {() => {
                                                         const resultList: IvirtualNode[] = [];
 
-                                                        if (variableObject.isRagEmbeddingStart.state) {
+                                                        if (variableObject.isRagStart.state) {
                                                             resultList.push(<i class="cls_icon">update</i>);
                                                         } else {
                                                             resultList.push(

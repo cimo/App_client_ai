@@ -16,7 +16,7 @@ export interface IapiDocumentDeleteBody {
     fileName: string;
 }
 
-export interface IapiRagEmbeddingCheckBody {
+export interface IapiRagCheckBody {
     fileName: string;
 }
 
@@ -161,7 +161,7 @@ export interface Ivariable {
     agentSelected: IvariableBind<Iagent>;
     documentList: IvariableBind<IfileDetail[]>;
     isDocumentUpload: IvariableBind<boolean>;
-    isRagEmbeddingStart: IvariableBind<boolean>;
+    isRagStart: IvariableBind<boolean>;
     skillList: IvariableBind<IfileDetail[]>;
     isSkillUpload: IvariableBind<boolean>;
     agentForm: IvariableBind<Iagent>;
