@@ -116,7 +116,7 @@ export default class Chat implements Icontroller {
     };
 
     private onClickButtonMessageSend = (): void => {
-        if (this.abortControllerLlmResponse && this.responseId) {
+        if (this.abortControllerLlmResponse && !this.variableObject.isMessageSendAvailable.state) {
             this.abortControllerLlmResponse.abort();
             this.abortControllerLlmResponse = undefined;
         } else {
