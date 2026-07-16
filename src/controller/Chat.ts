@@ -657,7 +657,31 @@ export default class Chat implements Icontroller {
 
                                                     this.variableObject.messageList.state = messageListState;
                                                 }
+                                            } else {
+                                                const messageListToolState = this.variableObject.messageList.state.slice();
+
+                                                messageListToolState[messageIndex] = {
+                                                    ...messageListToolState[messageIndex],
+                                                    assistantNoReason: message
+                                                };
+
+                                                this.variableObject.messageList.state = messageListToolState;
+
+                                                this.messageLoadingHide(messageIndex);
                                             }
+
+                                            this.autoscroll();
+                                        } else {
+                                            const messageListToolState = this.variableObject.messageList.state.slice();
+
+                                            messageListToolState[messageIndex] = {
+                                                ...messageListToolState[messageIndex],
+                                                assistantNoReason: "Tool response empty."
+                                            };
+
+                                            this.variableObject.messageList.state = messageListToolState;
+
+                                            this.messageLoadingHide(messageIndex);
 
                                             this.autoscroll();
                                         }
