@@ -323,6 +323,10 @@ export default class Chat implements Icontroller {
                 tools: []
             };
 
+            if (!(mode !== "rag" && systemModeRequest === "chat")) {
+                body.temperature = 0;
+            }
+
             fetch(`${helperSrc.URL_AI}/api/response`, {
                 method: "POST",
                 headers: {

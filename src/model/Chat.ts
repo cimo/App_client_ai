@@ -8,6 +8,7 @@ export interface IapiDataResponseBody {
     model: string;
     input: IdataInput[];
     tools: unknown[];
+    temperature?: number;
 }
 
 export interface IdataMessage {
