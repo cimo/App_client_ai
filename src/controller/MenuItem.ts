@@ -38,6 +38,10 @@ export default class MenuItem implements Icontroller {
             }
 
             if (documentList) {
+                documentList.sort((firstObject, secondObject) =>
+                    firstObject.fileName.localeCompare(secondObject.fileName, undefined, { numeric: true, sensitivity: "variant" })
+                );
+
                 this.variableObject.documentList.state = this.controllerPagination.updateList<modelMcp.IfileDetail>(documentList);
             }
         } else if (this.variableObject.isMenuItemSkill.state || this.variableObject.isAgentSkillSelect.state) {
@@ -48,6 +52,10 @@ export default class MenuItem implements Icontroller {
             }
 
             if (skillList) {
+                skillList.sort((firstObject, secondObject) =>
+                    firstObject.fileName.localeCompare(secondObject.fileName, undefined, { numeric: true, sensitivity: "variant" })
+                );
+
                 this.variableObject.skillList.state = this.controllerPagination.updateList<modelMcp.IfileDetail>(skillList);
             }
         }
