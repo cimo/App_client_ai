@@ -35,6 +35,8 @@ export default class LlmLlamaCpp {
                 })
                 .catch((error: Error) => {
                     helperSrc.writeLog("LlmLlamaCpp.ts - apiModel() - fetch() - catch()", error.message);
+
+                    this.controllerChat.llmServiceError();
                 });
         }
     };

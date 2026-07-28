@@ -42,6 +42,8 @@ export default class Chat implements Icontroller {
             .catch((error: Error) => {
                 helperSrc.writeLog("Chat.ts - importController() - import() - catch()", error.message);
 
+                this.llmServiceError();
+
                 return null;
             });
     };
@@ -95,6 +97,13 @@ export default class Chat implements Icontroller {
     setControllerToast(value: Toast): void {
         this.controllerToast = value;
     }
+
+    llmServiceError = (): void => {
+        this.variableObject.modelList.state = [];
+        this.variableObject.modelSelected.state = "";
+
+        this.controllerToast.show("error", ["Failed to connect with the llm service."], 0);
+    };
 
     responseReset = (mode?: string): void => {
         this.responseReason = "";

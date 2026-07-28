@@ -260,6 +260,7 @@ export const input = (variableObject: modelChat.Ivariable, methodObject: modelCh
                             onClick={() => {
                                 methodObject.onClickButtonMessageSend();
                             }}
+                            disabled={() => variableObject.modelSelected.state === ""}
                         >
                             <i class="cls_icon">{() => (variableObject.isMessageSendAvailable.state ? "play_arrow" : "stop")}</i>
                         </button>

@@ -40,6 +40,8 @@ export default class LlmOpenAi {
                 })
                 .catch((error: Error) => {
                     helperSrc.writeLog("LlmOpenAi.ts - apiModel() - fetch() - catch()", error.message);
+
+                    this.controllerChat.llmServiceError();
                 });
         }
     };

@@ -12,6 +12,7 @@
     min-width: 0 !important;
     flex: 0 1 auto !important;
 
+    .category,
     .field {
         display: flex !important;
         flex-direction: column !important;
@@ -49,6 +50,17 @@
         }
     }
 
+    .category {
+        & > .label {
+            position: relative !important;
+            left: -10% !important;
+        }
+
+        .field {
+            margin: 0 !important;
+        }
+    }
+
     .button_wrapper {
         display: flex !important;
         flex-direction: row !important;
@@ -69,33 +81,6 @@
 
         button {
             margin: 0px !important;
-        }
-    }
-}
-
-.form_wrapper:has(> .category) {
-    align-items: stretch !important;
-
-    .category {
-        display: flex !important;
-        flex-direction: column !important;
-        align-content: center !important;
-        justify-content: start !important;
-        align-items: start !important;
-        justify-items: center !important;
-        min-height: 0 !important;
-        min-width: 0 !important;
-        flex: 0 1 auto !important;
-
-        margin: 0 25% !important;
-
-        & > .label {
-            font-size: parameter.$fontSizeNormal !important;
-            margin-bottom: 5px !important;
-        }
-
-        .field {
-            margin: 0 !important;
         }
     }
 }

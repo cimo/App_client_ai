@@ -24,9 +24,11 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                 <div class={() => `login_wrapper ${!variableObject.isLogin.state ? "" : "none"}`}>
                     <div class="form_wrapper">
                         <div class={`field ${helperSrc.IS_DEBUG ? "" : "none"}`}>
+                            <p class="label">Username:</p>
                             <input jsmvcfw-elementHookName="elementInputUsername"></input>
                         </div>
                         <div class={`field ${helperSrc.IS_DEBUG ? "" : "none"}`}>
+                            <p class="label">Password:</p>
                             <input jsmvcfw-elementHookName="elementInputPassword" type="password"></input>
                         </div>
                         <div class="button_wrapper">
