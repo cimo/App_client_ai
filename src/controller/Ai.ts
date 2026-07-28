@@ -6,6 +6,8 @@ import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
 import * as modelHelperSrc from "../model/HelperSrc.js";
 import * as modelAi from "../model/Ai";
+import * as modelMcp from "../model/Mcp";
+import * as modelChat from "../model/Chat.js";
 import viewAi from "../view/Ai";
 import type Mcp from "./Mcp";
 import type Chat from "./Chat";
@@ -19,8 +21,6 @@ export default class Ai implements Icontroller {
     private controllerChat: Chat;
     private controllerToast: Toast;
 
-    private modelDefault: string;
-
     // Method
     private generateUniqueId = (): string => {
         const timestamp = Date.now().toString(36);
@@ -32,118 +32,93 @@ export default class Ai implements Icontroller {
     };
 
     private onClickDropdownModel = (): void => {
-        this.apiModel(true);
+        if (this.variableObject.llmInstance.state) {
+            this.variableObject.llmInstance.state.apiModel(true);
+        }
     };
 
     private onClickModelName = (name: string): void => {
         this.variableObject.modelSelected.state = name;
-
-        this.controllerChat.setModelSelected(this.variableObject.modelSelected.state);
     };
 
-    setControllerToast(controller: Toast): void {
-        this.controllerToast = controller;
+    setControllerToast(value: Toast): void {
+        this.controllerToast = value;
     }
 
-    setControllerMcp(controller: Mcp): void {
-        this.controllerMcp = controller;
+    setControllerMcp(value: Mcp): void {
+        this.controllerMcp = value;
     }
 
-    setControllerChat(controller: Chat): void {
-        this.controllerChat = controller;
-
-        this.controllerChat.setModelSelected(this.modelDefault);
+    setControllerChat(value: Chat): void {
+        this.controllerChat = value;
     }
 
     apiLogin = async (): Promise<void> => {
-        return fetch(`${helperSrc.URL_AI}/login`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${session.data.aiBearerToken}`
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (resultApi) => {
-                this.variableObject.isOfflineAi.state = false;
+        if (!session.data.aiCookie && this.variableObject.setting.state.llm[0].selected) {
+            const settingLlm = this.variableObject.setting.state.llm[0];
 
-                const cookie = resultApi.headers.get("set-cookie");
-
-                if (cookie) {
-                    const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
-                    const stdout = json.response.stdout;
-
-                    session.writeAiSession(session.data.aiBearerToken, cookie);
-
-                    this.variableObject.adUrl.state = stdout;
+            return fetch(`${settingLlm.url}/login`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${settingLlm.apiKey ? settingLlm.apiKey : session.data.aiBearerToken}`
+                },
+                danger: {
+                    acceptInvalidCerts: true,
+                    acceptInvalidHostnames: true
                 }
             })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Ai.ts - apiLogin() - fetch() - catch()", error.message);
+                .then(async (resultApi) => {
+                    this.variableObject.isOfflineAi.state = false;
 
-                this.variableObject.isOfflineAi.state = true;
-            });
-    };
+                    const cookie = resultApi.headers.get("set-cookie");
 
-    apiModel = async (isShowDropdown: boolean): Promise<void> => {
-        return fetch(`${helperSrc.URL_AI}/api/model`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${session.data.aiBearerToken}`,
-                "ai-cookie": session.data.aiCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (resultApi) => {
-                this.variableObject.isOfflineAi.state = false;
+                    if (cookie) {
+                        const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                        const stdout = json.response.stdout;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
-                const stdoutList = JSON.parse(json.response.stdout);
+                        if (!session.data.aiBearerToken) {
+                            session.data.aiBearerToken = this.generateUniqueId();
+                        }
 
-                this.variableObject.modelList.state = stdoutList;
+                        session.writeAiSession(session.data.aiBearerToken, cookie);
 
-                this.variableObject.modelSelected.state = this.modelDefault = this.variableObject.modelList.state[0];
+                        this.variableObject.adUrl.state = stdout;
+                    }
+                })
+                .catch((error: Error) => {
+                    helperSrc.writeLog("Ai.ts - apiLogin() - fetch() - catch()", error.message);
 
-                this.controllerChat.setModelSelected(this.variableObject.modelSelected.state);
-
-                if (isShowDropdown) {
-                    this.variableObject.isOpenDropdownModelList.state = true;
-                }
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Ai.ts - apiModel() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineAi.state = true;
-            });
+                    this.variableObject.isOfflineAi.state = true;
+                });
+        }
     };
 
     apiLogout = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_AI}/logout`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${session.data.aiBearerToken}`,
-                "ai-cookie": session.data.aiCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(() => {
-                this.variableObject.isOfflineAi.state = false;
+        if (session.data.aiCookie) {
+            const settingLlm = this.variableObject.setting.state.llm[0];
 
-                session.deleteAiSession();
+            return fetch(`${settingLlm.url}/logout`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${settingLlm.apiKey ? settingLlm.apiKey : session.data.aiBearerToken}`,
+                    "ai-cookie": session.data.aiCookie
+                },
+                danger: {
+                    acceptInvalidCerts: true,
+                    acceptInvalidHostnames: true
+                }
             })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Ai.ts - apiLogout() - fetch() - catch()", error.message);
+                .then(() => {
+                    this.variableObject.isOfflineAi.state = false;
 
-                this.variableObject.isOfflineAi.state = true;
-            });
+                    session.deleteAiSession();
+                })
+                .catch((error: Error) => {
+                    helperSrc.writeLog("Ai.ts - apiLogout() - fetch() - catch()", error.message);
+
+                    this.variableObject.isOfflineAi.state = true;
+                });
+        }
     };
 
     constructor() {
@@ -152,12 +127,6 @@ export default class Ai implements Icontroller {
         this.controllerMcp = {} as Mcp;
         this.controllerChat = {} as Chat;
         this.controllerToast = {} as Toast;
-
-        this.modelDefault = "";
-
-        if (!session.data.aiBearerToken) {
-            session.data.aiBearerToken = this.generateUniqueId();
-        }
     }
 
     hookObject = {} as modelAi.IelementHook;
@@ -168,8 +137,10 @@ export default class Ai implements Icontroller {
                 isOfflineAi: false,
                 isOpenDropdownModelList: false,
                 modelList: [],
-                modelSelected: this.modelDefault,
-                adUrl: variableLink<string>("Index")
+                modelSelected: "",
+                adUrl: variableLink<string>("Index"),
+                setting: variableLink<modelMcp.Isetting>("Mcp"),
+                llmInstance: variableLink<modelChat.TllmInstance | null>("Chat")
             },
             this.constructor.name
         );

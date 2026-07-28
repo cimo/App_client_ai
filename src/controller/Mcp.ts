@@ -724,14 +724,16 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
-                const stdout = json.response.stdout;
+                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IapiStatusResponse;
 
-                if (stdout !== "ko") {
+                if (stdoutObject.status !== "ko") {
                     this.apiAgentSelect();
 
                     this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+
+                    this.controllerToast.show("success", [stdoutObject.message]);
                 } else {
-                    this.controllerToast.show("error", ["Failed to create agent."]);
+                    this.controllerToast.show("error", [stdoutObject.message]);
                 }
 
                 this.variableObject.isAgentSave.state = false;
@@ -770,14 +772,16 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
-                const stdout = json.response.stdout;
+                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IapiStatusResponse;
 
-                if (stdout !== "ko") {
+                if (stdoutObject.status !== "ko") {
                     this.apiAgentSelect();
 
                     this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+
+                    this.controllerToast.show("success", [stdoutObject.message]);
                 } else {
-                    this.controllerToast.show("error", ["Failed to update agent."]);
+                    this.controllerToast.show("error", [stdoutObject.message]);
                 }
 
                 this.variableObject.isAgentSave.state = false;
@@ -875,8 +879,8 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiUserInfo = (): void => {
-        fetch(`${helperSrc.URL_MCP}/api/user-info`, {
+    apiUserSelect = async (): Promise<void> => {
+        return fetch(`${helperSrc.URL_MCP}/api/user-read`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -894,10 +898,10 @@ export default class Mcp implements Icontroller {
                 const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = JSON.parse(json.response.stdout) as modelMcp.Iuser;
 
-                this.variableObject.userInfo.state = stdout;
+                this.variableObject.user.state = stdout;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiUserInfo() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiUserSelect() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
             });
@@ -930,14 +934,14 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
-                const stdout = json.response.stdout;
+                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IapiStatusResponse;
 
-                if (stdout === "ok") {
-                    this.apiUserInfo();
+                if (stdoutObject.status !== "ko") {
+                    this.apiUserSelect();
 
-                    this.controllerToast.show("success", ["User updated successfully."]);
+                    this.controllerToast.show("success", [stdoutObject.message]);
                 } else {
-                    this.controllerToast.show("error", ["Failed to update user."]);
+                    this.controllerToast.show("error", [stdoutObject.message]);
                 }
 
                 this.variableObject.isUserUpdate.state = false;
@@ -949,39 +953,8 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiLlmSelect = async (): Promise<modelMcp.Illm[]> => {
-        return fetch(`${helperSrc.URL_MCP}/api/llm-list`, {
-            method: "GET",
-            headers: {
-                "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (resultApi) => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
-                const stdoutList = JSON.parse(json.response.stdout);
-
-                this.variableObject.llmList.state = stdoutList;
-
-                return this.variableObject.llmList.state;
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiLlmSelect() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-
-                return [];
-            });
-    };
-
-    apiSettingInfo = (): void => {
-        fetch(`${helperSrc.URL_MCP}/api/setting-info`, {
+    apiSettingSelect = async (): Promise<void> => {
+        return fetch(`${helperSrc.URL_MCP}/api/setting-read`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -999,10 +972,18 @@ export default class Mcp implements Icontroller {
                 const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
                 const stdout = JSON.parse(json.response.stdout) as modelMcp.Isetting;
 
-                this.variableObject.settingInfo.state = stdout;
+                this.variableObject.setting.state = stdout;
+
+                for (let a = 0; a < this.variableObject.setting.state.llm.length; a++) {
+                    if (this.variableObject.setting.state.llm[a].selected) {
+                        this.variableObject.settingLlmServiceId.state = this.variableObject.setting.state.llm[a].id;
+
+                        break;
+                    }
+                }
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiSettingInfo() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiSettingSelect() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
             });
@@ -1013,7 +994,7 @@ export default class Mcp implements Icontroller {
 
         const body: modelMcp.IapiSettingUpdateBody = {
             id: setting.id,
-            apiId: setting.apiId
+            llm: setting.llm
         };
 
         fetch(`${helperSrc.URL_MCP}/api/setting-update`, {
@@ -1033,14 +1014,14 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
-                const stdout = json.response.stdout;
+                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IapiStatusResponse;
 
-                if (stdout === "ok") {
-                    this.apiSettingInfo();
+                if (stdoutObject.status !== "ko") {
+                    this.apiSettingSelect();
 
-                    this.controllerToast.show("success", ["Setting updated successfully."]);
+                    this.controllerToast.show("success", [stdoutObject.message]);
                 } else {
-                    this.controllerToast.show("error", ["Failed to update setting."]);
+                    this.controllerToast.show("error", [stdoutObject.message]);
                 }
 
                 this.variableObject.isSettingSave.state = false;
@@ -1065,8 +1046,8 @@ export default class Mcp implements Icontroller {
         this.controllerToast.show("error", ["Content protected, need to be authenticated to view it."]);
     };
 
-    setControllerToast(controller: Toast): void {
-        this.controllerToast = controller;
+    setControllerToast(value: Toast): void {
+        this.controllerToast = value;
     }
 
     constructor() {
@@ -1091,21 +1072,21 @@ export default class Mcp implements Icontroller {
                 agentList: [],
                 agentSelected: {} as modelMcp.Iagent,
                 documentList: [],
+                skillList: [],
+                user: {} as modelMcp.Iuser,
+                setting: {} as modelMcp.Isetting,
+                playwrightVideoSrc: "",
+                playwrightVideoName: "",
                 isDocumentUpload: variableLink<boolean>("MenuItem"),
                 isRagStart: variableLink<boolean>("MenuItem"),
-                skillList: [],
                 isSkillUpload: variableLink<boolean>("MenuItem"),
                 agentForm: variableLink<modelMcp.Iagent>("MenuItem"),
                 isAgentSave: variableLink<boolean>("MenuItem"),
-                userInfo: {} as modelMcp.Iuser,
                 isUserUpdate: variableLink<boolean>("MenuItem"),
-                llmList: [],
-                settingInfo: {} as modelMcp.Isetting,
+                settingLlmServiceId: variableLink<number>("MenuItem"),
                 isSettingSave: variableLink<boolean>("MenuItem"),
                 systemMode: variableLink<string>("Chat"),
-                messageList: variableLink<modelChat.IdataMessage[]>("Chat"),
-                playwrightVideoSrc: "",
-                playwrightVideoName: ""
+                messageList: variableLink<modelChat.IdataMessage[]>("Chat")
             },
             this.constructor.name
         );

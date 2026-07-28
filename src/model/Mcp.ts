@@ -54,7 +54,32 @@ export interface IapiUserUpdateBody {
 
 export interface IapiSettingUpdateBody {
     id: number;
-    apiId: number;
+    llm: IsettingLlm[];
+}
+
+export interface IapiStatusResponse {
+    status: string;
+    message: string;
+}
+
+export interface IapiLlmToolResponse {
+    name: string;
+    argumentObject: Record<string, string>;
+}
+
+export interface IapiLlmTaskResponse {
+    list: IapiLlmToolResponse[];
+}
+
+export interface IapiToolCallResponse {
+    result: {
+        content: [
+            {
+                type: string;
+                text: string;
+            }
+        ];
+    };
 }
 
 export interface IuserLoginSession {
@@ -95,9 +120,17 @@ export interface Iuser {
     password?: string;
 }
 
-export interface Isetting {
-    id: number;
-    apiId: number;
+export interface ItoolBody {
+    tool_call_id: string;
+    type: string;
+    name: string;
+    arguments: string;
+    output: string;
+}
+
+export interface ItoolResult {
+    name: string;
+    result: unknown;
 }
 
 export interface IragCitation {
@@ -140,14 +173,18 @@ export interface IfileDetail {
     size: string;
 }
 
-export interface IllmResponseTool {
-    name: string;
-    result: unknown;
-}
-
-export interface Illm {
+export interface IsettingLlm {
     id: number;
     name: string;
+    module: string;
+    url: string;
+    apiKey: string;
+    selected: boolean;
+}
+
+export interface Isetting {
+    id: number;
+    llm: IsettingLlm[];
 }
 
 export interface Ivariable {
@@ -160,21 +197,21 @@ export interface Ivariable {
     agentList: IvariableBind<Iagent[]>;
     agentSelected: IvariableBind<Iagent>;
     documentList: IvariableBind<IfileDetail[]>;
+    skillList: IvariableBind<IfileDetail[]>;
+    user: IvariableBind<Iuser>;
+    setting: IvariableBind<Isetting>;
+    playwrightVideoSrc: IvariableBind<string>;
+    playwrightVideoName: IvariableBind<string>;
     isDocumentUpload: IvariableBind<boolean>;
     isRagStart: IvariableBind<boolean>;
-    skillList: IvariableBind<IfileDetail[]>;
     isSkillUpload: IvariableBind<boolean>;
     agentForm: IvariableBind<Iagent>;
     isAgentSave: IvariableBind<boolean>;
-    userInfo: IvariableBind<Iuser>;
     isUserUpdate: IvariableBind<boolean>;
-    llmList: IvariableBind<Illm[]>;
-    settingInfo: IvariableBind<Isetting>;
+    settingLlmServiceId: IvariableBind<number>;
     isSettingSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
     messageList: IvariableBind<modelChat.IdataMessage[]>;
-    playwrightVideoSrc: IvariableBind<string>;
-    playwrightVideoName: IvariableBind<string>;
 }
 
 export interface Imethod {

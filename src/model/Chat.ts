@@ -2,14 +2,14 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 
 // Source
 import * as modelMcp from "./Mcp";
+import type Chat from "../controller/Chat.js";
 
-export interface IapiDataResponseBody {
-    stream: boolean;
-    model: string;
-    input: IdataInput[];
-    tools: unknown[];
-    temperature?: number;
-}
+export type TllmInstance = {
+    apiModel: (isShowDropdown: boolean) => Promise<void>;
+    apiResponse: () => Promise<void>;
+};
+
+export type TllmConstructor = new (chat: Chat) => TllmInstance;
 
 export interface IdataMessage {
     isLoading: boolean;
@@ -17,30 +17,11 @@ export interface IdataMessage {
     user: string;
     assistantReason: string;
     assistantNoReason: string;
-    mcpTool?: ImcpTool;
+    mcpToolBody?: modelMcp.ItoolBody;
     ragCitationList: modelMcp.IragCitation[] | undefined;
     ragCitationTabIndex: number;
     securityScanner: string;
     playwright: Iplaywright;
-}
-
-export interface IdataInput {
-    role: string;
-    content: string | Array<{ type: string; text?: string; image_url?: string }>;
-}
-
-export interface ImcpTool {
-    tool_call_id: string;
-    type: string;
-    name: string;
-    arguments: string;
-    output: string;
-}
-
-export interface Iplaywright {
-    action: string;
-    nameList: string[];
-    stdout: string;
 }
 
 export interface Ifile {
@@ -49,32 +30,27 @@ export interface Ifile {
     };
 }
 
-export interface IllmResponse {
-    type: string;
-    response: {
-        id: string;
-        name: string;
-        arguments: string;
-        message: string;
-    };
-    error: {
-        message: string;
-    };
-    delta: string;
-    item: ImcpTool;
+export interface Iplaywright {
+    action: string;
+    nameList: string[];
+    stdout: string;
 }
 
 export interface Ivariable {
     isMessageSendAvailable: IvariableBind<boolean>;
     messageList: IvariableBind<IdataMessage[]>;
-    historyList: IvariableBind<IdataInput[]>;
     systemMode: IvariableBind<string>;
+    llmInstance: IvariableBind<TllmInstance | null>;
+    isOpenDropdownModelList: IvariableBind<boolean>;
+    modelList: IvariableBind<string[]>;
+    modelSelected: IvariableBind<string>;
     toolSelected: IvariableBind<modelMcp.Itool>;
     toolList: IvariableBind<modelMcp.Itool[]>;
     taskSelected: IvariableBind<modelMcp.Itask>;
     agentSelected: IvariableBind<modelMcp.Iagent>;
     playwrightVideoSrc: IvariableBind<string>;
     playwrightVideoName: IvariableBind<string>;
+    setting: IvariableBind<modelMcp.Isetting>;
 }
 
 export interface Imethod {

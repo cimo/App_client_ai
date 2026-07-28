@@ -11,7 +11,6 @@ import ControllerMcp from "./Mcp";
 export default class Document implements Icontroller {
     // Variable
     private variableObject: modelDocument.Ivariable;
-    private methodObject: modelDocument.Imethod;
     private controllerMcp: ControllerMcp;
 
     private windowDocument: Window;
@@ -88,7 +87,6 @@ export default class Document implements Icontroller {
 
     constructor() {
         this.variableObject = {} as modelDocument.Ivariable;
-        this.methodObject = {} as modelDocument.Imethod;
 
         this.controllerMcp = new ControllerMcp();
 
@@ -112,8 +110,6 @@ export default class Document implements Icontroller {
             },
             this.constructor.name
         );
-
-        this.methodObject = {};
     }
 
     variableEffect(watch: IvariableEffect): void {

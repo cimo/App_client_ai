@@ -13,6 +13,17 @@
 
     position: relative;
 
+    .header_wrapper {
+        .dropdown {
+            .menu {
+                ul {
+                    max-height: 200px;
+                    overflow-y: scroll;
+                }
+            }
+        }
+    }
+
     aside:has(> .view_chat_message) {
         display: flex;
         flex-direction: column;

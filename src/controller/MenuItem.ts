@@ -8,7 +8,6 @@ import * as modelMcp from "../model/Mcp";
 import * as modelDocument from "../model/Document";
 import * as viewMenuItem from "../view/MenuItem";
 import type Mcp from "./Mcp";
-import type Toast from "./Toast";
 import ControllerDialog from "./Dialog";
 import ControllerPagination from "./Pagination";
 
@@ -17,7 +16,6 @@ export default class MenuItem implements Icontroller {
     private variableObject: modelMenuItem.Ivariable;
     private methodObject: modelMenuItem.Imethod;
     private controllerMcp: Mcp;
-    private controllerToast: Toast;
     private controllerDialog: ControllerDialog;
     private controllerPagination: ControllerPagination;
 
@@ -331,31 +329,13 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickAgentSave = (): void => {
-        const errorList = [];
+        this.variableObject.agentForm.state.name = this.hookObject.elementInputAgentName.value;
+        this.variableObject.agentForm.state.description = this.hookObject.elementInputAgentDescription.value;
 
-        if (this.hookObject.elementInputAgentName.value === "") {
-            errorList.push("Agent name is required.");
-        }
-
-        if (this.hookObject.elementInputAgentDescription.value === "") {
-            errorList.push("Agent description is required.");
-        }
-
-        if (this.variableObject.agentForm.state.skillName === "") {
-            errorList.push("Agent skill is required.");
-        }
-
-        if (errorList.length === 0) {
-            this.variableObject.agentForm.state.name = this.hookObject.elementInputAgentName.value;
-            this.variableObject.agentForm.state.description = this.hookObject.elementInputAgentDescription.value;
-
-            if (this.variableObject.agentForm.state.id === -1) {
-                this.controllerMcp.apiAgentCreate(this.variableObject.agentForm.state);
-            } else {
-                this.controllerMcp.apiAgentUpdate(this.variableObject.agentForm.state);
-            }
+        if (this.variableObject.agentForm.state.id === -1) {
+            this.controllerMcp.apiAgentCreate(this.variableObject.agentForm.state);
         } else {
-            this.controllerToast.show("error", errorList);
+            this.controllerMcp.apiAgentUpdate(this.variableObject.agentForm.state);
         }
     };
 
@@ -394,60 +374,50 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuUser = (): void => {
-        this.variableObject.isMenuItemDocument.state = false;
-        this.variableObject.isMenuItemTool.state = false;
-        this.variableObject.isMenuItemTask.state = false;
-        this.variableObject.isMenuItemAgent.state = false;
-        this.variableObject.isMenuItemSkill.state = false;
-        this.variableObject.isMenuItemUser.state = !this.variableObject.isMenuItemUser.state;
-        this.variableObject.isMenuItemSetting.state = false;
+        this.controllerMcp.apiUserSelect().then(() => {
+            this.variableObject.isMenuItemDocument.state = false;
+            this.variableObject.isMenuItemTool.state = false;
+            this.variableObject.isMenuItemTask.state = false;
+            this.variableObject.isMenuItemAgent.state = false;
+            this.variableObject.isMenuItemSkill.state = false;
+            this.variableObject.isMenuItemUser.state = !this.variableObject.isMenuItemUser.state;
+            this.variableObject.isMenuItemSetting.state = false;
 
-        this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-        this.variableObject.isAgentSkillSelect.state = false;
+            this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+            this.variableObject.isAgentSkillSelect.state = false;
+        });
     };
 
     private onClickUserUpdate = (): void => {
-        const errorList = [];
+        this.variableObject.user.state.name = this.hookObject.elementInputUserName.value;
+        this.variableObject.user.state.surname = this.hookObject.elementInputUserSurname.value;
+        this.variableObject.user.state.password = this.hookObject.elementInputUserPassword.value;
 
-        if (this.hookObject.elementInputUserName.value === "") {
-            errorList.push("User name is required.");
-        }
-
-        if (this.hookObject.elementInputUserSurname.value === "") {
-            errorList.push("User surname is required.");
-        }
-
-        if (errorList.length === 0) {
-            this.variableObject.userInfo.state.name = this.hookObject.elementInputUserName.value;
-            this.variableObject.userInfo.state.surname = this.hookObject.elementInputUserSurname.value;
-            this.variableObject.userInfo.state.password = this.hookObject.elementInputUserPassword.value;
-
-            this.controllerMcp.apiUserUpdate(this.variableObject.userInfo.state);
-        } else {
-            this.controllerToast.show("error", errorList);
-        }
+        this.controllerMcp.apiUserUpdate(this.variableObject.user.state);
     };
 
     private onClickUserCancel = (): void => {
         this.variableObject.isMenuItemUser.state = false;
     };
 
+    private onChangeSettingLlmServiceId = (): void => {
+        this.variableObject.settingLlmServiceId.state = parseInt(this.hookObject.elementSelectSettingLlmServiceId.value);
+    };
+
     private onClickSettingSave = (): void => {
-        const errorList: string[] = [];
+        const llmServiceId = parseInt(this.hookObject.elementSelectSettingLlmServiceId.value);
 
-        const apiId = parseInt(this.hookObject.elementSelectSettingApiId.value);
-
-        if (isNaN(apiId)) {
-            errorList.push("Selected API is invalid.");
+        for (let a = 0; a < this.variableObject.setting.state.llm.length; a++) {
+            if (this.variableObject.setting.state.llm[a].id === llmServiceId) {
+                this.variableObject.setting.state.llm[a].url = this.hookObject.elementInputSettingLlmUrl.value.trim().replace(/\/+$/, "");
+                this.variableObject.setting.state.llm[a].apiKey = this.hookObject.elementInputSettingLlmApiKey.value.trim();
+                this.variableObject.setting.state.llm[a].selected = true;
+            } else {
+                this.variableObject.setting.state.llm[a].selected = false;
+            }
         }
 
-        if (errorList.length === 0) {
-            this.variableObject.settingInfo.state.apiId = apiId;
-
-            this.controllerMcp.apiSettingUpdate(this.variableObject.settingInfo.state);
-        } else {
-            this.controllerToast.show("error", errorList);
-        }
+        this.controllerMcp.apiSettingUpdate(this.variableObject.setting.state);
     };
 
     private onClickSettingCancel = (): void => {
@@ -455,18 +425,18 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuSetting = async (): Promise<void> => {
-        await this.controllerMcp.apiLlmSelect();
+        this.controllerMcp.apiSettingSelect().then(() => {
+            this.variableObject.isMenuItemDocument.state = false;
+            this.variableObject.isMenuItemTool.state = false;
+            this.variableObject.isMenuItemTask.state = false;
+            this.variableObject.isMenuItemAgent.state = false;
+            this.variableObject.isMenuItemSkill.state = false;
+            this.variableObject.isMenuItemUser.state = false;
+            this.variableObject.isMenuItemSetting.state = !this.variableObject.isMenuItemSetting.state;
 
-        this.variableObject.isMenuItemDocument.state = false;
-        this.variableObject.isMenuItemTool.state = false;
-        this.variableObject.isMenuItemTask.state = false;
-        this.variableObject.isMenuItemAgent.state = false;
-        this.variableObject.isMenuItemSkill.state = false;
-        this.variableObject.isMenuItemUser.state = false;
-        this.variableObject.isMenuItemSetting.state = !this.variableObject.isMenuItemSetting.state;
-
-        this.variableObject.agentForm.state = {} as modelMcp.Iagent;
-        this.variableObject.isAgentSkillSelect.state = false;
+            this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+            this.variableObject.isAgentSkillSelect.state = false;
+        });
     };
 
     private onClickToggleSelectAll = (mode: string): void => {
@@ -638,12 +608,8 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    setControllerMcp(controller: Mcp): void {
-        this.controllerMcp = controller;
-    }
-
-    setControllerToast(controller: Toast): void {
-        this.controllerToast = controller;
+    setControllerMcp(value: Mcp): void {
+        this.controllerMcp = value;
     }
 
     constructor() {
@@ -651,7 +617,6 @@ export default class MenuItem implements Icontroller {
         this.methodObject = {} as modelMenuItem.Imethod;
 
         this.controllerMcp = {} as Mcp;
-        this.controllerToast = {} as Toast;
 
         this.controllerDialog = new ControllerDialog();
         this.controllerPagination = new ControllerPagination();
@@ -689,10 +654,10 @@ export default class MenuItem implements Icontroller {
                 agentForm: {} as modelMcp.Iagent,
                 isAgentSkillSelect: false,
                 isAgentSave: false,
-                userInfo: variableLink<modelMcp.Iuser>("Mcp"),
+                user: variableLink<modelMcp.Iuser>("Mcp"),
                 isUserUpdate: false,
-                llmList: variableLink<modelMcp.Illm[]>("Mcp"),
-                settingInfo: variableLink<modelMcp.Isetting>("Mcp"),
+                setting: variableLink<modelMcp.Isetting>("Mcp"),
+                settingLlmServiceId: 1,
                 isSettingSave: false,
                 systemMode: variableLink<string>("Chat"),
                 pageNumber: variableLink<number>("Pagination")
@@ -733,6 +698,7 @@ export default class MenuItem implements Icontroller {
             onClickUserUpdate: this.onClickUserUpdate,
             onClickUserCancel: this.onClickUserCancel,
             onClickMenuSetting: this.onClickMenuSetting,
+            onChangeSettingLlmServiceId: this.onChangeSettingLlmServiceId,
             onClickSettingSave: this.onClickSettingSave,
             onClickSettingCancel: this.onClickSettingCancel,
             onClickToggleSelectAll: this.onClickToggleSelectAll,

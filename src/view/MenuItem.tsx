@@ -602,7 +602,6 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                 <input
                                                     value={() => variableObject.agentForm.state.name}
                                                     jsmvcfw-elementHookName="elementInputAgentName"
-                                                    placeholder="Name"
                                                 ></input>
                                             </div>
                                             <div class="field">
@@ -752,32 +751,29 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                             <div class="form_wrapper">
                                 <div class="field">
                                     <p class="label">Email:</p>
-                                    <input value={() => variableObject.userInfo.state.email} type="text" readonly></input>
+                                    <input value={() => variableObject.user.state.email} type="text" readonly></input>
                                 </div>
                                 <div class="field">
                                     <p class="label">Name:</p>
                                     <input
-                                        value={() => variableObject.userInfo.state.name}
+                                        value={() => variableObject.user.state.name}
                                         jsmvcfw-elementHookName="elementInputUserName"
-                                        placeholder="Name"
                                         type="text"
                                     ></input>
                                 </div>
                                 <div class="field">
                                     <p class="label">Surname:</p>
                                     <input
-                                        value={() => variableObject.userInfo.state.surname}
+                                        value={() => variableObject.user.state.surname}
                                         jsmvcfw-elementHookName="elementInputUserSurname"
-                                        placeholder="Surname"
                                         type="text"
                                     ></input>
                                 </div>
                                 <div class="field">
                                     <p class="label">Password:</p>
                                     <input
-                                        value={() => variableObject.userInfo.state.password}
+                                        value={() => variableObject.user.state.password}
                                         jsmvcfw-elementHookName="elementInputUserPassword"
-                                        placeholder="Password"
                                         type="password"
                                     ></input>
                                 </div>
@@ -815,27 +811,46 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                     resultList.push(
                         <div class="setting_wrapper">
                             <div class="form_wrapper">
-                                <div class="field">
-                                    <p class="label">LLM:</p>
-                                    <select value={() => variableObject.settingInfo.state.apiId} jsmvcfw-elementHookName="elementSelectSettingApiId">
-                                        {() => {
-                                            const resultList: IvirtualNode[] = [];
+                                <div class="category">
+                                    <p class="label">Llm:</p>
+                                    <div class="field">
+                                        <p class="label">Service:</p>
+                                        <select
+                                            value={() => variableObject.settingLlmServiceId.state}
+                                            jsmvcfw-elementHookName="elementSelectSettingLlmServiceId"
+                                            onChange={() => methodObject.onChangeSettingLlmServiceId()}
+                                        >
+                                            {() => {
+                                                const resultList: IvirtualNode[] = [];
 
-                                            for (const [key, value] of Object.entries(variableObject.llmList.state)) {
-                                                resultList.push(
-                                                    <option
-                                                        key={key}
-                                                        value={value.id}
-                                                        selected={() => variableObject.settingInfo.state.apiId === value.id}
-                                                    >
-                                                        {value.name}
-                                                    </option>
-                                                );
-                                            }
+                                                for (const [key, value] of Object.entries(variableObject.setting.state.llm)) {
+                                                    resultList.push(
+                                                        <option key={key} value={value.id} selected={() => value.selected}>
+                                                            {value.name}
+                                                        </option>
+                                                    );
+                                                }
 
-                                            return resultList;
-                                        }}
-                                    </select>
+                                                return resultList;
+                                            }}
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <p class="label">Url:</p>
+                                        <input
+                                            value={() => variableObject.setting.state.llm[variableObject.settingLlmServiceId.state - 1].url}
+                                            jsmvcfw-elementHookName="elementInputSettingLlmUrl"
+                                            type="text"
+                                        ></input>
+                                    </div>
+                                    <div class="field">
+                                        <p class="label">Api key:</p>
+                                        <input
+                                            value={() => variableObject.setting.state.llm[variableObject.settingLlmServiceId.state - 1].apiKey}
+                                            jsmvcfw-elementHookName="elementInputSettingLlmApiKey"
+                                            type="password"
+                                        ></input>
+                                    </div>
                                 </div>
                                 <div class="button_wrapper">
                                     <button

@@ -22,7 +22,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                 </div>
                                 <div class="chat_assistant_wrapper">
                                     <i class={`cls_icon ${value.isLoading ? "" : "none"}`}>update</i>
-                                    <details class={value.mcpTool && value.mcpTool["name"] ? "" : "none"}>
+                                    <details class={value.mcpToolBody && value.mcpToolBody["name"] ? "" : "none"}>
                                         <summary>
                                             <i class="cls_icon">handyman</i>
                                             <p>Show tool</p>
@@ -30,18 +30,18 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                         {() => {
                                             const resultList: IvirtualNode[] = [];
 
-                                            if (value.mcpTool) {
+                                            if (value.mcpToolBody) {
                                                 resultList.push(
                                                     <ul>
                                                         <li>
-                                                            <b>Name:</b> {value.mcpTool["name"]}
+                                                            <b>Name:</b> {value.mcpToolBody["name"]}
                                                         </li>
                                                         <li>
                                                             <b>Argument:</b>
                                                             <pre>
-                                                                {helperSrc.jsonCheck(value.mcpTool["arguments"])
-                                                                    ? JSON.stringify(JSON.parse(value.mcpTool["arguments"]), null, 4)
-                                                                    : value.mcpTool["arguments"]}
+                                                                {helperSrc.jsonCheck(value.mcpToolBody["arguments"])
+                                                                    ? JSON.stringify(JSON.parse(value.mcpToolBody["arguments"]), null, 4)
+                                                                    : value.mcpToolBody["arguments"]}
                                                             </pre>
                                                         </li>
                                                     </ul>

@@ -47,6 +47,12 @@
                 },
                 {
                     "url": "https://host.docker.internal:1047/*"
+                },
+                {
+                    "url": "https://api.anthropic.com/v1/*"
+                },
+                {
+                    "url": "https://api.openai.com/v1/*"
                 }
             ],
             "deny": []

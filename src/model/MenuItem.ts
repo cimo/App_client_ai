@@ -35,10 +35,10 @@ export interface Ivariable {
     agentForm: IvariableBind<modelMcp.Iagent>;
     isAgentSkillSelect: IvariableBind<boolean>;
     isAgentSave: IvariableBind<boolean>;
-    userInfo: IvariableBind<modelMcp.Iuser>;
+    user: IvariableBind<modelMcp.Iuser>;
     isUserUpdate: IvariableBind<boolean>;
-    llmList: IvariableBind<modelMcp.Illm[]>;
-    settingInfo: IvariableBind<modelMcp.Isetting>;
+    setting: IvariableBind<modelMcp.Isetting>;
+    settingLlmServiceId: IvariableBind<number>;
     isSettingSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
     pageNumber: IvariableBind<number>;
@@ -77,6 +77,7 @@ export interface Imethod {
     onClickUserUpdate: () => void;
     onClickUserCancel: () => void;
     onClickMenuSetting: () => Promise<void>;
+    onChangeSettingLlmServiceId: () => void;
     onClickSettingSave: () => void;
     onClickSettingCancel: () => void;
     onClickToggleSelectAll: (mode: string) => void;
@@ -89,5 +90,7 @@ export interface IelementHook extends Record<string, Element | Element[]> {
     elementInputUserName: HTMLInputElement;
     elementInputUserSurname: HTMLInputElement;
     elementInputUserPassword: HTMLInputElement;
-    elementSelectSettingApiId: HTMLSelectElement;
+    elementSelectSettingLlmServiceId: HTMLSelectElement;
+    elementInputSettingLlmUrl: HTMLInputElement;
+    elementInputSettingLlmApiKey: HTMLInputElement;
 }

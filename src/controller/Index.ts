@@ -7,10 +7,12 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
 import * as modelIndex from "../model/Index";
+import * as modelMcp from "../model/Mcp";
+import * as modelChat from "../model/Chat.js";
 import viewIndex from "../view/Index";
-import ControllerChat from "./Chat";
 import ControllerAi from "./Ai";
 import ControllerMcp from "./Mcp";
+import ControllerChat from "./Chat";
 import ControllerMenuItem from "./MenuItem";
 import ControllerToast from "./Toast";
 
@@ -19,9 +21,9 @@ export default class Index implements Icontroller {
     private variableObject: modelIndex.Ivariable;
     private methodObject: modelIndex.Imethod;
 
-    private controllerChat: ControllerChat;
     private controllerAi: ControllerAi;
     private controllerMcp: ControllerMcp;
+    private controllerChat: ControllerChat;
     private controllerMenuItem: ControllerMenuItem;
     private controllerToast: ControllerToast;
 
@@ -31,11 +33,25 @@ export default class Index implements Icontroller {
 
     // Method
     private mcpApi = async (): Promise<void> => {
-        this.controllerMcp.apiUserInfo();
-        this.controllerMcp.apiSettingInfo();
+        await this.controllerMcp.apiUserSelect();
+        await this.controllerMcp.apiSettingSelect();
 
         await this.controllerMcp.apiTool();
         await this.controllerMcp.apiTask();
+    };
+
+    private aiApi = async (): Promise<void> => {
+        if (this.variableObject.llmInstance.state) {
+            if (!session.data.aiCookie) {
+                await this.controllerAi.apiLogin();
+            } else {
+                if (!this.variableObject.setting.state.llm[0].selected) {
+                    await this.controllerAi.apiLogout();
+                }
+            }
+
+            await this.variableObject.llmInstance.state.apiModel(false);
+        }
     };
 
     private onClickLoginBasic = async (): Promise<void> => {
@@ -52,12 +68,6 @@ export default class Index implements Icontroller {
 
         if (isLogin) {
             await this.mcpApi();
-
-            if (!session.data.aiCookie) {
-                await this.controllerAi.apiLogin();
-            }
-
-            await this.controllerAi.apiModel(false);
         }
     };
 
@@ -77,20 +87,19 @@ export default class Index implements Icontroller {
         this.variableObject = {} as modelIndex.Ivariable;
         this.methodObject = {} as modelIndex.Imethod;
 
-        this.controllerChat = new ControllerChat();
         this.controllerAi = new ControllerAi();
         this.controllerMcp = new ControllerMcp();
+        this.controllerChat = new ControllerChat();
         this.controllerMenuItem = new ControllerMenuItem();
         this.controllerToast = new ControllerToast();
 
-        this.controllerChat.setControllerMcp(this.controllerMcp);
-        this.controllerChat.setControllerToast(this.controllerToast);
         this.controllerAi.setControllerChat(this.controllerChat);
         this.controllerAi.setControllerMcp(this.controllerMcp);
         this.controllerAi.setControllerToast(this.controllerToast);
         this.controllerMcp.setControllerToast(this.controllerToast);
+        this.controllerChat.setControllerMcp(this.controllerMcp);
+        this.controllerChat.setControllerToast(this.controllerToast);
         this.controllerMenuItem.setControllerMcp(this.controllerMcp);
-        this.controllerMenuItem.setControllerToast(this.controllerToast);
 
         this.windowApp = getCurrentWindow();
 
@@ -103,10 +112,12 @@ export default class Index implements Icontroller {
         this.variableObject = variableBind(
             {
                 adUrl: "",
+                isViewHidden: true,
                 isOfflineAi: variableLink<boolean>("Ai"),
                 isOfflineMcp: variableLink<boolean>("Mcp"),
                 isLogin: variableLink<boolean>("Mcp"),
-                isViewHidden: true
+                setting: variableLink<modelMcp.Isetting>("Mcp"),
+                llmInstance: variableLink<modelChat.TllmInstance | null>("Chat")
             },
             this.constructor.name
         );
@@ -119,7 +130,14 @@ export default class Index implements Icontroller {
     }
 
     variableEffect(watch: IvariableEffect): void {
-        watch([]);
+        watch([
+            {
+                variableList: ["llmInstance"],
+                action: () => {
+                    this.aiApi();
+                }
+            }
+        ]);
     }
 
     view(): IvirtualNode {
@@ -168,10 +186,6 @@ export default class Index implements Icontroller {
                 this.variableObject.isLogin.state = true;
 
                 await this.mcpApi();
-            }
-
-            if (session.data.aiCookie && session.data.aiBearerToken) {
-                await this.controllerAi.apiModel(false);
             }
 
             if (this.windowApp.label === "main") {
