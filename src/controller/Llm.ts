@@ -365,7 +365,7 @@ export const mcpJsonResponse = async <T extends modelLlm.IdataContext>(
             }
         })
             .then(async (resultToolCall) => {
-                const json = (await resultToolCall.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultToolCall.json()) as modelHelperSrc.IapiResponse;
 
                 const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IapiToolCallResponse;
 
@@ -395,7 +395,7 @@ export const mcpJsonResponse = async <T extends modelLlm.IdataContext>(
             }
         })
             .then(async (resultToolCall) => {
-                const json = (await resultToolCall.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultToolCall.json()) as modelHelperSrc.IapiResponse;
 
                 toolResponse(tThis, json.response.stdout, "", userPrompt, messageIndex);
             })

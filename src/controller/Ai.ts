@@ -73,7 +73,7 @@ export default class Ai implements Icontroller {
                     const cookie = resultApi.headers.get("set-cookie");
 
                     if (cookie) {
-                        const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                        const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                         const stdout = json.response.stdout;
 
                         if (!session.data.aiBearerToken) {

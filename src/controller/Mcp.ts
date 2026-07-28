@@ -63,7 +63,7 @@ export default class Mcp implements Icontroller {
                 .then(async (resultApi) => {
                     this.variableObject.isOfflineMcp.state = false;
 
-                    const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                    const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                     const stdout = json.response.stdout;
 
                     fileStatusList[index].status = stdout;
@@ -199,7 +199,7 @@ export default class Mcp implements Icontroller {
                 const cookie = resultApi.headers.get("set-cookie");
 
                 if (cookie) {
-                    const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                    const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                     const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IuserLoginSession;
 
                     if (stdoutObject.mcpSessionId !== "") {
@@ -263,7 +263,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.toolList.state = stdoutList;
@@ -290,7 +290,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.taskList.state = stdoutList;
@@ -340,7 +340,7 @@ export default class Mcp implements Icontroller {
                     .then(async (resultApi) => {
                         this.variableObject.isOfflineMcp.state = false;
 
-                        const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                        const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                         const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IfileStatus;
 
                         if (stdoutObject.fileName !== "") {
@@ -377,7 +377,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.documentList.state = stdoutList;
@@ -414,7 +414,7 @@ export default class Mcp implements Icontroller {
 
                 let resultStdoutObject = {} as modelDocument.IdataRead;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdout = json.response.stdout;
 
                 if (stdout !== "ko") {
@@ -451,7 +451,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdout = json.response.stdout;
 
                 if (stdout === "ko") {
@@ -485,7 +485,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 if (stdoutList.length > 0) {
@@ -522,7 +522,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdout = json.response.stdout;
 
                 return stdout;
@@ -573,7 +573,7 @@ export default class Mcp implements Icontroller {
                     .then(async (resultApi) => {
                         this.variableObject.isOfflineMcp.state = false;
 
-                        const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                        const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                         const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IfileStatus;
 
                         if (stdoutObject.fileName !== "") {
@@ -610,7 +610,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.skillList.state = stdoutList;
@@ -647,7 +647,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdout = json.response.stdout;
 
                 if (stdout !== "ko") {
@@ -684,7 +684,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdout = json.response.stdout;
 
                 if (stdout === "ko") {
@@ -723,7 +723,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IapiStatusResponse;
 
                 if (stdoutObject.status !== "ko") {
@@ -771,7 +771,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IapiStatusResponse;
 
                 if (stdoutObject.status !== "ko") {
@@ -808,7 +808,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdoutList = JSON.parse(json.response.stdout);
 
                 this.variableObject.agentList.state = stdoutList;
@@ -855,7 +855,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdout = json.response.stdout;
 
                 if (stdout !== "ko") {
@@ -895,7 +895,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdout = JSON.parse(json.response.stdout) as modelMcp.Iuser;
 
                 this.variableObject.user.state = stdout;
@@ -933,7 +933,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IapiStatusResponse;
 
                 if (stdoutObject.status !== "ko") {
@@ -969,7 +969,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdout = JSON.parse(json.response.stdout) as modelMcp.Isetting;
 
                 this.variableObject.setting.state = stdout;
@@ -1013,7 +1013,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IresponseBody;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
                 const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IapiStatusResponse;
 
                 if (stdoutObject.status !== "ko") {

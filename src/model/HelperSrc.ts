@@ -26,7 +26,7 @@ export interface IfileDetailSignature {
     }[];
 }
 
-export interface IresponseBody {
+export interface IapiResponse {
     response: {
         stdout: string;
         stderr: string | Error;
