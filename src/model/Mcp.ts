@@ -3,7 +3,7 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 // Source
 import * as modelChat from "./Chat";
 
-export interface IapiServerLoginBody {
+export interface IapiLoginBody {
     username: string;
     password: string;
 }

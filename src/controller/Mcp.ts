@@ -174,7 +174,7 @@ export default class Mcp implements Icontroller {
     };
 
     apiLogin = async (username: string, password: string): Promise<boolean> => {
-        const body: modelMcp.IapiServerLoginBody = {
+        const body: modelMcp.IapiLoginBody = {
             username,
             password
         };
