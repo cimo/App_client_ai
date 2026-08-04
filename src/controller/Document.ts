@@ -23,13 +23,13 @@ export default class Document implements Icontroller {
         const windowDocumentTitle = await this.windowDocument.title();
         const fileDetail = helperSrc.fileDetail(windowDocumentTitle);
 
-        const documentReadObject = await this.controllerMcp.apiDocumentRead(fileDetail.fileName);
+        const fileContent = await this.controllerMcp.apiDocumentRead(fileDetail.fileName);
 
-        if (documentReadObject.fileContent) {
+        if (fileContent) {
             if (fileDetail.category === "image") {
-                this.variableObject.imageContent.state = documentReadObject.fileContent;
+                this.variableObject.imageContent.state = fileContent;
             } else {
-                const decodedList = window.atob(documentReadObject.fileContent);
+                const decodedList = window.atob(fileContent);
                 const unicodeList = new Uint8Array(decodedList.length);
 
                 for (let a = 0; a < decodedList.length; a++) {

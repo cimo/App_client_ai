@@ -156,28 +156,64 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         return resultList;
                                                     }}
                                                 </button>
-                                                {() => {
-                                                    const result: IvirtualNode[] = [];
+                                                <div class="right_button_wrapper">
+                                                    {() => {
+                                                        const result: IvirtualNode[] = [];
 
-                                                    if (variableObject.documentSelectList.state.length > 0) {
+                                                        if (variableObject.documentSelectList.state.length > 0) {
+                                                            result.push(
+                                                                <button
+                                                                    onClick={() => {
+                                                                        methodObject.onClickDocumentDeleteSelected();
+                                                                    }}
+                                                                >
+                                                                    <i class="cls_icon">delete</i>
+                                                                    <p>Delete selected</p>
+                                                                </button>
+                                                            );
+                                                        }
+
+                                                        if (variableObject.documentCurrentFolderList.state.length > 0) {
+                                                            result.push(
+                                                                <button
+                                                                    onClick={() => {
+                                                                        methodObject.onClickDocumentFolderBack();
+                                                                    }}
+                                                                >
+                                                                    <i class="cls_icon">drive_file_move_rtl</i>
+                                                                    <p>Back</p>
+                                                                </button>
+                                                            );
+                                                        }
+
                                                         result.push(
                                                             <button
-                                                                class="delete_selected"
+                                                                class="button_create_folder"
                                                                 onClick={() => {
-                                                                    methodObject.onClickDocumentDeleteSelected();
+                                                                    methodObject.onClickDocumentFolderCreate();
                                                                 }}
+                                                                disabled={() => variableObject.isDocumentFolderStillCreate.state}
                                                             >
-                                                                <i class="cls_icon">delete</i>
-                                                                <p>Delete selected</p>
+                                                                <i class="cls_icon">create_new_folder</i>
+                                                                <p>Create folder</p>
                                                             </button>
                                                         );
-                                                    }
 
-                                                    return result;
-                                                }}
+                                                        return result;
+                                                    }}
+                                                </div>
+                                            </div>
+                                            <div class="breadcrumb_wrapper">
+                                                <p>
+                                                    Current path: ./{variableObject.documentCurrentFolderList.state.join("/")}
+                                                    {variableObject.documentCurrentFolderList.state.length > 0 ? "/" : ""}
+                                                </p>
                                             </div>
                                             <div class="table_flex">
                                                 <div class="row header">
+                                                    <div class="cell id">
+                                                        <p>ID</p>
+                                                    </div>
                                                     <div class="cell select">
                                                         {() => {
                                                             const resultList: IvirtualNode[] = [];
@@ -223,15 +259,18 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         const resultList: IvirtualNode[] = [];
 
                                                         for (const [key, value] of Object.entries(variableObject.documentList.state)) {
-                                                            const extension = helperSrc.fileDetail(value.fileName).extension;
-
                                                             resultList.push(
                                                                 <div key={key} class="row">
+                                                                    <div class="cell id">
+                                                                        <p>{methodObject.itemId(key)}</p>
+                                                                    </div>
                                                                     <div class="cell select">
                                                                         <input
                                                                             type="checkbox"
                                                                             checked={() =>
-                                                                                variableObject.documentSelectList.state.includes(value.fileName)
+                                                                                variableObject.documentSelectList.state.includes(
+                                                                                    methodObject.documentPathSelected(value.fileName)
+                                                                                )
                                                                             }
                                                                             onChange={() => {
                                                                                 methodObject.onClickDocumentCheckbox(value.fileName);
@@ -249,8 +288,31 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                         </i>
                                                                     </div>
                                                                     <div class="cell name">
-                                                                        <img class="icon" src={`/asset/image/icon_file/${extension}.svg`} />
-                                                                        <p>{value.fileName}</p>
+                                                                        <img
+                                                                            class="icon"
+                                                                            src={`/asset/image/icon_file/${value.extension ? value.extension : value.category}.svg`}
+                                                                        />
+                                                                        {() => {
+                                                                            const resultList: IvirtualNode[] = [];
+
+                                                                            if (value.fileName) {
+                                                                                resultList.push(<p>{value.fileName}</p>);
+                                                                            } else {
+                                                                                resultList.push(
+                                                                                    <input
+                                                                                        class="input_folder_name"
+                                                                                        type="text"
+                                                                                        jsmvcfw-elementHookName="elementInputDocumentFolderName"
+                                                                                        onKeyUp={(event: KeyboardEvent) => {
+                                                                                            methodObject.onInputDocumentFolderName(event);
+                                                                                        }}
+                                                                                        autofocus
+                                                                                    ></input>
+                                                                                );
+                                                                            }
+
+                                                                            return resultList;
+                                                                        }}
                                                                     </div>
                                                                     <div class="cell date">
                                                                         <p>{helperSrc.localeFormat(new Date(value.dateModified))}</p>
@@ -259,14 +321,31 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                         <p>{value.size}</p>
                                                                     </div>
                                                                     <div class="cell button">
-                                                                        <button
-                                                                            onClick={() => methodObject.windowOpenDocument(value.fileName)}
-                                                                            disabled={() =>
-                                                                                variableObject.documentOpenList.state.includes(value.fileName)
+                                                                        {() => {
+                                                                            const resultList: IvirtualNode[] = [];
+
+                                                                            if (value.fileName) {
+                                                                                resultList.push(
+                                                                                    <button
+                                                                                        onClick={() =>
+                                                                                            methodObject.onClickDocumentOpen(
+                                                                                                value.fileName,
+                                                                                                value.category
+                                                                                            )
+                                                                                        }
+                                                                                        disabled={() =>
+                                                                                            variableObject.documentOpenList.state.includes(
+                                                                                                value.fileName
+                                                                                            )
+                                                                                        }
+                                                                                    >
+                                                                                        <p>Open</p>
+                                                                                    </button>
+                                                                                );
                                                                             }
-                                                                        >
-                                                                            <p>Open</p>
-                                                                        </button>
+
+                                                                            return resultList;
+                                                                        }}
                                                                     </div>
                                                                 </div>
                                                             );
@@ -350,28 +429,32 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         return resultList;
                                     }}
                                 </button>
-                                {() => {
-                                    const result: IvirtualNode[] = [];
+                                <div class="right_button_wrapper">
+                                    {() => {
+                                        const result: IvirtualNode[] = [];
 
-                                    if (variableObject.skillSelectList.state.length > 0) {
-                                        result.push(
-                                            <button
-                                                class="delete_selected"
-                                                onClick={() => {
-                                                    methodObject.onClickSkillDeleteSelected();
-                                                }}
-                                            >
-                                                <i class="cls_icon">delete</i>
-                                                <p>Delete selected</p>
-                                            </button>
-                                        );
-                                    }
+                                        if (variableObject.skillSelectList.state.length > 0) {
+                                            result.push(
+                                                <button
+                                                    onClick={() => {
+                                                        methodObject.onClickSkillDeleteSelected();
+                                                    }}
+                                                >
+                                                    <i class="cls_icon">delete</i>
+                                                    <p>Delete selected</p>
+                                                </button>
+                                            );
+                                        }
 
-                                    return result;
-                                }}
+                                        return result;
+                                    }}
+                                </div>
                             </div>
                             <div class="table_flex">
                                 <div class="row header">
+                                    <div class="cell id">
+                                        <p>ID</p>
+                                    </div>
                                     <div class="cell select">
                                         {() => {
                                             const resultList: IvirtualNode[] = [];
@@ -418,6 +501,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         for (const [key, value] of Object.entries(variableObject.skillList.state)) {
                                             resultList.push(
                                                 <div key={key} class="row">
+                                                    <div class="cell id">
+                                                        <p>{methodObject.itemId(key)}</p>
+                                                    </div>
                                                     <div class="cell select">
                                                         <input
                                                             type="checkbox"
@@ -546,6 +632,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             </div>
                                             <div class="table_flex">
                                                 <div class="row header">
+                                                    <div class="cell id">
+                                                        <p>ID</p>
+                                                    </div>
                                                     <div class="cell name">
                                                         <p>Name</p>
                                                     </div>
@@ -564,6 +653,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         for (const [key, value] of Object.entries(variableObject.skillList.state)) {
                                                             resultList.push(
                                                                 <div key={key} class="row">
+                                                                    <div class="cell id">
+                                                                        <p>{methodObject.itemId(key)}</p>
+                                                                    </div>
                                                                     <div class="cell name">
                                                                         <img class="icon" src={`/asset/image/icon_file/md.svg`} />
                                                                         <p>{value.fileName}</p>

@@ -8,16 +8,25 @@ export interface IapiLoginBody {
     password: string;
 }
 
+export interface IapiDocumentListBody {
+    folderJoin: string;
+}
+
 export interface IapiDocumentReadBody {
     fileName: string;
 }
 
 export interface IapiDocumentDeleteBody {
-    fileName: string;
+    pathFile: string;
+}
+
+export interface IapiDocumentFolderCreateBody {
+    folderName: string;
+    folderJoin: string;
 }
 
 export interface IapiRagCheckBody {
-    fileName: string;
+    pathFile: string;
 }
 
 export interface IapiSkillReadBody {
@@ -55,11 +64,6 @@ export interface IapiUserUpdateBody {
 export interface IapiSettingUpdateBody {
     id: number;
     llm: IsettingLlm[];
-}
-
-export interface IapiStatusResponse {
-    status: string;
-    message: string;
 }
 
 export interface IapiLlmToolResponse {
@@ -162,13 +166,17 @@ export interface IdocumentParser {
     searchInput: string;
 }
 
-export interface IfileStatus {
-    fileName: string;
-    status: string;
+export interface IactionOperation {
+    message: string;
+    isComplete?: boolean;
+    state?: string;
+    pathFile?: string;
 }
 
 export interface IfileDetail {
     fileName: string;
+    extension: string;
+    category: string;
     dateModified: string;
     size: string;
 }

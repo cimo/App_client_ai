@@ -33,6 +33,10 @@ export default class Pagination implements Icontroller {
         }
     };
 
+    itemId = (index: number): number => {
+        return (this.variableObject.pageNumber.state - 1) * this.itemMax + index + 1;
+    };
+
     updateList = <T>(list: T[]): T[] => {
         this.variableObject.pageTotal.state = Math.max(1, Math.ceil(list.length / this.itemMax));
 

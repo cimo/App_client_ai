@@ -15,10 +15,12 @@ export interface Ivariable {
     isMenuItemSkill: IvariableBind<boolean>;
     isMenuItemUser: IvariableBind<boolean>;
     isMenuItemSetting: IvariableBind<boolean>;
-    isDocumentUpload: IvariableBind<boolean>;
     documentList: IvariableBind<modelMcp.IfileDetail[]>;
     documentOpenList: IvariableBind<string[]>;
     documentSelectList: IvariableBind<string[]>;
+    documentCurrentFolderList: IvariableBind<string[]>;
+    isDocumentUpload: IvariableBind<boolean>;
+    isDocumentFolderStillCreate: IvariableBind<boolean>;
     isRagStart: IvariableBind<boolean>;
     isRagGraphOpen: IvariableBind<boolean>;
     isRagGraphHtmlLoading: IvariableBind<boolean>;
@@ -45,12 +47,17 @@ export interface Ivariable {
 }
 
 export interface Imethod {
+    itemId: (key: string) => number;
     selectAllCheck: (fileDetailList: modelMcp.IfileDetail[], selectList: string[]) => boolean;
+    documentPathSelected: (fileName: string) => string;
     onClickMenuDocument: () => void;
     onClickDocumentUpload: () => void;
     onClickDocumentCheckbox: (fileName: string) => void;
     onClickDocumentDelete: (fileName: string) => void;
     onClickDocumentDeleteSelected: () => void;
+    onClickDocumentFolderCreate: () => void;
+    onClickDocumentFolderBack: () => void;
+    onClickDocumentOpen: (fileName: string, category: string) => void;
     onClickRagStart: () => void;
     onClickRagGraph: () => void;
     onClickRagGraphBack: () => void;
@@ -81,10 +88,11 @@ export interface Imethod {
     onClickSettingSave: () => void;
     onClickSettingCancel: () => void;
     onClickToggleSelectAll: (mode: string) => void;
-    windowOpenDocument: (title: string) => void;
+    onInputDocumentFolderName: (event: KeyboardEvent) => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {
+    elementInputDocumentFolderName: HTMLInputElement;
     elementInputAgentName: HTMLInputElement;
     elementInputAgentDescription: HTMLInputElement;
     elementInputUserName: HTMLInputElement;

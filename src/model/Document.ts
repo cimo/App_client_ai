@@ -16,11 +16,6 @@ export interface Idata {
     pageNumber: number;
 }
 
-export interface IdataRead {
-    fileContent: string;
-    pageTotal: number;
-}
-
 export interface IpdfViewerApplication {
     eventBus: IpdfViewerApplicationEventBus;
     findBar?: IpdfViewerApplicationFindBar;

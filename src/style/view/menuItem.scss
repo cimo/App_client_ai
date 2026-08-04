@@ -89,17 +89,38 @@
             button {
                 margin: 0px !important;
 
-                &.delete_selected {
-                    margin-left: auto !important;
-                }
-
                 .cls_icon:has(+ p) {
                     margin-right: 5px !important;
                 }
             }
+
+            .right_button_wrapper {
+                display: flex;
+
+                margin-left: auto;
+                gap: 5px;
+            }
+        }
+
+        .breadcrumb_wrapper {
+            display: flex;
+            flex-direction: row;
+            align-content: center;
+            justify-content: start;
+            align-items: center;
+            justify-items: center;
+            min-height: 0;
+            min-width: 0;
+            flex: 0 0 auto;
+
+            margin: 0 10px 10px 10px;
         }
 
         .table_flex {
+            & .id {
+                flex: 0 0 40px !important;
+            }
+
             & .select {
                 flex: 0 0 60px !important;
 
@@ -140,6 +161,10 @@
 
                 .icon {
                     width: 40px !important;
+                }
+
+                input {
+                    width: 100% !important;
                 }
             }
 
@@ -333,5 +358,16 @@
 
     .view_menuItem_right {
         background-color: color.$darkRootBackground;
+
+        .document_wrapper {
+            .table_flex {
+                & .name {
+                    input {
+                        border: 1px solid color.$darkChatMessageSendBorder;
+                        box-shadow: color.$darkShadowMessageSend;
+                    }
+                }
+            }
+        }
     }
 }

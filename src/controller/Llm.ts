@@ -111,9 +111,9 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                         citationContextList.push(`[${citationList[a].fileName}]: ${citationList[a].chunk}`);
                     }
 
-                    const citationContext = citationContextList.join("\n---\n");
+                    const citationContextJoin = citationContextList.join("\n---\n");
 
-                    let nodeContext = "";
+                    let nodeContextJoin = "";
 
                     if (nodeList.length > 0) {
                         const nodeContextList: string[] = [];
@@ -128,10 +128,10 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                             nodeContextList.push(`${nodeLine}: ${nodeList[a].description}`);
                         }
 
-                        nodeContext = nodeContextList.join("\n");
+                        nodeContextJoin = nodeContextList.join("\n");
                     }
 
-                    let graphContext = "";
+                    let graphContextJoin = "";
 
                     if (graphList.length > 0) {
                         const graphContextList: string[] = [];
@@ -146,12 +146,12 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                             graphContextList.push(graphLine);
                         }
 
-                        graphContext = graphContextList.join("\n");
+                        graphContextJoin = graphContextList.join("\n");
                     }
 
                     tThis.apiResponse(
                         "rag",
-                        `CITATION:\n${citationContext}\n\nNODE:\n${nodeContext}\n\nGRAPH:\n${graphContext}\n\nText:\n${userPrompt}`
+                        `CITATION:\n${citationContextJoin}\n\nNODE:\n${nodeContextJoin}\n\nGRAPH:\n${graphContextJoin}\n\nText:\n${userPrompt}`
                     );
 
                     tThis.controllerChat.variableObject.systemMode.state = "tool-call";

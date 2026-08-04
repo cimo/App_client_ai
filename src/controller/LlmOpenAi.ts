@@ -173,11 +173,11 @@ export default class LlmOpenAi {
                             }
 
                             buffer += decoder.decode(value, { stream: true });
-                            const lineList = buffer.split(/\r?\n/);
-                            buffer = lineList.pop() as string;
+                            const bufferSplit = buffer.split(/\r?\n/);
+                            buffer = bufferSplit.pop() as string;
 
-                            for (let a = 0; a < lineList.length; a++) {
-                                const line = lineList[a];
+                            for (let a = 0; a < bufferSplit.length; a++) {
+                                const line = bufferSplit[a];
 
                                 if (line.startsWith("data:")) {
                                     const data = line.slice(5).trim();
