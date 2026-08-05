@@ -27,6 +27,7 @@ npm run tauri_dev
 
 ## Reset
 1. Delete this from the root:
+    - dist
     - node_modules
     - src-tauri/Cargo.lock
 
