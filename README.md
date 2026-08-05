@@ -29,6 +29,5 @@ npm run tauri_dev
 1. Delete this from the root:
     - node_modules
     - src-tauri/Cargo.lock
-    - package-lock.json
 
 2. Follow the "Installation" instructions.
