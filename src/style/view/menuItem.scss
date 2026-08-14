@@ -94,11 +94,26 @@
                 }
             }
 
+            .left_button_wrapper,
             .right_button_wrapper {
                 display: flex;
+                flex-direction: row;
+                align-content: center;
+                align-items: center;
+                justify-items: center;
+                min-height: 0;
+                min-width: 0;
+                flex: 1 1 0;
 
-                margin-left: auto;
                 gap: 5px;
+            }
+
+            .left_button_wrapper {
+                justify-content: start;
+            }
+
+            .right_button_wrapper {
+                justify-content: end;
             }
         }
 
@@ -114,6 +129,14 @@
             flex: 0 0 auto;
 
             margin: 0 10px 10px 10px;
+
+            button {
+                margin: 0 5px 0 0 !important;
+            }
+
+            p {
+                padding: 10px 0 10px 0;
+            }
         }
 
         .table_flex {

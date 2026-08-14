@@ -1,4 +1,5 @@
 @use "setting/color.scss" as color;
+@use "setting/parameter.scss" as parameter;
 
 .table_flex {
     display: flex !important;
@@ -11,16 +12,31 @@
     min-width: 0 !important;
     flex: 1 1 auto !important;
 
+    .body_loading,
     .body {
         display: flex !important;
         flex-direction: column !important;
+        min-height: 0 !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+
+    .body_loading {
+        align-content: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+        justify-items: center !important;
+
+        .cls_icon {
+            font-size: parameter.$fontSizeVeryBig !important;
+        }
+    }
+
+    .body {
         align-content: start !important;
         justify-content: start !important;
         align-items: stretch !important;
         justify-items: start !important;
-        min-height: 0 !important;
-        min-width: 0 !important;
-        flex: 1 1 auto !important;
 
         overflow-y: auto !important;
     }

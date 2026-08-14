@@ -269,7 +269,7 @@ export default class LlmLlamaCpp {
                                                     helperSrc.jsonCheck(responseCompleted) &&
                                                     (systemModeRequest === "tool-call" || systemModeRequest === "task-call")
                                                 ) {
-                                                    await controllerLlm.mcpJsonResponse(this, responseCompleted, userPrompt, messageIndex);
+                                                    await controllerLlm.mcpResponse(this, responseCompleted, userPrompt, messageIndex);
                                                 } else {
                                                     const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 

@@ -28,7 +28,7 @@ export default class LlmOpenAi {
                 .then(async (resultApi) => {
                     const json = (await resultApi.json()) as modelLlmOpenAi.IapiModelBody;
 
-                    const modelList = [];
+                    const modelList: string[] = [];
 
                     for (const model of json.data) {
                         if (model.owned_by === "system") {
@@ -268,7 +268,7 @@ export default class LlmOpenAi {
                                                 helperSrc.jsonCheck(responseCompleted) &&
                                                 (systemModeRequest === "tool-call" || systemModeRequest === "task-call")
                                             ) {
-                                                await controllerLlm.mcpJsonResponse(this, responseCompleted, userPrompt, messageIndex);
+                                                await controllerLlm.mcpResponse(this, responseCompleted, userPrompt, messageIndex);
                                             } else {
                                                 const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 

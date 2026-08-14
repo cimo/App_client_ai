@@ -55,16 +55,7 @@ export default class Index implements Icontroller {
     };
 
     private onClickLoginBasic = async (): Promise<void> => {
-        const username = this.hookObject.elementInputUsername.value;
-        const password = this.hookObject.elementInputPassword.value;
-
-        if (!username || !password) {
-            this.controllerToast.show("error", ["Please enter username and password."]);
-
-            return;
-        }
-
-        const isLogin = await this.controllerMcp.apiLogin(username, password);
+        const isLogin = await this.controllerMcp.apiLogin(this.hookObject.elementInputUsername.value, this.hookObject.elementInputPassword.value);
 
         if (isLogin) {
             await this.mcpApi();

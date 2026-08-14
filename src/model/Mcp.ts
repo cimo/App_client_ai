@@ -25,6 +25,11 @@ export interface IapiDocumentFolderCreateBody {
     folderJoin: string;
 }
 
+export interface IapiDocumentFolderMoveBody {
+    pathList: string[];
+    folderJoin: string;
+}
+
 export interface IapiRagCheckBody {
     pathFile: string;
 }
@@ -84,11 +89,6 @@ export interface IapiToolCallResponse {
             }
         ];
     };
-}
-
-export interface IuserLoginSession {
-    mcpSessionId: string;
-    message: string;
 }
 
 export interface Itool {
@@ -167,10 +167,9 @@ export interface IdocumentParser {
 }
 
 export interface IactionOperation {
-    message: string;
-    isComplete?: boolean;
-    state?: string;
-    pathFile?: string;
+    state: string;
+    message: string | string[];
+    data?: unknown;
 }
 
 export interface IfileDetail {
@@ -210,9 +209,10 @@ export interface Ivariable {
     setting: IvariableBind<Isetting>;
     playwrightVideoSrc: IvariableBind<string>;
     playwrightVideoName: IvariableBind<string>;
-    isDocumentUpload: IvariableBind<boolean>;
-    isRagStart: IvariableBind<boolean>;
-    isSkillUpload: IvariableBind<boolean>;
+    isUploadRunning: IvariableBind<boolean>;
+    isDocumentFolderCreateRunning: IvariableBind<boolean>;
+    isDocumentFolderMoveRunning: IvariableBind<boolean>;
+    isRagRunning: IvariableBind<boolean>;
     agentForm: IvariableBind<Iagent>;
     isAgentSave: IvariableBind<boolean>;
     isUserUpdate: IvariableBind<boolean>;

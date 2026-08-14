@@ -11,13 +11,7 @@ const viewDocument = (variableObject: modelDocument.Ivariable): IvirtualNode => 
                 {() => {
                     const resultList: IvirtualNode[] = [];
 
-                    if (variableObject.isLoadingWindow.state) {
-                        resultList.push(
-                            <div class="loading_wrapper">
-                                <i class="cls_icon">update</i>
-                            </div>
-                        );
-                    } else {
+                    if (!variableObject.isLoadingWindow.state) {
                         resultList.push(
                             <div class="data_wrapper">
                                 {() => {
@@ -33,6 +27,12 @@ const viewDocument = (variableObject: modelDocument.Ivariable): IvirtualNode => 
 
                                     return resultList;
                                 }}
+                            </div>
+                        );
+                    } else {
+                        resultList.push(
+                            <div class="loading_wrapper">
+                                <i class="cls_icon">update</i>
                             </div>
                         );
                     }

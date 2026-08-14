@@ -15,8 +15,32 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
     userPrompt: string,
     messageIndex: number
 ): Promise<void> => {
-    if (message) {
-        if (helperSrc.jsonCheck(message)) {
+    if (!message) {
+        const messageListToolState = tThis.controllerChat.variableObject.messageList.state.slice();
+
+        messageListToolState[messageIndex] = {
+            ...messageListToolState[messageIndex],
+            assistantNoReason: "Tool response empty."
+        };
+
+        tThis.controllerChat.variableObject.messageList.state = messageListToolState;
+
+        tThis.controllerChat.messageLoadingHide(messageIndex);
+
+        tThis.controllerChat.autoscroll();
+    } else {
+        if (!helperSrc.jsonCheck(message)) {
+            const messageListToolState = tThis.controllerChat.variableObject.messageList.state.slice();
+
+            messageListToolState[messageIndex] = {
+                ...messageListToolState[messageIndex],
+                assistantNoReason: message
+            };
+
+            tThis.controllerChat.variableObject.messageList.state = messageListToolState;
+
+            tThis.controllerChat.messageLoadingHide(messageIndex);
+        } else {
             const messageObject = JSON.parse(message) as modelMcp.ItoolResult;
 
             tThis.controllerChat.responseMcpTool = {
@@ -61,7 +85,16 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
             } else if (messageObject.name === "document_parser") {
                 const result = messageObject.result as modelMcp.IdocumentParser;
 
-                if (Object.keys(result).length > 0) {
+                if (Object.keys(result).length === 0) {
+                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+
+                    messageListState[messageIndex] = {
+                        ...messageListState[messageIndex],
+                        assistantNoReason: "Document not found."
+                    };
+
+                    tThis.controllerChat.variableObject.messageList.state = messageListState;
+                } else {
                     tThis.controllerChat.fileObject[result.fileName] = {
                         searchInput: result.searchInput
                     };
@@ -76,15 +109,6 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                     };
 
                     tThis.controllerChat.variableObject.messageList.state = messageListState;
-                } else {
-                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
-
-                    messageListState[messageIndex] = {
-                        ...messageListState[messageIndex],
-                        assistantNoReason: "Document not found."
-                    };
-
-                    tThis.controllerChat.variableObject.messageList.state = messageListState;
                 }
             } else if (messageObject.name === "rag_search") {
                 const result = messageObject.result as modelMcp.IragSearch;
@@ -92,7 +116,16 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                 const nodeList = result.nodeList ? result.nodeList : [];
                 const graphList = result.graphList ? result.graphList : [];
 
-                if (citationList.length > 0) {
+                if (citationList.length === 0) {
+                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+
+                    messageListState[messageIndex] = {
+                        ...messageListState[messageIndex],
+                        assistantNoReason: "No citations found."
+                    };
+
+                    tThis.controllerChat.variableObject.messageList.state = messageListState;
+                } else {
                     const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
 
                     messageListState[messageIndex] = {
@@ -155,15 +188,6 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                     );
 
                     tThis.controllerChat.variableObject.systemMode.state = "tool-call";
-                } else {
-                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
-
-                    messageListState[messageIndex] = {
-                        ...messageListState[messageIndex],
-                        assistantNoReason: "No citations found."
-                    };
-
-                    tThis.controllerChat.variableObject.messageList.state = messageListState;
                 }
             } else if (messageObject.name === "security_scanner") {
                 const result = messageObject.result as string;
@@ -188,31 +212,7 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
 
                 tThis.controllerChat.variableObject.messageList.state = messageListState;
             }
-        } else {
-            const messageListToolState = tThis.controllerChat.variableObject.messageList.state.slice();
-
-            messageListToolState[messageIndex] = {
-                ...messageListToolState[messageIndex],
-                assistantNoReason: message
-            };
-
-            tThis.controllerChat.variableObject.messageList.state = messageListToolState;
-
-            tThis.controllerChat.messageLoadingHide(messageIndex);
         }
-
-        tThis.controllerChat.autoscroll();
-    } else {
-        const messageListToolState = tThis.controllerChat.variableObject.messageList.state.slice();
-
-        messageListToolState[messageIndex] = {
-            ...messageListToolState[messageIndex],
-            assistantNoReason: "Tool response empty."
-        };
-
-        tThis.controllerChat.variableObject.messageList.state = messageListToolState;
-
-        tThis.controllerChat.messageLoadingHide(messageIndex);
 
         tThis.controllerChat.autoscroll();
     }
@@ -221,15 +221,15 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
 export const updateModel = <T extends modelLlm.IdataContext>(tThis: T, modelList: string[], isShowDropdown: boolean): void => {
     tThis.controllerChat.variableObject.modelList.state = modelList;
 
-    if (isShowDropdown) {
-        tThis.controllerChat.variableObject.isOpenDropdownModelList.state = true;
-    } else {
+    if (!isShowDropdown) {
         if (
             tThis.controllerChat.variableObject.modelSelected.state === "" ||
             !tThis.controllerChat.variableObject.modelList.state.includes(tThis.controllerChat.variableObject.modelSelected.state)
         ) {
             tThis.controllerChat.variableObject.modelSelected.state = tThis.controllerChat.variableObject.modelList.state[0];
         }
+    } else {
+        tThis.controllerChat.variableObject.isOpenDropdownModelList.state = true;
     }
 };
 
@@ -328,7 +328,7 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
     return { resultUserPrompt, resultSystemPrompt };
 };
 
-export const mcpJsonResponse = async <T extends modelLlm.IdataContext>(
+export const mcpResponse = async <T extends modelLlm.IdataContext>(
     tThis: T,
     responseCompleted: string,
     userPrompt: string,
@@ -367,15 +367,19 @@ export const mcpJsonResponse = async <T extends modelLlm.IdataContext>(
             .then(async (resultToolCall) => {
                 const json = (await resultToolCall.json()) as modelHelperSrc.IapiResponse;
 
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IapiToolCallResponse;
+                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                let message = "";
+                if (stdoutObject.state === "ok" && stdoutObject.data) {
+                    const stdoutObjectData = stdoutObject.data as modelMcp.IapiToolCallResponse;
 
-                if (stdoutObject.result && stdoutObject.result.content && stdoutObject.result.content[0]) {
-                    message = stdoutObject.result.content[0].text;
+                    let message = "";
+
+                    if (stdoutObjectData.result && stdoutObjectData.result.content && stdoutObjectData.result.content[0]) {
+                        message = stdoutObjectData.result.content[0].text;
+                    }
+
+                    toolResponse(tThis, message, JSON.stringify(responseCompletedObject.argumentObject), userPrompt, messageIndex);
                 }
-
-                toolResponse(tThis, message, JSON.stringify(responseCompletedObject.argumentObject), userPrompt, messageIndex);
             })
             .catch((error: Error) => {
                 toolResponse(tThis, error.message, "", userPrompt, messageIndex);
@@ -394,10 +398,14 @@ export const mcpJsonResponse = async <T extends modelLlm.IdataContext>(
                 acceptInvalidHostnames: true
             }
         })
-            .then(async (resultToolCall) => {
-                const json = (await resultToolCall.json()) as modelHelperSrc.IapiResponse;
+            .then(async (resultTaskCall) => {
+                const json = (await resultTaskCall.json()) as modelHelperSrc.IapiResponse;
 
-                toolResponse(tThis, json.response.stdout, "", userPrompt, messageIndex);
+                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
+
+                if (stdoutObject.state === "ok" && stdoutObject.data) {
+                    toolResponse(tThis, stdoutObject.data as string, "", userPrompt, messageIndex);
+                }
             })
             .catch((error: Error) => {
                 toolResponse(tThis, error.message, "", userPrompt, messageIndex);

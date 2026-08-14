@@ -40,7 +40,9 @@ export default class Dialog implements Icontroller {
     show(mode: string, message: string, isConfirm: boolean): Promise<boolean> {
         let result: Promise<boolean>;
 
-        if (!this.isOpen) {
+        if (this.isOpen) {
+            result = Promise.resolve(false);
+        } else {
             this.isOpen = true;
 
             const route = "#/dialog";
@@ -92,8 +94,6 @@ export default class Dialog implements Icontroller {
                     focus: true
                 });
             });
-        } else {
-            result = Promise.resolve(false);
         }
 
         return result;
