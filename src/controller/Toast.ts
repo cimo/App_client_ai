@@ -9,6 +9,8 @@ export default class Toast implements Icontroller {
     private variableObject: modelToast.Ivariable;
     private methodObject: modelToast.Imethod;
 
+    private timeout: ReturnType<typeof setTimeout> | undefined;
+
     // Method
     private onClickClose = (): void => {
         this.variableObject.mode.state = "";
@@ -16,12 +18,16 @@ export default class Toast implements Icontroller {
     };
 
     show(mode: string, messageList: string[], timeClose = 3000): void {
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+        }
+
         this.variableObject.mode.state = mode;
         this.variableObject.messageList.state = messageList;
         this.variableObject.timeClose.state = timeClose;
 
         if (timeClose > 0) {
-            setTimeout(() => {
+            this.timeout = setTimeout(() => {
                 this.variableObject.mode.state = "";
                 this.variableObject.messageList.state = [];
             }, timeClose);
@@ -31,6 +37,8 @@ export default class Toast implements Icontroller {
     constructor() {
         this.variableObject = {} as modelToast.Ivariable;
         this.methodObject = {} as modelToast.Imethod;
+
+        this.timeout = undefined;
     }
 
     hookObject = {} as modelToast.IelementHook;
