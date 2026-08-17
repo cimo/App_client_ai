@@ -213,7 +213,7 @@ export interface Ivariable {
     isDocumentFolderCreateRunning: IvariableBind<boolean>;
     isDocumentFolderMoveRunning: IvariableBind<boolean>;
     isRagRunning: IvariableBind<boolean>;
-    agentForm: IvariableBind<Iagent>;
+    agentData: IvariableBind<Iagent>;
     isAgentSave: IvariableBind<boolean>;
     isUserUpdate: IvariableBind<boolean>;
     settingLlmServiceId: IvariableBind<number>;

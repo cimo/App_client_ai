@@ -345,7 +345,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                                     type="checkbox"
                                                                                                     checked={() =>
                                                                                                         variableObject.documentSelectList.state.includes(
-                                                                                                            methodObject.itemPathSelected(
+                                                                                                            methodObject.itemPathCurrent(
                                                                                                                 "document",
                                                                                                                 value.fileName
                                                                                                             )
@@ -841,20 +841,20 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             <aside jsmvcfw-controllerName="Pagination" jsmvcfw-parentView="right" />
                                         </>
                                     );
-                                } else if (Object.keys(variableObject.agentForm.state).length > 0) {
+                                } else if (Object.keys(variableObject.agentData.state).length > 0) {
                                     resultList.push(
                                         <div class="form_wrapper">
                                             <div class="field">
                                                 <p class="label">Name:</p>
                                                 <input
-                                                    value={() => variableObject.agentForm.state.name}
+                                                    value={() => variableObject.agentData.state.name}
                                                     jsmvcfw-elementHookName="elementInputAgentName"
                                                 ></input>
                                             </div>
                                             <div class="field">
                                                 <p class="label">Description:</p>
                                                 <textarea jsmvcfw-elementHookName="elementInputAgentDescription" rows="4">
-                                                    {variableObject.agentForm.state.description}
+                                                    {variableObject.agentData.state.description}
                                                 </textarea>
                                             </div>
                                             <div class="field">
@@ -870,11 +870,11 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     {() => {
                                                         const resultList: IvirtualNode[] = [];
 
-                                                        if (variableObject.agentForm.state.skillName !== "") {
+                                                        if (variableObject.agentData.state.skillName !== "") {
                                                             resultList.push(
                                                                 <div class="skill">
                                                                     <img src={`/asset/image/icon_ui/lightbulb.svg`} />
-                                                                    <p>{variableObject.agentForm.state.skillName}</p>
+                                                                    <p>{variableObject.agentData.state.skillName}</p>
                                                                 </div>
                                                             );
                                                         }

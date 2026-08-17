@@ -37,7 +37,7 @@ export interface Ivariable {
     taskSelected: IvariableBind<modelMcp.Itask>;
     agentList: IvariableBind<modelMcp.Iagent[]>;
     agentSelected: IvariableBind<modelMcp.Iagent>;
-    agentForm: IvariableBind<modelMcp.Iagent>;
+    agentData: IvariableBind<modelMcp.Iagent>;
     isAgentSkillSelect: IvariableBind<boolean>;
     isAgentSave: IvariableBind<boolean>;
     user: IvariableBind<modelMcp.Iuser>;
@@ -52,7 +52,7 @@ export interface Ivariable {
 export interface Imethod {
     itemId: (key: string) => number;
     selectAllCheck: (mode: string) => boolean;
-    itemPathSelected: (mode: string, fileName: string) => string;
+    itemPathCurrent: (mode: string, fileName: string) => string;
     checkProcessOngoing: (mode: string) => boolean;
     onClickCheckbox: (mode: string, fileName: string) => void;
     onClickMenuDocument: () => void;

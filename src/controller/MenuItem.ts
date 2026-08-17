@@ -42,7 +42,7 @@ export default class MenuItem implements Icontroller {
         }
 
         for (const fileDetail of fileDetailList) {
-            const path = this.itemPathSelected(mode, fileDetail.fileName);
+            const path = this.itemPathCurrent(mode, fileDetail.fileName);
 
             if (!selectList.includes(path)) {
                 isResult = false;
@@ -54,18 +54,18 @@ export default class MenuItem implements Icontroller {
         return isResult;
     };
 
-    private itemPathSelected = (mode: string, value: string): string => {
+    private itemPathCurrent = (mode: string, value: string): string => {
         let result = "";
 
         if (mode === "document") {
             const fileDetail = helperSrc.fileDetail(value);
 
-            const pathRelative = fileDetail.baseName ? `${fileDetail.baseName}/${fileDetail.fileName}` : `${value}/`;
+            const pathCurrent = fileDetail.baseName ? `${fileDetail.baseName}/${fileDetail.fileName}` : `${value}/`;
 
             if (this.variableObject.isMenuItemDocument.state && this.variableObject.documentCurrentFolderList.state.length > 0) {
-                result = `${this.variableObject.documentCurrentFolderList.state.join("/")}/${pathRelative}`;
+                result = `${this.variableObject.documentCurrentFolderList.state.join("/")}/${pathCurrent}`;
             } else {
-                result = pathRelative;
+                result = pathCurrent;
             }
         } else if (mode === "skill") {
             result = value;
@@ -144,7 +144,7 @@ export default class MenuItem implements Icontroller {
             if (!isFolderCreate) {
                 this.variableObject.documentList.state.shift();
             } else {
-                this.paginationState("update");
+                await this.paginationState("update");
             }
         }
     };
@@ -190,6 +190,33 @@ export default class MenuItem implements Icontroller {
         }
     };
 
+    private itemDelete = async (mode: string, path: string): Promise<boolean> => {
+        let isResult = false;
+        let selectList: string[] = [];
+
+        if (mode === "document") {
+            selectList = this.variableObject.documentSelectList.state;
+
+            isResult = await this.controllerMcp.apiDocumentDelete(path);
+        } else if (mode === "skill") {
+            selectList = this.variableObject.skillSelectList.state;
+
+            isResult = await this.controllerMcp.apiSkillDelete(path);
+        }
+
+        if (isResult) {
+            const index = selectList.indexOf(path);
+
+            if (index !== -1) {
+                selectList.splice(index, 1);
+            }
+
+            this.updateSelectList(mode, selectList);
+        }
+
+        return isResult;
+    };
+
     private dialogMessageDeleteDocument = async (fileName?: string): Promise<void> => {
         let dialogMessage = "";
 
@@ -205,26 +232,24 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isDeleteRunning.state = true;
 
             if (!fileName) {
-                for (const documentSelect of this.variableObject.documentSelectList.state) {
+                for (const documentSelect of this.variableObject.documentSelectList.state.slice()) {
                     const fileDetail = helperSrc.fileDetail(documentSelect);
 
                     if (fileDetail.fileName) {
                         helperSrc.windowClose("document", fileDetail.fileName);
                     }
 
-                    await this.controllerMcp.apiDocumentDelete(documentSelect);
+                    await this.itemDelete("document", documentSelect);
                 }
-
-                this.variableObject.documentSelectList.state = [];
             } else {
                 helperSrc.windowClose("document", fileName);
 
-                const path = this.itemPathSelected("document", fileName);
+                const path = this.itemPathCurrent("document", fileName);
 
-                await this.controllerMcp.apiDocumentDelete(path);
+                await this.itemDelete("document", path);
             }
 
-            this.paginationState("update");
+            await this.paginationState("update");
 
             this.variableObject.isDeleteRunning.state = false;
         }
@@ -276,22 +301,24 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isDeleteRunning.state = true;
 
             if (!fileName) {
-                for (const skillSelect of this.variableObject.skillSelectList.state) {
-                    await this.controllerMcp.apiSkillDelete(skillSelect);
+                for (const skillSelect of this.variableObject.skillSelectList.state.slice()) {
+                    const isDelete = await this.itemDelete("skill", skillSelect);
 
-                    if (skillSelect in agentObject) {
+                    if (isDelete && skillSelect in agentObject) {
                         await this.agentSkillClear(agentObject[skillSelect]);
                     }
                 }
 
                 this.variableObject.skillSelectList.state = [];
             } else {
-                await this.controllerMcp.apiSkillDelete(fileName);
+                const isDelete = await this.itemDelete("skill", fileName);
 
-                await this.agentSkillClear(agentList);
+                if (isDelete) {
+                    await this.agentSkillClear(agentList);
+                }
             }
 
-            this.paginationState("update");
+            await this.paginationState("update");
 
             this.variableObject.isDeleteRunning.state = false;
         }
@@ -318,7 +345,7 @@ export default class MenuItem implements Icontroller {
             selectList = this.variableObject.skillSelectList.state;
         }
 
-        const path = this.itemPathSelected(mode, fileName);
+        const path = this.itemPathCurrent(mode, fileName);
 
         if (!selectList.includes(path)) {
             selectList.push(path);
@@ -336,7 +363,7 @@ export default class MenuItem implements Icontroller {
     private onClickMenuDocument = (): void => {
         this.variableObject.documentCurrentFolderList.state = [];
 
-        this.controllerMcp.apiDocumentSelect(this.variableObject.documentCurrentFolderList.state).then(() => {
+        this.controllerMcp.apiDocumentSelect(this.variableObject.documentCurrentFolderList.state).then(async () => {
             this.variableObject.isMenuItemDocument.state = !this.variableObject.isMenuItemDocument.state;
             this.variableObject.isMenuItemTool.state = false;
             this.variableObject.isMenuItemTask.state = false;
@@ -345,17 +372,17 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemUser.state = false;
             this.variableObject.isMenuItemSetting.state = false;
 
-            this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+            this.variableObject.agentData.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSkillSelect.state = false;
 
-            this.paginationState("initialize", this.variableObject.documentList.state);
+            await this.paginationState("initialize", this.variableObject.documentList.state);
         });
     };
 
     private onClickDocumentUpload = async (): Promise<void> => {
         await this.controllerMcp.apiDocumentUpload(this.variableObject.documentCurrentFolderList.state);
 
-        this.paginationState("update");
+        await this.paginationState("update");
     };
 
     private onClickDocumentDelete = (fileName: string): void => {
@@ -381,8 +408,8 @@ export default class MenuItem implements Icontroller {
     private onClickDocumentFolderBack = (): void => {
         this.variableObject.documentCurrentFolderList.state.pop();
 
-        this.controllerMcp.apiDocumentSelect(this.variableObject.documentCurrentFolderList.state).then(() => {
-            this.paginationState("initialize", this.variableObject.documentList.state);
+        this.controllerMcp.apiDocumentSelect(this.variableObject.documentCurrentFolderList.state).then(async () => {
+            await this.paginationState("initialize", this.variableObject.documentList.state);
         });
     };
 
@@ -397,10 +424,9 @@ export default class MenuItem implements Icontroller {
         );
 
         if (isFolderMove) {
-            this.paginationState("update");
+            await this.paginationState("update");
 
-            this.variableObject.documentSelectList.state = [];
-            this.variableObject.isDocumentFolderMoveSelecting.state = false;
+            this.updateSelectList("document", []);
         }
     };
 
@@ -408,8 +434,8 @@ export default class MenuItem implements Icontroller {
         if (category === "folder") {
             this.variableObject.documentCurrentFolderList.state.push(fileName);
 
-            this.controllerMcp.apiDocumentSelect(this.variableObject.documentCurrentFolderList.state).then(() => {
-                this.paginationState("initialize", this.variableObject.documentList.state);
+            this.controllerMcp.apiDocumentSelect(this.variableObject.documentCurrentFolderList.state).then(async () => {
+                await this.paginationState("initialize", this.variableObject.documentList.state);
             });
         } else {
             this.documentWindowOpen(fileName);
@@ -433,7 +459,7 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuSkill = (): void => {
-        this.controllerMcp.apiSkillSelect().then(() => {
+        this.controllerMcp.apiSkillSelect().then(async () => {
             this.variableObject.isMenuItemDocument.state = false;
             this.variableObject.isMenuItemTool.state = false;
             this.variableObject.isMenuItemTask.state = false;
@@ -442,17 +468,17 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemUser.state = false;
             this.variableObject.isMenuItemSetting.state = false;
 
-            this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+            this.variableObject.agentData.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSkillSelect.state = false;
 
-            this.paginationState("initialize", this.variableObject.skillList.state);
+            await this.paginationState("initialize", this.variableObject.skillList.state);
         });
     };
 
     private onClickSkillUpload = async (): Promise<void> => {
         await this.controllerMcp.apiSkillUpload();
 
-        this.paginationState("update");
+        await this.paginationState("update");
     };
 
     private onClickSkillDelete = (fileName: string): void => {
@@ -468,18 +494,18 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickSelectSkill = (): void => {
-        this.controllerMcp.apiSkillSelect().then(() => {
-            this.variableObject.agentForm.state.name = this.hookObject.elementInputAgentName.value;
-            this.variableObject.agentForm.state.description = this.hookObject.elementInputAgentDescription.value;
+        this.controllerMcp.apiSkillSelect().then(async () => {
+            this.variableObject.agentData.state.name = this.hookObject.elementInputAgentName.value;
+            this.variableObject.agentData.state.description = this.hookObject.elementInputAgentDescription.value;
 
             this.variableObject.isAgentSkillSelect.state = true;
 
-            this.paginationState("initialize", this.variableObject.skillList.state);
+            await this.paginationState("initialize", this.variableObject.skillList.state);
         });
     };
 
     private onClickSkillSelect = (fileName: string): void => {
-        this.variableObject.agentForm.state.skillName = fileName;
+        this.variableObject.agentData.state.skillName = fileName;
 
         this.variableObject.isAgentSkillSelect.state = false;
     };
@@ -497,7 +523,7 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemUser.state = false;
         this.variableObject.isMenuItemSetting.state = false;
 
-        this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+        this.variableObject.agentData.state = {} as modelMcp.Iagent;
         this.variableObject.isAgentSkillSelect.state = false;
     };
 
@@ -530,7 +556,7 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isMenuItemUser.state = false;
         this.variableObject.isMenuItemSetting.state = false;
 
-        this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+        this.variableObject.agentData.state = {} as modelMcp.Iagent;
         this.variableObject.isAgentSkillSelect.state = false;
     };
 
@@ -564,13 +590,13 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemUser.state = false;
             this.variableObject.isMenuItemSetting.state = false;
 
-            this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+            this.variableObject.agentData.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSkillSelect.state = false;
         });
     };
 
     private onClickAgentCreate = (): void => {
-        this.variableObject.agentForm.state = {
+        this.variableObject.agentData.state = {
             id: -1,
             name: "",
             description: "",
@@ -583,7 +609,7 @@ export default class MenuItem implements Icontroller {
             const agent = this.variableObject.agentList.state[a];
 
             if (agent.id === id) {
-                this.variableObject.agentForm.state = agent;
+                this.variableObject.agentData.state = agent;
 
                 break;
             }
@@ -601,19 +627,19 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickAgentSave = (): void => {
-        this.variableObject.agentForm.state.name = this.hookObject.elementInputAgentName.value;
-        this.variableObject.agentForm.state.description = this.hookObject.elementInputAgentDescription.value;
+        this.variableObject.agentData.state.name = this.hookObject.elementInputAgentName.value;
+        this.variableObject.agentData.state.description = this.hookObject.elementInputAgentDescription.value;
 
-        if (this.variableObject.agentForm.state.id === -1) {
-            this.controllerMcp.apiAgentCreate(this.variableObject.agentForm.state);
+        if (this.variableObject.agentData.state.id === -1) {
+            this.controllerMcp.apiAgentCreate(this.variableObject.agentData.state);
         } else {
-            this.controllerMcp.apiAgentUpdate(this.variableObject.agentForm.state);
+            this.controllerMcp.apiAgentUpdate(this.variableObject.agentData.state);
         }
     };
 
     private onClickAgentCancel = (): void => {
         this.controllerMcp.apiAgentSelect().then(() => {
-            this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+            this.variableObject.agentData.state = {} as modelMcp.Iagent;
         });
     };
 
@@ -655,17 +681,19 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemUser.state = !this.variableObject.isMenuItemUser.state;
             this.variableObject.isMenuItemSetting.state = false;
 
-            this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+            this.variableObject.agentData.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSkillSelect.state = false;
         });
     };
 
     private onClickUserUpdate = (): void => {
-        this.variableObject.user.state.name = this.hookObject.elementInputUserName.value;
-        this.variableObject.user.state.surname = this.hookObject.elementInputUserSurname.value;
-        this.variableObject.user.state.password = this.hookObject.elementInputUserPassword.value;
+        const userCopy = { ...this.variableObject.user.state };
 
-        this.controllerMcp.apiUserUpdate(this.variableObject.user.state);
+        userCopy.name = this.hookObject.elementInputUserName.value;
+        userCopy.surname = this.hookObject.elementInputUserSurname.value;
+        userCopy.password = this.hookObject.elementInputUserPassword.value;
+
+        this.controllerMcp.apiUserUpdate(userCopy);
     };
 
     private onClickUserCancel = (): void => {
@@ -679,17 +707,21 @@ export default class MenuItem implements Icontroller {
     private onClickSettingSave = (): void => {
         const llmServiceId = parseInt(this.hookObject.elementSelectSettingLlmServiceId.value);
 
-        for (let a = 0; a < this.variableObject.setting.state.llm.length; a++) {
-            if (this.variableObject.setting.state.llm[a].id === llmServiceId) {
-                this.variableObject.setting.state.llm[a].url = this.hookObject.elementInputSettingLlmUrl.value.trim().replace(/\/+$/, "");
-                this.variableObject.setting.state.llm[a].apiKey = this.hookObject.elementInputSettingLlmApiKey.value.trim();
-                this.variableObject.setting.state.llm[a].selected = true;
-            } else {
-                this.variableObject.setting.state.llm[a].selected = false;
-            }
+        const settingCopy: modelMcp.Isetting = {
+            id: this.variableObject.setting.state.id,
+            llm: []
+        };
+
+        for (const llm of this.variableObject.setting.state.llm) {
+            settingCopy.llm.push({
+                ...llm,
+                url: llm.id === llmServiceId ? this.hookObject.elementInputSettingLlmUrl.value : llm.url,
+                apiKey: llm.id === llmServiceId ? this.hookObject.elementInputSettingLlmApiKey.value : llm.apiKey,
+                selected: llm.id === llmServiceId ? true : false
+            });
         }
 
-        this.controllerMcp.apiSettingUpdate(this.variableObject.setting.state);
+        this.controllerMcp.apiSettingUpdate(settingCopy);
     };
 
     private onClickSettingCancel = (): void => {
@@ -706,7 +738,7 @@ export default class MenuItem implements Icontroller {
             this.variableObject.isMenuItemUser.state = false;
             this.variableObject.isMenuItemSetting.state = !this.variableObject.isMenuItemSetting.state;
 
-            this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+            this.variableObject.agentData.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSkillSelect.state = false;
         });
     };
@@ -725,7 +757,7 @@ export default class MenuItem implements Icontroller {
 
         if (!this.selectAllCheck(mode)) {
             for (const fileDetail of fileDetailList) {
-                const path = this.itemPathSelected(mode, fileDetail.fileName);
+                const path = this.itemPathCurrent(mode, fileDetail.fileName);
 
                 if (!selectList.includes(path)) {
                     selectList.push(path);
@@ -733,7 +765,7 @@ export default class MenuItem implements Icontroller {
             }
         } else {
             for (const fileDetail of fileDetailList) {
-                const path = this.itemPathSelected(mode, fileDetail.fileName);
+                const path = this.itemPathCurrent(mode, fileDetail.fileName);
 
                 const index = selectList.indexOf(path);
 
@@ -800,7 +832,7 @@ export default class MenuItem implements Icontroller {
                 taskSelected: variableLink<modelMcp.Itask>("Mcp"),
                 agentList: variableLink<modelMcp.Iagent[]>("Mcp"),
                 agentSelected: variableLink<modelMcp.Iagent>("Mcp"),
-                agentForm: {} as modelMcp.Iagent,
+                agentData: {} as modelMcp.Iagent,
                 isAgentSkillSelect: false,
                 isAgentSave: false,
                 user: variableLink<modelMcp.Iuser>("Mcp"),
@@ -817,7 +849,7 @@ export default class MenuItem implements Icontroller {
         this.methodObject = {
             itemId: this.itemId,
             selectAllCheck: this.selectAllCheck,
-            itemPathSelected: this.itemPathSelected,
+            itemPathCurrent: this.itemPathCurrent,
             checkProcessOngoing: this.checkProcessOngoing,
             onClickCheckbox: this.onClickCheckbox,
             onClickMenuDocument: this.onClickMenuDocument,
@@ -866,8 +898,8 @@ export default class MenuItem implements Icontroller {
         watch([
             {
                 variableList: ["pageNumber"],
-                action: () => {
-                    this.paginationState("update");
+                action: async () => {
+                    await this.paginationState("update");
                 }
             }
         ]);

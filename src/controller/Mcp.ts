@@ -453,10 +453,10 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiDocumentDelete = async (pathFile: string): Promise<void> => {
+    apiDocumentDelete = async (pathFile: string): Promise<boolean> => {
         const body: modelMcp.IapiDocumentDeleteBody = { pathFile };
 
-        await fetch(`${helperSrc.URL_MCP}/api/document-delete`, {
+        return fetch(`${helperSrc.URL_MCP}/api/document-delete`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -471,11 +471,15 @@ export default class Mcp implements Icontroller {
         })
             .then(() => {
                 this.variableObject.isOfflineMcp.state = false;
+
+                return true;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiDocumentDelete() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
+
+                return false;
             });
     };
 
@@ -784,10 +788,10 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiSkillDelete = async (fileName: string): Promise<void> => {
+    apiSkillDelete = async (fileName: string): Promise<boolean> => {
         const body: modelMcp.IapiSkillDeleteBody = { fileName };
 
-        await fetch(`${helperSrc.URL_MCP}/api/skill-delete`, {
+        return fetch(`${helperSrc.URL_MCP}/api/skill-delete`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -802,11 +806,15 @@ export default class Mcp implements Icontroller {
         })
             .then(() => {
                 this.variableObject.isOfflineMcp.state = false;
+
+                return true;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiSkillDelete() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
+
+                return false;
             });
     };
 
@@ -843,7 +851,7 @@ export default class Mcp implements Icontroller {
                 } else {
                     this.apiAgentSelect();
 
-                    this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+                    this.variableObject.agentData.state = {} as modelMcp.Iagent;
 
                     this.showToastMessage("success", stdoutObject.message);
                 }
@@ -891,7 +899,7 @@ export default class Mcp implements Icontroller {
                 } else {
                     this.apiAgentSelect();
 
-                    this.variableObject.agentForm.state = {} as modelMcp.Iagent;
+                    this.variableObject.agentData.state = {} as modelMcp.Iagent;
 
                     this.showToastMessage("success", stdoutObject.message);
                 }
@@ -1197,7 +1205,7 @@ export default class Mcp implements Icontroller {
                 isDocumentFolderMoveRunning: variableLink<boolean>("MenuItem"),
                 isDocumentFolderCreateRunning: variableLink<boolean>("MenuItem"),
                 isRagRunning: variableLink<boolean>("MenuItem"),
-                agentForm: variableLink<modelMcp.Iagent>("MenuItem"),
+                agentData: variableLink<modelMcp.Iagent>("MenuItem"),
                 isAgentSave: variableLink<boolean>("MenuItem"),
                 isUserUpdate: variableLink<boolean>("MenuItem"),
                 settingLlmServiceId: variableLink<number>("MenuItem"),
