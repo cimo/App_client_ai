@@ -4,17 +4,17 @@ App client ai with Npm_jsMvcFw package.
 AI client application for communicating with a model hosted on a server.
 
 ## Installation
-1. Write on terminal:
+1. Write on container terminal:
 ```
 npm install
 ```
 
-2. For development write on terminal:
+2. For development write on container terminal:
 ```
 npm run tauri_dev
 ```
 
-3. For build write on terminal:
+3. For build write on container terminal:
     - 64-bit (AppImage, deb, rpm):
     ```
     npm run tauri_build_linux_x86_64
