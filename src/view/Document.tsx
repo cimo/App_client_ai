@@ -11,7 +11,7 @@ const viewDocument = (variableObject: modelDocument.Ivariable): IvirtualNode => 
                 {() => {
                     const resultList: IvirtualNode[] = [];
 
-                    if (!variableObject.isLoadingWindow.state) {
+                    if (!variableObject.isWindowLoading.state) {
                         resultList.push(
                             <div class="data_wrapper">
                                 {() => {

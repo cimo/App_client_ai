@@ -113,7 +113,7 @@ export default class Mcp implements Icontroller {
         }, 1000);
     };
 
-    private apiPLaywrightLogin = async (): Promise<void> => {
+    private apiPlaywrightLogin = async (): Promise<void> => {
         return fetch(`${helperSrc.URL_MS_AUTOMATE_TEST}/login`, {
             method: "GET",
             maxRedirections: 0,
@@ -130,11 +130,11 @@ export default class Mcp implements Icontroller {
                 }
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiPLaywrightLogin() - catch()", error);
+                helperSrc.writeLog("Mcp.ts - apiPlaywrightLogin() - catch()", error);
             });
     };
 
-    private apiPLaywrightVideoBlobUrl = async (fileName: string): Promise<string | void> => {
+    private apiPlaywrightVideoBlobUrl = async (fileName: string): Promise<string | void> => {
         return fetch(`${helperSrc.URL_MS_AUTOMATE_TEST}/file/${fileName}`, {
             method: "GET",
             headers: {
@@ -151,11 +151,11 @@ export default class Mcp implements Icontroller {
                 return URL.createObjectURL(blob);
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiPLaywrightVideoBlobUrl() - catch()", error);
+                helperSrc.writeLog("Mcp.ts - apiPlaywrightVideoBlobUrl() - catch()", error);
             });
     };
 
-    private apiPLaywrightLogout = async (): Promise<void> => {
+    private apiPlaywrightLogout = async (): Promise<void> => {
         return fetch(`${helperSrc.URL_MS_AUTOMATE_TEST}/logout`, {
             method: "GET",
             headers: {
@@ -170,7 +170,7 @@ export default class Mcp implements Icontroller {
                 session.deleteMsAutomateTestSession();
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiPLaywrightLogout() - fetch() - catch()", error);
+                helperSrc.writeLog("Mcp.ts - apiPlaywrightLogout() - fetch() - catch()", error);
             });
     };
 
@@ -180,7 +180,7 @@ export default class Mcp implements Icontroller {
         this.variableObject.agentSelected.state = {} as modelMcp.Iagent;
 
         if (session.data.msAutomateTestCookie) {
-            this.apiPLaywrightLogout().then(() => {
+            this.apiPlaywrightLogout().then(() => {
                 this.variableObject.playwrightVideoSrc.state = "";
             });
         }
@@ -849,7 +849,7 @@ export default class Mcp implements Icontroller {
                 if (stdoutObject.state === "ko") {
                     this.showToastMessage("error", stdoutObject.message);
                 } else {
-                    this.apiAgentSelect();
+                    await this.apiAgentSelect();
 
                     this.variableObject.agentData.state = {} as modelMcp.Iagent;
 
@@ -897,7 +897,7 @@ export default class Mcp implements Icontroller {
                 if (stdoutObject.state === "ko") {
                     this.showToastMessage("error", stdoutObject.message);
                 } else {
-                    this.apiAgentSelect();
+                    await this.apiAgentSelect();
 
                     this.variableObject.agentData.state = {} as modelMcp.Iagent;
 
@@ -958,10 +958,10 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiAgentDelete = (index: number, id: number): void => {
+    apiAgentDelete = async (index: number, id: number): Promise<boolean> => {
         const body: modelMcp.IapiAgentDeleteBody = { id };
 
-        fetch(`${helperSrc.URL_MCP}/api/agent-delete`, {
+        return fetch(`${helperSrc.URL_MCP}/api/agent-delete`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -975,6 +975,8 @@ export default class Mcp implements Icontroller {
             }
         })
             .then(async (resultApi) => {
+                let isResult = false;
+
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
@@ -990,12 +992,18 @@ export default class Mcp implements Icontroller {
                     }
 
                     this.variableObject.agentList.state = filteredList;
+
+                    isResult = true;
                 }
+
+                return isResult;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiAgentDelete() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
+
+                return false;
             });
     };
 
@@ -1158,8 +1166,8 @@ export default class Mcp implements Icontroller {
     };
 
     playwrightVideoShow = (fileName: string) => {
-        this.apiPLaywrightLogin().then(async () => {
-            const blobUrl = await this.apiPLaywrightVideoBlobUrl(fileName);
+        this.apiPlaywrightLogin().then(async () => {
+            const blobUrl = await this.apiPlaywrightVideoBlobUrl(fileName);
 
             this.variableObject.playwrightVideoSrc.state = blobUrl || "";
             this.variableObject.playwrightVideoName.state = fileName;

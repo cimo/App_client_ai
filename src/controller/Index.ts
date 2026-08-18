@@ -124,8 +124,8 @@ export default class Index implements Icontroller {
         watch([
             {
                 variableList: ["llmInstance"],
-                action: () => {
-                    this.aiApi();
+                action: async () => {
+                    await this.aiApi();
                 }
             }
         ]);

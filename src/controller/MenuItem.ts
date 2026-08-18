@@ -149,14 +149,14 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private documentWindowOpen = (title: string): void => {
+    private documentWindowOpen = async (title: string): Promise<void> => {
         if (!this.variableObject.documentOpenList.state.includes(title)) {
             this.variableObject.documentOpenList.state = [...this.variableObject.documentOpenList.state, title];
         }
 
         const route = "#/document";
 
-        helperSrc.windowOpen("document", title, route, {
+        await helperSrc.windowOpen("document", title, route, {
             title,
             url: route,
             decorations: true,
@@ -236,13 +236,13 @@ export default class MenuItem implements Icontroller {
                     const fileDetail = helperSrc.fileDetail(documentSelect);
 
                     if (fileDetail.fileName) {
-                        helperSrc.windowClose("document", fileDetail.fileName);
+                        await helperSrc.windowClose("document", fileDetail.fileName);
                     }
 
                     await this.itemDelete("document", documentSelect);
                 }
             } else {
-                helperSrc.windowClose("document", fileName);
+                await helperSrc.windowClose("document", fileName);
 
                 const path = this.itemPathCurrent("document", fileName);
 
@@ -385,12 +385,12 @@ export default class MenuItem implements Icontroller {
         await this.paginationState("update");
     };
 
-    private onClickDocumentDelete = (fileName: string): void => {
-        this.dialogMessageDeleteDocument(fileName);
+    private onClickDocumentDelete = async (fileName: string): Promise<void> => {
+        await this.dialogMessageDeleteDocument(fileName);
     };
 
-    private onClickDocumentDeleteSelected = (): void => {
-        this.dialogMessageDeleteDocument();
+    private onClickDocumentDeleteSelected = async (): Promise<void> => {
+        await this.dialogMessageDeleteDocument();
     };
 
     private onClickDocumentFolderCreate = (): void => {
@@ -430,7 +430,7 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private onClickDocumentOpen = (fileName: string, category: string): void => {
+    private onClickDocumentOpen = async (fileName: string, category: string): Promise<void> => {
         if (category === "folder") {
             this.variableObject.documentCurrentFolderList.state.push(fileName);
 
@@ -438,7 +438,7 @@ export default class MenuItem implements Icontroller {
                 await this.paginationState("initialize", this.variableObject.documentList.state);
             });
         } else {
-            this.documentWindowOpen(fileName);
+            await this.documentWindowOpen(fileName);
         }
     };
 
@@ -482,14 +482,14 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickSkillDelete = (fileName: string): void => {
-        this.controllerMcp.apiAgentSelect().then((resultApiList) => {
-            this.dialogMessageDeleteSkill(resultApiList, fileName);
+        this.controllerMcp.apiAgentSelect().then(async (resultApiList) => {
+            await this.dialogMessageDeleteSkill(resultApiList, fileName);
         });
     };
 
     private onClickSkillDeleteSelected = (): void => {
-        this.controllerMcp.apiAgentSelect().then((resultApiList) => {
-            this.dialogMessageDeleteSkill(resultApiList);
+        this.controllerMcp.apiAgentSelect().then(async (resultApiList) => {
+            await this.dialogMessageDeleteSkill(resultApiList);
         });
     };
 
@@ -620,9 +620,11 @@ export default class MenuItem implements Icontroller {
         const isConfirm = await this.controllerDialog.show("warning", `Are you sure you want to delete: '${name}'?`, false);
 
         if (isConfirm) {
-            this.controllerMcp.apiAgentDelete(index, id);
+            const isDelete = await this.controllerMcp.apiAgentDelete(index, id);
 
-            this.agentUnselect(id);
+            if (isDelete) {
+                this.agentUnselect(id);
+            }
         }
     };
 
@@ -778,9 +780,9 @@ export default class MenuItem implements Icontroller {
         this.updateSelectList(mode, selectList);
     };
 
-    private onInputDocumentFolderName = (event: KeyboardEvent): void => {
+    private onInputDocumentFolderName = async (event: KeyboardEvent): Promise<void> => {
         if (event.key === "Enter") {
-            this.documentCreateFolder();
+            await this.documentCreateFolder();
         }
     };
 
@@ -946,7 +948,7 @@ export default class MenuItem implements Icontroller {
             const target = event.target as HTMLElement;
 
             if (!helperSrc.findElementParent(target, "input_folder_name") && !helperSrc.findElementParent(target, "button_create_folder")) {
-                this.documentCreateFolder();
+                await this.documentCreateFolder();
             }
         });
     }

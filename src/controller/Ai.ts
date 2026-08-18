@@ -31,9 +31,9 @@ export default class Ai implements Icontroller {
         return uniqueId;
     };
 
-    private onClickDropdownModel = (): void => {
+    private onClickDropdownModel = async (): Promise<void> => {
         if (this.variableObject.llmInstance.state) {
-            this.variableObject.llmInstance.state.apiModel(true);
+            await this.variableObject.llmInstance.state.apiModel(true);
         }
     };
 

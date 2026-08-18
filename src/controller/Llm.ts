@@ -378,11 +378,11 @@ export const mcpResponse = async <T extends modelLlm.IdataContext>(
                         message = stdoutObjectData.result.content[0].text;
                     }
 
-                    toolResponse(tThis, message, JSON.stringify(responseCompletedObject.argumentObject), userPrompt, messageIndex);
+                    await toolResponse(tThis, message, JSON.stringify(responseCompletedObject.argumentObject), userPrompt, messageIndex);
                 }
             })
-            .catch((error: Error) => {
-                toolResponse(tThis, error.message, "", userPrompt, messageIndex);
+            .catch(async (error: Error) => {
+                await toolResponse(tThis, error.message, "", userPrompt, messageIndex);
             });
     } else if ("list" in responseCompletedObject) {
         await fetch(`${helperSrc.URL_MCP}/api/task-call`, {
@@ -404,11 +404,11 @@ export const mcpResponse = async <T extends modelLlm.IdataContext>(
                 const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
                 if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    toolResponse(tThis, stdoutObject.data as string, "", userPrompt, messageIndex);
+                    await toolResponse(tThis, stdoutObject.data as string, "", userPrompt, messageIndex);
                 }
             })
-            .catch((error: Error) => {
-                toolResponse(tThis, error.message, "", userPrompt, messageIndex);
+            .catch(async (error: Error) => {
+                await toolResponse(tThis, error.message, "", userPrompt, messageIndex);
             });
     }
 };

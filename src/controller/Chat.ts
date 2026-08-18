@@ -60,23 +60,23 @@ export default class Chat implements Icontroller {
         }
     };
 
-    private onClickButtonMessageSend = (): void => {
+    private onClickButtonMessageSend = async (): Promise<void> => {
         if (this.abortControllerLlmResponse && !this.variableObject.isMessageSendAvailable.state) {
             this.abortControllerLlmResponse.abort();
             this.abortControllerLlmResponse = undefined;
         } else if (this.variableObject.llmInstance.state) {
-            this.variableObject.llmInstance.state.apiResponse();
+            await this.variableObject.llmInstance.state.apiResponse();
         }
     };
 
-    private onClickCitationLink = (event: Event, fileName: string, chunk: string): void => {
+    private onClickCitationLink = async (event: Event, fileName: string, chunk: string): Promise<void> => {
         event.preventDefault();
 
         this.fileObject[fileName] = {
             searchInput: chunk
         };
 
-        this.windowOpenDocument(fileName);
+        await this.windowOpenDocument(fileName);
     };
 
     private onClickCitationTab = (messageIndex: number, tabIndex: number): void => {
@@ -251,8 +251,8 @@ export default class Chat implements Icontroller {
         watch([
             {
                 variableList: ["setting"],
-                action: () => {
-                    this.currentLlmInstance();
+                action: async () => {
+                    await this.currentLlmInstance();
                 }
             }
         ]);

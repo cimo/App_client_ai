@@ -12,8 +12,7 @@ interface IpdfViewerApplicationFindBar {
 }
 
 export interface Idata {
-    fileName?: string;
-    pageNumber: number;
+    fileName: string;
 }
 
 export interface IpdfViewerApplication {
@@ -26,7 +25,7 @@ export interface IpdfViewerWindow extends Window {
 }
 
 export interface Ivariable {
-    isLoadingWindow: IvariableBind<boolean>;
+    isWindowLoading: IvariableBind<boolean>;
     pdfContent: IvariableBind<string>;
     imageContent: IvariableBind<string>;
 }

@@ -47,7 +47,7 @@ export default class Dialog implements Icontroller {
 
             const route = "#/dialog";
 
-            result = new Promise((resolve) => {
+            result = new Promise(async (resolve) => {
                 const windowLabel = helperSrc.windowLabelUnique("dialog", mode);
 
                 let unlistenWindowReady: UnlistenFn | undefined = undefined;
@@ -79,7 +79,7 @@ export default class Dialog implements Icontroller {
                     unlistenWindowResult = unlistenFn;
                 });
 
-                helperSrc.windowOpen("dialog", mode, route, {
+                await helperSrc.windowOpen("dialog", mode, route, {
                     title: mode,
                     url: route,
                     decorations: true,

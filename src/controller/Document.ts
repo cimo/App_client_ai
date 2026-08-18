@@ -45,7 +45,7 @@ export default class Document implements Icontroller {
                 this.variableObject.pdfContent.state = pdfContent.toString();
             }
 
-            this.variableObject.isLoadingWindow.state = false;
+            this.variableObject.isWindowLoading.state = false;
         }
     };
 
@@ -104,7 +104,7 @@ export default class Document implements Icontroller {
     variable(): void {
         this.variableObject = variableBind(
             {
-                isLoadingWindow: true,
+                isWindowLoading: true,
                 pdfContent: "",
                 imageContent: ""
             },
@@ -144,10 +144,10 @@ export default class Document implements Icontroller {
     }
 
     rendered(): void {
-        this.windowDocument.title().then((windowDocumentTitle) => {
+        this.windowDocument.title().then(async (windowDocumentTitle) => {
             this.windowDocumentTitle = windowDocumentTitle;
 
-            this.readContentData();
+            await this.readContentData();
 
             let isIntervalRunning = false;
 
