@@ -21,7 +21,7 @@ export default class Document implements Icontroller {
     // Method
     private readContentData = async (): Promise<void> => {
         const windowDocumentTitle = await this.windowDocument.title();
-        const fileDetail = helperSrc.fileDetail(windowDocumentTitle);
+        const fileDetail = await helperSrc.fileDetail(windowDocumentTitle);
 
         const fileContent = await this.controllerMcp.apiDocumentRead(fileDetail.fileName);
 

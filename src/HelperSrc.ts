@@ -1,18 +1,24 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { exists, stat } from "@tauri-apps/plugin-fs";
 import { WebviewOptions } from "@tauri-apps/api/webview";
 import { emitTo, listen } from "@tauri-apps/api/event";
 import { WindowOptions } from "@tauri-apps/api/window";
 
+// Custom
+// Custom
+
 // Source
 import * as modelHelperSrc from "./model/HelperSrc";
 
+// Custom
 declare const IS_DEPLOY_DEV: string;
+// Custom
 
 export const IS_DEBUG = IS_DEPLOY_DEV;
-export const URL_MS_AUTOMATE_TEST = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1044" : "https://localhost:1044";
-export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
 
 // Custom
+export const URL_MS_AUTOMATE_TEST = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1044" : "https://localhost:1044";
+export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
 // Custom
 
 const fileSize = (value: Uint8Array | number, isOnlyByte = true): string => {
@@ -139,7 +145,7 @@ export const jsonCheck = (value: string): boolean => {
     }
 };
 
-export const fileDetail = (value: string, buffer?: Uint8Array, isOnlyByte = true): modelHelperSrc.IfileDetail => {
+export const fileDetail = async (value: string, buffer?: Uint8Array, isOnlyByte = true): Promise<modelHelperSrc.IfileDetail> => {
     let resultObject = {} as modelHelperSrc.IfileDetail;
 
     if (!value) {
@@ -148,6 +154,20 @@ export const fileDetail = (value: string, buffer?: Uint8Array, isOnlyByte = true
 
     const fileNameWithExtension = value.includes("/") ? value.split("/").pop()! : value;
     const baseName = fileNameWithExtension.trim().replace(/\.[^/.]+$/, "");
+
+    if (value.includes("/")) {
+        const isFileExists = await exists(value);
+
+        if (isFileExists) {
+            const statObject = await stat(value);
+
+            resultObject = {
+                ...resultObject,
+                size: fileSize(statObject.size, isOnlyByte),
+                dateModified: statObject.mtime ? localeFormat(statObject.mtime) || "" : ""
+            };
+        }
+    }
 
     const signatureList: modelHelperSrc.IfileDetailSignature[] = [
         { mimeType: "text/javascript", extension: "js", category: "code" },

@@ -233,7 +233,7 @@ export default class MenuItem implements Icontroller {
 
             if (!fileName) {
                 for (const documentSelect of this.variableObject.documentSelectList.state.slice()) {
-                    const fileDetail = helperSrc.fileDetail(documentSelect);
+                    const fileDetail = await helperSrc.fileDetail(documentSelect);
 
                     if (fileDetail.fileName) {
                         await helperSrc.windowClose("document", fileDetail.fileName);

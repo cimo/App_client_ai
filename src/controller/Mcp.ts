@@ -32,12 +32,12 @@ export default class Mcp implements Icontroller {
         this.controllerToast.show(mode, messageList);
     };
 
-    private showFileFailedMessage = (actionOperationList: modelMcp.IactionOperation[]): void => {
+    private showFileFailedMessage = async (actionOperationList: modelMcp.IactionOperation[]): Promise<void> => {
         const messageList: string[] = [];
 
         for (const actionOperation of actionOperationList) {
             if ((actionOperation.state === "ko" || actionOperation.state === "failed") && actionOperation.data) {
-                const fileDetail = helperSrc.fileDetail(actionOperation.data as string);
+                const fileDetail = await helperSrc.fileDetail(actionOperation.data as string);
 
                 messageList.push(`[Failed] ${fileDetail.fileName}`);
             }
@@ -100,7 +100,7 @@ export default class Mcp implements Icontroller {
                             }
                         }
 
-                        this.showFileFailedMessage(actionOperationList);
+                        await this.showFileFailedMessage(actionOperationList);
                     })
                     .catch((error: Error) => {
                         helperSrc.writeLog("Mcp.ts - apiRagCheck() - fetch() - catch()", error.message);
@@ -336,7 +336,7 @@ export default class Mcp implements Icontroller {
                 const pathFile = pathFileList[a];
 
                 const file = await readFile(pathFile);
-                const fileDetail = helperSrc.fileDetail(pathFile, file);
+                const fileDetail = await helperSrc.fileDetail(pathFile, file);
 
                 const blob = new Blob([file], { type: fileDetail.mimeType });
 
@@ -364,7 +364,7 @@ export default class Mcp implements Icontroller {
 
                         actionOperationList.push(JSON.parse(json.response.stdout) as modelMcp.IactionOperation);
 
-                        this.showFileFailedMessage(actionOperationList);
+                        await this.showFileFailedMessage(actionOperationList);
                     })
                     .catch((error: Error) => {
                         helperSrc.writeLog("Mcp.ts - apiDocumentUpload() - fetch() - catch()", error.message);
@@ -677,7 +677,7 @@ export default class Mcp implements Icontroller {
                 const pathFile = pathFileList[a];
 
                 const file = await readFile(pathFile);
-                const fileDetail = helperSrc.fileDetail(pathFile, file);
+                const fileDetail = await helperSrc.fileDetail(pathFile, file);
                 const blob = new Blob([file], { type: fileDetail.mimeType });
 
                 const formData = new FormData();
@@ -703,7 +703,7 @@ export default class Mcp implements Icontroller {
 
                         actionOperationList.push(JSON.parse(json.response.stdout) as modelMcp.IactionOperation);
 
-                        this.showFileFailedMessage(actionOperationList);
+                        await this.showFileFailedMessage(actionOperationList);
                     })
                     .catch((error: Error) => {
                         helperSrc.writeLog("Mcp.ts - apiSkillUpload() - fetch() - catch()", error.message);
