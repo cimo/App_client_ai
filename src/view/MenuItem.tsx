@@ -339,22 +339,17 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                     {() => {
                                                                                         const resultList: IvirtualNode[] = [];
 
-                                                                                        if (value.fileName) {
+                                                                                        if (value.name && !methodObject.checkRenameSelected(value)) {
                                                                                             resultList.push(
                                                                                                 <input
                                                                                                     type="checkbox"
                                                                                                     checked={() =>
-                                                                                                        variableObject.documentSelectList.state.includes(
-                                                                                                            methodObject.itemPathCurrent(
-                                                                                                                "document",
-                                                                                                                value.fileName
-                                                                                                            )
-                                                                                                        )
+                                                                                                        methodObject.checkItemSelected(value)
                                                                                                     }
                                                                                                     onChange={() => {
                                                                                                         methodObject.onClickCheckbox(
                                                                                                             "document",
-                                                                                                            value.fileName
+                                                                                                            value
                                                                                                         );
                                                                                                     }}
                                                                                                 />
@@ -368,14 +363,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                     {() => {
                                                                                         const resultList: IvirtualNode[] = [];
 
-                                                                                        if (value.fileName) {
+                                                                                        if (value.name && !methodObject.checkRenameSelected(value)) {
                                                                                             resultList.push(
                                                                                                 <i
                                                                                                     class="cls_icon"
                                                                                                     onClick={() => {
-                                                                                                        methodObject.onClickDocumentDelete(
-                                                                                                            value.fileName
-                                                                                                        );
+                                                                                                        methodObject.onClickDocumentDelete(value);
                                                                                                     }}
                                                                                                 >
                                                                                                     delete
@@ -394,7 +387,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                     {() => {
                                                                                         const resultList: IvirtualNode[] = [];
 
-                                                                                        if (!value.fileName) {
+                                                                                        if (!value.name) {
                                                                                             resultList.push(
                                                                                                 <input
                                                                                                     class="input_folder_name"
@@ -406,8 +399,34 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                                     autofocus
                                                                                                 ></input>
                                                                                             );
+                                                                                        } else if (methodObject.checkRenameSelected(value)) {
+                                                                                            resultList.push(
+                                                                                                <input
+                                                                                                    class="input_rename"
+                                                                                                    type="text"
+                                                                                                    value={() =>
+                                                                                                        value.baseName ? value.baseName : value.name
+                                                                                                    }
+                                                                                                    jsmvcfw-elementHookName="elementInputDocumentRename"
+                                                                                                    onKeyUp={(event: KeyboardEvent) => {
+                                                                                                        methodObject.onInputDocumentRename(event);
+                                                                                                    }}
+                                                                                                    autofocus
+                                                                                                ></input>
+                                                                                            );
                                                                                         } else {
-                                                                                            resultList.push(<p>{value.fileName}</p>);
+                                                                                            resultList.push(
+                                                                                                <p
+                                                                                                    onClick={(event: Event) =>
+                                                                                                        methodObject.onClickDocumentRename(
+                                                                                                            event,
+                                                                                                            value
+                                                                                                        )
+                                                                                                    }
+                                                                                                >
+                                                                                                    {value.name}
+                                                                                                </p>
+                                                                                            );
                                                                                         }
 
                                                                                         return resultList;
@@ -423,18 +442,18 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                     {() => {
                                                                                         const resultList: IvirtualNode[] = [];
 
-                                                                                        if (value.fileName) {
+                                                                                        if (value.name && !methodObject.checkRenameSelected(value)) {
                                                                                             resultList.push(
                                                                                                 <button
                                                                                                     onClick={() =>
                                                                                                         methodObject.onClickDocumentOpen(
-                                                                                                            value.fileName,
+                                                                                                            value.name,
                                                                                                             value.category
                                                                                                         )
                                                                                                     }
                                                                                                     disabled={() =>
                                                                                                         variableObject.documentOpenList.state.includes(
-                                                                                                            value.fileName
+                                                                                                            value.name
                                                                                                         )
                                                                                                     }
                                                                                                 >
@@ -642,9 +661,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                 <div class="cell select">
                                                                     <input
                                                                         type="checkbox"
-                                                                        checked={() => variableObject.skillSelectList.state.includes(value.fileName)}
+                                                                        checked={() => variableObject.skillSelectList.state.includes(value.name)}
                                                                         onChange={() => {
-                                                                            methodObject.onClickCheckbox("skill", value.fileName);
+                                                                            methodObject.onClickCheckbox("skill", value);
                                                                         }}
                                                                     />
                                                                 </div>
@@ -652,7 +671,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     <i
                                                                         class="cls_icon"
                                                                         onClick={() => {
-                                                                            methodObject.onClickSkillDelete(value.fileName);
+                                                                            methodObject.onClickSkillDelete(value.name);
                                                                         }}
                                                                     >
                                                                         delete
@@ -660,7 +679,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                 </div>
                                                                 <div class="cell name">
                                                                     <img class="icon" src={`/asset/image/icon_file/md.svg`} />
-                                                                    <p>{value.fileName}</p>
+                                                                    <p>{value.name}</p>
                                                                 </div>
                                                                 <div class="cell date">
                                                                     <p>{value.dateModified}</p>
@@ -813,7 +832,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     </div>
                                                                     <div class="cell name">
                                                                         <img class="icon" src={`/asset/image/icon_file/md.svg`} />
-                                                                        <p>{value.fileName}</p>
+                                                                        <p>{value.name}</p>
                                                                     </div>
                                                                     <div class="cell date">
                                                                         <p>{value.dateModified}</p>
@@ -824,7 +843,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     <div class="cell button">
                                                                         <button
                                                                             onClick={() => {
-                                                                                methodObject.onClickSkillSelect(value.fileName);
+                                                                                methodObject.onClickSkillSelect(value.name);
                                                                             }}
                                                                         >
                                                                             <p>Pick</p>

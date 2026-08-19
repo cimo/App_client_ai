@@ -17,7 +17,12 @@ export interface IapiDocumentReadBody {
 }
 
 export interface IapiDocumentDeleteBody {
-    pathFile: string;
+    pathItem: string;
+}
+
+export interface IapiDocumentRenameBody {
+    pathItem: string;
+    name: string;
 }
 
 export interface IapiDocumentFolderCreateBody {
@@ -172,12 +177,13 @@ export interface IactionOperation {
     data?: unknown;
 }
 
-export interface IfileDetail {
-    fileName: string;
+export interface IitemDetail {
+    name: string;
+    baseName: string;
+    size: string;
+    dateModified: string;
     extension: string;
     category: string;
-    dateModified: string;
-    size: string;
 }
 
 export interface IsettingLlm {
@@ -203,8 +209,8 @@ export interface Ivariable {
     taskSelected: IvariableBind<Itask>;
     agentList: IvariableBind<Iagent[]>;
     agentSelected: IvariableBind<Iagent>;
-    documentList: IvariableBind<IfileDetail[]>;
-    skillList: IvariableBind<IfileDetail[]>;
+    documentList: IvariableBind<IitemDetail[]>;
+    skillList: IvariableBind<IitemDetail[]>;
     user: IvariableBind<Iuser>;
     setting: IvariableBind<Isetting>;
     playwrightVideoSrc: IvariableBind<string>;

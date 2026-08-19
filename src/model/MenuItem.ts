@@ -15,10 +15,11 @@ export interface Ivariable {
     isMenuItemSkill: IvariableBind<boolean>;
     isMenuItemUser: IvariableBind<boolean>;
     isMenuItemSetting: IvariableBind<boolean>;
-    documentList: IvariableBind<modelMcp.IfileDetail[]>;
+    documentList: IvariableBind<modelMcp.IitemDetail[]>;
     documentOpenList: IvariableBind<string[]>;
     documentSelectList: IvariableBind<string[]>;
     documentCurrentFolderList: IvariableBind<string[]>;
+    documentRenameSelected: IvariableBind<string>;
     isUploadRunning: IvariableBind<boolean>;
     isDeleteRunning: IvariableBind<boolean>;
     isDocumentFolderStillCreate: IvariableBind<boolean>;
@@ -29,7 +30,7 @@ export interface Ivariable {
     isRagGraphOpen: IvariableBind<boolean>;
     isRagGraphHtmlLoading: IvariableBind<boolean>;
     ragGraphHtml: IvariableBind<string>;
-    skillList: IvariableBind<modelMcp.IfileDetail[]>;
+    skillList: IvariableBind<modelMcp.IitemDetail[]>;
     skillSelectList: IvariableBind<string[]>;
     toolList: IvariableBind<modelMcp.Itool[]>;
     toolSelected: IvariableBind<modelMcp.Itool>;
@@ -50,15 +51,17 @@ export interface Ivariable {
 }
 
 export interface Imethod {
-    itemId: (key: string) => number;
     selectAllCheck: (mode: string) => boolean;
-    itemPathCurrent: (mode: string, fileName: string) => string;
     checkProcessOngoing: (mode: string) => boolean;
-    onClickCheckbox: (mode: string, fileName: string) => void;
+    checkRenameSelected: (itemDetail: modelMcp.IitemDetail) => boolean;
+    checkItemSelected: (itemDetail: modelMcp.IitemDetail) => boolean;
+    itemId: (key: string) => number;
+    onClickCheckbox: (mode: string, itemDetail: modelMcp.IitemDetail) => void;
     onClickMenuDocument: () => void;
     onClickDocumentUpload: () => void;
-    onClickDocumentDelete: (fileName: string) => void;
+    onClickDocumentDelete: (itemDetail: modelMcp.IitemDetail) => void;
     onClickDocumentDeleteSelected: () => void;
+    onClickDocumentRename: (event: Event, itemDetail: modelMcp.IitemDetail) => void;
     onClickDocumentFolderCreate: () => void;
     onClickDocumentFolderBack: () => void;
     onClickDocumentFolderMoveTo: () => void;
@@ -88,16 +91,18 @@ export interface Imethod {
     onClickMenuUser: () => void;
     onClickUserUpdate: () => void;
     onClickUserCancel: () => void;
-    onClickMenuSetting: () => Promise<void>;
-    onChangeSettingLlmServiceId: () => void;
     onClickSettingSave: () => void;
     onClickSettingCancel: () => void;
+    onClickMenuSetting: () => Promise<void>;
     onClickToggleSelectAll: (mode: string) => void;
     onInputDocumentFolderName: (event: KeyboardEvent) => void;
+    onInputDocumentRename: (event: KeyboardEvent) => void;
+    onChangeSettingLlmServiceId: () => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {
     elementInputDocumentFolderName: HTMLInputElement;
+    elementInputDocumentRename: HTMLInputElement;
     elementInputAgentName: HTMLInputElement;
     elementInputAgentDescription: HTMLInputElement;
     elementInputUserName: HTMLInputElement;

@@ -339,7 +339,7 @@ export const fileDetail = async (value: string, buffer?: Uint8Array, isOnlyByte 
             if (isMatched) {
                 resultObject = {
                     ...resultObject,
-                    fileName: fileNameWithExtension,
+                    name: fileNameWithExtension,
                     baseName,
                     mimeType: signatureList[a].mimeType,
                     extension: signatureList[a].extension,
@@ -358,7 +358,7 @@ export const fileDetail = async (value: string, buffer?: Uint8Array, isOnlyByte 
             if (signatureList[a].extension === extension) {
                 resultObject = {
                     ...resultObject,
-                    fileName: fileNameWithExtension,
+                    name: fileNameWithExtension,
                     baseName,
                     mimeType: signatureList[a].mimeType,
                     extension: signatureList[a].extension,

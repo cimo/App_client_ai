@@ -39,7 +39,7 @@ export default class Mcp implements Icontroller {
             if ((actionOperation.state === "ko" || actionOperation.state === "failed") && actionOperation.data) {
                 const fileDetail = await helperSrc.fileDetail(actionOperation.data as string);
 
-                messageList.push(`[Failed] ${fileDetail.fileName}`);
+                messageList.push(`[Failed] ${fileDetail.name}`);
             }
         }
 
@@ -341,14 +341,14 @@ export default class Mcp implements Icontroller {
                 const blob = new Blob([file], { type: fileDetail.mimeType });
 
                 const formData = new FormData();
-                formData.append("file", blob, encodeURIComponent(fileDetail.fileName));
+                formData.append("file", blob, encodeURIComponent(fileDetail.name));
 
                 await fetch(`${helperSrc.URL_MCP}/api/document-upload`, {
                     method: "POST",
                     headers: {
                         "mcp-session-id": session.data.mcpSessionId,
                         "mcp-cookie": session.data.mcpCookie,
-                        fileNameEncode: encodeURIComponent(fileDetail.fileName),
+                        fileNameEncode: encodeURIComponent(fileDetail.name),
                         folderJoin: currentFolderList.join("/")
                     },
                     body: formData,
@@ -377,7 +377,7 @@ export default class Mcp implements Icontroller {
         }
     };
 
-    apiDocumentSelect = async (currentFolderList: string[]): Promise<modelMcp.IfileDetail[]> => {
+    apiDocumentSelect = async (currentFolderList: string[]): Promise<modelMcp.IitemDetail[]> => {
         const body: modelMcp.IapiDocumentListBody = { folderJoin: currentFolderList.join("/") };
 
         return fetch(`${helperSrc.URL_MCP}/api/document-list`, {
@@ -400,7 +400,7 @@ export default class Mcp implements Icontroller {
                 const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
                 if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    this.variableObject.documentList.state = stdoutObject.data as modelMcp.IfileDetail[];
+                    this.variableObject.documentList.state = stdoutObject.data as modelMcp.IitemDetail[];
                 }
 
                 return this.variableObject.documentList.state;
@@ -453,8 +453,8 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiDocumentDelete = async (pathFile: string): Promise<boolean> => {
-        const body: modelMcp.IapiDocumentDeleteBody = { pathFile };
+    apiDocumentDelete = async (pathItem: string): Promise<boolean> => {
+        const body: modelMcp.IapiDocumentDeleteBody = { pathItem };
 
         return fetch(`${helperSrc.URL_MCP}/api/document-delete`, {
             method: "POST",
@@ -476,6 +476,49 @@ export default class Mcp implements Icontroller {
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiDocumentDelete() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+
+                return false;
+            });
+    };
+
+    apiDocumentRename = async (pathItem: string, name: string): Promise<boolean> => {
+        const body: modelMcp.IapiDocumentRenameBody = { pathItem, name };
+
+        return fetch(`${helperSrc.URL_MCP}/api/document-rename`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie
+            },
+            body: JSON.stringify(body),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                let isResult = false;
+
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
+
+                if (stdoutObject.state === "ko") {
+                    this.showToastMessage("error", stdoutObject.message);
+
+                    isResult = false;
+                } else {
+                    isResult = true;
+                }
+
+                return isResult;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiDocumentRename() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
 
@@ -681,14 +724,14 @@ export default class Mcp implements Icontroller {
                 const blob = new Blob([file], { type: fileDetail.mimeType });
 
                 const formData = new FormData();
-                formData.append("file", blob, encodeURIComponent(fileDetail.fileName));
+                formData.append("file", blob, encodeURIComponent(fileDetail.name));
 
                 await fetch(`${helperSrc.URL_MCP}/api/skill-upload`, {
                     method: "POST",
                     headers: {
                         "mcp-session-id": session.data.mcpSessionId,
                         "mcp-cookie": session.data.mcpCookie,
-                        fileNameEncode: encodeURIComponent(fileDetail.fileName)
+                        fileNameEncode: encodeURIComponent(fileDetail.name)
                     },
                     body: formData,
                     danger: {
@@ -716,7 +759,7 @@ export default class Mcp implements Icontroller {
         }
     };
 
-    apiSkillSelect = async (): Promise<modelMcp.IfileDetail[]> => {
+    apiSkillSelect = async (): Promise<modelMcp.IitemDetail[]> => {
         return fetch(`${helperSrc.URL_MCP}/api/skill-list`, {
             method: "GET",
             headers: {
@@ -735,7 +778,7 @@ export default class Mcp implements Icontroller {
                 const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
                 if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    this.variableObject.skillList.state = stdoutObject.data as modelMcp.IfileDetail[];
+                    this.variableObject.skillList.state = stdoutObject.data as modelMcp.IitemDetail[];
                 }
 
                 return this.variableObject.skillList.state;

@@ -23,7 +23,7 @@ export default class Document implements Icontroller {
         const windowDocumentTitle = await this.windowDocument.title();
         const fileDetail = await helperSrc.fileDetail(windowDocumentTitle);
 
-        const fileContent = await this.controllerMcp.apiDocumentRead(fileDetail.fileName);
+        const fileContent = await this.controllerMcp.apiDocumentRead(fileDetail.name);
 
         if (fileContent) {
             if (fileDetail.category === "image") {
