@@ -26,9 +26,12 @@ export interface IfileDetailSignature {
     }[];
 }
 
+export interface IactionOperation {
+    state: string;
+    message: string | string[];
+    data?: unknown;
+}
+
 export interface IapiResponse {
-    response: {
-        stdout: string;
-        stderr: string | Error;
-    };
+    response: IactionOperation;
 }

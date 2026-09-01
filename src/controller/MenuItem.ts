@@ -24,38 +24,42 @@ export default class MenuItem implements Icontroller {
 
     // Method
     private selectAllCheck = (mode: string): boolean => {
-        let isResult = true;
+        let isResult = false;
 
         let itemDetailList: modelMcp.IitemDetail[] = [];
         let selectList: string[] = [];
 
-        if (mode === "document") {
-            itemDetailList = this.variableObject.documentList.state;
-            selectList = this.variableObject.documentSelectList.state;
+        if (mode === "workspace") {
+            itemDetailList = this.variableObject.workspaceItemList.state;
+            selectList = this.variableObject.workspaceSelectList.state;
         } else if (mode === "skill") {
             itemDetailList = this.variableObject.skillList.state;
             selectList = this.variableObject.skillSelectList.state;
         }
 
+        let includeCount = 0;
+
         for (const itemDetail of itemDetailList) {
             const pathItemSelected = this.itemSelectedPath(mode, itemDetail);
 
-            if (!selectList.includes(pathItemSelected)) {
-                isResult = false;
-
-                break;
+            if (selectList.includes(pathItemSelected)) {
+                includeCount++;
             }
+        }
+
+        if (includeCount === itemDetailList.length) {
+            isResult = true;
         }
 
         return isResult;
     };
 
     private updateSelectList = (mode: string, selectList: string[]): void => {
-        if (mode === "document") {
-            this.variableObject.documentSelectList.state = selectList;
+        if (mode === "workspace") {
+            this.variableObject.workspaceSelectList.state = selectList;
 
-            if (this.variableObject.documentSelectList.state.length === 0) {
-                this.variableObject.isDocumentFolderMoveSelecting.state = false;
+            if (this.variableObject.workspaceSelectList.state.length === 0) {
+                this.variableObject.isWorkspaceFolderMoveSelecting.state = false;
             }
         } else if (mode === "skill") {
             this.variableObject.skillSelectList.state = selectList;
@@ -65,13 +69,13 @@ export default class MenuItem implements Icontroller {
     private checkProcessOngoing = (mode: string): boolean => {
         let isResult = false;
 
-        if (mode === "document") {
+        if (mode === "workspace") {
             isResult =
                 this.variableObject.isUploadRunning.state ||
                 this.variableObject.isDeleteRunning.state ||
                 this.variableObject.isRagRunning.state ||
-                this.variableObject.isDocumentFolderMoveRunning.state ||
-                this.variableObject.isDocumentFolderCreateRunning.state;
+                this.variableObject.isWorkspaceFolderMoveRunning.state ||
+                this.variableObject.isWorkspaceFolderCreateRunning.state;
         } else if (mode === "skill") {
             isResult = this.variableObject.isUploadRunning.state || this.variableObject.isDeleteRunning.state;
         }
@@ -80,11 +84,11 @@ export default class MenuItem implements Icontroller {
     };
 
     private checkRenameSelected = (itemDetail: modelMcp.IitemDetail): boolean => {
-        return this.variableObject.documentRenameSelected.state === this.itemSelectedPath("document", itemDetail);
+        return this.variableObject.workspaceRenameSelected.state === this.itemSelectedPath("workspace", itemDetail);
     };
 
     private checkItemSelected = (itemDetail: modelMcp.IitemDetail): boolean => {
-        return this.variableObject.documentSelectList.state.includes(this.itemSelectedPath("document", itemDetail));
+        return this.variableObject.workspaceSelectList.state.includes(this.itemSelectedPath("workspace", itemDetail));
     };
 
     private itemId = (key: string): number => {
@@ -94,11 +98,11 @@ export default class MenuItem implements Icontroller {
     private itemSelectedPath = (mode: string, itemDetail: modelMcp.IitemDetail): string => {
         let result = "";
 
-        if (mode === "document") {
+        if (mode === "workspace") {
             const pathCurrent = itemDetail.baseName ? `${itemDetail.baseName}/${itemDetail.name}` : `${itemDetail.name}/`;
 
-            if (this.variableObject.isMenuItemDocument.state && this.variableObject.documentCurrentFolderList.state.length > 0) {
-                result = `${this.variableObject.documentCurrentFolderList.state.join("/")}/${pathCurrent}`;
+            if (this.variableObject.isMenuItemWorkspace.state && this.variableObject.workspaceCurrentFolderList.state.length > 0) {
+                result = `${this.variableObject.workspaceCurrentFolderList.state.join("/")}/${pathCurrent}`;
             } else {
                 result = pathCurrent;
             }
@@ -109,29 +113,38 @@ export default class MenuItem implements Icontroller {
         return result;
     };
 
-    private itemDelete = async (mode: string, path: string): Promise<boolean> => {
+    private itemDelete = async (mode: string, selectList: string[]): Promise<boolean> => {
         let isResult = false;
-        let selectList: string[] = [];
 
-        if (mode === "document") {
-            selectList = this.variableObject.documentSelectList.state;
+        this.variableObject.isDeleteRunning.state = true;
 
-            isResult = await this.controllerMcp.apiDocumentDelete(path);
+        if (mode === "workspace") {
+            isResult = await this.controllerMcp.apiWorkspaceDelete(selectList);
         } else if (mode === "skill") {
-            selectList = this.variableObject.skillSelectList.state;
-
-            isResult = await this.controllerMcp.apiSkillDelete(path);
+            isResult = await this.controllerMcp.apiSkillDelete(selectList);
         }
 
         if (isResult) {
-            const index = selectList.indexOf(path);
+            for (const item of selectList) {
+                const itemDetail = await helperSrc.fileDetail(item);
 
-            if (index !== -1) {
-                selectList.splice(index, 1);
+                if (!itemDetail.baseName) {
+                    const folderName = item.replace(/\/+$/, "").split("/").pop() ?? "";
+
+                    const indexFolder = this.variableObject.workspaceCurrentFolderList.state.indexOf(folderName);
+
+                    if (indexFolder !== -1) {
+                        this.variableObject.workspaceCurrentFolderList.state.splice(indexFolder);
+                    }
+                }
             }
 
-            this.updateSelectList(mode, selectList);
+            await this.paginationState("update");
+
+            this.updateSelectList(mode, []);
         }
+
+        this.variableObject.isDeleteRunning.state = false;
 
         return isResult;
     };
@@ -141,9 +154,9 @@ export default class MenuItem implements Icontroller {
             this.variableObject.pageNumber.state = 1;
         }
 
-        if (this.variableObject.isMenuItemDocument.state) {
+        if (this.variableObject.isMenuItemWorkspace.state) {
             if (mode === "update") {
-                itemList = await this.controllerMcp.apiDocumentSelect(this.variableObject.documentCurrentFolderList.state);
+                itemList = await this.controllerMcp.apiWorkspace(this.variableObject.workspaceCurrentFolderList.state);
             }
 
             if (itemList) {
@@ -158,11 +171,11 @@ export default class MenuItem implements Icontroller {
                     return firstObject.name.localeCompare(secondObject.name, undefined, { numeric: true, sensitivity: "variant" });
                 });
 
-                this.variableObject.documentList.state = this.controllerPagination.updateList<modelMcp.IitemDetail>(itemList);
+                this.variableObject.workspaceItemList.state = this.controllerPagination.updateList<modelMcp.IitemDetail>(itemList);
             }
         } else if (this.variableObject.isMenuItemSkill.state || this.variableObject.isAgentSkillSelect.state) {
             if (mode === "update") {
-                itemList = await this.controllerMcp.apiSkillSelect();
+                itemList = await this.controllerMcp.apiSkill();
             }
 
             if (itemList) {
@@ -175,40 +188,43 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private documentCreateFolder = async (): Promise<void> => {
-        if (this.variableObject.isDocumentFolderStillCreate.state) {
-            this.variableObject.isDocumentFolderStillCreate.state = false;
+    private workspaceCreateFolder = async (): Promise<void> => {
+        if (this.variableObject.isWorkspaceFolderStillCreate.state) {
+            this.variableObject.isWorkspaceFolderStillCreate.state = false;
+            this.variableObject.isWorkspaceFolderCreateRunning.state = true;
 
-            const elementInputValue = this.hookObject.elementInputDocumentFolderName.value;
+            const elementInputValue = this.hookObject.elementInputWorkspaceFolderName.value;
 
-            const isFolderCreate = await this.controllerMcp.apiDocumentFolderCreate(
+            const isFolderCreate = await this.controllerMcp.apiWorkspaceFolderCreate(
                 elementInputValue,
-                this.variableObject.documentCurrentFolderList.state
+                this.variableObject.workspaceCurrentFolderList.state
             );
 
             if (!isFolderCreate) {
-                this.variableObject.documentList.state.shift();
+                this.variableObject.workspaceItemList.state.shift();
             } else {
                 await this.paginationState("update");
             }
+
+            this.variableObject.isWorkspaceFolderCreateRunning.state = false;
         }
     };
 
-    private documentRename = async (): Promise<void> => {
-        if (this.variableObject.documentRenameSelected.state !== "") {
-            const elementInputValue = this.hookObject.elementInputDocumentRename.value;
+    private workspaceRename = async (): Promise<void> => {
+        if (this.variableObject.workspaceRenameSelected.state !== "") {
+            const elementInputValue = this.hookObject.elementInputWorkspaceRename.value;
 
-            const isRename = await this.controllerMcp.apiDocumentRename(this.variableObject.documentRenameSelected.state, elementInputValue);
+            const isRename = await this.controllerMcp.apiWorkspaceRename(this.variableObject.workspaceRenameSelected.state, elementInputValue);
 
             if (isRename) {
                 await this.paginationState("update");
             }
 
-            this.variableObject.documentRenameSelected.state = "";
+            this.variableObject.workspaceRenameSelected.state = "";
         }
     };
 
-    private documentWindowOpen = async (title: string): Promise<void> => {
+    private windowOpenDocument = async (title: string): Promise<void> => {
         if (!this.variableObject.documentOpenList.state.includes(title)) {
             this.variableObject.documentOpenList.state = [...this.variableObject.documentOpenList.state, title];
         }
@@ -249,7 +265,7 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private dialogMessageDeleteDocument = async (itemDetail?: modelMcp.IitemDetail): Promise<void> => {
+    private dialogMessageDeleteWorkspaceItem = async (itemDetail?: modelMcp.IitemDetail): Promise<void> => {
         let dialogMessage = "";
 
         if (!itemDetail) {
@@ -261,29 +277,23 @@ export default class MenuItem implements Icontroller {
         const isConfirm = await this.controllerDialog.show("warning", dialogMessage, false);
 
         if (isConfirm) {
-            this.variableObject.isDeleteRunning.state = true;
-
             if (!itemDetail) {
-                for (const documentSelect of this.variableObject.documentSelectList.state.slice()) {
-                    const fileDetail = await helperSrc.fileDetail(documentSelect);
+                for (const workspaceSelect of this.variableObject.workspaceSelectList.state) {
+                    const fileDetail = await helperSrc.fileDetail(workspaceSelect);
 
                     if (fileDetail.name) {
                         await helperSrc.windowClose("document", fileDetail.name);
                     }
-
-                    await this.itemDelete("document", documentSelect);
                 }
+
+                await this.itemDelete("workspace", this.variableObject.workspaceSelectList.state);
             } else {
                 await helperSrc.windowClose("document", itemDetail.name);
 
-                const pathItemSelected = this.itemSelectedPath("document", itemDetail);
+                const pathItemSelected = this.itemSelectedPath("workspace", itemDetail);
 
-                await this.itemDelete("document", pathItemSelected);
+                await this.itemDelete("workspace", [pathItemSelected]);
             }
-
-            await this.paginationState("update");
-
-            this.variableObject.isDeleteRunning.state = false;
         }
     };
 
@@ -330,37 +340,31 @@ export default class MenuItem implements Icontroller {
         const isConfirm = await this.controllerDialog.show("warning", dialogMessage, false);
 
         if (isConfirm) {
-            this.variableObject.isDeleteRunning.state = true;
-
             if (!fileName) {
-                for (const skillSelect of this.variableObject.skillSelectList.state.slice()) {
-                    const isDelete = await this.itemDelete("skill", skillSelect);
+                const skillSelectListSlice = this.variableObject.skillSelectList.state.slice();
 
+                const isDelete = await this.itemDelete("skill", skillSelectListSlice);
+
+                for (const skillSelect of skillSelectListSlice) {
                     if (isDelete && skillSelect in agentObject) {
                         await this.agentSkillClear(agentObject[skillSelect]);
                     }
                 }
-
-                this.variableObject.skillSelectList.state = [];
             } else {
-                const isDelete = await this.itemDelete("skill", fileName);
+                const isDelete = await this.itemDelete("skill", [fileName]);
 
                 if (isDelete) {
                     await this.agentSkillClear(agentList);
                 }
             }
-
-            await this.paginationState("update");
-
-            this.variableObject.isDeleteRunning.state = false;
         }
     };
 
     private onClickCheckbox = (mode: string, itemDetail: modelMcp.IitemDetail): void => {
         let selectList: string[] = [];
 
-        if (mode === "document") {
-            selectList = this.variableObject.documentSelectList.state;
+        if (mode === "workspace") {
+            selectList = this.variableObject.workspaceSelectList.state;
         } else if (mode === "skill") {
             selectList = this.variableObject.skillSelectList.state;
         }
@@ -380,11 +384,11 @@ export default class MenuItem implements Icontroller {
         this.updateSelectList(mode, selectList);
     };
 
-    private onClickMenuDocument = (): void => {
-        this.variableObject.documentCurrentFolderList.state = [];
+    private onClickMenuWorkspace = (): void => {
+        this.variableObject.workspaceCurrentFolderList.state = [];
 
-        this.controllerMcp.apiDocumentSelect(this.variableObject.documentCurrentFolderList.state).then(async () => {
-            this.variableObject.isMenuItemDocument.state = !this.variableObject.isMenuItemDocument.state;
+        this.controllerMcp.apiWorkspace(this.variableObject.workspaceCurrentFolderList.state).then(async () => {
+            this.variableObject.isMenuItemWorkspace.state = !this.variableObject.isMenuItemWorkspace.state;
             this.variableObject.isMenuItemTool.state = false;
             this.variableObject.isMenuItemTask.state = false;
             this.variableObject.isMenuItemAgent.state = false;
@@ -395,25 +399,29 @@ export default class MenuItem implements Icontroller {
             this.variableObject.agentData.state = {} as modelMcp.Iagent;
             this.variableObject.isAgentSkillSelect.state = false;
 
-            await this.paginationState("initialize", this.variableObject.documentList.state);
+            await this.paginationState("initialize", this.variableObject.workspaceItemList.state);
         });
     };
 
-    private onClickDocumentUpload = async (): Promise<void> => {
-        await this.controllerMcp.apiDocumentUpload(this.variableObject.documentCurrentFolderList.state);
+    private onClickWorkspaceUpload = async (): Promise<void> => {
+        this.variableObject.isUploadRunning.state = true;
+
+        await this.controllerMcp.apiWorkspaceUpload(this.variableObject.workspaceCurrentFolderList.state);
 
         await this.paginationState("update");
+
+        this.variableObject.isUploadRunning.state = false;
     };
 
-    private onClickDocumentDelete = async (itemDetail: modelMcp.IitemDetail): Promise<void> => {
-        await this.dialogMessageDeleteDocument(itemDetail);
+    private onClickWorkspaceDeleteItem = async (itemDetail: modelMcp.IitemDetail): Promise<void> => {
+        await this.dialogMessageDeleteWorkspaceItem(itemDetail);
     };
 
-    private onClickDocumentDeleteSelected = async (): Promise<void> => {
-        await this.dialogMessageDeleteDocument();
+    private onClickWorkspaceDeleteSelected = async (): Promise<void> => {
+        await this.dialogMessageDeleteWorkspaceItem();
     };
 
-    private onClickDocumentRename = async (event: Event, itemDetail: modelMcp.IitemDetail): Promise<void> => {
+    private onClickWorkspaceRename = async (event: Event, itemDetail: modelMcp.IitemDetail): Promise<void> => {
         event.stopPropagation();
 
         const indexOpen = this.variableObject.documentOpenList.state.indexOf(itemDetail.name);
@@ -424,26 +432,26 @@ export default class MenuItem implements Icontroller {
             this.variableObject.documentOpenList.state.splice(indexOpen, 1);
         }
 
-        const pathItemSelected = this.itemSelectedPath("document", itemDetail);
+        const pathItemSelected = this.itemSelectedPath("workspace", itemDetail);
 
-        const indexSelect = this.variableObject.documentSelectList.state.indexOf(pathItemSelected);
+        const indexSelect = this.variableObject.workspaceSelectList.state.indexOf(pathItemSelected);
 
         if (indexSelect !== -1) {
-            this.variableObject.documentSelectList.state.splice(indexSelect, 1);
+            this.variableObject.workspaceSelectList.state.splice(indexSelect, 1);
 
-            if (this.variableObject.documentSelectList.state.length === 0) {
-                this.variableObject.isDocumentFolderMoveSelecting.state = false;
+            if (this.variableObject.workspaceSelectList.state.length === 0) {
+                this.variableObject.isWorkspaceFolderMoveSelecting.state = false;
             }
         }
 
-        this.variableObject.documentRenameSelected.state = pathItemSelected;
+        this.variableObject.workspaceRenameSelected.state = pathItemSelected;
     };
 
-    private onClickDocumentFolderCreate = (): void => {
-        if (!this.variableObject.isDocumentFolderStillCreate.state) {
-            this.variableObject.isDocumentFolderStillCreate.state = true;
+    private onClickWorkspaceFolderCreate = (): void => {
+        if (!this.variableObject.isWorkspaceFolderStillCreate.state) {
+            this.variableObject.isWorkspaceFolderStillCreate.state = true;
 
-            this.variableObject.documentList.state.unshift({
+            this.variableObject.workspaceItemList.state.unshift({
                 name: "",
                 extension: "",
                 category: "folder"
@@ -451,40 +459,44 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private onClickDocumentFolderBack = (): void => {
-        this.variableObject.documentCurrentFolderList.state.pop();
+    private onClickWorkspaceFolderBack = (): void => {
+        this.variableObject.workspaceCurrentFolderList.state.pop();
 
-        this.controllerMcp.apiDocumentSelect(this.variableObject.documentCurrentFolderList.state).then(async () => {
-            await this.paginationState("initialize", this.variableObject.documentList.state);
+        this.controllerMcp.apiWorkspace(this.variableObject.workspaceCurrentFolderList.state).then(async () => {
+            await this.paginationState("initialize", this.variableObject.workspaceItemList.state);
         });
     };
 
-    private onClickDocumentFolderMoveTo = async (): Promise<void> => {
-        this.variableObject.isDocumentFolderMoveSelecting.state = !this.variableObject.isDocumentFolderMoveSelecting.state;
+    private onClickWorkspaceFolderMoveTo = (): void => {
+        this.variableObject.isWorkspaceFolderMoveSelecting.state = !this.variableObject.isWorkspaceFolderMoveSelecting.state;
     };
 
-    private onClickDocumentFolderHere = async (): Promise<void> => {
-        const isFolderMove = await this.controllerMcp.apiDocumentFolderMove(
-            this.variableObject.documentSelectList.state,
-            this.variableObject.documentCurrentFolderList.state
+    private onClickWorkspaceFolderHere = async (): Promise<void> => {
+        this.variableObject.isWorkspaceFolderMoveRunning.state = true;
+
+        const isFolderMove = await this.controllerMcp.apiWorkspaceFolderMove(
+            this.variableObject.workspaceSelectList.state,
+            this.variableObject.workspaceCurrentFolderList.state
         );
 
         if (isFolderMove) {
             await this.paginationState("update");
 
-            this.updateSelectList("document", []);
+            this.updateSelectList("workspace", []);
         }
+
+        this.variableObject.isWorkspaceFolderMoveRunning.state = false;
     };
 
-    private onClickDocumentOpen = async (fileName: string, category: string): Promise<void> => {
+    private onClickWorkspaceOpen = async (fileName: string, category: string): Promise<void> => {
         if (category === "folder") {
-            this.variableObject.documentCurrentFolderList.state.push(fileName);
+            this.variableObject.workspaceCurrentFolderList.state.push(fileName);
 
-            this.controllerMcp.apiDocumentSelect(this.variableObject.documentCurrentFolderList.state).then(async () => {
-                await this.paginationState("initialize", this.variableObject.documentList.state);
+            this.controllerMcp.apiWorkspace(this.variableObject.workspaceCurrentFolderList.state).then(async () => {
+                await this.paginationState("initialize", this.variableObject.workspaceItemList.state);
             });
         } else {
-            await this.documentWindowOpen(fileName);
+            await this.windowOpenDocument(fileName);
         }
     };
 
@@ -505,8 +517,8 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuSkill = (): void => {
-        this.controllerMcp.apiSkillSelect().then(async () => {
-            this.variableObject.isMenuItemDocument.state = false;
+        this.controllerMcp.apiSkill().then(async () => {
+            this.variableObject.isMenuItemWorkspace.state = false;
             this.variableObject.isMenuItemTool.state = false;
             this.variableObject.isMenuItemTask.state = false;
             this.variableObject.isMenuItemAgent.state = false;
@@ -522,25 +534,29 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickSkillUpload = async (): Promise<void> => {
+        this.variableObject.isUploadRunning.state = true;
+
         await this.controllerMcp.apiSkillUpload();
 
         await this.paginationState("update");
+
+        this.variableObject.isUploadRunning.state = false;
     };
 
     private onClickSkillDelete = (fileName: string): void => {
-        this.controllerMcp.apiAgentSelect().then(async (resultApiList) => {
+        this.controllerMcp.apiAgent().then(async (resultApiList) => {
             await this.dialogMessageDeleteSkill(resultApiList, fileName);
         });
     };
 
     private onClickSkillDeleteSelected = (): void => {
-        this.controllerMcp.apiAgentSelect().then(async (resultApiList) => {
+        this.controllerMcp.apiAgent().then(async (resultApiList) => {
             await this.dialogMessageDeleteSkill(resultApiList);
         });
     };
 
     private onClickSelectSkill = (): void => {
-        this.controllerMcp.apiSkillSelect().then(async () => {
+        this.controllerMcp.apiSkill().then(async () => {
             this.variableObject.agentData.state.name = this.hookObject.elementInputAgentName.value;
             this.variableObject.agentData.state.description = this.hookObject.elementInputAgentDescription.value;
 
@@ -561,7 +577,7 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuTool = (): void => {
-        this.variableObject.isMenuItemDocument.state = false;
+        this.variableObject.isMenuItemWorkspace.state = false;
         this.variableObject.isMenuItemTool.state = !this.variableObject.isMenuItemTool.state;
         this.variableObject.isMenuItemTask.state = false;
         this.variableObject.isMenuItemAgent.state = false;
@@ -594,7 +610,7 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuTask = (): void => {
-        this.variableObject.isMenuItemDocument.state = false;
+        this.variableObject.isMenuItemWorkspace.state = false;
         this.variableObject.isMenuItemTool.state = false;
         this.variableObject.isMenuItemTask.state = !this.variableObject.isMenuItemTask.state;
         this.variableObject.isMenuItemAgent.state = false;
@@ -627,8 +643,8 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuAgent = (): void => {
-        this.controllerMcp.apiAgentSelect().then(() => {
-            this.variableObject.isMenuItemDocument.state = false;
+        this.controllerMcp.apiAgent().then(() => {
+            this.variableObject.isMenuItemWorkspace.state = false;
             this.variableObject.isMenuItemTool.state = false;
             this.variableObject.isMenuItemTask.state = false;
             this.variableObject.isMenuItemAgent.state = !this.variableObject.isMenuItemAgent.state;
@@ -674,19 +690,23 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private onClickAgentSave = (): void => {
+    private onClickAgentSave = async (): Promise<void> => {
+        this.variableObject.isAgentSave.state = true;
+
         this.variableObject.agentData.state.name = this.hookObject.elementInputAgentName.value;
         this.variableObject.agentData.state.description = this.hookObject.elementInputAgentDescription.value;
 
         if (this.variableObject.agentData.state.id === -1) {
-            this.controllerMcp.apiAgentCreate(this.variableObject.agentData.state);
+            await this.controllerMcp.apiAgentCreate(this.variableObject.agentData.state);
         } else {
-            this.controllerMcp.apiAgentUpdate(this.variableObject.agentData.state);
+            await this.controllerMcp.apiAgentUpdate(this.variableObject.agentData.state);
         }
+
+        this.variableObject.isAgentSave.state = false;
     };
 
     private onClickAgentCancel = (): void => {
-        this.controllerMcp.apiAgentSelect().then(() => {
+        this.controllerMcp.apiAgent().then(() => {
             this.variableObject.agentData.state = {} as modelMcp.Iagent;
         });
     };
@@ -720,8 +740,8 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuUser = (): void => {
-        this.controllerMcp.apiUserSelect().then(() => {
-            this.variableObject.isMenuItemDocument.state = false;
+        this.controllerMcp.apiUserQuery().then(() => {
+            this.variableObject.isMenuItemWorkspace.state = false;
             this.variableObject.isMenuItemTool.state = false;
             this.variableObject.isMenuItemTask.state = false;
             this.variableObject.isMenuItemAgent.state = false;
@@ -734,30 +754,39 @@ export default class MenuItem implements Icontroller {
         });
     };
 
-    private onClickUserUpdate = (): void => {
+    private onClickUserUpdate = async (): Promise<void> => {
+        this.variableObject.isUserUpdate.state = true;
+
         const userCopy = { ...this.variableObject.user.state };
 
         userCopy.name = this.hookObject.elementInputUserName.value;
         userCopy.surname = this.hookObject.elementInputUserSurname.value;
-        userCopy.password = this.hookObject.elementInputUserPassword.value;
 
-        this.controllerMcp.apiUserUpdate(userCopy);
+        if (this.variableObject.loginMode.state === "basic") {
+            userCopy.password = this.hookObject.elementInputUserPassword.value;
+        }
+
+        await this.controllerMcp.apiUserUpdate(userCopy);
+
+        this.variableObject.isUserUpdate.state = false;
     };
 
     private onClickUserCancel = (): void => {
         this.variableObject.isMenuItemUser.state = false;
     };
 
-    private onClickSettingSave = (): void => {
+    private onClickSettingSave = async (): Promise<void> => {
+        this.variableObject.isSettingSave.state = true;
+
         const llmServiceId = parseInt(this.hookObject.elementSelectSettingLlmServiceId.value);
 
         const settingCopy: modelMcp.Isetting = {
             id: this.variableObject.setting.state.id,
-            llm: []
+            llmList: []
         };
 
-        for (const llm of this.variableObject.setting.state.llm) {
-            settingCopy.llm.push({
+        for (const llm of this.variableObject.setting.state.llmList) {
+            settingCopy.llmList.push({
                 ...llm,
                 url: llm.id === llmServiceId ? this.hookObject.elementInputSettingLlmUrl.value : llm.url,
                 apiKey: llm.id === llmServiceId ? this.hookObject.elementInputSettingLlmApiKey.value : llm.apiKey,
@@ -765,7 +794,9 @@ export default class MenuItem implements Icontroller {
             });
         }
 
-        this.controllerMcp.apiSettingUpdate(settingCopy);
+        await this.controllerMcp.apiSettingUpdate(settingCopy);
+
+        this.variableObject.isSettingSave.state = false;
     };
 
     private onClickSettingCancel = (): void => {
@@ -773,8 +804,8 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuSetting = async (): Promise<void> => {
-        this.controllerMcp.apiSettingSelect().then(() => {
-            this.variableObject.isMenuItemDocument.state = false;
+        this.controllerMcp.apiSettingQuery().then(() => {
+            this.variableObject.isMenuItemWorkspace.state = false;
             this.variableObject.isMenuItemTool.state = false;
             this.variableObject.isMenuItemTask.state = false;
             this.variableObject.isMenuItemAgent.state = false;
@@ -791,9 +822,9 @@ export default class MenuItem implements Icontroller {
         let itemDetailList: modelMcp.IitemDetail[] = [];
         let selectList: string[] = [];
 
-        if (mode === "document") {
-            itemDetailList = this.variableObject.documentList.state;
-            selectList = this.variableObject.documentSelectList.state;
+        if (mode === "workspace") {
+            itemDetailList = this.variableObject.workspaceItemList.state;
+            selectList = this.variableObject.workspaceSelectList.state;
         } else if (mode === "skill") {
             itemDetailList = this.variableObject.skillList.state;
             selectList = this.variableObject.skillSelectList.state;
@@ -822,15 +853,15 @@ export default class MenuItem implements Icontroller {
         this.updateSelectList(mode, selectList);
     };
 
-    private onInputDocumentFolderName = async (event: KeyboardEvent): Promise<void> => {
+    private onInputWorkspaceFolderName = async (event: KeyboardEvent): Promise<void> => {
         if (event.key === "Enter") {
-            await this.documentCreateFolder();
+            await this.workspaceCreateFolder();
         }
     };
 
-    private onInputDocumentRename = async (event: KeyboardEvent): Promise<void> => {
+    private onInputWorkspaceRename = async (event: KeyboardEvent): Promise<void> => {
         if (event.key === "Enter") {
-            await this.documentRename();
+            await this.workspaceRename();
         }
     };
 
@@ -857,24 +888,25 @@ export default class MenuItem implements Icontroller {
     variable(): void {
         this.variableObject = variableBind(
             {
-                isMenuItemDocument: false,
+                loginMode: variableLink<string>("Mcp"),
+                isMenuItemWorkspace: false,
                 isMenuItemTool: false,
                 isMenuItemTask: false,
                 isMenuItemAgent: false,
                 isMenuItemSkill: false,
                 isMenuItemUser: false,
                 isMenuItemSetting: false,
-                documentList: variableLink<modelMcp.IitemDetail[]>("Mcp"),
                 documentOpenList: [],
-                documentSelectList: [],
-                documentCurrentFolderList: [],
-                documentRenameSelected: "",
+                workspaceItemList: variableLink<modelMcp.IitemDetail[]>("Mcp"),
+                workspaceSelectList: [],
+                workspaceCurrentFolderList: [],
+                workspaceRenameSelected: "",
                 isUploadRunning: false,
                 isDeleteRunning: false,
-                isDocumentFolderStillCreate: false,
-                isDocumentFolderCreateRunning: false,
-                isDocumentFolderMoveSelecting: false,
-                isDocumentFolderMoveRunning: false,
+                isWorkspaceFolderStillCreate: false,
+                isWorkspaceFolderCreateRunning: false,
+                isWorkspaceFolderMoveSelecting: false,
+                isWorkspaceFolderMoveRunning: false,
                 isRagRunning: false,
                 isRagGraphOpen: false,
                 isRagGraphHtmlLoading: false,
@@ -908,16 +940,16 @@ export default class MenuItem implements Icontroller {
             checkItemSelected: this.checkItemSelected,
             itemId: this.itemId,
             onClickCheckbox: this.onClickCheckbox,
-            onClickMenuDocument: this.onClickMenuDocument,
-            onClickDocumentUpload: this.onClickDocumentUpload,
-            onClickDocumentDelete: this.onClickDocumentDelete,
-            onClickDocumentDeleteSelected: this.onClickDocumentDeleteSelected,
-            onClickDocumentRename: this.onClickDocumentRename,
-            onClickDocumentFolderCreate: this.onClickDocumentFolderCreate,
-            onClickDocumentFolderBack: this.onClickDocumentFolderBack,
-            onClickDocumentFolderMoveTo: this.onClickDocumentFolderMoveTo,
-            onClickDocumentFolderHere: this.onClickDocumentFolderHere,
-            onClickDocumentOpen: this.onClickDocumentOpen,
+            onClickMenuWorkspace: this.onClickMenuWorkspace,
+            onClickWorkspaceUpload: this.onClickWorkspaceUpload,
+            onClickWorkspaceDeleteItem: this.onClickWorkspaceDeleteItem,
+            onClickWorkspaceDeleteSelected: this.onClickWorkspaceDeleteSelected,
+            onClickWorkspaceRename: this.onClickWorkspaceRename,
+            onClickWorkspaceFolderCreate: this.onClickWorkspaceFolderCreate,
+            onClickWorkspaceFolderBack: this.onClickWorkspaceFolderBack,
+            onClickWorkspaceFolderMoveTo: this.onClickWorkspaceFolderMoveTo,
+            onClickWorkspaceFolderHere: this.onClickWorkspaceFolderHere,
+            onClickWorkspaceOpen: this.onClickWorkspaceOpen,
             onClickRagStart: this.onClickRagStart,
             onClickRagGraph: this.onClickRagGraph,
             onClickRagGraphBack: this.onClickRagGraphBack,
@@ -946,8 +978,8 @@ export default class MenuItem implements Icontroller {
             onClickSettingCancel: this.onClickSettingCancel,
             onClickMenuSetting: this.onClickMenuSetting,
             onClickToggleSelectAll: this.onClickToggleSelectAll,
-            onInputDocumentFolderName: this.onInputDocumentFolderName,
-            onInputDocumentRename: this.onInputDocumentRename,
+            onInputWorkspaceFolderName: this.onInputWorkspaceFolderName,
+            onInputWorkspaceRename: this.onInputWorkspaceRename,
             onChangeSettingLlmServiceId: this.onChangeSettingLlmServiceId
         };
     }
@@ -1004,13 +1036,13 @@ export default class MenuItem implements Icontroller {
             const target = event.target as HTMLElement;
 
             if (
-                this.variableObject.isDocumentFolderStillCreate.state &&
+                this.variableObject.isWorkspaceFolderStillCreate.state &&
                 !helperSrc.findElementParent(target, "input_folder_name") &&
                 !helperSrc.findElementParent(target, "button_create_folder")
             ) {
-                await this.documentCreateFolder();
-            } else if (this.variableObject.documentRenameSelected.state !== "" && !helperSrc.findElementParent(target, "input_rename")) {
-                await this.documentRename();
+                await this.workspaceCreateFolder();
+            } else if (this.variableObject.workspaceRenameSelected.state !== "" && !helperSrc.findElementParent(target, "input_rename")) {
+                await this.workspaceRename();
             }
         });
     }

@@ -9,7 +9,6 @@ export interface Ivariable {
     isOpenDropdownModelList: IvariableBind<boolean>;
     modelList: IvariableBind<string[]>;
     modelSelected: IvariableBind<string>;
-    adUrl: IvariableBind<string>;
     setting: IvariableBind<modelMcp.Isetting>;
     llmInstance: IvariableBind<modelChat.TllmInstance | null>;
 }

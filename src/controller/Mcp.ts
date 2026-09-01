@@ -20,33 +20,27 @@ export default class Mcp implements Icontroller {
     private controllerToast: Toast;
 
     // Method
-    private showToastMessage = (mode: string, message: string | string[]): void => {
-        let messageList: string[] = [];
-
-        if (typeof message !== "string") {
-            messageList = message;
-        } else {
-            messageList = [message];
-        }
-
-        this.controllerToast.show(mode, messageList);
-    };
-
-    private showFileFailedMessage = async (actionOperationList: modelMcp.IactionOperation[]): Promise<void> => {
+    private showFileFailedMessage = async (actionOperationList: modelHelperSrc.IactionOperation[]): Promise<void> => {
         const messageList: string[] = [];
 
         for (const actionOperation of actionOperationList) {
             if ((actionOperation.state === "ko" || actionOperation.state === "failed") && actionOperation.data) {
                 const fileDetail = await helperSrc.fileDetail(actionOperation.data as string);
 
-                messageList.push(`[Failed] ${fileDetail.name}`);
+                if (typeof actionOperation.message !== "string") {
+                    for (const message of actionOperation.message) {
+                        messageList.push(`${fileDetail.name} - ${message}`);
+                    }
+                } else {
+                    messageList.push(`${fileDetail.name} - ${actionOperation.message}`);
+                }
             }
         }
 
         this.controllerToast.show("error", messageList, 0);
     };
 
-    private apiRagCheck = (actionOperationList: modelMcp.IactionOperation[], index: number): void => {
+    private apiRagCheck = (actionOperationList: modelHelperSrc.IactionOperation[], index: number): void => {
         const pathFile = actionOperationList[index].data as string;
 
         let isIntervalRunning = false;
@@ -78,11 +72,11 @@ export default class Mcp implements Icontroller {
                         this.variableObject.isOfflineMcp.state = false;
 
                         const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                        const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                        actionOperationList[index].state = stdoutObject.state;
+                        actionOperationList[index].state = json.response.state;
+                        actionOperationList[index].message = json.response.message;
 
-                        if (stdoutObject.state !== "ongoing") {
+                        if (json.response.state !== "ongoing") {
                             if (interval) {
                                 clearInterval(interval);
                             }
@@ -188,17 +182,41 @@ export default class Mcp implements Icontroller {
         this.variableObject.systemMode.state = "chat";
     };
 
-    apiLogin = async (username: string, password: string): Promise<boolean> => {
-        const body: modelMcp.IapiLoginBody = {
-            username,
-            password
-        };
+    showToastMessage = (mode: string, message: string | string[]): void => {
+        let messageList: string[] = [];
+
+        if (typeof message !== "string") {
+            messageList = message;
+        } else if (message !== "") {
+            messageList = [message];
+        }
+
+        this.controllerToast.show(mode, messageList);
+    };
+
+    apiLogin = async (mode: string, username?: string, password?: string): Promise<boolean> => {
+        let body = {} as modelMcp.IapiLoginBody;
+
+        if (mode === "basic") {
+            body = {
+                mode,
+                username,
+                password
+            };
+        } else if (mode === "ad") {
+            body = { mode };
+        }
+
+        if (!session.data.mcpBearerToken) {
+            session.data.mcpBearerToken = helperSrc.generateUniqueId();
+        }
 
         return fetch(`${helperSrc.URL_MCP}/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "mcp-session-id": session.data.mcpSessionId
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-bearer-token": session.data.mcpBearerToken
             },
             body: JSON.stringify(body),
             danger: {
@@ -215,14 +233,25 @@ export default class Mcp implements Icontroller {
 
                 if (cookie) {
                     const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                    const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                    if (stdoutObject.state === "ko" || !stdoutObject.data) {
-                        this.showToastMessage("error", stdoutObject.message);
+                    if (json.response.state === "ko") {
+                        this.variableObject.isLogin.state = false;
+
+                        this.showToastMessage("error", json.response.message);
                     } else {
-                        this.variableObject.isLogin.state = true;
+                        let mcpSessionId = "";
 
-                        session.writeMcpSession(stdoutObject.data as string, cookie);
+                        if (mode === "basic") {
+                            mcpSessionId = json.response.data as string;
+
+                            this.variableObject.isLogin.state = true;
+                        } else if (mode === "ad") {
+                            this.variableObject.adUrl.state = json.response.data as string;
+                        }
+
+                        this.variableObject.loginMode.state = mode;
+
+                        session.writeMcpSession(mcpSessionId, cookie, session.data.mcpBearerToken);
 
                         isResult = true;
                     }
@@ -239,22 +268,71 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiLogout = async (): Promise<void | Response> => {
-        return fetch(`${helperSrc.URL_MCP}/logout`, {
+    apiAdVerify = async (): Promise<string> => {
+        return fetch(`${helperSrc.URL_MCP}/ad-verify`, {
             method: "GET",
             headers: {
-                "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                "mcp-cookie": session.data.mcpCookie,
+                "mcp-bearer-token": session.data.mcpBearerToken
             },
             danger: {
                 acceptInvalidCerts: true,
                 acceptInvalidHostnames: true
             }
         })
-            .then(() => {
+            .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                session.deleteMcpSession();
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+
+                if (json.response.state === "ko") {
+                    this.variableObject.isLogin.state = false;
+
+                    this.showToastMessage("error", json.response.message);
+                } else {
+                    if (json.response.state === "ongoing") {
+                        this.variableObject.isLogin.state = false;
+                    } else if (json.response.state === "ok") {
+                        session.writeMcpSession(json.response.data as string, session.data.mcpCookie, session.data.mcpBearerToken);
+
+                        this.variableObject.isLogin.state = true;
+                    }
+                }
+
+                return json.response.state;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiAdVerify() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+
+                return "ko";
+            });
+    };
+
+    apiLogout = async (): Promise<void | Response> => {
+        return fetch(`${helperSrc.URL_MCP}/logout`, {
+            method: "GET",
+            headers: {
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie,
+                "mcp-bearer-token": session.data.mcpBearerToken
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+                } else {
+                    session.deleteMcpSession();
+                }
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiLogout() - fetch() - catch()", error.message);
@@ -264,7 +342,7 @@ export default class Mcp implements Icontroller {
     };
 
     apiTool = async (): Promise<void> => {
-        return fetch(`${helperSrc.URL_MCP}/api/tool-list`, {
+        return fetch(`${helperSrc.URL_MCP}/api/tool-retrieve`, {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
@@ -279,10 +357,13 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    this.variableObject.toolList.state = stdoutObject.data as modelMcp.Itool[];
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+
+                    this.variableObject.toolList.state = [];
+                } else {
+                    this.variableObject.toolList.state = json.response.data as modelMcp.Itool[];
                 }
             })
             .catch((error: Error) => {
@@ -293,7 +374,7 @@ export default class Mcp implements Icontroller {
     };
 
     apiTask = async (): Promise<void> => {
-        return fetch(`${helperSrc.URL_MCP}/api/task-list`, {
+        return fetch(`${helperSrc.URL_MCP}/api/task-retrieve`, {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
@@ -308,10 +389,13 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    this.variableObject.taskList.state = stdoutObject.data as modelMcp.Itask[];
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+
+                    this.variableObject.taskList.state = [];
+                } else {
+                    this.variableObject.taskList.state = json.response.data as modelMcp.Itask[];
                 }
             })
             .catch((error: Error) => {
@@ -321,16 +405,54 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiDocumentUpload = async (currentFolderList: string[]): Promise<void> => {
+    apiWorkspace = async (currentFolderList: string[]): Promise<modelMcp.IitemDetail[]> => {
+        const body: modelMcp.IapiWorkspaceBody = { folderJoin: currentFolderList.join("/") };
+
+        return fetch(`${helperSrc.URL_MCP}/api/workspace-retrieve`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie
+            },
+            body: JSON.stringify(body),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+
+                    this.variableObject.workspaceItemList.state = [];
+                } else {
+                    this.variableObject.workspaceItemList.state = json.response.data as modelMcp.IitemDetail[];
+                }
+
+                return this.variableObject.workspaceItemList.state;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiWorkspace() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+
+                return [];
+            });
+    };
+
+    apiWorkspaceUpload = async (currentFolderList: string[]): Promise<void> => {
         const pathFileList = await open({
             multiple: true,
             directory: false
         });
 
         if (pathFileList) {
-            this.variableObject.isUploadRunning.state = true;
-
-            const actionOperationList: modelMcp.IactionOperation[] = [];
+            const actionOperationList: modelHelperSrc.IactionOperation[] = [];
 
             for (let a = 0; a < pathFileList.length; a++) {
                 const pathFile = pathFileList[a];
@@ -343,7 +465,7 @@ export default class Mcp implements Icontroller {
                 const formData = new FormData();
                 formData.append("file", blob, encodeURIComponent(fileDetail.name));
 
-                await fetch(`${helperSrc.URL_MCP}/api/document-upload`, {
+                await fetch(`${helperSrc.URL_MCP}/api/workspace-upload`, {
                     method: "POST",
                     headers: {
                         "mcp-session-id": session.data.mcpSessionId,
@@ -362,62 +484,23 @@ export default class Mcp implements Icontroller {
 
                         const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
 
-                        actionOperationList.push(JSON.parse(json.response.stdout) as modelMcp.IactionOperation);
+                        actionOperationList.push(json.response);
 
                         await this.showFileFailedMessage(actionOperationList);
                     })
                     .catch((error: Error) => {
-                        helperSrc.writeLog("Mcp.ts - apiDocumentUpload() - fetch() - catch()", error.message);
+                        helperSrc.writeLog("Mcp.ts - apiWorkspaceUpload() - fetch() - catch()", error.message);
 
                         this.variableObject.isOfflineMcp.state = true;
                     });
             }
-
-            this.variableObject.isUploadRunning.state = false;
         }
     };
 
-    apiDocumentSelect = async (currentFolderList: string[]): Promise<modelMcp.IitemDetail[]> => {
-        const body: modelMcp.IapiDocumentListBody = { folderJoin: currentFolderList.join("/") };
+    apiWorkspaceRead = async (fileName: string): Promise<string> => {
+        const body: modelMcp.IapiWorkspaceReadBody = { fileName };
 
-        return fetch(`${helperSrc.URL_MCP}/api/document-list`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
-            },
-            body: JSON.stringify(body),
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (resultApi) => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
-
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    this.variableObject.documentList.state = stdoutObject.data as modelMcp.IitemDetail[];
-                }
-
-                return this.variableObject.documentList.state;
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiDocumentSelect() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-
-                return [];
-            });
-    };
-
-    apiDocumentRead = async (fileName: string): Promise<string> => {
-        const body: modelMcp.IapiDocumentReadBody = { fileName };
-
-        return fetch(`${helperSrc.URL_MCP}/api/document-read`, {
+        return fetch(`${helperSrc.URL_MCP}/api/workspace-read`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -436,16 +519,17 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    result = stdoutObject.data as string;
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+                } else {
+                    result = json.response.data as string;
                 }
 
                 return result;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiDocumentRead() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiWorkspaceRead() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
 
@@ -453,40 +537,10 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiDocumentDelete = async (pathItem: string): Promise<boolean> => {
-        const body: modelMcp.IapiDocumentDeleteBody = { pathItem };
+    apiWorkspaceDelete = async (selectList: string[]): Promise<boolean> => {
+        const body: modelMcp.IapiWorkspaceDeleteBody = { pathList: selectList };
 
-        return fetch(`${helperSrc.URL_MCP}/api/document-delete`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
-            },
-            body: JSON.stringify(body),
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(() => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                return true;
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiDocumentDelete() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-
-                return false;
-            });
-    };
-
-    apiDocumentRename = async (pathItem: string, name: string): Promise<boolean> => {
-        const body: modelMcp.IapiDocumentRenameBody = { pathItem, name };
-
-        return fetch(`${helperSrc.URL_MCP}/api/document-rename`, {
+        return fetch(`${helperSrc.URL_MCP}/api/workspace-delete`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -505,12 +559,9 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ko") {
-                    this.showToastMessage("error", stdoutObject.message);
-
-                    isResult = false;
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
                 } else {
                     isResult = true;
                 }
@@ -518,7 +569,7 @@ export default class Mcp implements Icontroller {
                 return isResult;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiDocumentRename() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiWorkspaceDelete() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
 
@@ -526,12 +577,10 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiDocumentFolderCreate = async (folderName: string, currentFolderList: string[]): Promise<boolean> => {
-        this.variableObject.isDocumentFolderCreateRunning.state = true;
+    apiWorkspaceRename = async (pathItem: string, name: string): Promise<boolean> => {
+        const body: modelMcp.IapiWorkspaceRenameBody = { pathItem, name };
 
-        const body: modelMcp.IapiDocumentFolderCreateBody = { folderName, folderJoin: currentFolderList.join("/") };
-
-        return fetch(`${helperSrc.URL_MCP}/api/document-folder-create`, {
+        return fetch(`${helperSrc.URL_MCP}/api/workspace-rename`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -550,37 +599,28 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ko") {
-                    this.showToastMessage("error", stdoutObject.message);
-
-                    isResult = false;
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
                 } else {
                     isResult = true;
                 }
 
-                this.variableObject.isDocumentFolderCreateRunning.state = false;
-
                 return isResult;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiDocumentFolderCreate() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiWorkspaceRename() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
-
-                this.variableObject.isDocumentFolderCreateRunning.state = false;
 
                 return false;
             });
     };
 
-    apiDocumentFolderMove = async (selectList: string[], currentFolderList: string[]): Promise<boolean> => {
-        this.variableObject.isDocumentFolderMoveRunning.state = true;
+    apiWorkspaceFolderCreate = async (folderName: string, currentFolderList: string[]): Promise<boolean> => {
+        const body: modelMcp.IapiWorkspaceFolderCreateBody = { folderName, folderJoin: currentFolderList.join("/") };
 
-        const body: modelMcp.IapiDocumentFolderMoveBody = { pathList: selectList, folderJoin: currentFolderList.join("/") };
-
-        return fetch(`${helperSrc.URL_MCP}/api/document-folder-move`, {
+        return fetch(`${helperSrc.URL_MCP}/api/workspace-folder-create`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -599,26 +639,59 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ko") {
-                    this.showToastMessage("error", stdoutObject.message);
-
-                    isResult = false;
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
                 } else {
                     isResult = true;
                 }
 
-                this.variableObject.isDocumentFolderMoveRunning.state = false;
+                return isResult;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiWorkspaceFolderCreate() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+
+                return false;
+            });
+    };
+
+    apiWorkspaceFolderMove = async (selectList: string[], currentFolderList: string[]): Promise<boolean> => {
+        const body: modelMcp.IapiWorkspaceFolderMoveBody = { pathList: selectList, folderJoin: currentFolderList.join("/") };
+
+        return fetch(`${helperSrc.URL_MCP}/api/workspace-folder-move`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie
+            },
+            body: JSON.stringify(body),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                let isResult = false;
+
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+                } else {
+                    isResult = true;
+                }
 
                 return isResult;
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiDocumentFolderMove() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiWorkspaceFolderMove() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
-
-                this.variableObject.isDocumentFolderMoveRunning.state = false;
 
                 return false;
             });
@@ -627,7 +700,7 @@ export default class Mcp implements Icontroller {
     apiRagStart = (): void => {
         this.variableObject.isRagRunning.state = true;
 
-        const actionOperationList: modelMcp.IactionOperation[] = [];
+        const actionOperationList: modelHelperSrc.IactionOperation[] = [];
 
         fetch(`${helperSrc.URL_MCP}/api/rag-start`, {
             method: "POST",
@@ -645,14 +718,13 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ko" || !stdoutObject.data) {
-                    this.showToastMessage("error", stdoutObject.message);
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
 
                     this.variableObject.isRagRunning.state = false;
                 } else {
-                    const pathFileList = stdoutObject.data as string[];
+                    const pathFileList = json.response.data as string[];
 
                     for (let a = 0; a < pathFileList.length; a++) {
                         actionOperationList.push({ state: "ongoing", message: "", data: pathFileList[a] });
@@ -688,10 +760,11 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    result = stdoutObject.data as string;
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+                } else {
+                    result = json.response.data as string;
                 }
 
                 return result;
@@ -705,6 +778,42 @@ export default class Mcp implements Icontroller {
             });
     };
 
+    apiSkill = async (): Promise<modelMcp.IitemDetail[]> => {
+        return fetch(`${helperSrc.URL_MCP}/api/skill-retrieve`, {
+            method: "GET",
+            headers: {
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+
+                    this.variableObject.skillList.state = [];
+                } else {
+                    this.variableObject.skillList.state = json.response.data as modelMcp.IitemDetail[];
+                }
+
+                return this.variableObject.skillList.state;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiSkill() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+
+                return [];
+            });
+    };
+
     apiSkillUpload = async (): Promise<void> => {
         const pathFileList = await open({
             multiple: true,
@@ -712,9 +821,7 @@ export default class Mcp implements Icontroller {
         });
 
         if (pathFileList) {
-            this.variableObject.isUploadRunning.state = true;
-
-            const actionOperationList: modelMcp.IactionOperation[] = [];
+            const actionOperationList: modelHelperSrc.IactionOperation[] = [];
 
             for (let a = 0; a < pathFileList.length; a++) {
                 const pathFile = pathFileList[a];
@@ -744,7 +851,7 @@ export default class Mcp implements Icontroller {
 
                         const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
 
-                        actionOperationList.push(JSON.parse(json.response.stdout) as modelMcp.IactionOperation);
+                        actionOperationList.push(json.response);
 
                         await this.showFileFailedMessage(actionOperationList);
                     })
@@ -754,42 +861,7 @@ export default class Mcp implements Icontroller {
                         this.variableObject.isOfflineMcp.state = true;
                     });
             }
-
-            this.variableObject.isUploadRunning.state = false;
         }
-    };
-
-    apiSkillSelect = async (): Promise<modelMcp.IitemDetail[]> => {
-        return fetch(`${helperSrc.URL_MCP}/api/skill-list`, {
-            method: "GET",
-            headers: {
-                "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (resultApi) => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
-
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    this.variableObject.skillList.state = stdoutObject.data as modelMcp.IitemDetail[];
-                }
-
-                return this.variableObject.skillList.state;
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiSkillSelect() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-
-                return [];
-            });
     };
 
     apiSkillRead = async (fileName: string): Promise<string> => {
@@ -814,10 +886,11 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    result = stdoutObject.data as string;
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+                } else {
+                    result = json.response.data as string;
                 }
 
                 return result;
@@ -831,8 +904,8 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiSkillDelete = async (fileName: string): Promise<boolean> => {
-        const body: modelMcp.IapiSkillDeleteBody = { fileName };
+    apiSkillDelete = async (selectList: string[]): Promise<boolean> => {
+        const body: modelMcp.IapiSkillDeleteBody = { fileNameList: selectList };
 
         return fetch(`${helperSrc.URL_MCP}/api/skill-delete`, {
             method: "POST",
@@ -847,10 +920,20 @@ export default class Mcp implements Icontroller {
                 acceptInvalidHostnames: true
             }
         })
-            .then(() => {
+            .then(async (resultApi) => {
+                let isResult = false;
+
                 this.variableObject.isOfflineMcp.state = false;
 
-                return true;
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+                } else {
+                    isResult = true;
+                }
+
+                return isResult;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiSkillDelete() - fetch() - catch()", error.message);
@@ -861,16 +944,62 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiAgentCreate = (agent: modelMcp.Iagent): void => {
-        this.variableObject.isAgentSave.state = true;
+    apiAgent = async (): Promise<modelMcp.Iagent[]> => {
+        return fetch(`${helperSrc.URL_MCP}/api/agent-retrieve`, {
+            method: "GET",
+            headers: {
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie
+            },
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
 
+                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+
+                    this.variableObject.agentList.state = [];
+                } else {
+                    this.variableObject.agentList.state = json.response.data as modelMcp.Iagent[];
+                }
+
+                if (Object.keys(this.variableObject.agentSelected.state).length > 0) {
+                    for (let a = 0; a < this.variableObject.agentList.state.length; a++) {
+                        const agent = this.variableObject.agentList.state[a];
+
+                        if (this.variableObject.agentSelected.state.id === agent.id) {
+                            this.variableObject.agentSelected.state = agent;
+
+                            break;
+                        }
+                    }
+                }
+
+                return this.variableObject.agentList.state;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiAgent() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+
+                return [];
+            });
+    };
+
+    apiAgentCreate = async (agent: modelMcp.Iagent): Promise<void> => {
         const body: modelMcp.IapiAgentCreateBody = {
             name: agent.name,
             description: agent.description,
             skillName: agent.skillName
         };
 
-        fetch(`${helperSrc.URL_MCP}/api/agent-create`, {
+        await fetch(`${helperSrc.URL_MCP}/api/agent-create`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -887,19 +1016,16 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ko") {
-                    this.showToastMessage("error", stdoutObject.message);
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
                 } else {
-                    await this.apiAgentSelect();
+                    this.apiAgent().then(() => {
+                        this.variableObject.agentData.state = {} as modelMcp.Iagent;
 
-                    this.variableObject.agentData.state = {} as modelMcp.Iagent;
-
-                    this.showToastMessage("success", stdoutObject.message);
+                        this.showToastMessage("success", json.response.message);
+                    });
                 }
-
-                this.variableObject.isAgentSave.state = false;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiAgentCreate() - fetch() - catch()", error.message);
@@ -909,8 +1035,6 @@ export default class Mcp implements Icontroller {
     };
 
     apiAgentUpdate = async (agent: modelMcp.Iagent): Promise<void> => {
-        this.variableObject.isAgentSave.state = true;
-
         const body: modelMcp.IapiAgentUpdateBody = {
             id: agent.id,
             name: agent.name,
@@ -935,69 +1059,21 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ko") {
-                    this.showToastMessage("error", stdoutObject.message);
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
                 } else {
-                    await this.apiAgentSelect();
+                    this.apiAgent().then(() => {
+                        this.variableObject.agentData.state = {} as modelMcp.Iagent;
 
-                    this.variableObject.agentData.state = {} as modelMcp.Iagent;
-
-                    this.showToastMessage("success", stdoutObject.message);
+                        this.showToastMessage("success", json.response.message);
+                    });
                 }
-
-                this.variableObject.isAgentSave.state = false;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiAgentUpdate() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
-            });
-    };
-
-    apiAgentSelect = async (): Promise<modelMcp.Iagent[]> => {
-        return fetch(`${helperSrc.URL_MCP}/api/agent-list`, {
-            method: "GET",
-            headers: {
-                "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
-            },
-            danger: {
-                acceptInvalidCerts: true,
-                acceptInvalidHostnames: true
-            }
-        })
-            .then(async (resultApi) => {
-                this.variableObject.isOfflineMcp.state = false;
-
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
-
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    this.variableObject.agentList.state = stdoutObject.data as modelMcp.Iagent[];
-                }
-
-                if (Object.keys(this.variableObject.agentSelected.state).length > 0) {
-                    for (let a = 0; a < this.variableObject.agentList.state.length; a++) {
-                        const agent = this.variableObject.agentList.state[a];
-
-                        if (this.variableObject.agentSelected.state.id === agent.id) {
-                            this.variableObject.agentSelected.state = agent;
-
-                            break;
-                        }
-                    }
-                }
-
-                return this.variableObject.agentList.state;
-            })
-            .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiAgentSelect() - fetch() - catch()", error.message);
-
-                this.variableObject.isOfflineMcp.state = true;
-
-                return [];
             });
     };
 
@@ -1023,9 +1099,10 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdout = json.response.stdout;
 
-                if (stdout === "ok") {
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+                } else {
                     const filteredList: modelMcp.Iagent[] = [];
 
                     for (let a = 0; a < this.variableObject.agentList.state.length; a++) {
@@ -1050,8 +1127,8 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiUserSelect = async (): Promise<void> => {
-        return fetch(`${helperSrc.URL_MCP}/api/user-read`, {
+    apiUserQuery = async (): Promise<void> => {
+        return fetch(`${helperSrc.URL_MCP}/api/user-query`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -1067,22 +1144,23 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    this.variableObject.user.state = stdoutObject.data as modelMcp.Iuser;
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+
+                    this.variableObject.user.state = {} as modelMcp.Iuser;
+                } else {
+                    this.variableObject.user.state = json.response.data as modelMcp.Iuser;
                 }
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiUserSelect() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiUserQuery() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
             });
     };
 
-    apiUserUpdate = (user: modelMcp.Iuser): void => {
-        this.variableObject.isUserUpdate.state = true;
-
+    apiUserUpdate = async (user: modelMcp.Iuser): Promise<void> => {
         const body: modelMcp.IapiUserUpdateBody = {
             id: user.id,
             name: user.name,
@@ -1090,7 +1168,7 @@ export default class Mcp implements Icontroller {
             password: user.password || ""
         };
 
-        fetch(`${helperSrc.URL_MCP}/api/user-update`, {
+        await fetch(`${helperSrc.URL_MCP}/api/user-update`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -1107,17 +1185,14 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ko") {
-                    this.showToastMessage("error", stdoutObject.message);
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
                 } else {
-                    this.apiUserSelect();
-
-                    this.showToastMessage("success", stdoutObject.message);
+                    this.apiUserQuery().then(() => {
+                        this.showToastMessage("success", json.response.message);
+                    });
                 }
-
-                this.variableObject.isUserUpdate.state = false;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiUserUpdate() - fetch() - catch()", error.message);
@@ -1126,8 +1201,8 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiSettingSelect = async (): Promise<void> => {
-        return fetch(`${helperSrc.URL_MCP}/api/setting-read`, {
+    apiSettingQuery = async (): Promise<void> => {
+        return fetch(`${helperSrc.URL_MCP}/api/setting-query`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -1143,14 +1218,17 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    this.variableObject.setting.state = stdoutObject.data as modelMcp.Isetting;
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
 
-                    for (let a = 0; a < this.variableObject.setting.state.llm.length; a++) {
-                        if (this.variableObject.setting.state.llm[a].selected) {
-                            this.variableObject.settingLlmServiceId.state = this.variableObject.setting.state.llm[a].id;
+                    this.variableObject.setting.state = {} as modelMcp.Isetting;
+                } else {
+                    this.variableObject.setting.state = json.response.data as modelMcp.Isetting;
+
+                    for (let a = 0; a < this.variableObject.setting.state.llmList.length; a++) {
+                        if (this.variableObject.setting.state.llmList[a].selected) {
+                            this.variableObject.settingLlmServiceId.state = this.variableObject.setting.state.llmList[a].id;
 
                             break;
                         }
@@ -1158,21 +1236,19 @@ export default class Mcp implements Icontroller {
                 }
             })
             .catch((error: Error) => {
-                helperSrc.writeLog("Mcp.ts - apiSettingSelect() - fetch() - catch()", error.message);
+                helperSrc.writeLog("Mcp.ts - apiSettingQuery() - fetch() - catch()", error.message);
 
                 this.variableObject.isOfflineMcp.state = true;
             });
     };
 
-    apiSettingUpdate = (setting: modelMcp.Isetting): void => {
-        this.variableObject.isSettingSave.state = true;
-
+    apiSettingUpdate = async (setting: modelMcp.Isetting): Promise<void> => {
         const body: modelMcp.IapiSettingUpdateBody = {
             id: setting.id,
-            llm: setting.llm
+            llmList: setting.llmList
         };
 
-        fetch(`${helperSrc.URL_MCP}/api/setting-update`, {
+        await fetch(`${helperSrc.URL_MCP}/api/setting-update`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -1189,17 +1265,14 @@ export default class Mcp implements Icontroller {
                 this.variableObject.isOfflineMcp.state = false;
 
                 const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
 
-                if (stdoutObject.state === "ko") {
-                    this.showToastMessage("error", stdoutObject.message);
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
                 } else {
-                    this.apiSettingSelect();
-
-                    this.showToastMessage("success", stdoutObject.message);
+                    this.apiSettingQuery().then(() => {
+                        this.showToastMessage("success", json.response.message);
+                    });
                 }
-
-                this.variableObject.isSettingSave.state = false;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiSettingUpdate() - fetch() - catch()", error.message);
@@ -1238,6 +1311,8 @@ export default class Mcp implements Icontroller {
     variable(): void {
         this.variableObject = variableBind(
             {
+                adUrl: "",
+                loginMode: "",
                 isOfflineMcp: false,
                 isLogin: false,
                 toolList: [],
@@ -1246,21 +1321,15 @@ export default class Mcp implements Icontroller {
                 taskSelected: {} as modelMcp.Itask,
                 agentList: [],
                 agentSelected: {} as modelMcp.Iagent,
-                documentList: [],
+                workspaceItemList: [],
                 skillList: [],
                 user: {} as modelMcp.Iuser,
                 setting: {} as modelMcp.Isetting,
                 playwrightVideoSrc: "",
                 playwrightVideoName: "",
-                isUploadRunning: variableLink<boolean>("MenuItem"),
-                isDocumentFolderMoveRunning: variableLink<boolean>("MenuItem"),
-                isDocumentFolderCreateRunning: variableLink<boolean>("MenuItem"),
                 isRagRunning: variableLink<boolean>("MenuItem"),
                 agentData: variableLink<modelMcp.Iagent>("MenuItem"),
-                isAgentSave: variableLink<boolean>("MenuItem"),
-                isUserUpdate: variableLink<boolean>("MenuItem"),
                 settingLlmServiceId: variableLink<number>("MenuItem"),
-                isSettingSave: variableLink<boolean>("MenuItem"),
                 systemMode: variableLink<string>("Chat"),
                 messageList: variableLink<modelChat.IdataMessage[]>("Chat")
             },

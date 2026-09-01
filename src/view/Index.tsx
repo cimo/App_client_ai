@@ -49,6 +49,25 @@ const viewIndex = (variableObject: modelIndex.Ivariable, methodObject: modelInde
                             </button>
                         </div>
                     </div>
+                    <div class={() => `ad_wrapper ${variableObject.adUrl.state !== "" ? "" : "none"}`}>
+                        <p class="ad_link">{() => variableObject.adUrl.state}</p>
+                        <button
+                            onClick={() => {
+                                methodObject.onClickAdCopyUrl();
+                            }}
+                        >
+                            <i class="cls_icon">content_copy</i>
+                            <p>Copy</p>
+                        </button>
+                        <button
+                            onClick={() => {
+                                methodObject.onClickAdOpenUrl();
+                            }}
+                        >
+                            <i class="cls_icon">open_in_browser</i>
+                            <p>Open</p>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="main_wrapper">

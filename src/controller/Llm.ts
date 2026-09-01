@@ -367,15 +367,15 @@ export const mcpResponse = async <T extends modelLlm.IdataContext>(
             .then(async (resultToolCall) => {
                 const json = (await resultToolCall.json()) as modelHelperSrc.IapiResponse;
 
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
-
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    const stdoutObjectData = stdoutObject.data as modelMcp.IapiToolCallResponse;
+                if (json.response.state === "ko") {
+                    tThis.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
+                } else {
+                    const jsonResponseData = json.response.data as modelMcp.IapiToolCallResponse;
 
                     let message = "";
 
-                    if (stdoutObjectData.result && stdoutObjectData.result.content && stdoutObjectData.result.content[0]) {
-                        message = stdoutObjectData.result.content[0].text;
+                    if (jsonResponseData.result && jsonResponseData.result.content && jsonResponseData.result.content[0]) {
+                        message = jsonResponseData.result.content[0].text;
                     }
 
                     await toolResponse(tThis, message, JSON.stringify(responseCompletedObject.argumentObject), userPrompt, messageIndex);
@@ -401,10 +401,10 @@ export const mcpResponse = async <T extends modelLlm.IdataContext>(
             .then(async (resultTaskCall) => {
                 const json = (await resultTaskCall.json()) as modelHelperSrc.IapiResponse;
 
-                const stdoutObject = JSON.parse(json.response.stdout) as modelMcp.IactionOperation;
-
-                if (stdoutObject.state === "ok" && stdoutObject.data) {
-                    await toolResponse(tThis, stdoutObject.data as string, "", userPrompt, messageIndex);
+                if (json.response.state === "ko") {
+                    tThis.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
+                } else {
+                    await toolResponse(tThis, json.response.data as string, "", userPrompt, messageIndex);
                 }
             })
             .catch(async (error: Error) => {

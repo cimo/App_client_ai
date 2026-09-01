@@ -51,7 +51,7 @@
     left: 150px;
     z-index: parameter.$zIndexLevel2;
 
-    .document_wrapper,
+    .workspace_wrapper,
     .skill_wrapper,
     .tool_wrapper,
     .task_wrapper,
@@ -209,7 +209,7 @@
         }
     }
 
-    .document_wrapper {
+    .workspace_wrapper {
         .ragGraphify_wrapper {
             width: 100%;
             height: 100%;
@@ -382,7 +382,7 @@
     .view_menuItem_right {
         background-color: color.$darkRootBackground;
 
-        .document_wrapper {
+        .workspace_wrapper {
             .table_flex {
                 & .name {
                     input {

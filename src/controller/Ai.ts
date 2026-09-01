@@ -22,15 +22,6 @@ export default class Ai implements Icontroller {
     private controllerToast: Toast;
 
     // Method
-    private generateUniqueId = (): string => {
-        const timestamp = Date.now().toString(36);
-        const randomPart = crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
-
-        const uniqueId = `${timestamp}-${randomPart}`;
-
-        return uniqueId;
-    };
-
     private onClickDropdownModel = async (): Promise<void> => {
         if (this.variableObject.llmInstance.state) {
             await this.variableObject.llmInstance.state.apiModel(true);
@@ -54,14 +45,21 @@ export default class Ai implements Icontroller {
     }
 
     apiLogin = async (): Promise<void> => {
-        if (!session.data.aiCookie && this.variableObject.setting.state.llm[0].selected) {
-            const settingLlm = this.variableObject.setting.state.llm[0];
+        if (!session.data.aiCookie && this.variableObject.setting.state.llmList[0].selected) {
+            const settingLlm = this.variableObject.setting.state.llmList[0];
+
+            let header: HeadersInit | undefined = {};
+
+            if (settingLlm.apiKey) {
+                header = {
+                    ...header,
+                    Authorization: `Bearer ${settingLlm.apiKey}`
+                };
+            }
 
             return fetch(`${settingLlm.url}/login`, {
                 method: "GET",
-                headers: {
-                    Authorization: `Bearer ${settingLlm.apiKey ? settingLlm.apiKey : session.data.aiBearerToken}`
-                },
+                headers: header,
                 danger: {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
@@ -74,15 +72,12 @@ export default class Ai implements Icontroller {
 
                     if (cookie) {
                         const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-                        const stdout = json.response.stdout;
 
-                        if (!session.data.aiBearerToken) {
-                            session.data.aiBearerToken = this.generateUniqueId();
+                        if (json.response.state === "ko") {
+                            this.controllerMcp.showToastMessage("error", json.response.message);
+                        } else {
+                            session.writeAiSession(cookie);
                         }
-
-                        session.writeAiSession(session.data.aiBearerToken, cookie);
-
-                        this.variableObject.adUrl.state = stdout;
                     }
                 })
                 .catch((error: Error) => {
@@ -95,23 +90,38 @@ export default class Ai implements Icontroller {
 
     apiLogout = async (): Promise<void | Response> => {
         if (session.data.aiCookie) {
-            const settingLlm = this.variableObject.setting.state.llm[0];
+            const settingLlm = this.variableObject.setting.state.llmList[0];
+
+            let header: HeadersInit | undefined = {
+                "Content-Type": "application/json",
+                "ai-cookie": session.data.aiCookie
+            };
+
+            if (settingLlm.apiKey) {
+                header = {
+                    ...header,
+                    Authorization: `Bearer ${settingLlm.apiKey}`
+                };
+            }
 
             return fetch(`${settingLlm.url}/logout`, {
                 method: "GET",
-                headers: {
-                    Authorization: `Bearer ${settingLlm.apiKey ? settingLlm.apiKey : session.data.aiBearerToken}`,
-                    "ai-cookie": session.data.aiCookie
-                },
+                headers: header,
                 danger: {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
                 }
             })
-                .then(() => {
+                .then(async (resultApi) => {
                     this.variableObject.isOfflineAi.state = false;
 
-                    session.deleteAiSession();
+                    const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+
+                    if (json.response.state === "ko") {
+                        this.controllerMcp.showToastMessage("error", json.response.message);
+                    } else {
+                        session.deleteAiSession();
+                    }
                 })
                 .catch((error: Error) => {
                     helperSrc.writeLog("Ai.ts - apiLogout() - fetch() - catch()", error.message);
@@ -138,7 +148,6 @@ export default class Ai implements Icontroller {
                 isOpenDropdownModelList: false,
                 modelList: [],
                 modelSelected: "",
-                adUrl: variableLink<string>("Index"),
                 setting: variableLink<modelMcp.Isetting>("Mcp"),
                 llmInstance: variableLink<modelChat.TllmInstance | null>("Chat")
             },

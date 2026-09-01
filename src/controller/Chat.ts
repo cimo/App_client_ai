@@ -50,9 +50,9 @@ export default class Chat implements Icontroller {
 
     private currentLlmInstance = async (): Promise<void> => {
         if (Object.keys(this.variableObject.setting.state).length > 0) {
-            for (let a = 0; a < this.variableObject.setting.state.llm.length; a++) {
-                if (this.variableObject.setting.state.llm[a].selected) {
-                    this.variableObject.llmInstance.state = await this.importController(this.variableObject.setting.state.llm[a].module);
+            for (let a = 0; a < this.variableObject.setting.state.llmList.length; a++) {
+                if (this.variableObject.setting.state.llmList[a].selected) {
+                    this.variableObject.llmInstance.state = await this.importController(this.variableObject.setting.state.llmList[a].module);
 
                     break;
                 }
@@ -185,9 +185,9 @@ export default class Chat implements Icontroller {
     selectedLlm = (): modelMcp.IsettingLlm | null => {
         let llm = null;
 
-        for (let a = 0; a < this.variableObject.setting.state.llm.length; a++) {
-            if (this.variableObject.setting.state.llm[a].selected) {
-                llm = this.variableObject.setting.state.llm[a];
+        for (let a = 0; a < this.variableObject.setting.state.llmList.length; a++) {
+            if (this.variableObject.setting.state.llmList[a].selected) {
+                llm = this.variableObject.setting.state.llmList[a];
 
                 break;
             }

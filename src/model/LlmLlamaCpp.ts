@@ -3,8 +3,9 @@ import * as modelMcp from "./Mcp";
 
 export interface IapiModelBody {
     response: {
-        stdout: string;
-        stderr: string | Error;
+        state: string;
+        message: string | string[];
+        data?: unknown;
     };
 }
 

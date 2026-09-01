@@ -165,6 +165,32 @@ aside {
 
         .login_wrapper {
             width: 100%;
+
+            .ad_wrapper {
+                display: flex;
+                flex-direction: row;
+                align-content: center;
+                justify-content: center;
+                align-items: center;
+                justify-items: center;
+                min-height: 0;
+                min-width: 0;
+                flex: 0 1 auto;
+
+                gap: 5px;
+
+                .ad_link {
+                    width: 400px;
+                    word-break: break-word;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+
+                button {
+                    margin: 0px !important;
+                }
+            }
         }
     }
 

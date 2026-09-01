@@ -4,33 +4,34 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 import * as modelChat from "./Chat";
 
 export interface IapiLoginBody {
-    username: string;
-    password: string;
+    mode: string;
+    username?: string;
+    password?: string;
 }
 
-export interface IapiDocumentListBody {
+export interface IapiWorkspaceBody {
     folderJoin: string;
 }
 
-export interface IapiDocumentReadBody {
+export interface IapiWorkspaceReadBody {
     fileName: string;
 }
 
-export interface IapiDocumentDeleteBody {
-    pathItem: string;
+export interface IapiWorkspaceDeleteBody {
+    pathList: string[];
 }
 
-export interface IapiDocumentRenameBody {
+export interface IapiWorkspaceRenameBody {
     pathItem: string;
     name: string;
 }
 
-export interface IapiDocumentFolderCreateBody {
+export interface IapiWorkspaceFolderCreateBody {
     folderName: string;
     folderJoin: string;
 }
 
-export interface IapiDocumentFolderMoveBody {
+export interface IapiWorkspaceFolderMoveBody {
     pathList: string[];
     folderJoin: string;
 }
@@ -44,7 +45,7 @@ export interface IapiSkillReadBody {
 }
 
 export interface IapiSkillDeleteBody {
-    fileName: string;
+    fileNameList: string[];
 }
 
 export interface IapiAgentCreateBody {
@@ -73,7 +74,7 @@ export interface IapiUserUpdateBody {
 
 export interface IapiSettingUpdateBody {
     id: number;
-    llm: IsettingLlm[];
+    llmList: IsettingLlm[];
 }
 
 export interface IapiLlmToolResponse {
@@ -171,12 +172,6 @@ export interface IdocumentParser {
     searchInput: string;
 }
 
-export interface IactionOperation {
-    state: string;
-    message: string | string[];
-    data?: unknown;
-}
-
 export interface IitemDetail {
     name: string;
     baseName: string;
@@ -197,10 +192,12 @@ export interface IsettingLlm {
 
 export interface Isetting {
     id: number;
-    llm: IsettingLlm[];
+    llmList: IsettingLlm[];
 }
 
 export interface Ivariable {
+    adUrl: IvariableBind<string>;
+    loginMode: IvariableBind<string>;
     isOfflineMcp: IvariableBind<boolean>;
     isLogin: IvariableBind<boolean>;
     toolList: IvariableBind<Itool[]>;
@@ -209,21 +206,15 @@ export interface Ivariable {
     taskSelected: IvariableBind<Itask>;
     agentList: IvariableBind<Iagent[]>;
     agentSelected: IvariableBind<Iagent>;
-    documentList: IvariableBind<IitemDetail[]>;
+    workspaceItemList: IvariableBind<IitemDetail[]>;
     skillList: IvariableBind<IitemDetail[]>;
     user: IvariableBind<Iuser>;
     setting: IvariableBind<Isetting>;
     playwrightVideoSrc: IvariableBind<string>;
     playwrightVideoName: IvariableBind<string>;
-    isUploadRunning: IvariableBind<boolean>;
-    isDocumentFolderCreateRunning: IvariableBind<boolean>;
-    isDocumentFolderMoveRunning: IvariableBind<boolean>;
     isRagRunning: IvariableBind<boolean>;
     agentData: IvariableBind<Iagent>;
-    isAgentSave: IvariableBind<boolean>;
-    isUserUpdate: IvariableBind<boolean>;
     settingLlmServiceId: IvariableBind<number>;
-    isSettingSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
     messageList: IvariableBind<modelChat.IdataMessage[]>;
 }

@@ -1,5 +1,6 @@
-import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { exists, stat } from "@tauri-apps/plugin-fs";
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { isAbsolute } from "@tauri-apps/api/path";
 import { WebviewOptions } from "@tauri-apps/api/webview";
 import { emitTo, listen } from "@tauri-apps/api/event";
 import { WindowOptions } from "@tauri-apps/api/window";
@@ -155,7 +156,7 @@ export const fileDetail = async (value: string, buffer?: Uint8Array, isOnlyByte 
     const fileNameWithExtension = value.includes("/") ? value.split("/").pop()! : value;
     const baseName = fileNameWithExtension.trim().replace(/\.[^/.]+$/, "");
 
-    if (value.includes("/")) {
+    if (value.includes("/") && (await isAbsolute(value))) {
         const isFileExists = await exists(value);
 
         if (isFileExists) {

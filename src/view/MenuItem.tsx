@@ -8,12 +8,12 @@ export const left = (variableObject: modelMenuItem.Ivariable, methodObject: mode
     return (
         <ul class="view_menuItem_left">
             <li
-                class={() => (variableObject.isMenuItemDocument.state ? "active" : "")}
+                class={() => (variableObject.isMenuItemWorkspace.state ? "active" : "")}
                 onClick={() => {
-                    methodObject.onClickMenuDocument();
+                    methodObject.onClickMenuWorkspace();
                 }}
             >
-                <i class="cls_icon">file_present</i> <p>Document</p>
+                <i class="cls_icon">file_present</i> <p>Workspace</p>
             </li>
             <li
                 class={() => (variableObject.isMenuItemSkill.state ? "active" : "")}
@@ -71,15 +71,15 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
     return (
         <div
             class={() =>
-                `view_menuItem_right ${variableObject.isMenuItemDocument.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state || variableObject.isMenuItemSkill.state || variableObject.isMenuItemUser.state || variableObject.isMenuItemSetting.state ? "" : "none"}`
+                `view_menuItem_right ${variableObject.isMenuItemWorkspace.state || variableObject.isMenuItemTool.state || variableObject.isMenuItemTask.state || variableObject.isMenuItemAgent.state || variableObject.isMenuItemSkill.state || variableObject.isMenuItemUser.state || variableObject.isMenuItemSetting.state ? "" : "none"}`
             }
         >
             {() => {
                 const resultList: IvirtualNode[] = [];
 
-                if (variableObject.isMenuItemDocument.state) {
+                if (variableObject.isMenuItemWorkspace.state) {
                     resultList.push(
-                        <div class="document_wrapper">
+                        <div class="workspace_wrapper">
                             {() => {
                                 const resultList: IvirtualNode[] = [];
 
@@ -90,9 +90,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                 <div class="left_button_wrapper">
                                                     <button
                                                         onClick={() => {
-                                                            methodObject.onClickDocumentUpload();
+                                                            methodObject.onClickWorkspaceUpload();
                                                         }}
-                                                        disabled={() => methodObject.checkProcessOngoing("document")}
+                                                        disabled={() => methodObject.checkProcessOngoing("workspace")}
                                                     >
                                                         {() => {
                                                             const resultList: IvirtualNode[] = [];
@@ -115,7 +115,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         onClick={() => {
                                                             methodObject.onClickRagStart();
                                                         }}
-                                                        disabled={() => methodObject.checkProcessOngoing("document")}
+                                                        disabled={() => methodObject.checkProcessOngoing("workspace")}
                                                     >
                                                         {() => {
                                                             const resultList: IvirtualNode[] = [];
@@ -138,7 +138,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         onClick={() => {
                                                             methodObject.onClickRagGraph();
                                                         }}
-                                                        disabled={() => methodObject.checkProcessOngoing("document")}
+                                                        disabled={() => methodObject.checkProcessOngoing("workspace")}
                                                     >
                                                         {() => {
                                                             const resultList: IvirtualNode[] = [];
@@ -162,14 +162,14 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     {() => {
                                                         const result: IvirtualNode[] = [];
 
-                                                        if (variableObject.documentSelectList.state.length > 0) {
+                                                        if (variableObject.workspaceSelectList.state.length > 0) {
                                                             result.push(
                                                                 <>
                                                                     <button
                                                                         onClick={() => {
-                                                                            methodObject.onClickDocumentDeleteSelected();
+                                                                            methodObject.onClickWorkspaceDeleteSelected();
                                                                         }}
-                                                                        disabled={() => methodObject.checkProcessOngoing("document")}
+                                                                        disabled={() => methodObject.checkProcessOngoing("workspace")}
                                                                     >
                                                                         {() => {
                                                                             const resultList: IvirtualNode[] = [];
@@ -190,19 +190,19 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     </button>
                                                                     <button
                                                                         onClick={() => {
-                                                                            methodObject.onClickDocumentFolderMoveTo();
+                                                                            methodObject.onClickWorkspaceFolderMoveTo();
                                                                         }}
-                                                                        disabled={() => methodObject.checkProcessOngoing("document")}
+                                                                        disabled={() => methodObject.checkProcessOngoing("workspace")}
                                                                     >
                                                                         {() => {
                                                                             const resultList: IvirtualNode[] = [];
 
-                                                                            if (!variableObject.isDocumentFolderMoveRunning.state) {
+                                                                            if (!variableObject.isWorkspaceFolderMoveRunning.state) {
                                                                                 resultList.push(
                                                                                     <>
                                                                                         <i class="cls_icon">drive_file_move</i>
                                                                                         <p>
-                                                                                            {variableObject.isDocumentFolderMoveSelecting.state
+                                                                                            {variableObject.isWorkspaceFolderMoveSelecting.state
                                                                                                 ? "Cancel"
                                                                                                 : "Move to"}
                                                                                         </p>
@@ -219,13 +219,13 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                             );
                                                         }
 
-                                                        if (variableObject.documentCurrentFolderList.state.length > 0) {
+                                                        if (variableObject.workspaceCurrentFolderList.state.length > 0) {
                                                             result.push(
                                                                 <button
                                                                     onClick={() => {
-                                                                        methodObject.onClickDocumentFolderBack();
+                                                                        methodObject.onClickWorkspaceFolderBack();
                                                                     }}
-                                                                    disabled={() => methodObject.checkProcessOngoing("document")}
+                                                                    disabled={() => methodObject.checkProcessOngoing("workspace")}
                                                                 >
                                                                     <i class="cls_icon">drive_file_move_rtl</i>
                                                                     <p>Back</p>
@@ -237,11 +237,11 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                             <button
                                                                 class="button_create_folder"
                                                                 onClick={() => {
-                                                                    methodObject.onClickDocumentFolderCreate();
+                                                                    methodObject.onClickWorkspaceFolderCreate();
                                                                 }}
                                                                 disabled={() =>
-                                                                    variableObject.isDocumentFolderStillCreate.state ||
-                                                                    methodObject.checkProcessOngoing("document")
+                                                                    variableObject.isWorkspaceFolderStillCreate.state ||
+                                                                    methodObject.checkProcessOngoing("workspace")
                                                                 }
                                                             >
                                                                 <i class="cls_icon">create_new_folder</i>
@@ -257,13 +257,13 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                 {() => {
                                                     const resultList: IvirtualNode[] = [];
 
-                                                    if (variableObject.isDocumentFolderMoveSelecting.state) {
+                                                    if (variableObject.isWorkspaceFolderMoveSelecting.state) {
                                                         resultList.push(
                                                             <button
                                                                 onClick={() => {
-                                                                    methodObject.onClickDocumentFolderHere();
+                                                                    methodObject.onClickWorkspaceFolderHere();
                                                                 }}
-                                                                disabled={() => methodObject.checkProcessOngoing("document")}
+                                                                disabled={() => methodObject.checkProcessOngoing("workspace")}
                                                             >
                                                                 <p>Here</p>
                                                             </button>
@@ -273,8 +273,8 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     return resultList;
                                                 }}
                                                 <p>
-                                                    Current path: ./{variableObject.documentCurrentFolderList.state.join("/")}
-                                                    {variableObject.documentCurrentFolderList.state.length > 0 ? "/" : ""}
+                                                    Current path: ./{variableObject.workspaceCurrentFolderList.state.join("/")}
+                                                    {variableObject.workspaceCurrentFolderList.state.length > 0 ? "/" : ""}
                                                 </p>
                                             </div>
                                             <div class="table_flex">
@@ -286,17 +286,17 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         {() => {
                                                             const resultList: IvirtualNode[] = [];
 
-                                                            if (variableObject.documentList.state.length > 0) {
+                                                            if (variableObject.workspaceItemList.state.length > 0) {
                                                                 resultList.push(
                                                                     <button
                                                                         onClick={() => {
-                                                                            methodObject.onClickToggleSelectAll("document");
+                                                                            methodObject.onClickToggleSelectAll("workspace");
                                                                         }}
-                                                                        disabled={() => methodObject.checkProcessOngoing("document")}
+                                                                        disabled={() => methodObject.checkProcessOngoing("workspace")}
                                                                     >
                                                                         <i class="cls_icon">
                                                                             {() =>
-                                                                                methodObject.selectAllCheck("document")
+                                                                                methodObject.selectAllCheck("workspace")
                                                                                     ? "check_box_outline_blank"
                                                                                     : "check_box"
                                                                             }
@@ -323,13 +323,15 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                 {() => {
                                                     const resultList: IvirtualNode[] = [];
 
-                                                    if (!methodObject.checkProcessOngoing("document")) {
+                                                    if (!methodObject.checkProcessOngoing("workspace")) {
                                                         resultList.push(
                                                             <div class="body">
                                                                 {() => {
                                                                     const resultList: IvirtualNode[] = [];
 
-                                                                    for (const [key, value] of Object.entries(variableObject.documentList.state)) {
+                                                                    for (const [key, value] of Object.entries(
+                                                                        variableObject.workspaceItemList.state
+                                                                    )) {
                                                                         resultList.push(
                                                                             <div key={key} class="row">
                                                                                 <div class="cell id">
@@ -348,7 +350,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                                     }
                                                                                                     onChange={() => {
                                                                                                         methodObject.onClickCheckbox(
-                                                                                                            "document",
+                                                                                                            "workspace",
                                                                                                             value
                                                                                                         );
                                                                                                     }}
@@ -368,7 +370,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                                 <i
                                                                                                     class="cls_icon"
                                                                                                     onClick={() => {
-                                                                                                        methodObject.onClickDocumentDelete(value);
+                                                                                                        methodObject.onClickWorkspaceDeleteItem(
+                                                                                                            value
+                                                                                                        );
                                                                                                     }}
                                                                                                 >
                                                                                                     delete
@@ -392,9 +396,11 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                                 <input
                                                                                                     class="input_folder_name"
                                                                                                     type="text"
-                                                                                                    jsmvcfw-elementHookName="elementInputDocumentFolderName"
+                                                                                                    jsmvcfw-elementHookName="elementInputWorkspaceFolderName"
                                                                                                     onKeyUp={(event: KeyboardEvent) => {
-                                                                                                        methodObject.onInputDocumentFolderName(event);
+                                                                                                        methodObject.onInputWorkspaceFolderName(
+                                                                                                            event
+                                                                                                        );
                                                                                                     }}
                                                                                                     autofocus
                                                                                                 ></input>
@@ -407,9 +413,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                                     value={() =>
                                                                                                         value.baseName ? value.baseName : value.name
                                                                                                     }
-                                                                                                    jsmvcfw-elementHookName="elementInputDocumentRename"
+                                                                                                    jsmvcfw-elementHookName="elementInputWorkspaceRename"
                                                                                                     onKeyUp={(event: KeyboardEvent) => {
-                                                                                                        methodObject.onInputDocumentRename(event);
+                                                                                                        methodObject.onInputWorkspaceRename(event);
                                                                                                     }}
                                                                                                     autofocus
                                                                                                 ></input>
@@ -418,7 +424,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                             resultList.push(
                                                                                                 <p
                                                                                                     onClick={(event: Event) =>
-                                                                                                        methodObject.onClickDocumentRename(
+                                                                                                        methodObject.onClickWorkspaceRename(
                                                                                                             event,
                                                                                                             value
                                                                                                         )
@@ -446,7 +452,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                                             resultList.push(
                                                                                                 <button
                                                                                                     onClick={() =>
-                                                                                                        methodObject.onClickDocumentOpen(
+                                                                                                        methodObject.onClickWorkspaceOpen(
                                                                                                             value.name,
                                                                                                             value.category
                                                                                                         )
@@ -488,7 +494,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             {() => {
                                                 const resultList: IvirtualNode[] = [];
 
-                                                if (!methodObject.checkProcessOngoing("document")) {
+                                                if (!methodObject.checkProcessOngoing("workspace")) {
                                                     resultList.push(<aside jsmvcfw-controllerName="Pagination" jsmvcfw-parentView="right" />);
                                                 }
 
@@ -1035,14 +1041,24 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                         type="text"
                                     ></input>
                                 </div>
-                                <div class="field">
-                                    <p class="label">Password:</p>
-                                    <input
-                                        value={() => variableObject.user.state.password}
-                                        jsmvcfw-elementHookName="elementInputUserPassword"
-                                        type="password"
-                                    ></input>
-                                </div>
+                                {() => {
+                                    const resultList: IvirtualNode[] = [];
+
+                                    if (variableObject.loginMode.state === "basic") {
+                                        resultList.push(
+                                            <div class="field">
+                                                <p class="label">Password:</p>
+                                                <input
+                                                    value={() => variableObject.user.state.password}
+                                                    jsmvcfw-elementHookName="elementInputUserPassword"
+                                                    type="password"
+                                                ></input>
+                                            </div>
+                                        );
+                                    }
+
+                                    return resultList;
+                                }}
                                 <div class="button_wrapper">
                                     <button
                                         onClick={() => {
@@ -1089,7 +1105,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             {() => {
                                                 const resultList: IvirtualNode[] = [];
 
-                                                for (const [key, value] of Object.entries(variableObject.setting.state.llm)) {
+                                                for (const [key, value] of Object.entries(variableObject.setting.state.llmList)) {
                                                     resultList.push(
                                                         <option key={key} value={value.id} selected={() => value.selected}>
                                                             {value.name}
@@ -1104,7 +1120,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     <div class="field">
                                         <p class="label">Url:</p>
                                         <input
-                                            value={() => variableObject.setting.state.llm[variableObject.settingLlmServiceId.state - 1].url}
+                                            value={() => variableObject.setting.state.llmList[variableObject.settingLlmServiceId.state - 1].url}
                                             jsmvcfw-elementHookName="elementInputSettingLlmUrl"
                                             type="text"
                                         ></input>
@@ -1112,7 +1128,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                     <div class="field">
                                         <p class="label">Api key:</p>
                                         <input
-                                            value={() => variableObject.setting.state.llm[variableObject.settingLlmServiceId.state - 1].apiKey}
+                                            value={() => variableObject.setting.state.llmList[variableObject.settingLlmServiceId.state - 1].apiKey}
                                             jsmvcfw-elementHookName="elementInputSettingLlmApiKey"
                                             type="password"
                                         ></input>

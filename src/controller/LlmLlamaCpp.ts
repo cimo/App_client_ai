@@ -16,12 +16,20 @@ export default class LlmLlamaCpp {
         const llm = this.controllerChat.selectedLlm();
 
         if (llm) {
+            let header: HeadersInit | undefined = {
+                "ai-cookie": session.data.aiCookie
+            };
+
+            if (llm.apiKey) {
+                header = {
+                    ...header,
+                    Authorization: `Bearer ${llm.apiKey}`
+                };
+            }
+
             return fetch(`${llm.url}/api/model`, {
                 method: "GET",
-                headers: {
-                    Authorization: `Bearer ${llm.apiKey ? llm.apiKey : session.data.aiBearerToken}`,
-                    "ai-cookie": session.data.aiCookie
-                },
+                headers: header,
                 danger: {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
@@ -29,9 +37,12 @@ export default class LlmLlamaCpp {
             })
                 .then(async (resultApi) => {
                     const json = (await resultApi.json()) as modelLlmLlamaCpp.IapiModelBody;
-                    const stdoutList = JSON.parse(json.response.stdout);
 
-                    controllerLlm.updateModel(this, stdoutList, isShowDropdown);
+                    if (json.response.state === "ko") {
+                        this.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
+                    } else {
+                        controllerLlm.updateModel(this, json.response.data as string[], isShowDropdown);
+                    }
                 })
                 .catch((error: Error) => {
                     helperSrc.writeLog("LlmLlamaCpp.ts - apiModel() - fetch() - catch()", error.message);
@@ -128,15 +139,21 @@ export default class LlmLlamaCpp {
             const llm = this.controllerChat.selectedLlm();
 
             if (llm) {
+                let header: HeadersInit | undefined = {
+                    "Content-Type": "application/json",
+                    "ai-cookie": session.data.aiCookie
+                };
+
+                if (llm.apiKey) {
+                    header = {
+                        ...header,
+                        Authorization: `Bearer ${llm.apiKey}`
+                    };
+                }
+
                 fetch(`${llm.url}/api/response`, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${llm.apiKey ? llm.apiKey : session.data.aiBearerToken}`,
-                        "ai-cookie": session.data.aiCookie,
-                        "mcp-session-id": session.data.mcpSessionId,
-                        "mcp-cookie": session.data.mcpCookie
-                    },
+                    headers: header,
                     body: JSON.stringify(body),
                     signal: this.controllerChat.abortControllerLlmResponse.signal,
                     danger: {

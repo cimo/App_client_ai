@@ -5,7 +5,6 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 
 // Source
 import * as session from "../Session";
-import * as helperSrc from "../HelperSrc";
 import * as modelIndex from "../model/Index";
 import * as modelMcp from "../model/Mcp";
 import * as modelChat from "../model/Chat.js";
@@ -30,11 +29,12 @@ export default class Index implements Icontroller {
     private windowApp: Window;
 
     private isClosing: boolean;
+    private intervalAd: ReturnType<typeof setInterval> | undefined;
 
     // Method
     private mcpApi = async (): Promise<void> => {
-        await this.controllerMcp.apiUserSelect();
-        await this.controllerMcp.apiSettingSelect();
+        await this.controllerMcp.apiUserQuery();
+        await this.controllerMcp.apiSettingQuery();
 
         await this.controllerMcp.apiTool();
         await this.controllerMcp.apiTask();
@@ -45,7 +45,7 @@ export default class Index implements Icontroller {
             if (!session.data.aiCookie) {
                 await this.controllerAi.apiLogin();
             } else {
-                if (!this.variableObject.setting.state.llm[0].selected) {
+                if (!this.variableObject.setting.state.llmList[0].selected) {
                     await this.controllerAi.apiLogout();
                 }
             }
@@ -55,23 +55,63 @@ export default class Index implements Icontroller {
     };
 
     private onClickLoginBasic = async (): Promise<void> => {
-        const isLogin = await this.controllerMcp.apiLogin(this.hookObject.elementInputUsername.value, this.hookObject.elementInputPassword.value);
+        const isLogin = await this.controllerMcp.apiLogin(
+            "basic",
+            this.hookObject.elementInputUsername.value,
+            this.hookObject.elementInputPassword.value
+        );
 
         if (isLogin) {
             await this.mcpApi();
         }
     };
 
-    private onClickLoginAd = (): void => {
-        if (helperSrc.IS_DEBUG) {
-            this.variableObject.adUrl.state = "";
-        } else {
-            openUrl(this.variableObject.adUrl.state);
+    private onClickLoginAd = async (): Promise<void> => {
+        if (!this.intervalAd) {
+            const isLogin = await this.controllerMcp.apiLogin("ad");
+
+            if (isLogin) {
+                let isIntervalRunning = false;
+                let intervalCount = 0;
+
+                this.intervalAd = setInterval(async () => {
+                    if (isIntervalRunning) {
+                        return;
+                    }
+
+                    intervalCount++;
+
+                    isIntervalRunning = true;
+
+                    const state = await this.controllerMcp.apiAdVerify();
+
+                    if (state !== "ongoing" || intervalCount >= 30) {
+                        clearInterval(this.intervalAd);
+                        this.intervalAd = undefined;
+
+                        this.variableObject.adUrl.state = "";
+
+                        if (state === "ok") {
+                            await this.mcpApi();
+                        }
+                    }
+
+                    isIntervalRunning = false;
+                }, 1000);
+            }
         }
     };
 
     private onClickRefreshPage = (): void => {
         window.location.reload();
+    };
+
+    private onClickAdCopyUrl = (): void => {
+        navigator.clipboard.writeText(this.variableObject.adUrl.state);
+    };
+
+    private onClickAdOpenUrl = (): void => {
+        openUrl(this.variableObject.adUrl.state);
     };
 
     constructor() {
@@ -95,6 +135,7 @@ export default class Index implements Icontroller {
         this.windowApp = getCurrentWindow();
 
         this.isClosing = false;
+        this.intervalAd = undefined;
     }
 
     hookObject = {} as modelIndex.IelementHook;
@@ -102,9 +143,9 @@ export default class Index implements Icontroller {
     variable(): void {
         this.variableObject = variableBind(
             {
-                adUrl: "",
                 isViewHidden: true,
                 isOfflineAi: variableLink<boolean>("Ai"),
+                adUrl: variableLink<string>("Mcp"),
                 isOfflineMcp: variableLink<boolean>("Mcp"),
                 isLogin: variableLink<boolean>("Mcp"),
                 setting: variableLink<modelMcp.Isetting>("Mcp"),
@@ -116,7 +157,9 @@ export default class Index implements Icontroller {
         this.methodObject = {
             onClickLoginBasic: this.onClickLoginBasic,
             onClickLoginAd: this.onClickLoginAd,
-            onClickRefreshPage: this.onClickRefreshPage
+            onClickRefreshPage: this.onClickRefreshPage,
+            onClickAdCopyUrl: this.onClickAdCopyUrl,
+            onClickAdOpenUrl: this.onClickAdOpenUrl
         };
     }
 

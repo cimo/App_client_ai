@@ -1,7 +1,7 @@
 export interface Idata {
-    aiBearerToken: string;
-    aiCookie: string;
     mcpSessionId: string;
     mcpCookie: string;
+    mcpBearerToken: string;
+    aiCookie: string;
     msAutomateTestCookie: string;
 }

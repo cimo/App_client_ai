@@ -18,6 +18,8 @@ export interface Imethod {
     onClickLoginBasic: () => void;
     onClickLoginAd: () => void;
     onClickRefreshPage: () => void;
+    onClickAdCopyUrl: () => void;
+    onClickAdOpenUrl: () => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

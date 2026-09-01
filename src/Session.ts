@@ -4,51 +4,51 @@ import { getAppLabel, readStorage, writeStorage, deleteStorage } from "@cimo/jsm
 import * as modelSession from "./model/Session";
 
 export const data: modelSession.Idata = {
-    aiBearerToken: readStorage<string>("ai-bearer-token") || "",
-    aiCookie: readStorage<string>("ai-cookie") || "",
     mcpSessionId: readStorage<string>("mcp-session-id") || "",
     mcpCookie: readStorage<string>("mcp-cookie") || "",
+    mcpBearerToken: readStorage<string>("mcp-bearer-token") || "",
+    aiCookie: readStorage<string>("ai-cookie") || "",
     msAutomateTestCookie: readStorage<string>("ms-automate-test") || ""
 };
 
 export const syncFromStorage = (): void => {
-    data.aiBearerToken = readStorage<string>("ai-bearer-token") || "";
-    data.aiCookie = readStorage<string>("ai-cookie") || "";
     data.mcpSessionId = readStorage<string>("mcp-session-id") || "";
     data.mcpCookie = readStorage<string>("mcp-cookie") || "";
+    data.mcpBearerToken = readStorage<string>("mcp-bearer-token") || "";
+    data.aiCookie = readStorage<string>("ai-cookie") || "";
     data.msAutomateTestCookie = readStorage<string>("ms-automate-test") || "";
 };
 
-export const writeAiSession = (bearerToken: string, cookie: string): void => {
-    data.aiBearerToken = bearerToken;
+export const writeAiSession = (cookie: string): void => {
     data.aiCookie = cookie;
 
-    writeStorage("ai-bearer-token", bearerToken);
     writeStorage("ai-cookie", cookie);
 };
 
 export const deleteAiSession = (): void => {
-    data.aiBearerToken = "";
     data.aiCookie = "";
 
-    deleteStorage("ai-bearer-token");
     deleteStorage("ai-cookie");
 };
 
-export const writeMcpSession = (id: string, cookie: string): void => {
+export const writeMcpSession = (id: string, cookie: string, mcpBearerToken: string): void => {
     data.mcpSessionId = id;
     data.mcpCookie = cookie;
+    data.mcpBearerToken = mcpBearerToken;
 
     writeStorage("mcp-session-id", id);
     writeStorage("mcp-cookie", cookie);
+    writeStorage("mcp-bearer-token", mcpBearerToken);
 };
 
 export const deleteMcpSession = (): void => {
     data.mcpSessionId = "";
     data.mcpCookie = "";
+    data.mcpBearerToken = "";
 
     deleteStorage("mcp-session-id");
     deleteStorage("mcp-cookie");
+    deleteStorage("mcp-bearer-token");
 };
 
 export const writeMsAutomateTestSession = (cookie: string): void => {
@@ -68,18 +68,22 @@ window.addEventListener("storage", (event: StorageEvent) => {
 
     const appLabel = getAppLabel();
 
-    if (event.key === `${appLabel}_ai-bearer-token`) {
-        data.aiBearerToken = readStorage<string>("ai-bearer-token") || "";
-    }
-    if (event.key === `${appLabel}_ai-cookie`) {
-        data.aiCookie = readStorage<string>("ai-cookie") || "";
-    }
     if (event.key === `${appLabel}_mcp-session-id`) {
         data.mcpSessionId = readStorage<string>("mcp-session-id") || "";
     }
+
     if (event.key === `${appLabel}_mcp-cookie`) {
         data.mcpCookie = readStorage<string>("mcp-cookie") || "";
     }
+
+    if (event.key === `${appLabel}_mcp-bearer-token`) {
+        data.mcpBearerToken = readStorage<string>("mcp-bearer-token") || "";
+    }
+
+    if (event.key === `${appLabel}_ai-cookie`) {
+        data.aiCookie = readStorage<string>("ai-cookie") || "";
+    }
+
     if (event.key === `${appLabel}_ms-automate-test`) {
         data.msAutomateTestCookie = readStorage<string>("ms-automate-test") || "";
     }

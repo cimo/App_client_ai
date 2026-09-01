@@ -8,24 +8,25 @@ export interface Iagent {
 }
 
 export interface Ivariable {
-    isMenuItemDocument: IvariableBind<boolean>;
+    loginMode: IvariableBind<string>;
+    isMenuItemWorkspace: IvariableBind<boolean>;
     isMenuItemTool: IvariableBind<boolean>;
     isMenuItemTask: IvariableBind<boolean>;
     isMenuItemAgent: IvariableBind<boolean>;
     isMenuItemSkill: IvariableBind<boolean>;
     isMenuItemUser: IvariableBind<boolean>;
     isMenuItemSetting: IvariableBind<boolean>;
-    documentList: IvariableBind<modelMcp.IitemDetail[]>;
     documentOpenList: IvariableBind<string[]>;
-    documentSelectList: IvariableBind<string[]>;
-    documentCurrentFolderList: IvariableBind<string[]>;
-    documentRenameSelected: IvariableBind<string>;
+    workspaceItemList: IvariableBind<modelMcp.IitemDetail[]>;
+    workspaceSelectList: IvariableBind<string[]>;
+    workspaceCurrentFolderList: IvariableBind<string[]>;
+    workspaceRenameSelected: IvariableBind<string>;
     isUploadRunning: IvariableBind<boolean>;
     isDeleteRunning: IvariableBind<boolean>;
-    isDocumentFolderStillCreate: IvariableBind<boolean>;
-    isDocumentFolderCreateRunning: IvariableBind<boolean>;
-    isDocumentFolderMoveSelecting: IvariableBind<boolean>;
-    isDocumentFolderMoveRunning: IvariableBind<boolean>;
+    isWorkspaceFolderStillCreate: IvariableBind<boolean>;
+    isWorkspaceFolderCreateRunning: IvariableBind<boolean>;
+    isWorkspaceFolderMoveSelecting: IvariableBind<boolean>;
+    isWorkspaceFolderMoveRunning: IvariableBind<boolean>;
     isRagRunning: IvariableBind<boolean>;
     isRagGraphOpen: IvariableBind<boolean>;
     isRagGraphHtmlLoading: IvariableBind<boolean>;
@@ -57,16 +58,16 @@ export interface Imethod {
     checkItemSelected: (itemDetail: modelMcp.IitemDetail) => boolean;
     itemId: (key: string) => number;
     onClickCheckbox: (mode: string, itemDetail: modelMcp.IitemDetail) => void;
-    onClickMenuDocument: () => void;
-    onClickDocumentUpload: () => void;
-    onClickDocumentDelete: (itemDetail: modelMcp.IitemDetail) => void;
-    onClickDocumentDeleteSelected: () => void;
-    onClickDocumentRename: (event: Event, itemDetail: modelMcp.IitemDetail) => void;
-    onClickDocumentFolderCreate: () => void;
-    onClickDocumentFolderBack: () => void;
-    onClickDocumentFolderMoveTo: () => void;
-    onClickDocumentFolderHere: () => void;
-    onClickDocumentOpen: (fileName: string, category: string) => void;
+    onClickMenuWorkspace: () => void;
+    onClickWorkspaceUpload: () => void;
+    onClickWorkspaceDeleteItem: (itemDetail: modelMcp.IitemDetail) => void;
+    onClickWorkspaceDeleteSelected: () => void;
+    onClickWorkspaceRename: (event: Event, itemDetail: modelMcp.IitemDetail) => void;
+    onClickWorkspaceFolderCreate: () => void;
+    onClickWorkspaceFolderBack: () => void;
+    onClickWorkspaceFolderMoveTo: () => void;
+    onClickWorkspaceFolderHere: () => void;
+    onClickWorkspaceOpen: (fileName: string, category: string) => void;
     onClickRagStart: () => void;
     onClickRagGraph: () => void;
     onClickRagGraphBack: () => void;
@@ -95,14 +96,14 @@ export interface Imethod {
     onClickSettingCancel: () => void;
     onClickMenuSetting: () => Promise<void>;
     onClickToggleSelectAll: (mode: string) => void;
-    onInputDocumentFolderName: (event: KeyboardEvent) => void;
-    onInputDocumentRename: (event: KeyboardEvent) => void;
+    onInputWorkspaceFolderName: (event: KeyboardEvent) => void;
+    onInputWorkspaceRename: (event: KeyboardEvent) => void;
     onChangeSettingLlmServiceId: () => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {
-    elementInputDocumentFolderName: HTMLInputElement;
-    elementInputDocumentRename: HTMLInputElement;
+    elementInputWorkspaceFolderName: HTMLInputElement;
+    elementInputWorkspaceRename: HTMLInputElement;
     elementInputAgentName: HTMLInputElement;
     elementInputAgentDescription: HTMLInputElement;
     elementInputUserName: HTMLInputElement;
