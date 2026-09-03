@@ -259,9 +259,13 @@ export default class MenuItem implements Icontroller {
 
             agent.skillName = "";
 
-            await this.controllerMcp.apiAgentUpdate(agent);
+            const isUpdate = await this.controllerMcp.apiAgentUpdate(agent);
 
-            this.agentUnselect(agent.id);
+            if (isUpdate) {
+                await this.controllerMcp.apiAgent();
+
+                this.agentUnselect(agent.id);
+            }
         }
     };
 
@@ -696,10 +700,16 @@ export default class MenuItem implements Icontroller {
         this.variableObject.agentData.state.name = this.hookObject.elementInputAgentName.value;
         this.variableObject.agentData.state.description = this.hookObject.elementInputAgentDescription.value;
 
+        let isSave = false;
+
         if (this.variableObject.agentData.state.id === -1) {
-            await this.controllerMcp.apiAgentCreate(this.variableObject.agentData.state);
+            isSave = await this.controllerMcp.apiAgentCreate(this.variableObject.agentData.state);
         } else {
-            await this.controllerMcp.apiAgentUpdate(this.variableObject.agentData.state);
+            isSave = await this.controllerMcp.apiAgentUpdate(this.variableObject.agentData.state);
+        }
+
+        if (isSave) {
+            await this.controllerMcp.apiAgent();
         }
 
         this.variableObject.isAgentSave.state = false;
@@ -766,7 +776,11 @@ export default class MenuItem implements Icontroller {
             userCopy.password = this.hookObject.elementInputUserPassword.value;
         }
 
-        await this.controllerMcp.apiUserUpdate(userCopy);
+        const isUpdate = await this.controllerMcp.apiUserUpdate(userCopy);
+
+        if (isUpdate) {
+            await this.controllerMcp.apiUserQuery();
+        }
 
         this.variableObject.isUserUpdate.state = false;
     };
@@ -794,7 +808,11 @@ export default class MenuItem implements Icontroller {
             });
         }
 
-        await this.controllerMcp.apiSettingUpdate(settingCopy);
+        const isUpdate = await this.controllerMcp.apiSettingUpdate(settingCopy);
+
+        if (isUpdate) {
+            await this.controllerMcp.apiSettingQuery();
+        }
 
         this.variableObject.isSettingSave.state = false;
     };
