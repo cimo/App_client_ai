@@ -286,8 +286,8 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
             "You are a multilingual assistant tool executer and you need to transform the user request in a action.",
             `You MUST use ONLY the following tool: ${tThis.controllerChat.variableObject.toolSelected.state.name}`,
             `${tThis.controllerChat.variableObject.toolSelected.state.inputInstruction}`,
-            "You MUST return ONLY raw json WITHOUT wrap it in ```json and you need change ONLY the 'argumentObject' value without toutch the 'name' default value.",
-            `For ${tThis.controllerChat.variableObject.toolSelected.state.name} return ALWAYS the json with this format: { "name": "${tThis.controllerChat.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(tThis.controllerChat.variableObject.toolSelected.state.argumentObject)} }`,
+            "You MUST return ONLY raw json WITHOUT wrap it in ```json and you need change ONLY the 'argumentObject' value without touch the 'name' default value.",
+            `For ${tThis.controllerChat.variableObject.toolSelected.state.name} return ALWAYS the json with this format: { "name": "${tThis.controllerChat.variableObject.toolSelected.state.name}", "argumentObject": {} }`,
             "You MUST NOT solve problems.",
             "You MUST NOT invent new actions.",
             "You MUST NOT explain nothing."
@@ -297,8 +297,8 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
             "You are a multilingual assistant task executer and you need to transform the user request in a ordered list of actions.",
             `You MUST use ONLY the following tool: ${tThis.controllerChat.variableObject.taskSelected.state.name}`,
             `${tThis.controllerChat.variableObject.taskSelected.state.inputInstruction}`,
-            "You MUST return ONLY raw json WITHOUT wrap it in ```json and you need change ONLY the 'argumentObject' value without toutch the 'name' default value.",
-            `For ${tThis.controllerChat.variableObject.taskSelected.state.name} return ALWAYS the json with this format: { "list": [ { "name": "${tThis.controllerChat.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(tThis.controllerChat.variableObject.taskSelected.state.argumentObject)} } ] }`,
+            "You MUST return ONLY raw json WITHOUT wrap it in ```json and you need change ONLY the 'argumentObject' value without touch the 'name' default value.",
+            `For ${tThis.controllerChat.variableObject.taskSelected.state.name} return ALWAYS the json with this format: { "list": [ { "name": "${tThis.controllerChat.variableObject.taskSelected.state.name}", "argumentObject": {} } ] }`,
             "You MUST NOT solve problems.",
             "You MUST NOT invent new actions.",
             "You MUST NOT explain nothing."
