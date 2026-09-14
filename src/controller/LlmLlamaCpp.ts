@@ -251,31 +251,6 @@ export default class LlmLlamaCpp {
 
                                                 this.controllerChat.autoscroll();
                                             }
-                                        } else if (dataTrimObject.type === "response.output_item.done") {
-                                            const item = dataTrimObject.item;
-
-                                            if (item && item.type === "mcp_call" && (!prompt || mode === "rag")) {
-                                                this.controllerChat.responseMcpTool = {
-                                                    tool_call_id: item.tool_call_id,
-                                                    type: item.type,
-                                                    name: item.name,
-                                                    arguments: item.arguments,
-                                                    output: item.output
-                                                };
-
-                                                const messageListState = this.controllerChat.variableObject.messageList.state.slice();
-
-                                                messageListState[messageIndex] = {
-                                                    ...messageListState[messageIndex],
-                                                    mcpToolBody: this.controllerChat.responseMcpTool
-                                                };
-
-                                                this.controllerChat.variableObject.messageList.state = messageListState;
-
-                                                this.controllerChat.messageLoadingHide(messageIndex);
-
-                                                this.controllerChat.autoscroll();
-                                            }
                                         } else if (dataTrimObject.type === "response.completed") {
                                             const response = dataTrimObject.response;
 

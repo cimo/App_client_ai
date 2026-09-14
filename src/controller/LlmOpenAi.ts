@@ -8,6 +8,8 @@ import type Chat from "./Chat";
 
 export default class LlmOpenAi {
     // Variable
+    private modelAvailableList: string[] = ["gpt-6-astra", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"];
+
     controllerChat: Chat;
 
     // Method
@@ -30,9 +32,13 @@ export default class LlmOpenAi {
 
                     const modelList: string[] = [];
 
-                    for (const model of json.data) {
-                        if (model.owned_by === "system") {
-                            modelList.push(model.id);
+                    for (const availableModel of this.modelAvailableList) {
+                        for (const model of json.data) {
+                            if (model.owned_by === "system" && model.id === availableModel) {
+                                modelList.push(model.id);
+
+                                break;
+                            }
                         }
                     }
 
@@ -233,31 +239,6 @@ export default class LlmOpenAi {
 
                                                     this.controllerChat.messageLoadingHide(messageIndex);
                                                 }
-
-                                                this.controllerChat.autoscroll();
-                                            }
-                                        } else if (dataTrimObject.type === "response.output_item.done") {
-                                            const item = dataTrimObject.item;
-
-                                            if (item && item.type === "mcp_call" && (!prompt || mode === "rag")) {
-                                                this.controllerChat.responseMcpTool = {
-                                                    tool_call_id: item.tool_call_id,
-                                                    type: item.type,
-                                                    name: item.name,
-                                                    arguments: item.arguments,
-                                                    output: item.output
-                                                };
-
-                                                const messageListState = this.controllerChat.variableObject.messageList.state.slice();
-
-                                                messageListState[messageIndex] = {
-                                                    ...messageListState[messageIndex],
-                                                    mcpToolBody: this.controllerChat.responseMcpTool
-                                                };
-
-                                                this.controllerChat.variableObject.messageList.state = messageListState;
-
-                                                this.controllerChat.messageLoadingHide(messageIndex);
 
                                                 this.controllerChat.autoscroll();
                                             }

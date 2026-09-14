@@ -1,6 +1,3 @@
-// Source
-import * as modelMcp from "./Mcp";
-
 export interface IapiModelBody {
     response: {
         state: string;
@@ -39,7 +36,6 @@ export interface IapiLlmResponse {
         message: string;
     };
     delta: string;
-    item: modelMcp.ItoolBody;
 }
 
 export interface IdataInput {

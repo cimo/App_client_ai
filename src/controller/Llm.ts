@@ -62,16 +62,7 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
 
             tThis.controllerChat.messageLoadingHide(messageIndex);
 
-            if (
-                messageObject.name === "automate_screenshot" ||
-                messageObject.name === "automate_mouse_move" ||
-                messageObject.name === "automate_mouse_click" ||
-                messageObject.name === "browser_chrome" ||
-                messageObject.name === "math_expression" ||
-                messageObject.name === "ocr" ||
-                messageObject.name === "rag_store" ||
-                messageObject.name === "rag_delete"
-            ) {
+            if (messageObject.name === "math_expression" || messageObject.name === "ocr") {
                 const result = messageObject.result as string;
 
                 const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
