@@ -36,7 +36,7 @@ export default class LlmLlamaCpp {
                 }
             })
                 .then(async (resultApi) => {
-                    const json = (await resultApi.json()) as modelLlmLlamaCpp.IapiModelBody;
+                    const json = await this.controllerChat.controllerAi.apiResponseJson(resultApi);
 
                     if (json.response.state === "ko") {
                         this.controllerChat.controllerMcp.showToastMessage("error", json.response.message);

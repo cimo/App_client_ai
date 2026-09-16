@@ -44,6 +44,10 @@ export default class Ai implements Icontroller {
         this.controllerChat = value;
     }
 
+    apiResponseJson = async (resultApi: Response): Promise<modelHelperSrc.IapiResponse> => {
+        return helperSrc.apiResponseJson(resultApi, session.deleteAiSession, "Ai session expired, login again.");
+    };
+
     apiLogin = async (): Promise<void> => {
         if (!session.data.aiCookie && this.variableObject.setting.state.llmList[0].selected) {
             const settingLlm = this.variableObject.setting.state.llmList[0];
@@ -115,7 +119,7 @@ export default class Ai implements Icontroller {
                 .then(async (resultApi) => {
                     this.variableObject.isOfflineAi.state = false;
 
-                    const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                    const json = await this.apiResponseJson(resultApi);
 
                     if (json.response.state === "ko") {
                         this.controllerMcp.showToastMessage("error", json.response.message);

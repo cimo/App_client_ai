@@ -65,6 +65,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                             (value.assistantNoReason !== "" ||
                                                 value.ragCitationList ||
                                                 value.securityScanner ||
+                                                value.ocr ||
                                                 value.playwright.action) &&
                                             typeof value.assistantNoReason === "string"
                                         ) {
@@ -157,6 +158,17 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                             <p>Security scanner result:</p>
                                                         </summary>
                                                         <pre>{value.securityScanner}</pre>
+                                                    </details>
+                                                );
+                                            } else if (value.ocr) {
+                                                resultList.push(
+                                                    <details open class="markdown_wrapper">
+                                                        <summary>
+                                                            <p>Ocr result:</p>
+                                                        </summary>
+                                                        <div class="citation_wrapper">
+                                                            <div class="box markdown" jsmvcfw-html={methodObject.markdownHtml(value.ocr)}></div>
+                                                        </div>
                                                     </details>
                                                 );
                                             } else if (value.playwright.action) {

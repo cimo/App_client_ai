@@ -79,6 +79,10 @@
                     margin: 15px 0 0 0;
                     border-radius: 8px;
 
+                    &.markdown_wrapper {
+                        width: 100%;
+                    }
+
                     summary {
                         display: flex;
                         flex-direction: row;
@@ -138,6 +142,70 @@
 
                             pre {
                                 margin-bottom: 0 !important;
+                            }
+
+                            &.markdown {
+                                max-height: 500px;
+                                overflow: auto;
+                                word-break: break-word;
+
+                                h1,
+                                h2,
+                                h3,
+                                h4,
+                                h5,
+                                h6 {
+                                    font-weight: bold;
+                                    margin: 10px 0 5px 0;
+                                }
+
+                                p {
+                                    margin: 5px 0;
+                                }
+
+                                ul,
+                                ol {
+                                    list-style: revert;
+                                    margin: 5px 0;
+                                    padding-left: 20px;
+                                }
+
+                                table {
+                                    margin: 10px 0;
+
+                                    th,
+                                    td {
+                                        padding: 3px 6px;
+                                    }
+
+                                    th {
+                                        font-weight: bold;
+                                    }
+                                }
+
+                                blockquote {
+                                    display: block;
+                                    width: 100%;
+                                    margin: 10px 0;
+                                    padding: 5px 10px;
+                                }
+
+                                code {
+                                    padding: 1px 4px;
+                                }
+
+                                pre {
+                                    padding: 10px;
+                                    white-space: pre-wrap !important;
+
+                                    code {
+                                        padding: 0;
+                                    }
+                                }
+
+                                img {
+                                    max-width: 100%;
+                                }
                             }
                         }
                     }
@@ -256,6 +324,24 @@
 
                             .link {
                                 color: color.$darkHyperLinkText;
+                            }
+
+                            &.markdown {
+                                a {
+                                    color: color.$darkHyperLinkText;
+                                }
+
+                                table {
+                                    th,
+                                    td {
+                                        border: 1px solid color.$darkRootBorder;
+                                    }
+                                }
+
+                                blockquote {
+                                    background-color: color.$darkRootBorder;
+                                    color: color.$darkRootText;
+                                }
                             }
                         }
                     }

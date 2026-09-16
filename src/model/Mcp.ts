@@ -165,11 +165,13 @@ export interface IragSearch {
     citationList: IragCitation[];
     nodeList: IragNode[];
     graphList: IragRelation[];
+    message: string;
 }
 
 export interface IdocumentParser {
     fileName: string;
     searchInput: string;
+    message: string;
 }
 
 export interface IitemDetail {

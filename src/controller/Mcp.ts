@@ -71,7 +71,7 @@ export default class Mcp implements Icontroller {
                     .then(async (resultApi) => {
                         this.variableObject.isOfflineMcp.state = false;
 
-                        const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                        const json = await this.apiResponseJson(resultApi);
 
                         actionOperationList[index].state = json.response.state;
                         actionOperationList[index].message = json.response.message;
@@ -194,6 +194,10 @@ export default class Mcp implements Icontroller {
         this.controllerToast.show(mode, messageList);
     };
 
+    apiResponseJson = async (resultApi: Response): Promise<modelHelperSrc.IapiResponse> => {
+        return helperSrc.apiResponseJson(resultApi, session.deleteMcpSession, "Mcp session expired, login again.", this.variableObject.isLogin);
+    };
+
     apiLogin = async (mode: string, username?: string, password?: string): Promise<boolean> => {
         let body = {} as modelMcp.IapiLoginBody;
 
@@ -232,7 +236,7 @@ export default class Mcp implements Icontroller {
                 const cookie = resultApi.headers.get("set-cookie");
 
                 if (cookie) {
-                    const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                    const json = await this.apiResponseJson(resultApi);
 
                     if (json.response.state === "ko") {
                         this.variableObject.isLogin.state = false;
@@ -283,7 +287,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.variableObject.isLogin.state = false;
@@ -326,7 +330,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -356,7 +360,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -388,7 +392,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -424,7 +428,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -482,7 +486,7 @@ export default class Mcp implements Icontroller {
                     .then(async (resultApi) => {
                         this.variableObject.isOfflineMcp.state = false;
 
-                        const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                        const json = await this.apiResponseJson(resultApi);
 
                         actionOperationList.push(json.response);
 
@@ -518,7 +522,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -558,7 +562,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -598,7 +602,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -638,7 +642,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -678,7 +682,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -717,7 +721,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -759,7 +763,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -793,7 +797,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -849,7 +853,7 @@ export default class Mcp implements Icontroller {
                     .then(async (resultApi) => {
                         this.variableObject.isOfflineMcp.state = false;
 
-                        const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                        const json = await this.apiResponseJson(resultApi);
 
                         actionOperationList.push(json.response);
 
@@ -885,7 +889,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -925,7 +929,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -959,7 +963,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -1017,7 +1021,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -1066,7 +1070,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -1110,7 +1114,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -1155,7 +1159,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -1198,7 +1202,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -1235,7 +1239,7 @@ export default class Mcp implements Icontroller {
             .then(async (resultApi) => {
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
@@ -1284,7 +1288,7 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
+                const json = await this.apiResponseJson(resultApi);
 
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);

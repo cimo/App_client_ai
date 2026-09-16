@@ -3,7 +3,6 @@ import { fetch } from "@tauri-apps/plugin-http";
 // Source
 import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
-import * as modelHelperSrc from "../model/HelperSrc";
 import * as modelChat from "../model/Chat";
 import * as modelMcp from "../model/Mcp";
 import * as modelLlm from "../model/Llm";
@@ -62,7 +61,7 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
 
             tThis.controllerChat.messageLoadingHide(messageIndex);
 
-            if (messageObject.name === "math_expression" || messageObject.name === "ocr") {
+            if (messageObject.name === "math_expression") {
                 const result = messageObject.result as string;
 
                 const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
@@ -76,7 +75,16 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
             } else if (messageObject.name === "document_parser") {
                 const result = messageObject.result as modelMcp.IdocumentParser;
 
-                if (Object.keys(result).length === 0) {
+                if (result.message) {
+                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+
+                    messageListState[messageIndex] = {
+                        ...messageListState[messageIndex],
+                        assistantNoReason: result.message
+                    };
+
+                    tThis.controllerChat.variableObject.messageList.state = messageListState;
+                } else if (Object.keys(result).length === 0) {
                     const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
 
                     messageListState[messageIndex] = {
@@ -112,7 +120,7 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
 
                     messageListState[messageIndex] = {
                         ...messageListState[messageIndex],
-                        assistantNoReason: "No citations found."
+                        assistantNoReason: result.message ? result.message : "No citations found."
                     };
 
                     tThis.controllerChat.variableObject.messageList.state = messageListState;
@@ -191,14 +199,49 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                 };
 
                 tThis.controllerChat.variableObject.messageList.state = messageListState;
-            } else if (messageObject.name === "playwright") {
-                const result = messageObject.result as modelChat.Iplaywright;
+            } else if (messageObject.name === "ocr") {
+                const result = messageObject.result as string;
 
                 const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
 
                 messageListState[messageIndex] = {
                     ...messageListState[messageIndex],
-                    playwright: result
+                    ocr: result
+                };
+
+                tThis.controllerChat.variableObject.messageList.state = messageListState;
+            } else if (messageObject.name === "playwright") {
+                const result = messageObject.result as modelChat.Iplaywright;
+
+                const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+
+                if (result.message) {
+                    messageListState[messageIndex] = {
+                        ...messageListState[messageIndex],
+                        assistantNoReason: result.message
+                    };
+                } else {
+                    messageListState[messageIndex] = {
+                        ...messageListState[messageIndex],
+                        playwright: result
+                    };
+                }
+
+                tThis.controllerChat.variableObject.messageList.state = messageListState;
+            } else {
+                let resultText = "";
+
+                if (typeof messageObject.result === "string") {
+                    resultText = messageObject.result;
+                } else if (messageObject.result) {
+                    resultText = JSON.stringify(messageObject.result, null, 4);
+                }
+
+                const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+
+                messageListState[messageIndex] = {
+                    ...messageListState[messageIndex],
+                    assistantNoReason: resultText
                 };
 
                 tThis.controllerChat.variableObject.messageList.state = messageListState;
@@ -248,6 +291,7 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
                 ragCitationList: undefined,
                 ragCitationTabIndex: 0,
                 securityScanner: "",
+                ocr: "",
                 playwright: {} as modelChat.Iplaywright
             }
         ];
@@ -356,9 +400,11 @@ export const mcpResponse = async <T extends modelLlm.IdataContext>(
             }
         })
             .then(async (resultToolCall) => {
-                const json = (await resultToolCall.json()) as modelHelperSrc.IapiResponse;
+                const json = await tThis.controllerChat.controllerMcp.apiResponseJson(resultToolCall);
 
                 if (json.response.state === "ko") {
+                    tThis.controllerChat.messageLoadingHide(messageIndex);
+
                     tThis.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
                 } else {
                     const jsonResponseData = json.response.data as modelMcp.IapiToolCallResponse;
@@ -390,9 +436,11 @@ export const mcpResponse = async <T extends modelLlm.IdataContext>(
             }
         })
             .then(async (resultTaskCall) => {
-                const json = (await resultTaskCall.json()) as modelHelperSrc.IapiResponse;
+                const json = await tThis.controllerChat.controllerMcp.apiResponseJson(resultTaskCall);
 
                 if (json.response.state === "ko") {
+                    tThis.controllerChat.messageLoadingHide(messageIndex);
+
                     tThis.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
                 } else {
                     await toolResponse(tThis, json.response.data as string, "", userPrompt, messageIndex);

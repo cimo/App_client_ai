@@ -21,6 +21,7 @@ export interface IdataMessage {
     ragCitationList: modelMcp.IragCitation[] | undefined;
     ragCitationTabIndex: number;
     securityScanner: string;
+    ocr: string;
     playwright: Iplaywright;
 }
 
@@ -34,6 +35,7 @@ export interface Iplaywright {
     action: string;
     nameList: string[];
     stdout: string;
+    message: string;
 }
 
 export interface Ivariable {
@@ -59,6 +61,7 @@ export interface Imethod {
     onClickCitationTab: (messageIndex: number, tabIndex: number) => void;
     onClickPlaywrightVideoShow: (fileName: string) => void;
     onErrorPlaywrightVideoFail: () => void;
+    markdownHtml: (value: string) => string;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {

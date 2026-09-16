@@ -1,11 +1,3 @@
-export interface IapiModelBody {
-    response: {
-        state: string;
-        message: string | string[];
-        data?: unknown;
-    };
-}
-
 export interface IapiLlmBody {
     stream: boolean;
     model: string;

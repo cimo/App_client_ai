@@ -6,6 +6,7 @@ import { emitTo, listen } from "@tauri-apps/api/event";
 import { WindowOptions } from "@tauri-apps/api/window";
 
 // Custom
+import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 // Custom
 
 // Source
@@ -375,6 +376,25 @@ export const fileDetail = async (value: string, buffer?: Uint8Array, isOnlyByte 
 };
 
 // Custom
+export const apiResponseJson = async (
+    resultApi: Response,
+    sessionDelete: () => void,
+    message: string,
+    isLogin?: IvariableBind<boolean>
+): Promise<modelHelperSrc.IapiResponse> => {
+    if (resultApi.status === 401) {
+        sessionDelete();
+
+        if (isLogin) {
+            isLogin.state = false;
+        }
+
+        return { response: { state: "ko", message } };
+    }
+
+    return (await resultApi.json()) as modelHelperSrc.IapiResponse;
+};
+
 export const findElementParent = (element: HTMLElement, className: string): HTMLElement | null => {
     if (!element.parentNode || element.parentNode === document) {
         return null;

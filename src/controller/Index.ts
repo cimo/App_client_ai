@@ -128,6 +128,7 @@ export default class Index implements Icontroller {
         this.controllerAi.setControllerMcp(this.controllerMcp);
         this.controllerAi.setControllerToast(this.controllerToast);
         this.controllerMcp.setControllerToast(this.controllerToast);
+        this.controllerChat.setControllerAi(this.controllerAi);
         this.controllerChat.setControllerMcp(this.controllerMcp);
         this.controllerChat.setControllerToast(this.controllerToast);
         this.controllerMenuItem.setControllerMcp(this.controllerMcp);

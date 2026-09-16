@@ -1,6 +1,7 @@
 import { Icontroller, IvirtualNode, variableBind, variableLink, IvariableEffect } from "@cimo/jsmvcfw/dist/src/Main.js";
 import { listen, emitTo, UnlistenFn } from "@tauri-apps/api/event";
 import { getAllWindows } from "@tauri-apps/api/window";
+import { marked } from "marked";
 
 // Source
 import * as helperSrc from "../HelperSrc";
@@ -8,6 +9,7 @@ import * as modelChat from "../model/Chat";
 import * as modelMcp from "../model/Mcp";
 import * as modelDocument from "../model/Document";
 import * as viewChat from "../view/Chat";
+import type Ai from "./Ai";
 import type Mcp from "./Mcp";
 import type Toast from "./Toast";
 
@@ -19,6 +21,7 @@ export default class Chat implements Icontroller {
 
     variableObject: modelChat.Ivariable;
 
+    controllerAi: Ai;
     controllerMcp: Mcp;
     controllerToast: Toast;
 
@@ -90,6 +93,10 @@ export default class Chat implements Icontroller {
         this.variableObject.messageList.state = messageListState;
     };
 
+    setControllerAi(value: Ai): void {
+        this.controllerAi = value;
+    }
+
     setControllerMcp(value: Mcp): void {
         this.controllerMcp = value;
     }
@@ -150,6 +157,23 @@ export default class Chat implements Icontroller {
         });
     };
 
+    markdownHtml = (value: string): string => {
+        const template = document.createElement("template");
+        template.innerHTML = marked.parse(value, { async: false, gfm: true, breaks: true });
+
+        const headerList = template.content.querySelectorAll("table thead");
+
+        for (let a = 0; a < headerList.length; a++) {
+            const textContent = headerList[a].textContent;
+
+            if (!textContent || textContent.replace(/[\s\p{Default_Ignorable_Code_Point}]/gu, "") === "") {
+                headerList[a].remove();
+            }
+        }
+
+        return template.innerHTML;
+    };
+
     windowOpenDocument = async (fileName: string): Promise<void> => {
         const windowLabel = helperSrc.windowLabelUnique("document", fileName);
         const windowList = await getAllWindows();
@@ -199,6 +223,7 @@ export default class Chat implements Icontroller {
     constructor() {
         this.variableObject = {} as modelChat.Ivariable;
         this.methodObject = {} as modelChat.Imethod;
+        this.controllerAi = {} as Ai;
         this.controllerMcp = {} as Mcp;
         this.controllerToast = {} as Toast;
 
@@ -243,7 +268,8 @@ export default class Chat implements Icontroller {
             onClickCitationLink: this.onClickCitationLink,
             onClickCitationTab: this.onClickCitationTab,
             onClickPlaywrightVideoShow: this.controllerMcp.playwrightVideoShow,
-            onErrorPlaywrightVideoFail: this.controllerMcp.playwrightVideoFail
+            onErrorPlaywrightVideoFail: this.controllerMcp.playwrightVideoFail,
+            markdownHtml: this.markdownHtml
         };
     }
 
