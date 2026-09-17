@@ -430,15 +430,15 @@ export default class Mcp implements Icontroller {
 
                 const json = await this.apiResponseJson(resultApi);
 
+                let itemDetailList: modelMcp.IitemDetail[] = [];
+
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
-
-                    this.variableObject.workspaceItemList.state = [];
                 } else {
-                    this.variableObject.workspaceItemList.state = json.response.data as modelMcp.IitemDetail[];
+                    itemDetailList = json.response.data as modelMcp.IitemDetail[];
                 }
 
-                return this.variableObject.workspaceItemList.state;
+                return itemDetailList;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiWorkspace() - fetch() - catch()", error.message);
@@ -799,15 +799,15 @@ export default class Mcp implements Icontroller {
 
                 const json = await this.apiResponseJson(resultApi);
 
+                let itemDetailList: modelMcp.IitemDetail[] = [];
+
                 if (json.response.state === "ko") {
                     this.showToastMessage("error", json.response.message);
-
-                    this.variableObject.skillList.state = [];
                 } else {
-                    this.variableObject.skillList.state = json.response.data as modelMcp.IitemDetail[];
+                    itemDetailList = json.response.data as modelMcp.IitemDetail[];
                 }
 
-                return this.variableObject.skillList.state;
+                return itemDetailList;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiSkill() - fetch() - catch()", error.message);

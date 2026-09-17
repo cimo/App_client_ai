@@ -22,7 +22,7 @@ const viewToast = (variableObject: modelToast.Ivariable, methodObject: modelToas
                 {() => {
                     const resultList: IvirtualNode[] = [];
 
-                    if (variableObject.timeClose.state === 0) {
+                    if (variableObject.timeCloseSecond.state === 0) {
                         resultList.push(
                             <i
                                 class="cls_icon close"

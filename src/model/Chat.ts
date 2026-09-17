@@ -46,6 +46,8 @@ export interface Ivariable {
     isOpenDropdownModelList: IvariableBind<boolean>;
     modelList: IvariableBind<string[]>;
     modelSelected: IvariableBind<string>;
+    isOfflineMcp: IvariableBind<boolean>;
+    isLogin: IvariableBind<boolean>;
     toolSelected: IvariableBind<modelMcp.Itool>;
     toolList: IvariableBind<modelMcp.Itool[]>;
     taskSelected: IvariableBind<modelMcp.Itask>;

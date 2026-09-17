@@ -9,6 +9,8 @@ export interface Iagent {
 
 export interface Ivariable {
     loginMode: IvariableBind<string>;
+    isLogin: IvariableBind<boolean>;
+    isOfflineMcp: IvariableBind<boolean>;
     isMenuItemWorkspace: IvariableBind<boolean>;
     isMenuItemTool: IvariableBind<boolean>;
     isMenuItemTask: IvariableBind<boolean>;

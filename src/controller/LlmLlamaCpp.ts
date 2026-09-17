@@ -4,6 +4,7 @@ import { fetch } from "@tauri-apps/plugin-http";
 import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
 import * as controllerLlm from "../controller/Llm";
+import * as modelMcp from "../model/Mcp";
 import * as modelLlmLlamaCpp from "../model/LlmLlamaCpp";
 import type Chat from "./Chat";
 
@@ -12,10 +13,14 @@ export default class LlmLlamaCpp {
     controllerChat: Chat;
 
     // Method
-    apiModel = async (isShowDropdown: boolean): Promise<void> => {
-        const llm = this.controllerChat.selectedLlm();
-
-        if (llm) {
+    private apiFetchSession = async (
+        llm: modelMcp.IsettingLlm,
+        route: string,
+        method: string,
+        body?: string,
+        signal?: AbortSignal
+    ): Promise<Response> => {
+        const apiFetch = (): Promise<Response> => {
             let header: HeadersInit | undefined = {
                 "ai-cookie": session.data.aiCookie
             };
@@ -27,14 +32,43 @@ export default class LlmLlamaCpp {
                 };
             }
 
-            return fetch(`${llm.url}/api/model`, {
-                method: "GET",
+            if (body) {
+                header = {
+                    ...header,
+                    "Content-Type": "application/json"
+                };
+            }
+
+            return fetch(`${llm.url}${route}`, {
+                method,
                 headers: header,
+                body,
+                signal,
                 danger: {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
                 }
-            })
+            });
+        };
+
+        let resultApi = await apiFetch();
+
+        if (resultApi.status === 401) {
+            session.deleteAiSession();
+
+            await this.controllerChat.controllerAi.apiLogin();
+
+            resultApi = await apiFetch();
+        }
+
+        return resultApi;
+    };
+
+    apiModel = async (isShowDropdown: boolean): Promise<void> => {
+        const llm = this.controllerChat.selectedLlm();
+
+        if (llm) {
+            return this.apiFetchSession(llm, "/api/model", "GET")
                 .then(async (resultApi) => {
                     const json = await this.controllerChat.controllerAi.apiResponseJson(resultApi);
 
@@ -88,27 +122,6 @@ export default class LlmLlamaCpp {
 
             const inputList: modelLlmLlamaCpp.IdataInput[] = [];
 
-            // this.variableObject.historyList.state.push({
-            //     role: "user",
-            //     content: this.hookObject.elementInputMessageSend.value
-            // });
-
-            // for (let a = 0; a < this.variableObject.historyList.state.length; a++) {
-            //     const historyList = this.variableObject.historyList.state[a];
-
-            //     if (historyList.role === "system" || historyList.role === "user") {
-            //         inputList.push({
-            //             role: historyList.role,
-            //             content: [{ type: "input_text", text: historyList.content as string }]
-            //         });
-            //     } else {
-            //         inputList.push({
-            //             role: historyList.role,
-            //             content: [{ type: "output_text", text: historyList.content as string }]
-            //         });
-            //     }
-            // }
-
             inputList.push(
                 {
                     role: "system",
@@ -139,33 +152,22 @@ export default class LlmLlamaCpp {
             const llm = this.controllerChat.selectedLlm();
 
             if (llm) {
-                let header: HeadersInit | undefined = {
-                    "Content-Type": "application/json",
-                    "ai-cookie": session.data.aiCookie
-                };
-
-                if (llm.apiKey) {
-                    header = {
-                        ...header,
-                        Authorization: `Bearer ${llm.apiKey}`
-                    };
-                }
-
-                fetch(`${llm.url}/api/response`, {
-                    method: "POST",
-                    headers: header,
-                    body: JSON.stringify(body),
-                    signal: this.controllerChat.abortControllerLlmResponse.signal,
-                    danger: {
-                        acceptInvalidCerts: true,
-                        acceptInvalidHostnames: true
-                    }
-                })
+                this.apiFetchSession(llm, "/api/response", "POST", JSON.stringify(body), this.controllerChat.abortControllerLlmResponse.signal)
                     .then(async (resultApi) => {
                         const contentType = resultApi.headers.get("Content-Type");
 
                         if (!contentType || !contentType.includes("text/event-stream") || !resultApi.body) {
                             helperSrc.writeLog("LlmLlamaCpp.ts - apiResponse() - fetch() - Error", "Missing or invalid headers.");
+
+                            const json = await this.controllerChat.controllerAi.apiResponseJson(resultApi);
+
+                            this.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
+
+                            this.controllerChat.responseReset("finish");
+
+                            this.controllerChat.messageStreamReset();
+
+                            this.controllerChat.messageLoadingHide(messageIndex);
 
                             return;
                         }

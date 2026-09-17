@@ -4,6 +4,7 @@ import { getAllWindows } from "@tauri-apps/api/window";
 import { marked } from "marked";
 
 // Source
+import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
 import * as modelChat from "../model/Chat";
 import * as modelMcp from "../model/Mcp";
@@ -175,6 +176,12 @@ export default class Chat implements Icontroller {
     };
 
     windowOpenDocument = async (fileName: string): Promise<void> => {
+        await this.controllerMcp.apiUserQuery();
+
+        if (!session.data.mcpCookie || this.variableObject.isOfflineMcp.state) {
+            return;
+        }
+
         const windowLabel = helperSrc.windowLabelUnique("document", fileName);
         const windowList = await getAllWindows();
 
@@ -252,6 +259,8 @@ export default class Chat implements Icontroller {
                 isOpenDropdownModelList: variableLink<boolean>("Ai"),
                 modelList: variableLink<string[]>("Ai"),
                 modelSelected: variableLink<string>("Ai"),
+                isOfflineMcp: variableLink<boolean>("Mcp"),
+                isLogin: variableLink<boolean>("Mcp"),
                 toolSelected: variableLink<modelMcp.Itool>("Mcp"),
                 toolList: variableLink<modelMcp.Itool[]>("Mcp"),
                 taskSelected: variableLink<modelMcp.Itask>("Mcp"),
@@ -279,6 +288,18 @@ export default class Chat implements Icontroller {
                 variableList: ["setting"],
                 action: async () => {
                     await this.currentLlmInstance();
+                }
+            },
+            {
+                variableList: ["isLogin"],
+                action: async () => {
+                    if (!this.variableObject.isLogin.state) {
+                        this.variableObject.messageList.state = [];
+
+                        if (Object.keys(this.variableObject.setting.state).length > 0) {
+                            await this.controllerAi.apiLogout();
+                        }
+                    }
                 }
             }
         ]);

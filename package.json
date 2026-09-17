@@ -24,12 +24,12 @@
         "tauri_build_windows_x86_64": "tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc"
     },
     "dependencies": {
-        "@cimo/jsmvcfw": "1.7.51",
-        "@tauri-apps/api": "2.11.0",
-        "@tauri-apps/plugin-dialog": "2.7.1",
-        "@tauri-apps/plugin-fs": "2.5.1",
-        "@tauri-apps/plugin-http": "2.5.9",
-        "@tauri-apps/plugin-opener": "2.5.4",
+        "@cimo/jsmvcfw": "1.7.52",
+        "@tauri-apps/api": "2.11.1",
+        "@tauri-apps/plugin-dialog": "2.7.3",
+        "@tauri-apps/plugin-fs": "2.5.2",
+        "@tauri-apps/plugin-http": "2.6.1",
+        "@tauri-apps/plugin-opener": "2.5.5",
         "marked": "18.0.13"
     },
     "devDependencies": {
@@ -42,7 +42,7 @@
         "typescript": "5.7.2",
         "nodemon": "3.1.14",
         "prettier": "3.4.2",
-        "eslint": "10.8.0",
+        "eslint": "10.10.0",
         "eslint-plugin-prettier": "5.5.6",
         "sass": "1.102.0",
         "webpack": "5.105.0",
@@ -54,7 +54,5 @@
         "esbuild-loader": "4.5.0",
         "@tauri-apps/cli": "2.9.5"
     },
-    "overrides": {
-        "fast-uri": "3.1.5"
-    }
+    "overrides": {}
 }

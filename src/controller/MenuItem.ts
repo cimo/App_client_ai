@@ -2,6 +2,7 @@ import { Icontroller, IvariableEffect, IvirtualNode, variableBind, variableLink 
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 
 // Source
+import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
 import * as modelMenuItem from "../model/MenuItem";
 import * as modelMcp from "../model/Mcp";
@@ -21,6 +22,10 @@ export default class MenuItem implements Icontroller {
 
     private unlistenWindowDocumentData: UnlistenFn | undefined = undefined;
     private unlistenWindowDocumentClose: UnlistenFn | undefined = undefined;
+
+    private workspaceFullList: modelMcp.IitemDetail[] = [];
+    private skillFullList: modelMcp.IitemDetail[] = [];
+    private isMenuItemLoading = false;
 
     // Method
     private selectAllCheck = (mode: string): boolean => {
@@ -139,7 +144,7 @@ export default class MenuItem implements Icontroller {
                 }
             }
 
-            await this.paginationState("update");
+            await this.paginationLoad(mode, false);
 
             this.updateSelectList(mode, []);
         }
@@ -149,43 +154,57 @@ export default class MenuItem implements Icontroller {
         return isResult;
     };
 
-    private paginationState = async (mode: string, itemList?: modelMcp.IitemDetail[]): Promise<void> => {
-        if (mode === "initialize" && itemList) {
+    private paginationMode = (): string => {
+        let result = "";
+
+        if (this.variableObject.isMenuItemWorkspace.state) {
+            result = "workspace";
+        } else if (this.variableObject.isMenuItemSkill.state || this.variableObject.isAgentSkillSelect.state) {
+            result = "skill";
+        }
+
+        return result;
+    };
+
+    private paginationSlice = (mode: string): void => {
+        if (mode === "workspace") {
+            this.variableObject.workspaceItemList.state = this.controllerPagination.updateList<modelMcp.IitemDetail>(this.workspaceFullList);
+        } else if (mode === "skill") {
+            this.variableObject.skillList.state = this.controllerPagination.updateList<modelMcp.IitemDetail>(this.skillFullList);
+        }
+    };
+
+    private paginationLoad = async (mode: string, isInitialize: boolean): Promise<void> => {
+        if (mode === "workspace") {
+            const itemList = await this.controllerMcp.apiWorkspace(this.variableObject.workspaceCurrentFolderList.state);
+
+            itemList.sort((firstObject, secondObject) => {
+                const isFolderFirst = firstObject.category === "folder";
+                const isFolderSecond = secondObject.category === "folder";
+
+                if (isFolderFirst !== isFolderSecond) {
+                    return isFolderFirst ? -1 : 1;
+                }
+
+                return firstObject.name.localeCompare(secondObject.name, undefined, { numeric: true, sensitivity: "variant" });
+            });
+
+            this.workspaceFullList = itemList;
+        } else if (mode === "skill") {
+            const itemList = await this.controllerMcp.apiSkill();
+
+            itemList.sort((firstObject, secondObject) =>
+                firstObject.name.localeCompare(secondObject.name, undefined, { numeric: true, sensitivity: "variant" })
+            );
+
+            this.skillFullList = itemList;
+        }
+
+        if (isInitialize) {
             this.variableObject.pageNumber.state = 1;
         }
 
-        if (this.variableObject.isMenuItemWorkspace.state) {
-            if (mode === "update") {
-                itemList = await this.controllerMcp.apiWorkspace(this.variableObject.workspaceCurrentFolderList.state);
-            }
-
-            if (itemList) {
-                itemList.sort((firstObject, secondObject) => {
-                    const isFolderFirst = firstObject.category === "folder";
-                    const isFolderSecond = secondObject.category === "folder";
-
-                    if (isFolderFirst !== isFolderSecond) {
-                        return isFolderFirst ? -1 : 1;
-                    }
-
-                    return firstObject.name.localeCompare(secondObject.name, undefined, { numeric: true, sensitivity: "variant" });
-                });
-
-                this.variableObject.workspaceItemList.state = this.controllerPagination.updateList<modelMcp.IitemDetail>(itemList);
-            }
-        } else if (this.variableObject.isMenuItemSkill.state || this.variableObject.isAgentSkillSelect.state) {
-            if (mode === "update") {
-                itemList = await this.controllerMcp.apiSkill();
-            }
-
-            if (itemList) {
-                itemList.sort((firstObject, secondObject) =>
-                    firstObject.name.localeCompare(secondObject.name, undefined, { numeric: true, sensitivity: "variant" })
-                );
-
-                this.variableObject.skillList.state = this.controllerPagination.updateList<modelMcp.IitemDetail>(itemList);
-            }
-        }
+        this.paginationSlice(mode);
     };
 
     private workspaceCreateFolder = async (): Promise<void> => {
@@ -203,7 +222,7 @@ export default class MenuItem implements Icontroller {
             if (!isFolderCreate) {
                 this.variableObject.workspaceItemList.state.shift();
             } else {
-                await this.paginationState("update");
+                await this.paginationLoad("workspace", false);
             }
 
             this.variableObject.isWorkspaceFolderCreateRunning.state = false;
@@ -217,7 +236,7 @@ export default class MenuItem implements Icontroller {
             const isRename = await this.controllerMcp.apiWorkspaceRename(this.variableObject.workspaceRenameSelected.state, elementInputValue);
 
             if (isRename) {
-                await this.paginationState("update");
+                await this.paginationLoad("workspace", false);
             }
 
             this.variableObject.workspaceRenameSelected.state = "";
@@ -225,6 +244,12 @@ export default class MenuItem implements Icontroller {
     };
 
     private windowOpenDocument = async (title: string): Promise<void> => {
+        await this.controllerMcp.apiUserQuery();
+
+        if (!session.data.mcpCookie || this.variableObject.isOfflineMcp.state) {
+            return;
+        }
+
         if (!this.variableObject.documentOpenList.state.includes(title)) {
             this.variableObject.documentOpenList.state = [...this.variableObject.documentOpenList.state, title];
         }
@@ -388,23 +413,35 @@ export default class MenuItem implements Icontroller {
         this.updateSelectList(mode, selectList);
     };
 
-    private onClickMenuWorkspace = (): void => {
+    private onClickMenuWorkspace = async (): Promise<void> => {
+        if (this.isMenuItemLoading) {
+            return;
+        }
+
+        if (this.variableObject.isMenuItemWorkspace.state) {
+            this.variableObject.isMenuItemWorkspace.state = false;
+
+            return;
+        }
+
+        this.isMenuItemLoading = true;
+
         this.variableObject.workspaceCurrentFolderList.state = [];
 
-        this.controllerMcp.apiWorkspace(this.variableObject.workspaceCurrentFolderList.state).then(async () => {
-            this.variableObject.isMenuItemWorkspace.state = !this.variableObject.isMenuItemWorkspace.state;
-            this.variableObject.isMenuItemTool.state = false;
-            this.variableObject.isMenuItemTask.state = false;
-            this.variableObject.isMenuItemAgent.state = false;
-            this.variableObject.isMenuItemSkill.state = false;
-            this.variableObject.isMenuItemUser.state = false;
-            this.variableObject.isMenuItemSetting.state = false;
+        await this.paginationLoad("workspace", true);
 
-            this.variableObject.agentData.state = {} as modelMcp.Iagent;
-            this.variableObject.isAgentSkillSelect.state = false;
+        this.variableObject.isMenuItemWorkspace.state = true;
+        this.variableObject.isMenuItemTool.state = false;
+        this.variableObject.isMenuItemTask.state = false;
+        this.variableObject.isMenuItemAgent.state = false;
+        this.variableObject.isMenuItemSkill.state = false;
+        this.variableObject.isMenuItemUser.state = false;
+        this.variableObject.isMenuItemSetting.state = false;
 
-            await this.paginationState("initialize", this.variableObject.workspaceItemList.state);
-        });
+        this.variableObject.agentData.state = {} as modelMcp.Iagent;
+        this.variableObject.isAgentSkillSelect.state = false;
+
+        this.isMenuItemLoading = false;
     };
 
     private onClickWorkspaceUpload = async (): Promise<void> => {
@@ -412,7 +449,7 @@ export default class MenuItem implements Icontroller {
 
         await this.controllerMcp.apiWorkspaceUpload(this.variableObject.workspaceCurrentFolderList.state);
 
-        await this.paginationState("update");
+        await this.paginationLoad("workspace", false);
 
         this.variableObject.isUploadRunning.state = false;
     };
@@ -463,12 +500,10 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private onClickWorkspaceFolderBack = (): void => {
+    private onClickWorkspaceFolderBack = async (): Promise<void> => {
         this.variableObject.workspaceCurrentFolderList.state.pop();
 
-        this.controllerMcp.apiWorkspace(this.variableObject.workspaceCurrentFolderList.state).then(async () => {
-            await this.paginationState("initialize", this.variableObject.workspaceItemList.state);
-        });
+        await this.paginationLoad("workspace", true);
     };
 
     private onClickWorkspaceFolderMoveTo = (): void => {
@@ -484,7 +519,7 @@ export default class MenuItem implements Icontroller {
         );
 
         if (isFolderMove) {
-            await this.paginationState("update");
+            await this.paginationLoad("workspace", false);
 
             this.updateSelectList("workspace", []);
         }
@@ -496,9 +531,7 @@ export default class MenuItem implements Icontroller {
         if (category === "folder") {
             this.variableObject.workspaceCurrentFolderList.state.push(fileName);
 
-            this.controllerMcp.apiWorkspace(this.variableObject.workspaceCurrentFolderList.state).then(async () => {
-                await this.paginationState("initialize", this.variableObject.workspaceItemList.state);
-            });
+            await this.paginationLoad("workspace", true);
         } else {
             await this.windowOpenDocument(fileName);
         }
@@ -520,21 +553,33 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isRagGraphOpen.state = false;
     };
 
-    private onClickMenuSkill = (): void => {
-        this.controllerMcp.apiSkill().then(async () => {
-            this.variableObject.isMenuItemWorkspace.state = false;
-            this.variableObject.isMenuItemTool.state = false;
-            this.variableObject.isMenuItemTask.state = false;
-            this.variableObject.isMenuItemAgent.state = false;
-            this.variableObject.isMenuItemSkill.state = !this.variableObject.isMenuItemSkill.state;
-            this.variableObject.isMenuItemUser.state = false;
-            this.variableObject.isMenuItemSetting.state = false;
+    private onClickMenuSkill = async (): Promise<void> => {
+        if (this.isMenuItemLoading) {
+            return;
+        }
 
-            this.variableObject.agentData.state = {} as modelMcp.Iagent;
-            this.variableObject.isAgentSkillSelect.state = false;
+        if (this.variableObject.isMenuItemSkill.state) {
+            this.variableObject.isMenuItemSkill.state = false;
 
-            await this.paginationState("initialize", this.variableObject.skillList.state);
-        });
+            return;
+        }
+
+        this.isMenuItemLoading = true;
+
+        await this.paginationLoad("skill", true);
+
+        this.variableObject.isMenuItemWorkspace.state = false;
+        this.variableObject.isMenuItemTool.state = false;
+        this.variableObject.isMenuItemTask.state = false;
+        this.variableObject.isMenuItemAgent.state = false;
+        this.variableObject.isMenuItemSkill.state = true;
+        this.variableObject.isMenuItemUser.state = false;
+        this.variableObject.isMenuItemSetting.state = false;
+
+        this.variableObject.agentData.state = {} as modelMcp.Iagent;
+        this.variableObject.isAgentSkillSelect.state = false;
+
+        this.isMenuItemLoading = false;
     };
 
     private onClickSkillUpload = async (): Promise<void> => {
@@ -542,7 +587,7 @@ export default class MenuItem implements Icontroller {
 
         await this.controllerMcp.apiSkillUpload();
 
-        await this.paginationState("update");
+        await this.paginationLoad("skill", false);
 
         this.variableObject.isUploadRunning.state = false;
     };
@@ -559,15 +604,13 @@ export default class MenuItem implements Icontroller {
         });
     };
 
-    private onClickSelectSkill = (): void => {
-        this.controllerMcp.apiSkill().then(async () => {
-            this.variableObject.agentData.state.name = this.hookObject.elementInputAgentName.value;
-            this.variableObject.agentData.state.description = this.hookObject.elementInputAgentDescription.value;
+    private onClickSelectSkill = async (): Promise<void> => {
+        this.variableObject.agentData.state.name = this.hookObject.elementInputAgentName.value;
+        this.variableObject.agentData.state.description = this.hookObject.elementInputAgentDescription.value;
 
-            this.variableObject.isAgentSkillSelect.state = true;
+        await this.paginationLoad("skill", true);
 
-            await this.paginationState("initialize", this.variableObject.skillList.state);
-        });
+        this.variableObject.isAgentSkillSelect.state = true;
     };
 
     private onClickSkillSelect = (fileName: string): void => {
@@ -581,6 +624,10 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuTool = (): void => {
+        if (this.isMenuItemLoading) {
+            return;
+        }
+
         this.variableObject.isMenuItemWorkspace.state = false;
         this.variableObject.isMenuItemTool.state = !this.variableObject.isMenuItemTool.state;
         this.variableObject.isMenuItemTask.state = false;
@@ -614,6 +661,10 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuTask = (): void => {
+        if (this.isMenuItemLoading) {
+            return;
+        }
+
         this.variableObject.isMenuItemWorkspace.state = false;
         this.variableObject.isMenuItemTool.state = false;
         this.variableObject.isMenuItemTask.state = !this.variableObject.isMenuItemTask.state;
@@ -646,19 +697,33 @@ export default class MenuItem implements Icontroller {
         this.variableObject.systemMode.state = "task-call";
     };
 
-    private onClickMenuAgent = (): void => {
-        this.controllerMcp.apiAgent().then(() => {
-            this.variableObject.isMenuItemWorkspace.state = false;
-            this.variableObject.isMenuItemTool.state = false;
-            this.variableObject.isMenuItemTask.state = false;
-            this.variableObject.isMenuItemAgent.state = !this.variableObject.isMenuItemAgent.state;
-            this.variableObject.isMenuItemSkill.state = false;
-            this.variableObject.isMenuItemUser.state = false;
-            this.variableObject.isMenuItemSetting.state = false;
+    private onClickMenuAgent = async (): Promise<void> => {
+        if (this.isMenuItemLoading) {
+            return;
+        }
 
-            this.variableObject.agentData.state = {} as modelMcp.Iagent;
-            this.variableObject.isAgentSkillSelect.state = false;
-        });
+        if (this.variableObject.isMenuItemAgent.state) {
+            this.variableObject.isMenuItemAgent.state = false;
+
+            return;
+        }
+
+        this.isMenuItemLoading = true;
+
+        await this.controllerMcp.apiAgent();
+
+        this.variableObject.isMenuItemWorkspace.state = false;
+        this.variableObject.isMenuItemTool.state = false;
+        this.variableObject.isMenuItemTask.state = false;
+        this.variableObject.isMenuItemAgent.state = true;
+        this.variableObject.isMenuItemSkill.state = false;
+        this.variableObject.isMenuItemUser.state = false;
+        this.variableObject.isMenuItemSetting.state = false;
+
+        this.variableObject.agentData.state = {} as modelMcp.Iagent;
+        this.variableObject.isAgentSkillSelect.state = false;
+
+        this.isMenuItemLoading = false;
     };
 
     private onClickAgentCreate = (): void => {
@@ -749,19 +814,33 @@ export default class MenuItem implements Icontroller {
         }
     };
 
-    private onClickMenuUser = (): void => {
-        this.controllerMcp.apiUserQuery().then(() => {
-            this.variableObject.isMenuItemWorkspace.state = false;
-            this.variableObject.isMenuItemTool.state = false;
-            this.variableObject.isMenuItemTask.state = false;
-            this.variableObject.isMenuItemAgent.state = false;
-            this.variableObject.isMenuItemSkill.state = false;
-            this.variableObject.isMenuItemUser.state = !this.variableObject.isMenuItemUser.state;
-            this.variableObject.isMenuItemSetting.state = false;
+    private onClickMenuUser = async (): Promise<void> => {
+        if (this.isMenuItemLoading) {
+            return;
+        }
 
-            this.variableObject.agentData.state = {} as modelMcp.Iagent;
-            this.variableObject.isAgentSkillSelect.state = false;
-        });
+        if (this.variableObject.isMenuItemUser.state) {
+            this.variableObject.isMenuItemUser.state = false;
+
+            return;
+        }
+
+        this.isMenuItemLoading = true;
+
+        await this.controllerMcp.apiUserQuery();
+
+        this.variableObject.isMenuItemWorkspace.state = false;
+        this.variableObject.isMenuItemTool.state = false;
+        this.variableObject.isMenuItemTask.state = false;
+        this.variableObject.isMenuItemAgent.state = false;
+        this.variableObject.isMenuItemSkill.state = false;
+        this.variableObject.isMenuItemUser.state = true;
+        this.variableObject.isMenuItemSetting.state = false;
+
+        this.variableObject.agentData.state = {} as modelMcp.Iagent;
+        this.variableObject.isAgentSkillSelect.state = false;
+
+        this.isMenuItemLoading = false;
     };
 
     private onClickUserUpdate = async (): Promise<void> => {
@@ -822,18 +901,32 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickMenuSetting = async (): Promise<void> => {
-        this.controllerMcp.apiSettingQuery().then(() => {
-            this.variableObject.isMenuItemWorkspace.state = false;
-            this.variableObject.isMenuItemTool.state = false;
-            this.variableObject.isMenuItemTask.state = false;
-            this.variableObject.isMenuItemAgent.state = false;
-            this.variableObject.isMenuItemSkill.state = false;
-            this.variableObject.isMenuItemUser.state = false;
-            this.variableObject.isMenuItemSetting.state = !this.variableObject.isMenuItemSetting.state;
+        if (this.isMenuItemLoading) {
+            return;
+        }
 
-            this.variableObject.agentData.state = {} as modelMcp.Iagent;
-            this.variableObject.isAgentSkillSelect.state = false;
-        });
+        if (this.variableObject.isMenuItemSetting.state) {
+            this.variableObject.isMenuItemSetting.state = false;
+
+            return;
+        }
+
+        this.isMenuItemLoading = true;
+
+        await this.controllerMcp.apiSettingQuery();
+
+        this.variableObject.isMenuItemWorkspace.state = false;
+        this.variableObject.isMenuItemTool.state = false;
+        this.variableObject.isMenuItemTask.state = false;
+        this.variableObject.isMenuItemAgent.state = false;
+        this.variableObject.isMenuItemSkill.state = false;
+        this.variableObject.isMenuItemUser.state = false;
+        this.variableObject.isMenuItemSetting.state = true;
+
+        this.variableObject.agentData.state = {} as modelMcp.Iagent;
+        this.variableObject.isAgentSkillSelect.state = false;
+
+        this.isMenuItemLoading = false;
     };
 
     private onClickToggleSelectAll = (mode: string): void => {
@@ -887,6 +980,18 @@ export default class MenuItem implements Icontroller {
         this.variableObject.settingLlmServiceId.state = parseInt(this.hookObject.elementSelectSettingLlmServiceId.value);
     };
 
+    private menuReset = (): void => {
+        this.variableObject.isMenuItemWorkspace.state = false;
+        this.variableObject.isMenuItemTool.state = false;
+        this.variableObject.isMenuItemTask.state = false;
+        this.variableObject.isMenuItemAgent.state = false;
+        this.variableObject.isMenuItemSkill.state = false;
+        this.variableObject.isMenuItemUser.state = false;
+        this.variableObject.isMenuItemSetting.state = false;
+
+        this.variableObject.workspaceCurrentFolderList.state = [];
+    };
+
     setControllerMcp(value: Mcp): void {
         this.controllerMcp = value;
     }
@@ -907,6 +1012,8 @@ export default class MenuItem implements Icontroller {
         this.variableObject = variableBind(
             {
                 loginMode: variableLink<string>("Mcp"),
+                isLogin: variableLink<boolean>("Mcp"),
+                isOfflineMcp: variableLink<boolean>("Mcp"),
                 isMenuItemWorkspace: false,
                 isMenuItemTool: false,
                 isMenuItemTask: false,
@@ -1006,8 +1113,16 @@ export default class MenuItem implements Icontroller {
         watch([
             {
                 variableList: ["pageNumber"],
-                action: async () => {
-                    await this.paginationState("update");
+                action: () => {
+                    this.paginationSlice(this.paginationMode());
+                }
+            },
+            {
+                variableList: ["isLogin"],
+                action: () => {
+                    if (this.variableObject.isLogin.state) {
+                        this.menuReset();
+                    }
                 }
             }
         ]);

@@ -3,7 +3,7 @@ import { IvariableBind } from "@cimo/jsmvcfw/dist/src/Main.js";
 export interface Ivariable {
     mode: IvariableBind<string>;
     messageList: IvariableBind<string[]>;
-    timeClose: IvariableBind<number>;
+    timeCloseSecond: IvariableBind<number>;
 }
 
 export interface Imethod {

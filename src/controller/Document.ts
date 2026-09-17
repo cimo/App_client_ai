@@ -49,6 +49,24 @@ export default class Document implements Icontroller {
         }
     };
 
+    private disablePdfViewerStorage = (): void => {
+        const contentWindow = this.hookObject.elementPdfViewer.contentWindow as modelDocument.IpdfViewerWindow;
+
+        if (contentWindow) {
+            Object.defineProperty(contentWindow, "localStorage", {
+                configurable: true,
+                value: {
+                    length: 0,
+                    getItem: () => null,
+                    setItem: () => undefined,
+                    removeItem: () => undefined,
+                    clear: () => undefined,
+                    key: () => null
+                }
+            });
+        }
+    };
+
     private injectSearchInput = (text: string): void => {
         if (this.hookObject.elementPdfViewer.contentWindow) {
             const contentWindow = this.hookObject.elementPdfViewer.contentWindow as modelDocument.IpdfViewerWindow;
@@ -148,6 +166,10 @@ export default class Document implements Icontroller {
             this.windowDocumentTitle = windowDocumentTitle;
 
             await this.readContentData();
+
+            if (this.hookObject.elementPdfViewer) {
+                this.hookObject.elementPdfViewer.addEventListener("load", this.disablePdfViewerStorage);
+            }
 
             let isIntervalRunning = false;
 

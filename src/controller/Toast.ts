@@ -17,20 +17,20 @@ export default class Toast implements Icontroller {
         this.variableObject.messageList.state = [];
     };
 
-    show(mode: string, messageList: string[], timeClose = 3000): void {
+    show(mode: string, messageList: string[], timeCloseSecond = 3): void {
         if (this.timeout) {
             clearTimeout(this.timeout);
         }
 
         this.variableObject.mode.state = mode;
         this.variableObject.messageList.state = messageList;
-        this.variableObject.timeClose.state = timeClose;
+        this.variableObject.timeCloseSecond.state = timeCloseSecond;
 
-        if (timeClose > 0) {
+        if (timeCloseSecond > 0) {
             this.timeout = setTimeout(() => {
                 this.variableObject.mode.state = "";
                 this.variableObject.messageList.state = [];
-            }, timeClose);
+            }, timeCloseSecond * 1000);
         }
     }
 
@@ -48,7 +48,7 @@ export default class Toast implements Icontroller {
             {
                 mode: "",
                 messageList: [],
-                timeClose: 0
+                timeCloseSecond: 0
             },
             this.constructor.name
         );

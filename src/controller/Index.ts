@@ -54,6 +54,18 @@ export default class Index implements Icontroller {
         }
     };
 
+    private windowCloseDocument = async (): Promise<void> => {
+        const windowList = await getAllWindows();
+
+        for (let a = 0; a < windowList.length; a++) {
+            const window = windowList[a];
+
+            if (window.label !== "main") {
+                await window.close();
+            }
+        }
+    };
+
     private onClickLoginBasic = async (): Promise<void> => {
         const isLogin = await this.controllerMcp.apiLogin(
             "basic",
@@ -62,6 +74,9 @@ export default class Index implements Icontroller {
         );
 
         if (isLogin) {
+            this.hookObject.elementInputUsername.value = "";
+            this.hookObject.elementInputPassword.value = "";
+
             await this.mcpApi();
         }
     };
@@ -171,6 +186,14 @@ export default class Index implements Icontroller {
                 action: async () => {
                     await this.aiApi();
                 }
+            },
+            {
+                variableList: ["isLogin"],
+                action: async () => {
+                    if (!this.variableObject.isLogin.state) {
+                        await this.windowCloseDocument();
+                    }
+                }
             }
         ]);
     }
@@ -188,15 +211,7 @@ export default class Index implements Icontroller {
             this.isClosing = true;
 
             if (this.windowApp.label === "main") {
-                const windowList = await getAllWindows();
-
-                for (let a = 0; a < windowList.length; a++) {
-                    const window = windowList[a];
-
-                    if (window.label !== "main") {
-                        await window.close();
-                    }
-                }
+                await this.windowCloseDocument();
 
                 await this.controllerAi.apiLogout();
                 await this.controllerMcp.apiLogout();
