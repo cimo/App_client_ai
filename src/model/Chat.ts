@@ -21,7 +21,8 @@ export interface IdataMessage {
     ragCitationList: modelMcp.IragCitation[] | undefined;
     ragCitationTabIndex: number;
     securityScanner: string;
-    documentParser: string;
+    documentParserList: modelMcp.Idocument[];
+    documentParserTabIndex: number;
     playwright: Iplaywright;
 }
 
@@ -61,6 +62,7 @@ export interface Imethod {
     onClickButtonMessageSend: () => void;
     onClickCitationLink: (event: Event, fileName: string, chunk: string) => void;
     onClickCitationTab: (messageIndex: number, tabIndex: number) => void;
+    onClickDocumentParserTab: (messageIndex: number, tabIndex: number) => void;
     onClickPlaywrightVideoShow: (fileName: string) => void;
     onErrorPlaywrightVideoFail: () => void;
     markdownHtml: (value: string) => string;

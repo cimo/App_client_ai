@@ -94,6 +94,17 @@ export default class Chat implements Icontroller {
         this.variableObject.messageList.state = messageListState;
     };
 
+    private onClickDocumentParserTab = (messageIndex: number, tabIndex: number): void => {
+        const messageListState = this.variableObject.messageList.state.slice();
+
+        messageListState[messageIndex] = {
+            ...messageListState[messageIndex],
+            documentParserTabIndex: tabIndex
+        };
+
+        this.variableObject.messageList.state = messageListState;
+    };
+
     setControllerAi(value: Ai): void {
         this.controllerAi = value;
     }
@@ -276,6 +287,7 @@ export default class Chat implements Icontroller {
             onClickButtonMessageSend: this.onClickButtonMessageSend,
             onClickCitationLink: this.onClickCitationLink,
             onClickCitationTab: this.onClickCitationTab,
+            onClickDocumentParserTab: this.onClickDocumentParserTab,
             onClickPlaywrightVideoShow: this.controllerMcp.playwrightVideoShow,
             onErrorPlaywrightVideoFail: this.controllerMcp.playwrightVideoFail,
             markdownHtml: this.markdownHtml

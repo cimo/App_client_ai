@@ -1,10 +1,10 @@
 // Source
+import * as modelMcp from "./Mcp";
 import type Chat from "../controller/Chat";
 
 export interface IdataDocument {
-    markdown: string;
+    documentList: modelMcp.Idocument[];
     userPrompt: string;
-    fileName: string;
     messageIndex: number;
 }
 

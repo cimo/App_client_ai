@@ -73,29 +73,38 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
 
                 tThis.controllerChat.variableObject.messageList.state = messageListState;
             } else if (messageObject.name === "document_parser") {
-                const result = messageObject.result as string;
+                const result = messageObject.result as modelMcp.IdocumentParser;
 
-                const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+                if (result.documentList.length === 0) {
+                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
 
-                messageListState[messageIndex] = {
-                    ...messageListState[messageIndex],
-                    documentParser: result
-                };
+                    messageListState[messageIndex] = {
+                        ...messageListState[messageIndex],
+                        assistantNoReason: result.message
+                    };
 
-                tThis.controllerChat.variableObject.messageList.state = messageListState;
+                    tThis.controllerChat.variableObject.messageList.state = messageListState;
+                } else {
+                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
 
-                tThis.controllerChat.variableObject.systemMode.state = "chat";
+                    messageListState[messageIndex] = {
+                        ...messageListState[messageIndex],
+                        documentParserList: result.documentList,
+                        documentParserTabIndex: 0
+                    };
 
-                const argumentObject = JSON.parse(argument) as modelMcp.IdocumentParserArgument;
+                    tThis.controllerChat.variableObject.messageList.state = messageListState;
 
-                await tThis.apiResponseDocument({
-                    markdown: result,
-                    userPrompt,
-                    fileName: argumentObject.fileName,
-                    messageIndex
-                });
+                    tThis.controllerChat.variableObject.systemMode.state = "chat";
 
-                tThis.controllerChat.variableObject.systemMode.state = "tool-call";
+                    await tThis.apiResponseDocument({
+                        documentList: result.documentList,
+                        userPrompt,
+                        messageIndex
+                    });
+
+                    tThis.controllerChat.variableObject.systemMode.state = "tool-call";
+                }
             } else if (messageObject.name === "rag_search") {
                 const result = messageObject.result as modelMcp.IragSearch;
                 const citationList = result.citationList ? result.citationList : [];
@@ -269,7 +278,8 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
                 ragCitationList: undefined,
                 ragCitationTabIndex: 0,
                 securityScanner: "",
-                documentParser: "",
+                documentParserList: [],
+                documentParserTabIndex: 0,
                 playwright: {} as modelChat.Iplaywright
             }
         ];
@@ -300,7 +310,8 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
             "You MUST NOT invent new actions.",
             "You MUST NOT explain nothing.",
             "You MUST answer EXCLUSIVELY using the content of the provided DOCUMENT without inventing or adding information from your side.",
-            "DOCUMENT is the content of the file requested by the user, written in markdown."
+            "DOCUMENT is the content of the files requested by the user, written in markdown, where the name of each file is written between square brackets on the line before its content.",
+            "The content of a file is ONLY what follows its name and you MUST NOT mix the content of a file with the content of another one."
         ].join("\n");
     }
 

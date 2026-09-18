@@ -214,7 +214,13 @@ export default class LlmLlamaCpp {
     };
 
     apiResponseDocument = async (documentObject: modelLlm.IdataDocument): Promise<void> => {
-        const tokenDetail = await this.apiTokenDetail(documentObject.markdown);
+        const contentList: string[] = [];
+
+        for (let a = 0; a < documentObject.documentList.length; a++) {
+            contentList.push(`[${documentObject.documentList[a].fileName}]\n${documentObject.documentList[a].markdown}`);
+        }
+
+        const tokenDetail = await this.apiTokenDetail(contentList.join("\n\n"));
 
         if (tokenDetail.count === -1) {
             this.messageWrite("Engine not available.", documentObject.messageIndex);
@@ -225,7 +231,7 @@ export default class LlmLlamaCpp {
         const tokenBudget = tokenDetail.contextSize - this.tokenReserve;
 
         if (tokenDetail.count <= tokenBudget) {
-            this.apiResponse("document", `DOCUMENT:\n${documentObject.markdown}\n\nText:\n${documentObject.userPrompt}`);
+            this.apiResponse("document", `DOCUMENT:\n${contentList.join("\n\n")}\n\nText:\n${documentObject.userPrompt}`);
 
             return;
         }
@@ -240,57 +246,79 @@ export default class LlmLlamaCpp {
             "You MUST NOT write that the information is missing, you MUST NOT apologize and you MUST NOT explain: in that case the only allowed answer is NONE."
         ].join("\n");
 
-        let content = documentObject.markdown;
-        let lengthPerToken = documentObject.markdown.length / tokenDetail.count;
+        const tokenBudgetDocument = Math.floor(tokenBudget / documentObject.documentList.length);
 
-        while (true) {
-            const chunkList = helperSrc.markdownChunkList(content, Math.floor(tokenBudget * lengthPerToken));
+        const extractList: string[] = [];
 
-            const extractList: string[] = [];
+        for (let a = 0; a < documentObject.documentList.length; a++) {
+            const fileName = documentObject.documentList[a].fileName;
 
-            for (let a = 0; a < chunkList.length; a++) {
-                this.messageWrite(`Reading ${a + 1} of ${chunkList.length}.`, documentObject.messageIndex);
+            let content = documentObject.documentList[a].markdown;
 
-                const resultText = await this.apiResponseText(systemPrompt, `DOCUMENT:\n${chunkList[a]}\n\nText:\n${documentObject.userPrompt}`);
+            const tokenDetailDocument = await this.apiTokenDetail(content);
 
-                if (resultText.message !== "") {
-                    this.messageWrite(resultText.message, documentObject.messageIndex);
-
-                    return;
-                }
-
-                const textExtract = resultText.text.replace(/\.$/, "");
-
-                if (textExtract !== "" && textExtract.toUpperCase() !== "NONE") {
-                    extractList.push(resultText.text);
-                }
-            }
-
-            const contentExtract = extractList.join("\n");
-
-            await this.controllerChat.controllerMcp.apiWorkspaceParse(documentObject.fileName, contentExtract);
-
-            const tokenDetailExtract = await this.apiTokenDetail(contentExtract);
-
-            if (tokenDetailExtract.count === -1) {
+            if (tokenDetailDocument.count === -1) {
                 this.messageWrite("Engine not available.", documentObject.messageIndex);
 
                 return;
             }
 
-            const isReduced = contentExtract.length < content.length;
+            let lengthPerToken = content.length / tokenDetailDocument.count;
 
-            content = contentExtract;
-            lengthPerToken = contentExtract.length / tokenDetailExtract.count;
+            while (true) {
+                const chunkList = helperSrc.markdownChunkList(content, Math.floor(tokenBudgetDocument * lengthPerToken));
 
-            if (tokenDetailExtract.count <= tokenBudget || !isReduced) {
-                break;
+                const chunkExtractList: string[] = [];
+
+                for (let b = 0; b < chunkList.length; b++) {
+                    this.messageWrite(`Reading ${fileName} ${b + 1} of ${chunkList.length}.`, documentObject.messageIndex);
+
+                    const resultText = await this.apiResponseText(
+                        systemPrompt,
+                        `DOCUMENT:\n[${fileName}]\n${chunkList[b]}\n\nText:\n${documentObject.userPrompt}`
+                    );
+
+                    if (resultText.message !== "") {
+                        this.messageWrite(resultText.message, documentObject.messageIndex);
+
+                        return;
+                    }
+
+                    const textExtract = resultText.text.replace(/\.$/, "");
+
+                    if (textExtract !== "" && textExtract.toUpperCase() !== "NONE") {
+                        chunkExtractList.push(resultText.text);
+                    }
+                }
+
+                const contentExtract = chunkExtractList.join("\n");
+
+                await this.controllerChat.controllerMcp.apiWorkspaceParse(fileName, contentExtract);
+
+                const tokenDetailExtract = await this.apiTokenDetail(contentExtract);
+
+                if (tokenDetailExtract.count === -1) {
+                    this.messageWrite("Engine not available.", documentObject.messageIndex);
+
+                    return;
+                }
+
+                const isReduced = contentExtract.length < content.length;
+
+                content = contentExtract;
+                lengthPerToken = contentExtract.length / tokenDetailExtract.count;
+
+                if (tokenDetailExtract.count <= tokenBudgetDocument || !isReduced) {
+                    break;
+                }
             }
+
+            extractList.push(`[${fileName}]\n${content}`);
         }
 
         this.messageWrite("", documentObject.messageIndex);
 
-        this.apiResponse("document", `DOCUMENT:\n${content}\n\nText:\n${documentObject.userPrompt}`);
+        this.apiResponse("document", `DOCUMENT:\n${extractList.join("\n\n")}\n\nText:\n${documentObject.userPrompt}`);
     };
 
     apiResponse = async (mode?: string, prompt?: string): Promise<void> => {

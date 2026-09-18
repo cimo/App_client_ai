@@ -173,8 +173,14 @@ export interface IragSearch {
     message: string;
 }
 
-export interface IdocumentParserArgument {
+export interface Idocument {
     fileName: string;
+    markdown: string;
+}
+
+export interface IdocumentParser {
+    documentList: Idocument[];
+    message: string;
 }
 
 export interface IitemDetail {

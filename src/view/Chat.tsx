@@ -65,7 +65,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                             (value.assistantNoReason !== "" ||
                                                 value.ragCitationList ||
                                                 value.securityScanner ||
-                                                value.documentParser ||
+                                                value.documentParserList.length > 0 ||
                                                 value.playwright.action) &&
                                             typeof value.assistantNoReason === "string"
                                         ) {
@@ -73,7 +73,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                 resultList.push(
                                                     <details open>
                                                         <summary>
-                                                            <p>Citation result:</p>
+                                                            <p>Result rag_search:</p>
                                                         </summary>
                                                         <div class="citation_wrapper">
                                                             <div class="view_pagination">
@@ -155,22 +155,60 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                 resultList.push(
                                                     <details open class="scanner_wrapper">
                                                         <summary>
-                                                            <p>Security scanner result:</p>
+                                                            <p>Result security_scanner:</p>
                                                         </summary>
                                                         <pre>{value.securityScanner}</pre>
                                                     </details>
                                                 );
-                                            } else if (value.documentParser) {
+                                            } else if (value.documentParserList.length > 0) {
                                                 resultList.push(
                                                     <details open class="markdown_wrapper">
                                                         <summary>
-                                                            <p>Document parser result:</p>
+                                                            <p>Result document_parser:</p>
                                                         </summary>
                                                         <div class="citation_wrapper">
-                                                            <div
-                                                                class="box markdown"
-                                                                jsmvcfw-html={methodObject.markdownHtml(value.documentParser)}
-                                                            ></div>
+                                                            <div class="view_pagination">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        methodObject.onClickDocumentParserTab(
+                                                                            messageIndex,
+                                                                            Math.max(0, value.documentParserTabIndex - 1)
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    <i class="cls_icon">chevron_left</i>
+                                                                </button>
+                                                                <span class="label">
+                                                                    {value.documentParserTabIndex + 1} / {value.documentParserList.length}
+                                                                </span>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        methodObject.onClickDocumentParserTab(
+                                                                            messageIndex,
+                                                                            Math.min(
+                                                                                value.documentParserList.length - 1,
+                                                                                value.documentParserTabIndex + 1
+                                                                            )
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    <i class="cls_icon">chevron_right</i>
+                                                                </button>
+                                                            </div>
+                                                            <div class="box markdown">
+                                                                <p class="title">
+                                                                    <i class="cls_icon">text_snippet</i>
+                                                                    <span>
+                                                                        [{value.documentParserTabIndex + 1}]{" "}
+                                                                        {value.documentParserList[value.documentParserTabIndex].fileName}
+                                                                    </span>
+                                                                </p>
+                                                                <div
+                                                                    jsmvcfw-html={methodObject.markdownHtml(
+                                                                        value.documentParserList[value.documentParserTabIndex].markdown
+                                                                    )}
+                                                                ></div>
+                                                            </div>
                                                         </div>
                                                     </details>
                                                 );
@@ -182,7 +220,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                 resultList.push(
                                                     <details open class="playwright_container">
                                                         <summary>
-                                                            <p>Playwright result:</p>
+                                                            <p>Result playwright:</p>
                                                         </summary>
                                                         {() => {
                                                             const resultList: IvirtualNode[] = [];

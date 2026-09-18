@@ -57,7 +57,13 @@ export default class LlmAnthropic {
     };
 
     apiResponseDocument = async (documentObject: modelLlm.IdataDocument): Promise<void> => {
-        this.apiResponse("document", `DOCUMENT:\n${documentObject.markdown}\n\nText:\n${documentObject.userPrompt}`);
+        const contentList: string[] = [];
+
+        for (let a = 0; a < documentObject.documentList.length; a++) {
+            contentList.push(`[${documentObject.documentList[a].fileName}]\n${documentObject.documentList[a].markdown}`);
+        }
+
+        this.apiResponse("document", `DOCUMENT:\n${contentList.join("\n\n")}\n\nText:\n${documentObject.userPrompt}`);
     };
 
     apiResponse = async (mode?: string, prompt?: string): Promise<void> => {
