@@ -553,6 +553,38 @@ export default class Mcp implements Icontroller {
             });
     };
 
+    apiWorkspaceParse = async (fileName: string, text: string): Promise<void> => {
+        const body: modelMcp.IapiWorkspaceParseBody = { fileName, text };
+
+        await fetch(`${helperSrc.URL_MCP}/api/workspace-parse`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                "mcp-cookie": session.data.mcpCookie
+            },
+            body: JSON.stringify(body),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = await this.apiResponseJson(resultApi);
+
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+                }
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiWorkspaceParse() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+            });
+    };
+
     apiWorkspaceDelete = async (selectList: string[]): Promise<boolean> => {
         const body: modelMcp.IapiWorkspaceDeleteBody = { pathList: selectList };
 

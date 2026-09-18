@@ -17,6 +17,11 @@ export interface IapiWorkspaceReadBody {
     fileName: string;
 }
 
+export interface IapiWorkspaceParseBody {
+    fileName: string;
+    text: string;
+}
+
 export interface IapiWorkspaceDeleteBody {
     pathList: string[];
 }
@@ -166,6 +171,10 @@ export interface IragSearch {
     nodeList: IragNode[];
     graphList: IragRelation[];
     message: string;
+}
+
+export interface IdocumentParserArgument {
+    fileName: string;
 }
 
 export interface IitemDetail {

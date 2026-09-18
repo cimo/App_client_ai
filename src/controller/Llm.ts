@@ -86,7 +86,16 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
 
                 tThis.controllerChat.variableObject.systemMode.state = "chat";
 
-                tThis.apiResponse("document", `DOCUMENT:\n${result}\n\nText:\n${userPrompt}`);
+                const argumentObject = JSON.parse(argument) as modelMcp.IdocumentParserArgument;
+
+                await tThis.apiResponseDocument({
+                    markdown: result,
+                    userPrompt,
+                    fileName: argumentObject.fileName,
+                    messageIndex
+                });
+
+                tThis.controllerChat.variableObject.systemMode.state = "tool-call";
             } else if (messageObject.name === "rag_search") {
                 const result = messageObject.result as modelMcp.IragSearch;
                 const citationList = result.citationList ? result.citationList : [];
@@ -273,49 +282,49 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
 
     if (mode === "rag") {
         resultSystemPrompt = [
-            "You are a multilingual rag assistant.",
+            "You are a multilingual rag assistant that needs to reply with the user prompt language.",
+            "You MUST answer ONLY what the user asked and you MUST NOT add information that the user did not ask for.",
+            "If the answer is NOT present in the provided content you MUST reply that the information is not available.",
+            "You MUST NOT invent new actions.",
+            "You MUST NOT explain nothing.",
             "You MUST answer EXCLUSIVELY using the content of the provided CITATION, NODE and GRAPH without inventing or adding information from your side.",
             "NODE provides the entities and their descriptions, GRAPH provides the relations between them and CITATION provides the source text.",
             "You MAY use the connections between entities present in GRAPH when the question requires it, but you MUST NOT invent connections that are not explicitly present there.",
-            "For EACH topic answer INDEPENDENTLY and SEPARATELY and write a dedicated section with the topic name as title, followed by bullet points.",
-            "You MUST NOT add commentary about missing information.",
-            "You MUST NOT solve problems.",
-            "You MUST NOT invent new actions.",
-            "You MUST NOT explain nothing."
+            "For EACH topic answer INDEPENDENTLY and SEPARATELY and write a dedicated section with the topic name as title, followed by bullet points."
         ].join("\n");
     } else if (mode === "document") {
         resultSystemPrompt = [
-            "You are a multilingual document assistant.",
-            "You MUST answer EXCLUSIVELY using the content of the provided DOCUMENT without inventing or adding information from your side.",
-            "DOCUMENT is the content of the file requested by the user, written in markdown.",
-            "If the answer is NOT present in DOCUMENT you MUST reply that the information is not in the file.",
-            "You MUST NOT solve problems.",
+            "You are a multilingual document assistant that needs to reply with the user prompt language.",
+            "You MUST answer ONLY what the user asked and you MUST NOT add information that the user did not ask for.",
+            "If the answer is NOT present in the provided content you MUST reply that the information is not available.",
             "You MUST NOT invent new actions.",
-            "You MUST NOT explain nothing."
+            "You MUST NOT explain nothing.",
+            "You MUST answer EXCLUSIVELY using the content of the provided DOCUMENT without inventing or adding information from your side.",
+            "DOCUMENT is the content of the file requested by the user, written in markdown."
         ].join("\n");
     }
 
     if (tThis.controllerChat.variableObject.systemMode.state === "tool-call") {
         resultSystemPrompt = [
             "You are a multilingual assistant tool executer and you need to transform the user request in a action.",
+            "You MUST NOT invent new actions.",
+            "You MUST NOT explain nothing.",
             `You MUST use ONLY the following tool: ${tThis.controllerChat.variableObject.toolSelected.state.name}`,
             `${tThis.controllerChat.variableObject.toolSelected.state.inputInstruction}`,
             "You MUST return ONLY raw json WITHOUT wrap it in ```json and you need change ONLY the 'argumentObject' value without touch the 'name' default value.",
-            `For ${tThis.controllerChat.variableObject.toolSelected.state.name} return ALWAYS the json with this format: { "name": "${tThis.controllerChat.variableObject.toolSelected.state.name}", "argumentObject": {} }`,
-            "You MUST NOT solve problems.",
-            "You MUST NOT invent new actions.",
-            "You MUST NOT explain nothing."
+            `For ${tThis.controllerChat.variableObject.toolSelected.state.name} return ALWAYS the json with this format: { "name": "${tThis.controllerChat.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(tThis.controllerChat.variableObject.toolSelected.state.argumentObject)} }`,
+            "You MUST keep the parameter names of 'argumentObject' EXACTLY as they are written, without renaming them and without changing their case."
         ].join("\n");
     } else if (tThis.controllerChat.variableObject.systemMode.state === "task-call") {
         resultSystemPrompt = [
             "You are a multilingual assistant task executer and you need to transform the user request in a ordered list of actions.",
+            "You MUST NOT invent new actions.",
+            "You MUST NOT explain nothing.",
             `You MUST use ONLY the following tool: ${tThis.controllerChat.variableObject.taskSelected.state.name}`,
             `${tThis.controllerChat.variableObject.taskSelected.state.inputInstruction}`,
             "You MUST return ONLY raw json WITHOUT wrap it in ```json and you need change ONLY the 'argumentObject' value without touch the 'name' default value.",
-            `For ${tThis.controllerChat.variableObject.taskSelected.state.name} return ALWAYS the json with this format: { "list": [ { "name": "${tThis.controllerChat.variableObject.taskSelected.state.name}", "argumentObject": {} } ] }`,
-            "You MUST NOT solve problems.",
-            "You MUST NOT invent new actions.",
-            "You MUST NOT explain nothing."
+            `For ${tThis.controllerChat.variableObject.taskSelected.state.name} return ALWAYS the json with this format: { "list": [ { "name": "${tThis.controllerChat.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(tThis.controllerChat.variableObject.taskSelected.state.argumentObject)} } ] }`,
+            "You MUST keep the parameter names of 'argumentObject' EXACTLY as they are written, without renaming them and without changing their case."
         ].join("\n");
     } else if (tThis.controllerChat.variableObject.systemMode.state === "agent-skill") {
         const skillContent = await tThis.controllerChat.controllerMcp.apiSkillRead(tThis.controllerChat.variableObject.agentSelected.state.skillName);

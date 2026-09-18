@@ -30,6 +30,21 @@ export interface IapiLlmResponse {
     delta: string;
 }
 
+export interface IapiTokenDetailBody {
+    model: string;
+    text: string;
+}
+
+export interface IdataTokenDetail {
+    count: number;
+    contextSize: number;
+}
+
+export interface IdataResponseText {
+    text: string;
+    message: string;
+}
+
 export interface IdataInput {
     role: string;
     content: string | Array<{ type: string; text?: string; image_url?: string }>;

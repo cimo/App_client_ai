@@ -453,4 +453,62 @@ export const windowClose = async (label: string, title: string): Promise<void> =
         await window.close();
     }
 };
+
+export const markdownChunkList = (markdown: string, lengthMax: number): string[] => {
+    const atomList: string[] = [];
+
+    const sectionList = markdown.split(/\n(?=#{1,6} )/);
+
+    for (let a = 0; a < sectionList.length; a++) {
+        const section = sectionList[a];
+
+        if (section.length <= lengthMax) {
+            atomList.push(section);
+
+            continue;
+        }
+
+        const paragraphList = section.split(/\n{2,}/);
+
+        for (let b = 0; b < paragraphList.length; b++) {
+            const paragraph = paragraphList[b];
+
+            if (paragraph.length <= lengthMax) {
+                atomList.push(paragraph);
+
+                continue;
+            }
+
+            const lineList = paragraph.split("\n");
+
+            for (let c = 0; c < lineList.length; c++) {
+                atomList.push(lineList[c]);
+            }
+        }
+    }
+
+    const resultList: string[] = [];
+
+    let chunk = "";
+
+    for (let a = 0; a < atomList.length; a++) {
+        const atom = atomList[a];
+
+        if (chunk === "") {
+            chunk = atom;
+        } else if (`${chunk}\n\n${atom}`.length <= lengthMax) {
+            chunk = `${chunk}\n\n${atom}`;
+        } else {
+            resultList.push(chunk);
+
+            chunk = atom;
+        }
+    }
+
+    if (chunk !== "") {
+        resultList.push(chunk);
+    }
+
+    return resultList;
+};
 // Custom

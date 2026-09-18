@@ -4,6 +4,7 @@ import { fetch } from "@tauri-apps/plugin-http";
 import * as helperSrc from "../HelperSrc";
 import * as controllerLlm from "../controller/Llm";
 import * as modelLlmOpenAi from "../model/LlmOpenAi";
+import * as modelLlm from "../model/Llm";
 import type Chat from "./Chat";
 
 export default class LlmOpenAi {
@@ -52,6 +53,10 @@ export default class LlmOpenAi {
         }
     };
 
+    apiResponseDocument = async (documentObject: modelLlm.IdataDocument): Promise<void> => {
+        this.apiResponse("document", `DOCUMENT:\n${documentObject.markdown}\n\nText:\n${documentObject.userPrompt}`);
+    };
+
     apiResponse = async (mode?: string, prompt?: string): Promise<void> => {
         //const base64 = await invoke("test_screenshot");
         //this.variableObject.modelSelected.state = base64 as string;
@@ -89,27 +94,6 @@ export default class LlmOpenAi {
             this.controllerChat.autoscroll();
 
             const inputList: modelLlmOpenAi.IdataInput[] = [];
-
-            // this.variableObject.historyList.state.push({
-            //     role: "user",
-            //     content: this.hookObject.elementInputMessageSend.value
-            // });
-
-            // for (let a = 0; a < this.variableObject.historyList.state.length; a++) {
-            //     const historyList = this.variableObject.historyList.state[a];
-
-            //     if (historyList.role === "system" || historyList.role === "user") {
-            //         inputList.push({
-            //             role: historyList.role,
-            //             content: [{ type: "input_text", text: historyList.content as string }]
-            //         });
-            //     } else {
-            //         inputList.push({
-            //             role: historyList.role,
-            //             content: [{ type: "output_text", text: historyList.content as string }]
-            //         });
-            //     }
-            // }
 
             inputList.push(
                 {
