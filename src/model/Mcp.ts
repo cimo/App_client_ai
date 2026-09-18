@@ -168,12 +168,6 @@ export interface IragSearch {
     message: string;
 }
 
-export interface IdocumentParser {
-    fileName: string;
-    searchInput: string;
-    message: string;
-}
-
 export interface IitemDetail {
     name: string;
     baseName: string;

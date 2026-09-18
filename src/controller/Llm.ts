@@ -73,42 +73,20 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
 
                 tThis.controllerChat.variableObject.messageList.state = messageListState;
             } else if (messageObject.name === "document_parser") {
-                const result = messageObject.result as modelMcp.IdocumentParser;
+                const result = messageObject.result as string;
 
-                if (result.message) {
-                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+                const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
 
-                    messageListState[messageIndex] = {
-                        ...messageListState[messageIndex],
-                        assistantNoReason: result.message
-                    };
+                messageListState[messageIndex] = {
+                    ...messageListState[messageIndex],
+                    documentParser: result
+                };
 
-                    tThis.controllerChat.variableObject.messageList.state = messageListState;
-                } else if (Object.keys(result).length === 0) {
-                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+                tThis.controllerChat.variableObject.messageList.state = messageListState;
 
-                    messageListState[messageIndex] = {
-                        ...messageListState[messageIndex],
-                        assistantNoReason: "Document not found."
-                    };
+                tThis.controllerChat.variableObject.systemMode.state = "chat";
 
-                    tThis.controllerChat.variableObject.messageList.state = messageListState;
-                } else {
-                    tThis.controllerChat.fileObject[result.fileName] = {
-                        searchInput: result.searchInput
-                    };
-
-                    await tThis.controllerChat.windowOpenDocument(result.fileName);
-
-                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
-
-                    messageListState[messageIndex] = {
-                        ...messageListState[messageIndex],
-                        assistantNoReason: "Document opened."
-                    };
-
-                    tThis.controllerChat.variableObject.messageList.state = messageListState;
-                }
+                tThis.apiResponse("document", `DOCUMENT:\n${result}\n\nText:\n${userPrompt}`);
             } else if (messageObject.name === "rag_search") {
                 const result = messageObject.result as modelMcp.IragSearch;
                 const citationList = result.citationList ? result.citationList : [];
@@ -199,17 +177,6 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                 };
 
                 tThis.controllerChat.variableObject.messageList.state = messageListState;
-            } else if (messageObject.name === "ocr") {
-                const result = messageObject.result as string;
-
-                const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
-
-                messageListState[messageIndex] = {
-                    ...messageListState[messageIndex],
-                    ocr: result
-                };
-
-                tThis.controllerChat.variableObject.messageList.state = messageListState;
             } else if (messageObject.name === "playwright") {
                 const result = messageObject.result as modelChat.Iplaywright;
 
@@ -270,6 +237,8 @@ export const updateModel = <T extends modelLlm.IdataContext>(tThis: T, modelList
 export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, prompt?: string, mode?: string): Promise<modelLlm.IdataInputPrompt> => {
     tThis.controllerChat.variableObject.isMessageSendAvailable.state = false;
 
+    const isModeContext = mode === "rag" || mode === "document";
+
     let time = helperSrc.localeFormat(new Date()) as string;
     let resultUserPrompt = tThis.controllerChat.hookObject.elementInputMessageSend.value;
 
@@ -278,7 +247,7 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
         resultUserPrompt = "";
     }
 
-    if (mode !== "rag") {
+    if (!isModeContext) {
         tThis.controllerChat.variableObject.messageList.state = [
             ...tThis.controllerChat.variableObject.messageList.state,
             {
@@ -291,7 +260,7 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
                 ragCitationList: undefined,
                 ragCitationTabIndex: 0,
                 securityScanner: "",
-                ocr: "",
+                documentParser: "",
                 playwright: {} as modelChat.Iplaywright
             }
         ];
@@ -310,6 +279,16 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
             "You MAY use the connections between entities present in GRAPH when the question requires it, but you MUST NOT invent connections that are not explicitly present there.",
             "For EACH topic answer INDEPENDENTLY and SEPARATELY and write a dedicated section with the topic name as title, followed by bullet points.",
             "You MUST NOT add commentary about missing information.",
+            "You MUST NOT solve problems.",
+            "You MUST NOT invent new actions.",
+            "You MUST NOT explain nothing."
+        ].join("\n");
+    } else if (mode === "document") {
+        resultSystemPrompt = [
+            "You are a multilingual document assistant.",
+            "You MUST answer EXCLUSIVELY using the content of the provided DOCUMENT without inventing or adding information from your side.",
+            "DOCUMENT is the content of the file requested by the user, written in markdown.",
+            "If the answer is NOT present in DOCUMENT you MUST reply that the information is not in the file.",
             "You MUST NOT solve problems.",
             "You MUST NOT invent new actions.",
             "You MUST NOT explain nothing."

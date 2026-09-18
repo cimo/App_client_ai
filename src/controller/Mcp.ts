@@ -458,6 +458,8 @@ export default class Mcp implements Icontroller {
         if (pathFileList) {
             const actionOperationList: modelHelperSrc.IactionOperation[] = [];
 
+            let isStop = false;
+
             for (let a = 0; a < pathFileList.length; a++) {
                 const pathFile = pathFileList[a];
 
@@ -490,13 +492,23 @@ export default class Mcp implements Icontroller {
 
                         actionOperationList.push(json.response);
 
+                        if (json.response.state === "ko") {
+                            isStop = true;
+                        }
+
                         await this.showFileFailedMessage(actionOperationList);
                     })
                     .catch((error: Error) => {
                         helperSrc.writeLog("Mcp.ts - apiWorkspaceUpload() - fetch() - catch()", error.message);
 
                         this.variableObject.isOfflineMcp.state = true;
+
+                        isStop = true;
                     });
+
+                if (isStop) {
+                    break;
+                }
             }
         }
     };

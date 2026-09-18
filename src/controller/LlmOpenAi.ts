@@ -58,7 +58,9 @@ export default class LlmOpenAi {
 
         //await invoke("test");
 
-        if (!this.controllerChat.variableObject.isMessageSendAvailable.state && mode !== "rag") {
+        const isModeContext = mode === "rag" || mode === "document";
+
+        if (!this.controllerChat.variableObject.isMessageSendAvailable.state && !isModeContext) {
             this.controllerChat.controllerToast.show("warning", ["Wait for the current response to complete."]);
 
             return;
@@ -132,7 +134,7 @@ export default class LlmOpenAi {
                 tools: []
             };
 
-            if (!(mode !== "rag" && systemModeRequest === "chat")) {
+            if (!(!isModeContext && systemModeRequest === "chat")) {
                 body.temperature = 0;
             }
 
@@ -229,7 +231,7 @@ export default class LlmOpenAi {
                                         } else if (dataTrimObject.type === "response.output_text.delta") {
                                             const delta = dataTrimObject.delta;
 
-                                            if (delta && (!prompt || mode === "rag")) {
+                                            if (delta && (!prompt || isModeContext)) {
                                                 this.controllerChat.responseNoReason += delta;
 
                                                 if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
@@ -259,7 +261,7 @@ export default class LlmOpenAi {
                                                 };
 
                                                 if (
-                                                    (!prompt || mode === "rag") &&
+                                                    (!prompt || isModeContext) &&
                                                     systemModeRequest !== "tool-call" &&
                                                     systemModeRequest !== "task-call"
                                                 ) {

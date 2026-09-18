@@ -65,7 +65,7 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                             (value.assistantNoReason !== "" ||
                                                 value.ragCitationList ||
                                                 value.securityScanner ||
-                                                value.ocr ||
+                                                value.documentParser ||
                                                 value.playwright.action) &&
                                             typeof value.assistantNoReason === "string"
                                         ) {
@@ -160,17 +160,24 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                         <pre>{value.securityScanner}</pre>
                                                     </details>
                                                 );
-                                            } else if (value.ocr) {
+                                            } else if (value.documentParser) {
                                                 resultList.push(
                                                     <details open class="markdown_wrapper">
                                                         <summary>
-                                                            <p>Ocr result:</p>
+                                                            <p>Document parser result:</p>
                                                         </summary>
                                                         <div class="citation_wrapper">
-                                                            <div class="box markdown" jsmvcfw-html={methodObject.markdownHtml(value.ocr)}></div>
+                                                            <div
+                                                                class="box markdown"
+                                                                jsmvcfw-html={methodObject.markdownHtml(value.documentParser)}
+                                                            ></div>
                                                         </div>
                                                     </details>
                                                 );
+
+                                                if (value.assistantNoReason) {
+                                                    resultList.push(<pre>{value.assistantNoReason}</pre>);
+                                                }
                                             } else if (value.playwright.action) {
                                                 resultList.push(
                                                     <details open class="playwright_container">

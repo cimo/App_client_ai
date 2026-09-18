@@ -61,7 +61,9 @@ export default class LlmAnthropic {
 
         //await invoke("test");
 
-        if (!this.controllerChat.variableObject.isMessageSendAvailable.state && mode !== "rag") {
+        const isModeContext = mode === "rag" || mode === "document";
+
+        if (!this.controllerChat.variableObject.isMessageSendAvailable.state && !isModeContext) {
             this.controllerChat.controllerToast.show("warning", ["Wait for the current response to complete."]);
 
             return;
@@ -235,7 +237,7 @@ export default class LlmAnthropic {
 
                                                     this.controllerChat.autoscroll();
                                                 } else if (delta.type === "text_delta" && delta.text) {
-                                                    if (!prompt || mode === "rag") {
+                                                    if (!prompt || isModeContext) {
                                                         this.controllerChat.responseNoReason += delta.text;
 
                                                         if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
@@ -266,7 +268,7 @@ export default class LlmAnthropic {
                                                     };
 
                                                     if (
-                                                        (!prompt || mode === "rag") &&
+                                                        (!prompt || isModeContext) &&
                                                         systemModeRequest !== "tool-call" &&
                                                         systemModeRequest !== "task-call"
                                                     ) {

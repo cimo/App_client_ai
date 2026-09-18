@@ -21,7 +21,7 @@ export interface IdataMessage {
     ragCitationList: modelMcp.IragCitation[] | undefined;
     ragCitationTabIndex: number;
     securityScanner: string;
-    ocr: string;
+    documentParser: string;
     playwright: Iplaywright;
 }
 
