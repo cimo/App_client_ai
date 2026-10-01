@@ -1,6 +1,7 @@
 import { Icontroller, IvirtualNode, variableBind, variableLink, IvariableEffect } from "@cimo/jsmvcfw/dist/src/Main.js";
 import { listen, emitTo, UnlistenFn } from "@tauri-apps/api/event";
 import { getAllWindows } from "@tauri-apps/api/window";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { marked } from "marked";
 
 // Source
@@ -54,13 +55,15 @@ export default class Chat implements Icontroller {
 
     private currentLlmInstance = async (): Promise<void> => {
         if (Object.keys(this.variableObject.setting.state).length > 0) {
-            for (let a = 0; a < this.variableObject.setting.state.llmList.length; a++) {
-                if (this.variableObject.setting.state.llmList[a].selected) {
-                    this.variableObject.llmInstance.state = await this.importController(this.variableObject.setting.state.llmList[a].module);
+            for (let a = 0; a < this.variableObject.setting.state.llm.serviceList.length; a++) {
+                if (this.variableObject.setting.state.llm.serviceList[a].selected) {
+                    this.variableObject.llmInstance.state = await this.importController(this.variableObject.setting.state.llm.serviceList[a].module);
 
                     break;
                 }
             }
+
+            this.variableObject.isLoginLlm.state = false;
         }
     };
 
@@ -69,7 +72,17 @@ export default class Chat implements Icontroller {
             this.abortControllerLlmResponse.abort();
             this.abortControllerLlmResponse = undefined;
         } else if (this.variableObject.llmInstance.state) {
-            await this.variableObject.llmInstance.state.apiResponse();
+            if (this.variableObject.settingLlmUsageId.state === 1 || this.variableObject.settingLlmServiceId.state === 1) {
+                await this.variableObject.llmInstance.state.apiResponse();
+            } else if (this.variableObject.settingLlmUsageId.state === 2) {
+                if (!this.variableObject.isLoginLlm.state) {
+                    this.variableObject.llmInstance.state.apiCliLogin(this.hookObject.elementInputMessageSend.value);
+
+                    this.hookObject.elementInputMessageSend.value = "";
+                } else {
+                    await this.variableObject.llmInstance.state.apiCliResponse();
+                }
+            }
         }
     };
 
@@ -103,6 +116,20 @@ export default class Chat implements Icontroller {
         };
 
         this.variableObject.messageList.state = messageListState;
+    };
+
+    private onClickButtonLlmLogin = async (): Promise<void> => {
+        if (this.variableObject.llmInstance.state) {
+            this.variableObject.llmInstance.state.apiCliLogin();
+        }
+    };
+
+    private onClickLlmLoginCopyUrl = (url: string): void => {
+        navigator.clipboard.writeText(url);
+    };
+
+    private onClickLlmLoginOpenUrl = (url: string): void => {
+        openUrl(url);
     };
 
     setControllerAi(value: Ai): void {
@@ -224,12 +251,12 @@ export default class Chat implements Icontroller {
         }
     };
 
-    selectedLlm = (): modelMcp.IsettingLlm | null => {
+    selectedLlm = (): modelMcp.IsettingService | null => {
         let llm = null;
 
-        for (let a = 0; a < this.variableObject.setting.state.llmList.length; a++) {
-            if (this.variableObject.setting.state.llmList[a].selected) {
-                llm = this.variableObject.setting.state.llmList[a];
+        for (let a = 0; a < this.variableObject.setting.state.llm.serviceList.length; a++) {
+            if (this.variableObject.setting.state.llm.serviceList[a].selected) {
+                llm = this.variableObject.setting.state.llm.serviceList[a];
 
                 break;
             }
@@ -267,6 +294,8 @@ export default class Chat implements Icontroller {
                 messageList: [],
                 systemMode: "chat",
                 llmInstance: null,
+                isLoginLlm: false,
+                isOfflineAi: variableLink<boolean>("Ai"),
                 isOpenDropdownModelList: variableLink<boolean>("Ai"),
                 modelList: variableLink<string[]>("Ai"),
                 modelSelected: variableLink<string>("Ai"),
@@ -278,7 +307,9 @@ export default class Chat implements Icontroller {
                 agentSelected: variableLink<modelMcp.Iagent>("Mcp"),
                 playwrightVideoSrc: variableLink<string>("Mcp"),
                 playwrightVideoName: variableLink<string>("Mcp"),
-                setting: variableLink<modelMcp.Isetting>("Mcp")
+                setting: variableLink<modelMcp.Isetting>("Mcp"),
+                settingLlmServiceId: variableLink<number>("MenuItem"),
+                settingLlmUsageId: variableLink<number>("MenuItem")
             },
             this.constructor.name
         );
@@ -289,6 +320,9 @@ export default class Chat implements Icontroller {
             onClickCitationTab: this.onClickCitationTab,
             onClickDocumentParserTab: this.onClickDocumentParserTab,
             onClickPlaywrightVideoShow: this.controllerMcp.playwrightVideoShow,
+            onClickButtonLlmLogin: this.onClickButtonLlmLogin,
+            onClickLlmLoginCopyUrl: this.onClickLlmLoginCopyUrl,
+            onClickLlmLoginOpenUrl: this.onClickLlmLoginOpenUrl,
             onErrorPlaywrightVideoFail: this.controllerMcp.playwrightVideoFail,
             markdownHtml: this.markdownHtml
         };

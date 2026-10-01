@@ -5,6 +5,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 
 // Source
 import * as session from "../Session";
+import * as controllerLlm from "../controller/Llm";
 import * as modelIndex from "../model/Index";
 import * as modelMcp from "../model/Mcp";
 import * as modelChat from "../model/Chat.js";
@@ -42,15 +43,14 @@ export default class Index implements Icontroller {
 
     private aiApi = async (): Promise<void> => {
         if (this.variableObject.llmInstance.state) {
-            if (!session.data.aiCookie) {
-                await this.controllerAi.apiLogin();
-            } else {
-                if (!this.variableObject.setting.state.llmList[0].selected) {
-                    await this.controllerAi.apiLogout();
-                }
-            }
+            await this.controllerAi.apiLogout();
+            await this.controllerAi.apiLogin();
 
-            await this.variableObject.llmInstance.state.apiModel(false);
+            if (this.variableObject.settingLlmServiceId.state === 1) {
+                await this.variableObject.llmInstance.state.apiModel(false);
+            } else {
+                controllerLlm.updateModel(this.controllerChat, this.variableObject.llmInstance.state.modelAvailableList, false);
+            }
         }
     };
 
@@ -165,7 +165,8 @@ export default class Index implements Icontroller {
                 isOfflineMcp: variableLink<boolean>("Mcp"),
                 isLogin: variableLink<boolean>("Mcp"),
                 setting: variableLink<modelMcp.Isetting>("Mcp"),
-                llmInstance: variableLink<modelChat.TllmInstance | null>("Chat")
+                llmInstance: variableLink<modelChat.TllmInstance | null>("Chat"),
+                settingLlmServiceId: variableLink<number>("MenuItem")
             },
             this.constructor.name
         );

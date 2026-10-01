@@ -11,6 +11,8 @@ export interface Ivariable {
     modelSelected: IvariableBind<string>;
     setting: IvariableBind<modelMcp.Isetting>;
     llmInstance: IvariableBind<modelChat.TllmInstance | null>;
+    settingLlmServiceId: IvariableBind<number>;
+    settingLlmUsageId: IvariableBind<number>;
 }
 
 export interface Imethod {

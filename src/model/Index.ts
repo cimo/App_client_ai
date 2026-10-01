@@ -12,6 +12,7 @@ export interface Ivariable {
     isLogin: IvariableBind<boolean>;
     setting: IvariableBind<modelMcp.Isetting>;
     llmInstance: IvariableBind<modelChat.TllmInstance | null>;
+    settingLlmServiceId: IvariableBind<number>;
 }
 
 export interface Imethod {

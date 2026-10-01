@@ -1292,9 +1292,17 @@ export default class Mcp implements Icontroller {
                 } else {
                     this.variableObject.setting.state = json.response.data as modelMcp.Isetting;
 
-                    for (let a = 0; a < this.variableObject.setting.state.llmList.length; a++) {
-                        if (this.variableObject.setting.state.llmList[a].selected) {
-                            this.variableObject.settingLlmServiceId.state = this.variableObject.setting.state.llmList[a].id;
+                    for (let a = 0; a < this.variableObject.setting.state.llm.serviceList.length; a++) {
+                        if (this.variableObject.setting.state.llm.serviceList[a].selected) {
+                            this.variableObject.settingLlmServiceId.state = this.variableObject.setting.state.llm.serviceList[a].id;
+
+                            break;
+                        }
+                    }
+
+                    for (let a = 0; a < this.variableObject.setting.state.llm.usageList.length; a++) {
+                        if (this.variableObject.setting.state.llm.usageList[a].selected) {
+                            this.variableObject.settingLlmUsageId.state = this.variableObject.setting.state.llm.usageList[a].id;
 
                             break;
                         }
@@ -1311,7 +1319,7 @@ export default class Mcp implements Icontroller {
     apiSettingUpdate = async (setting: modelMcp.Isetting): Promise<boolean> => {
         const body: modelMcp.IapiSettingUpdateBody = {
             id: setting.id,
-            llmList: setting.llmList
+            llm: setting.llm
         };
 
         return fetch(`${helperSrc.URL_MCP}/api/setting-update`, {
@@ -1402,6 +1410,7 @@ export default class Mcp implements Icontroller {
                 isRagRunning: variableLink<boolean>("MenuItem"),
                 agentData: variableLink<modelMcp.Iagent>("MenuItem"),
                 settingLlmServiceId: variableLink<number>("MenuItem"),
+                settingLlmUsageId: variableLink<number>("MenuItem"),
                 systemMode: variableLink<string>("Chat"),
                 messageList: variableLink<modelChat.IdataMessage[]>("Chat")
             },

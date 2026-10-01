@@ -6,86 +6,89 @@ import * as helperSrc from "../HelperSrc";
 import * as modelChat from "../model/Chat";
 import * as modelMcp from "../model/Mcp";
 import * as modelLlm from "../model/Llm";
+import type Chat from "./Chat";
 
-const toolResponse = async <T extends modelLlm.IdataContext>(
-    tThis: T,
+const toolResponse = async (
+    controllerChat: Chat,
+    apiResponse: (mode?: string, prompt?: string) => void,
+    apiResponseDocument: (documentObject: modelLlm.IdataDocument) => Promise<void>,
     message: string,
     argument: string,
     userPrompt: string,
     messageIndex: number
 ): Promise<void> => {
     if (!message) {
-        const messageListToolState = tThis.controllerChat.variableObject.messageList.state.slice();
+        const messageListToolState = controllerChat.variableObject.messageList.state.slice();
 
         messageListToolState[messageIndex] = {
             ...messageListToolState[messageIndex],
             assistantNoReason: "Tool response empty."
         };
 
-        tThis.controllerChat.variableObject.messageList.state = messageListToolState;
+        controllerChat.variableObject.messageList.state = messageListToolState;
 
-        tThis.controllerChat.messageLoadingHide(messageIndex);
+        controllerChat.messageLoadingHide(messageIndex);
 
-        tThis.controllerChat.autoscroll();
+        controllerChat.autoscroll();
     } else {
         if (!helperSrc.jsonCheck(message)) {
-            const messageListToolState = tThis.controllerChat.variableObject.messageList.state.slice();
+            const messageListToolState = controllerChat.variableObject.messageList.state.slice();
 
             messageListToolState[messageIndex] = {
                 ...messageListToolState[messageIndex],
                 assistantNoReason: message
             };
 
-            tThis.controllerChat.variableObject.messageList.state = messageListToolState;
+            controllerChat.variableObject.messageList.state = messageListToolState;
 
-            tThis.controllerChat.messageLoadingHide(messageIndex);
+            controllerChat.messageLoadingHide(messageIndex);
         } else {
             const messageObject = JSON.parse(message) as modelMcp.ItoolResult;
 
-            tThis.controllerChat.responseMcpTool = {
-                ...tThis.controllerChat.responseMcpTool,
+            controllerChat.responseMcpTool = {
+                ...controllerChat.responseMcpTool,
                 type: "tool_response",
                 name: messageObject.name,
                 arguments: argument,
                 output: message
             };
 
-            const messageListToolState = tThis.controllerChat.variableObject.messageList.state.slice();
+            const messageListToolState = controllerChat.variableObject.messageList.state.slice();
 
             messageListToolState[messageIndex] = {
                 ...messageListToolState[messageIndex],
-                mcpToolBody: tThis.controllerChat.responseMcpTool
+                mcpToolBody: controllerChat.responseMcpTool
             };
 
-            tThis.controllerChat.variableObject.messageList.state = messageListToolState;
+            controllerChat.variableObject.messageList.state = messageListToolState;
 
-            tThis.controllerChat.messageLoadingHide(messageIndex);
+            controllerChat.messageLoadingHide(messageIndex);
 
             if (messageObject.name === "math_expression") {
                 const result = messageObject.result as string;
 
-                const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+                const messageListState = controllerChat.variableObject.messageList.state.slice();
 
                 messageListState[messageIndex] = {
                     ...messageListState[messageIndex],
                     assistantNoReason: result
                 };
 
-                tThis.controllerChat.variableObject.messageList.state = messageListState;
+                controllerChat.variableObject.messageList.state = messageListState;
             } else if (messageObject.name === "document_parser") {
                 const result = messageObject.result as modelMcp.IdocumentParser;
 
                 if (result.documentList.length === 0) {
-                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+                    const messageListState = controllerChat.variableObject.messageList.state.slice();
 
                     messageListState[messageIndex] = {
                         ...messageListState[messageIndex],
                         assistantNoReason: result.message
                     };
 
-                    tThis.controllerChat.variableObject.messageList.state = messageListState;
+                    controllerChat.variableObject.messageList.state = messageListState;
                 } else {
-                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+                    const messageListState = controllerChat.variableObject.messageList.state.slice();
 
                     messageListState[messageIndex] = {
                         ...messageListState[messageIndex],
@@ -93,17 +96,17 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                         documentParserTabIndex: 0
                     };
 
-                    tThis.controllerChat.variableObject.messageList.state = messageListState;
+                    controllerChat.variableObject.messageList.state = messageListState;
 
-                    tThis.controllerChat.variableObject.systemMode.state = "chat";
+                    controllerChat.variableObject.systemMode.state = "chat";
 
-                    await tThis.apiResponseDocument({
+                    await apiResponseDocument({
                         documentList: result.documentList,
                         userPrompt,
                         messageIndex
                     });
 
-                    tThis.controllerChat.variableObject.systemMode.state = "tool-call";
+                    controllerChat.variableObject.systemMode.state = "tool-call";
                 }
             } else if (messageObject.name === "rag_search") {
                 const result = messageObject.result as modelMcp.IragSearch;
@@ -112,16 +115,16 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                 const graphList = result.graphList ? result.graphList : [];
 
                 if (citationList.length === 0) {
-                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+                    const messageListState = controllerChat.variableObject.messageList.state.slice();
 
                     messageListState[messageIndex] = {
                         ...messageListState[messageIndex],
                         assistantNoReason: result.message ? result.message : "No citations found."
                     };
 
-                    tThis.controllerChat.variableObject.messageList.state = messageListState;
+                    controllerChat.variableObject.messageList.state = messageListState;
                 } else {
-                    const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+                    const messageListState = controllerChat.variableObject.messageList.state.slice();
 
                     messageListState[messageIndex] = {
                         ...messageListState[messageIndex],
@@ -129,9 +132,9 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                         ragCitationTabIndex: 0
                     };
 
-                    tThis.controllerChat.variableObject.messageList.state = messageListState;
+                    controllerChat.variableObject.messageList.state = messageListState;
 
-                    tThis.controllerChat.variableObject.systemMode.state = "chat";
+                    controllerChat.variableObject.systemMode.state = "chat";
 
                     const citationContextList: string[] = [];
 
@@ -177,28 +180,28 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                         graphContextJoin = graphContextList.join("\n");
                     }
 
-                    tThis.apiResponse(
+                    apiResponse(
                         "rag",
                         `CITATION:\n${citationContextJoin}\n\nNODE:\n${nodeContextJoin}\n\nGRAPH:\n${graphContextJoin}\n\nText:\n${userPrompt}`
                     );
 
-                    tThis.controllerChat.variableObject.systemMode.state = "tool-call";
+                    controllerChat.variableObject.systemMode.state = "tool-call";
                 }
             } else if (messageObject.name === "security_scanner") {
                 const result = messageObject.result as string;
 
-                const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+                const messageListState = controllerChat.variableObject.messageList.state.slice();
 
                 messageListState[messageIndex] = {
                     ...messageListState[messageIndex],
                     securityScanner: result
                 };
 
-                tThis.controllerChat.variableObject.messageList.state = messageListState;
+                controllerChat.variableObject.messageList.state = messageListState;
             } else if (messageObject.name === "playwright") {
                 const result = messageObject.result as modelChat.Iplaywright;
 
-                const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+                const messageListState = controllerChat.variableObject.messageList.state.slice();
 
                 if (result.message) {
                     messageListState[messageIndex] = {
@@ -212,7 +215,7 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                     };
                 }
 
-                tThis.controllerChat.variableObject.messageList.state = messageListState;
+                controllerChat.variableObject.messageList.state = messageListState;
             } else {
                 let resultText = "";
 
@@ -222,43 +225,43 @@ const toolResponse = async <T extends modelLlm.IdataContext>(
                     resultText = JSON.stringify(messageObject.result, null, 4);
                 }
 
-                const messageListState = tThis.controllerChat.variableObject.messageList.state.slice();
+                const messageListState = controllerChat.variableObject.messageList.state.slice();
 
                 messageListState[messageIndex] = {
                     ...messageListState[messageIndex],
                     assistantNoReason: resultText
                 };
 
-                tThis.controllerChat.variableObject.messageList.state = messageListState;
+                controllerChat.variableObject.messageList.state = messageListState;
             }
         }
 
-        tThis.controllerChat.autoscroll();
+        controllerChat.autoscroll();
     }
 };
 
-export const updateModel = <T extends modelLlm.IdataContext>(tThis: T, modelList: string[], isShowDropdown: boolean): void => {
-    tThis.controllerChat.variableObject.modelList.state = modelList;
+export const updateModel = (controllerChat: Chat, modelList: string[], isShowDropdown: boolean): void => {
+    controllerChat.variableObject.modelList.state = modelList;
 
     if (!isShowDropdown) {
         if (
-            tThis.controllerChat.variableObject.modelSelected.state === "" ||
-            !tThis.controllerChat.variableObject.modelList.state.includes(tThis.controllerChat.variableObject.modelSelected.state)
+            controllerChat.variableObject.modelSelected.state === "" ||
+            !controllerChat.variableObject.modelList.state.includes(controllerChat.variableObject.modelSelected.state)
         ) {
-            tThis.controllerChat.variableObject.modelSelected.state = tThis.controllerChat.variableObject.modelList.state[0];
+            controllerChat.variableObject.modelSelected.state = controllerChat.variableObject.modelList.state[0];
         }
     } else {
-        tThis.controllerChat.variableObject.isOpenDropdownModelList.state = true;
+        controllerChat.variableObject.isOpenDropdownModelList.state = true;
     }
 };
 
-export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, prompt?: string, mode?: string): Promise<modelLlm.IdataInputPrompt> => {
-    tThis.controllerChat.variableObject.isMessageSendAvailable.state = false;
+export const inputPrompt = async (controllerChat: Chat, prompt?: string, mode?: string): Promise<modelLlm.IdataInputPrompt> => {
+    controllerChat.variableObject.isMessageSendAvailable.state = false;
 
     const isModeContext = mode === "rag" || mode === "document";
 
     let time = helperSrc.localeFormat(new Date()) as string;
-    let resultUserPrompt = tThis.controllerChat.hookObject.elementInputMessageSend.value;
+    let resultUserPrompt = controllerChat.hookObject.elementInputMessageSend.value;
 
     if (prompt) {
         time = "";
@@ -266,21 +269,22 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
     }
 
     if (!isModeContext) {
-        tThis.controllerChat.variableObject.messageList.state = [
-            ...tThis.controllerChat.variableObject.messageList.state,
+        controllerChat.variableObject.messageList.state = [
+            ...controllerChat.variableObject.messageList.state,
             {
                 isLoading: true,
                 time: time,
                 user: resultUserPrompt,
-                assistantReason: tThis.controllerChat.responseReason,
-                assistantNoReason: tThis.controllerChat.responseNoReason,
-                mcpToolBody: tThis.controllerChat.responseMcpTool,
+                assistantReason: controllerChat.responseReason,
+                assistantNoReason: controllerChat.responseNoReason,
+                mcpToolBody: controllerChat.responseMcpTool,
                 ragCitationList: undefined,
                 ragCitationTabIndex: 0,
                 securityScanner: "",
                 documentParserList: [],
                 documentParserTabIndex: 0,
-                playwright: {} as modelChat.Iplaywright
+                playwright: {} as modelChat.Iplaywright,
+                llmAuthenticationUrl: ""
             }
         ];
     }
@@ -315,34 +319,34 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
         ].join("\n");
     }
 
-    if (tThis.controllerChat.variableObject.systemMode.state === "tool-call") {
+    if (controllerChat.variableObject.systemMode.state === "tool-call") {
         resultSystemPrompt = [
             "You are a multilingual assistant tool executer and you need to transform the user request in a action.",
             "You MUST NOT invent new actions.",
             "You MUST NOT explain nothing.",
-            `You MUST use ONLY the following tool: ${tThis.controllerChat.variableObject.toolSelected.state.name}`,
-            `${tThis.controllerChat.variableObject.toolSelected.state.inputInstruction}`,
+            `You MUST use ONLY the following tool: ${controllerChat.variableObject.toolSelected.state.name}`,
+            `${controllerChat.variableObject.toolSelected.state.inputInstruction}`,
             "You MUST return ONLY raw json WITHOUT wrap it in ```json and you need change ONLY the 'argumentObject' value without touch the 'name' default value.",
-            `For ${tThis.controllerChat.variableObject.toolSelected.state.name} return ALWAYS the json with this format: { "name": "${tThis.controllerChat.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(tThis.controllerChat.variableObject.toolSelected.state.argumentObject)} }`,
+            `For ${controllerChat.variableObject.toolSelected.state.name} return ALWAYS the json with this format: { "name": "${controllerChat.variableObject.toolSelected.state.name}", "argumentObject": ${JSON.stringify(controllerChat.variableObject.toolSelected.state.argumentObject)} }`,
             "You MUST keep the parameter names of 'argumentObject' EXACTLY as they are written, without renaming them and without changing their case."
         ].join("\n");
-    } else if (tThis.controllerChat.variableObject.systemMode.state === "task-call") {
+    } else if (controllerChat.variableObject.systemMode.state === "task-call") {
         resultSystemPrompt = [
             "You are a multilingual assistant task executer and you need to transform the user request in a ordered list of actions.",
             "You MUST NOT invent new actions.",
             "You MUST NOT explain nothing.",
-            `You MUST use ONLY the following tool: ${tThis.controllerChat.variableObject.taskSelected.state.name}`,
-            `${tThis.controllerChat.variableObject.taskSelected.state.inputInstruction}`,
+            `You MUST use ONLY the following tool: ${controllerChat.variableObject.taskSelected.state.name}`,
+            `${controllerChat.variableObject.taskSelected.state.inputInstruction}`,
             "You MUST return ONLY raw json WITHOUT wrap it in ```json and you need change ONLY the 'argumentObject' value without touch the 'name' default value.",
-            `For ${tThis.controllerChat.variableObject.taskSelected.state.name} return ALWAYS the json with this format: { "list": [ { "name": "${tThis.controllerChat.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(tThis.controllerChat.variableObject.taskSelected.state.argumentObject)} } ] }`,
+            `For ${controllerChat.variableObject.taskSelected.state.name} return ALWAYS the json with this format: { "list": [ { "name": "${controllerChat.variableObject.taskSelected.state.name}", "argumentObject": ${JSON.stringify(controllerChat.variableObject.taskSelected.state.argumentObject)} } ] }`,
             "You MUST keep the parameter names of 'argumentObject' EXACTLY as they are written, without renaming them and without changing their case."
         ].join("\n");
-    } else if (tThis.controllerChat.variableObject.systemMode.state === "agent-skill") {
-        const skillContent = await tThis.controllerChat.controllerMcp.apiSkillRead(tThis.controllerChat.variableObject.agentSelected.state.skillName);
+    } else if (controllerChat.variableObject.systemMode.state === "agent-skill") {
+        const skillContent = await controllerChat.controllerMcp.apiSkillRead(controllerChat.variableObject.agentSelected.state.skillName);
 
         resultSystemPrompt = [
             window.atob(skillContent),
-            `ONLY if you find a tag [script](...) in the user prompt, you MUST stop and return ONLY the raw json WITHOUT wrap it in \`\`\`json and with this format: { "action": { "skillName": "${tThis.controllerChat.variableObject.agentSelected.state.skillName}", "scriptName": "" } } where the value of "scriptName" is ONLY the file inside the tag [script](...).`
+            `ONLY if you find a tag [script](...) in the user prompt, you MUST stop and return ONLY the raw json WITHOUT wrap it in \`\`\`json and with this format: { "action": { "skillName": "${controllerChat.variableObject.agentSelected.state.skillName}", "scriptName": "" } } where the value of "scriptName" is ONLY the file inside the tag [script](...).`
         ].join("\n");
 
         const tagUserPromptStart = resultSystemPrompt.indexOf("[USER_PROMPT]");
@@ -362,8 +366,10 @@ export const inputPrompt = async <T extends modelLlm.IdataContext>(tThis: T, pro
     return { resultUserPrompt, resultSystemPrompt };
 };
 
-export const mcpResponse = async <T extends modelLlm.IdataContext>(
-    tThis: T,
+export const mcpResponse = async (
+    controllerChat: Chat,
+    apiResponse: (mode?: string, prompt?: string) => void,
+    apiResponseDocument: (documentObject: modelLlm.IdataDocument) => Promise<void>,
     responseCompleted: string,
     userPrompt: string,
     messageIndex: number
@@ -399,12 +405,12 @@ export const mcpResponse = async <T extends modelLlm.IdataContext>(
             }
         })
             .then(async (resultToolCall) => {
-                const json = await tThis.controllerChat.controllerMcp.apiResponseJson(resultToolCall);
+                const json = await controllerChat.controllerMcp.apiResponseJson(resultToolCall);
 
                 if (json.response.state === "ko") {
-                    tThis.controllerChat.messageLoadingHide(messageIndex);
+                    controllerChat.messageLoadingHide(messageIndex);
 
-                    tThis.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
+                    controllerChat.controllerMcp.showToastMessage("error", json.response.message);
                 } else {
                     const jsonResponseData = json.response.data as modelMcp.IapiToolCallResponse;
 
@@ -414,11 +420,19 @@ export const mcpResponse = async <T extends modelLlm.IdataContext>(
                         message = jsonResponseData.result.content[0].text;
                     }
 
-                    await toolResponse(tThis, message, JSON.stringify(responseCompletedObject.argumentObject), userPrompt, messageIndex);
+                    await toolResponse(
+                        controllerChat,
+                        apiResponse,
+                        apiResponseDocument,
+                        message,
+                        JSON.stringify(responseCompletedObject.argumentObject),
+                        userPrompt,
+                        messageIndex
+                    );
                 }
             })
             .catch(async (error: Error) => {
-                await toolResponse(tThis, error.message, "", userPrompt, messageIndex);
+                await toolResponse(controllerChat, apiResponse, apiResponseDocument, error.message, "", userPrompt, messageIndex);
             });
     } else if ("list" in responseCompletedObject) {
         await fetch(`${helperSrc.URL_MCP}/api/task-call`, {
@@ -435,18 +449,18 @@ export const mcpResponse = async <T extends modelLlm.IdataContext>(
             }
         })
             .then(async (resultTaskCall) => {
-                const json = await tThis.controllerChat.controllerMcp.apiResponseJson(resultTaskCall);
+                const json = await controllerChat.controllerMcp.apiResponseJson(resultTaskCall);
 
                 if (json.response.state === "ko") {
-                    tThis.controllerChat.messageLoadingHide(messageIndex);
+                    controllerChat.messageLoadingHide(messageIndex);
 
-                    tThis.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
+                    controllerChat.controllerMcp.showToastMessage("error", json.response.message);
                 } else {
-                    await toolResponse(tThis, json.response.data as string, "", userPrompt, messageIndex);
+                    await toolResponse(controllerChat, apiResponse, apiResponseDocument, json.response.data as string, "", userPrompt, messageIndex);
                 }
             })
             .catch(async (error: Error) => {
-                await toolResponse(tThis, error.message, "", userPrompt, messageIndex);
+                await toolResponse(controllerChat, apiResponse, apiResponseDocument, error.message, "", userPrompt, messageIndex);
             });
     }
 };

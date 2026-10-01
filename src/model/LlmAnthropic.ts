@@ -16,6 +16,13 @@ export interface IapiLlmBody {
     tools: unknown[];
 }
 
+export interface IapiCliBody {
+    code?: string;
+    model?: string;
+    systemPrompt?: string;
+    userPrompt?: string;
+}
+
 export interface IapiLlmResponse {
     type: string;
     error: {
@@ -36,4 +43,11 @@ export interface IdataMessage {
 export interface IdataSystem {
     text: string;
     type: string;
+}
+
+export interface IdataInput {
+    systemModeRequest: string;
+    messageIndex: number;
+    userPrompt: string;
+    systemPrompt: string;
 }

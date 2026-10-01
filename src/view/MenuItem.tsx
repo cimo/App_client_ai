@@ -1105,7 +1105,7 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             {() => {
                                                 const resultList: IvirtualNode[] = [];
 
-                                                for (const [key, value] of Object.entries(variableObject.setting.state.llmList)) {
+                                                for (const [key, value] of Object.entries(variableObject.setting.state.llm.serviceList)) {
                                                     resultList.push(
                                                         <option key={key} value={value.id} selected={() => value.selected}>
                                                             {value.name}
@@ -1117,22 +1117,82 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             }}
                                         </select>
                                     </div>
-                                    <div class="field">
-                                        <p class="label">Url:</p>
-                                        <input
-                                            value={() => variableObject.setting.state.llmList[variableObject.settingLlmServiceId.state - 1].url}
-                                            jsmvcfw-elementHookName="elementInputSettingLlmUrl"
-                                            type="text"
-                                        ></input>
-                                    </div>
-                                    <div class="field">
-                                        <p class="label">Api key:</p>
-                                        <input
-                                            value={() => variableObject.setting.state.llmList[variableObject.settingLlmServiceId.state - 1].apiKey}
-                                            jsmvcfw-elementHookName="elementInputSettingLlmApiKey"
-                                            type="password"
-                                        ></input>
-                                    </div>
+                                    {() => {
+                                        const resultList: IvirtualNode[] = [];
+
+                                        if (variableObject.settingLlmServiceId.state !== 1) {
+                                            resultList.push(
+                                                <>
+                                                    <div class="field">
+                                                        <p class="label">Usage:</p>
+                                                        <select
+                                                            value={() => variableObject.settingLlmUsageId.state}
+                                                            jsmvcfw-elementHookName="elementSelectSettingLlmUsageId"
+                                                            onChange={() => methodObject.onChangeSettingLlmUsageId()}
+                                                        >
+                                                            {() => {
+                                                                const resultList: IvirtualNode[] = [];
+
+                                                                for (const [key, value] of Object.entries(
+                                                                    variableObject.setting.state.llm.usageList
+                                                                )) {
+                                                                    resultList.push(
+                                                                        <option
+                                                                            key={key}
+                                                                            value={value.id}
+                                                                            selected={() => variableObject.settingLlmUsageId.state === value.id}
+                                                                        >
+                                                                            {value.name}
+                                                                        </option>
+                                                                    );
+                                                                }
+
+                                                                return resultList;
+                                                            }}
+                                                        </select>
+                                                    </div>
+                                                    {() => {
+                                                        const resultList: IvirtualNode[] = [];
+
+                                                        if (variableObject.settingLlmUsageId.state === 1) {
+                                                            resultList.push(
+                                                                <>
+                                                                    <div class="field">
+                                                                        <p class="label">Url:</p>
+                                                                        <input
+                                                                            value={() =>
+                                                                                variableObject.setting.state.llm.serviceList[
+                                                                                    variableObject.settingLlmServiceId.state - 1
+                                                                                ].url
+                                                                            }
+                                                                            jsmvcfw-elementHookName="elementInputSettingLlmUrl"
+                                                                            type="text"
+                                                                        ></input>
+                                                                    </div>
+                                                                    <div class="field">
+                                                                        <p class="label">Api key:</p>
+                                                                        <input
+                                                                            value={() =>
+                                                                                variableObject.setting.state.llm.serviceList[
+                                                                                    variableObject.settingLlmServiceId.state - 1
+                                                                                ].apiKey
+                                                                            }
+                                                                            jsmvcfw-elementHookName="elementInputSettingLlmApiKey"
+                                                                            type="password"
+                                                                        ></input>
+                                                                    </div>
+                                                                </>
+                                                            );
+                                                        }
+
+                                                        return resultList;
+                                                    }}
+                                                </>
+                                            );
+                                        }
+
+                                        return resultList;
+                                    }}
                                 </div>
                                 <div class="button_wrapper">
                                     <button

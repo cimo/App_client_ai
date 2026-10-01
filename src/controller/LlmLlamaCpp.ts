@@ -4,7 +4,6 @@ import { fetch } from "@tauri-apps/plugin-http";
 import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
 import * as controllerLlm from "../controller/Llm";
-import * as modelMcp from "../model/Mcp";
 import * as modelLlm from "../model/Llm";
 import * as modelLlmLlamaCpp from "../model/LlmLlamaCpp";
 import type Chat from "./Chat";
@@ -16,24 +15,11 @@ export default class LlmLlamaCpp {
     private tokenReserve = 1536;
 
     // Method
-    private apiFetchSession = async (
-        llm: modelMcp.IsettingLlm,
-        route: string,
-        method: string,
-        body?: string,
-        signal?: AbortSignal
-    ): Promise<Response> => {
+    private apiFetchSession = async (route: string, method: string, body?: string, signal?: AbortSignal): Promise<Response> => {
         const apiFetch = (): Promise<Response> => {
             let header: HeadersInit | undefined = {
                 "ai-cookie": session.data.aiCookie
             };
-
-            if (llm.apiKey) {
-                header = {
-                    ...header,
-                    Authorization: `Bearer ${llm.apiKey}`
-                };
-            }
 
             if (body) {
                 header = {
@@ -42,7 +28,7 @@ export default class LlmLlamaCpp {
                 };
             }
 
-            return fetch(`${llm.url}${route}`, {
+            return fetch(`${helperSrc.URL_AI}${route}`, {
                 method,
                 headers: header,
                 body,
@@ -68,40 +54,30 @@ export default class LlmLlamaCpp {
     };
 
     apiModel = async (isShowDropdown: boolean): Promise<void> => {
-        const llm = this.controllerChat.selectedLlm();
+        return this.apiFetchSession("/api/model", "GET")
+            .then(async (resultApi) => {
+                const json = await this.controllerChat.controllerAi.apiResponseJson(resultApi);
 
-        if (llm) {
-            return this.apiFetchSession(llm, "/api/model", "GET")
-                .then(async (resultApi) => {
-                    const json = await this.controllerChat.controllerAi.apiResponseJson(resultApi);
+                if (json.response.state === "ko") {
+                    this.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
+                } else {
+                    controllerLlm.updateModel(this.controllerChat, json.response.data as string[], isShowDropdown);
+                }
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("LlmLlamaCpp.ts - apiModel() - fetch() - catch()", error.message);
 
-                    if (json.response.state === "ko") {
-                        this.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
-                    } else {
-                        controllerLlm.updateModel(this, json.response.data as string[], isShowDropdown);
-                    }
-                })
-                .catch((error: Error) => {
-                    helperSrc.writeLog("LlmLlamaCpp.ts - apiModel() - fetch() - catch()", error.message);
-
-                    this.controllerChat.llmServiceError();
-                });
-        }
+                this.controllerChat.llmServiceError();
+            });
     };
 
     private apiTokenDetail = async (text: string): Promise<modelLlmLlamaCpp.IdataTokenDetail> => {
-        const llm = this.controllerChat.selectedLlm();
-
-        if (!llm) {
-            return { count: -1, contextSize: -1 };
-        }
-
         const body: modelLlmLlamaCpp.IapiTokenDetailBody = {
             model: this.controllerChat.variableObject.modelSelected.state,
             text
         };
 
-        return this.apiFetchSession(llm, "/api/token-detail", "POST", JSON.stringify(body))
+        return this.apiFetchSession("/api/token-detail", "POST", JSON.stringify(body))
             .then(async (resultApi) => {
                 const json = await this.controllerChat.controllerAi.apiResponseJson(resultApi);
 
@@ -121,12 +97,6 @@ export default class LlmLlamaCpp {
     };
 
     private apiResponseText = async (systemPrompt: string, userPrompt: string): Promise<modelLlmLlamaCpp.IdataResponseText> => {
-        const llm = this.controllerChat.selectedLlm();
-
-        if (!llm) {
-            return { text: "", message: "" };
-        }
-
         const body: modelLlmLlamaCpp.IapiLlmBody = {
             stream: true,
             model: this.controllerChat.variableObject.modelSelected.state,
@@ -146,7 +116,7 @@ export default class LlmLlamaCpp {
 
         const signal = this.controllerChat.abortControllerLlmResponse ? this.controllerChat.abortControllerLlmResponse.signal : undefined;
 
-        return this.apiFetchSession(llm, "/api/response", "POST", JSON.stringify(body), signal)
+        return this.apiFetchSession("/api/response", "POST", JSON.stringify(body), signal)
             .then(async (resultApi) => {
                 const contentType = resultApi.headers.get("Content-Type");
 
@@ -349,7 +319,11 @@ export default class LlmLlamaCpp {
 
             let messageIndex = -1;
 
-            const { resultUserPrompt: userPrompt, resultSystemPrompt: systemPrompt } = await controllerLlm.inputPrompt(this, prompt, mode);
+            const { resultUserPrompt: userPrompt, resultSystemPrompt: systemPrompt } = await controllerLlm.inputPrompt(
+                this.controllerChat,
+                prompt,
+                mode
+            );
 
             messageIndex = this.controllerChat.variableObject.messageList.state.length - 1;
 
@@ -386,71 +360,145 @@ export default class LlmLlamaCpp {
                 body.temperature = 0;
             }
 
-            const llm = this.controllerChat.selectedLlm();
+            this.apiFetchSession("/api/response", "POST", JSON.stringify(body), this.controllerChat.abortControllerLlmResponse.signal)
+                .then(async (resultApi) => {
+                    const contentType = resultApi.headers.get("Content-Type");
 
-            if (llm) {
-                this.apiFetchSession(llm, "/api/response", "POST", JSON.stringify(body), this.controllerChat.abortControllerLlmResponse.signal)
-                    .then(async (resultApi) => {
-                        const contentType = resultApi.headers.get("Content-Type");
+                    if (!contentType || !contentType.includes("text/event-stream") || !resultApi.body) {
+                        helperSrc.writeLog("LlmLlamaCpp.ts - apiResponse() - fetch() - Error", "Missing or invalid headers.");
 
-                        if (!contentType || !contentType.includes("text/event-stream") || !resultApi.body) {
-                            helperSrc.writeLog("LlmLlamaCpp.ts - apiResponse() - fetch() - Error", "Missing or invalid headers.");
+                        const json = await this.controllerChat.controllerAi.apiResponseJson(resultApi);
 
-                            const json = await this.controllerChat.controllerAi.apiResponseJson(resultApi);
+                        this.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
 
-                            this.controllerChat.controllerMcp.showToastMessage("error", json.response.message);
+                        this.controllerChat.responseReset("finish");
 
+                        this.controllerChat.messageStreamReset();
+
+                        this.controllerChat.messageLoadingHide(messageIndex);
+
+                        return;
+                    }
+
+                    const reader = resultApi.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    let buffer = "";
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+
+                        if (done) {
                             this.controllerChat.responseReset("finish");
 
-                            this.controllerChat.messageStreamReset();
-
-                            this.controllerChat.messageLoadingHide(messageIndex);
-
-                            return;
-                        }
-
-                        const reader = resultApi.body.getReader();
-                        const decoder = new TextDecoder("utf-8");
-                        let buffer = "";
-
-                        while (true) {
-                            const { value, done } = await reader.read();
-
-                            if (done) {
-                                this.controllerChat.responseReset("finish");
-
-                                if (this.controllerChat.variableObject.isMessageSendAvailable.state) {
-                                    this.controllerChat.messageLoadingHide(messageIndex);
-                                }
-
-                                break;
+                            if (this.controllerChat.variableObject.isMessageSendAvailable.state) {
+                                this.controllerChat.messageLoadingHide(messageIndex);
                             }
 
-                            buffer += decoder.decode(value, { stream: true });
-                            const bufferSplit = buffer.split(/\r?\n/);
-                            buffer = bufferSplit.pop() as string;
+                            break;
+                        }
 
-                            for (let a = 0; a < bufferSplit.length; a++) {
-                                const line = bufferSplit[a];
+                        buffer += decoder.decode(value, { stream: true });
+                        const bufferSplit = buffer.split(/\r?\n/);
+                        buffer = bufferSplit.pop() as string;
 
-                                if (line.startsWith("data:")) {
-                                    const data = line.slice(5).trim();
+                        for (let a = 0; a < bufferSplit.length; a++) {
+                            const line = bufferSplit[a];
 
-                                    const dataTrim = data.trim();
+                            if (line.startsWith("data:")) {
+                                const data = line.slice(5).trim();
 
-                                    if (helperSrc.jsonCheck(dataTrim)) {
-                                        const dataTrimObject = JSON.parse(dataTrim) as modelLlmLlamaCpp.IapiLlmResponse;
+                                const dataTrim = data.trim();
 
-                                        if (dataTrimObject.type === "error") {
-                                            const error = dataTrimObject.error;
+                                if (helperSrc.jsonCheck(dataTrim)) {
+                                    const dataTrimObject = JSON.parse(dataTrim) as modelLlmLlamaCpp.IapiLlmResponse;
 
-                                            if (error) {
+                                    if (dataTrimObject.type === "error") {
+                                        const error = dataTrimObject.error;
+
+                                        if (error) {
+                                            const messageListState = this.controllerChat.variableObject.messageList.state.slice();
+
+                                            messageListState[messageIndex] = {
+                                                ...messageListState[messageIndex],
+                                                assistantNoReason: error.message
+                                            };
+
+                                            this.controllerChat.variableObject.messageList.state = messageListState;
+
+                                            this.controllerChat.messageStreamReset();
+
+                                            this.controllerChat.autoscroll();
+                                        }
+                                    } else if (dataTrimObject.type === "response.reasoning_text.delta") {
+                                        const delta = dataTrimObject.delta;
+
+                                        if (delta) {
+                                            this.controllerChat.responseReason += delta;
+
+                                            this.controllerChat.hookObject.elementMessageStreamReasonWrapper.classList.remove("none");
+                                            this.controllerChat.hookObject.elementMessageStreamReason.textContent =
+                                                this.controllerChat.responseReason.trim();
+
+                                            if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
+                                                this.controllerChat.messageLoadingHide(messageIndex);
+                                            }
+
+                                            this.controllerChat.autoscroll();
+                                        }
+                                    } else if (dataTrimObject.type === "response.output_text.delta") {
+                                        const delta = dataTrimObject.delta;
+
+                                        if (delta && (!prompt || isModeContext)) {
+                                            this.controllerChat.responseNoReason += delta;
+
+                                            if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
+                                                this.controllerChat.hookObject.elementMessageStreamNoReason.classList.remove("none");
+                                                this.controllerChat.hookObject.elementMessageStreamNoReason.textContent =
+                                                    this.controllerChat.responseNoReason.trim();
+
+                                                this.controllerChat.messageLoadingHide(messageIndex);
+                                            }
+
+                                            this.controllerChat.autoscroll();
+                                        }
+                                    } else if (dataTrimObject.type === "response.completed") {
+                                        const response = dataTrimObject.response;
+
+                                        if (response) {
+                                            const responseCompleted = response.output[0].content[0].text;
+
+                                            if (
+                                                helperSrc.jsonCheck(responseCompleted) &&
+                                                (systemModeRequest === "tool-call" || systemModeRequest === "task-call")
+                                            ) {
+                                                await controllerLlm.mcpResponse(
+                                                    this.controllerChat,
+                                                    this.apiResponse,
+                                                    this.apiResponseDocument,
+                                                    responseCompleted,
+                                                    userPrompt,
+                                                    messageIndex
+                                                );
+                                            } else {
                                                 const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 
-                                                messageListState[messageIndex] = {
+                                                let message = {
                                                     ...messageListState[messageIndex],
-                                                    assistantNoReason: error.message
+                                                    assistantReason: this.controllerChat.responseReason.trim()
                                                 };
+
+                                                if (
+                                                    (!prompt || isModeContext) &&
+                                                    systemModeRequest !== "tool-call" &&
+                                                    systemModeRequest !== "task-call"
+                                                ) {
+                                                    message = {
+                                                        ...message,
+                                                        assistantNoReason: this.controllerChat.responseNoReason.trim()
+                                                    };
+                                                }
+
+                                                messageListState[messageIndex] = message;
 
                                                 this.controllerChat.variableObject.messageList.state = messageListState;
 
@@ -458,108 +506,37 @@ export default class LlmLlamaCpp {
 
                                                 this.controllerChat.autoscroll();
                                             }
-                                        } else if (dataTrimObject.type === "response.reasoning_text.delta") {
-                                            const delta = dataTrimObject.delta;
-
-                                            if (delta) {
-                                                this.controllerChat.responseReason += delta;
-
-                                                this.controllerChat.hookObject.elementMessageStreamReasonWrapper.classList.remove("none");
-                                                this.controllerChat.hookObject.elementMessageStreamReason.textContent =
-                                                    this.controllerChat.responseReason.trim();
-
-                                                if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
-                                                    this.controllerChat.messageLoadingHide(messageIndex);
-                                                }
-
-                                                this.controllerChat.autoscroll();
-                                            }
-                                        } else if (dataTrimObject.type === "response.output_text.delta") {
-                                            const delta = dataTrimObject.delta;
-
-                                            if (delta && (!prompt || isModeContext)) {
-                                                this.controllerChat.responseNoReason += delta;
-
-                                                if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
-                                                    this.controllerChat.hookObject.elementMessageStreamNoReason.classList.remove("none");
-                                                    this.controllerChat.hookObject.elementMessageStreamNoReason.textContent =
-                                                        this.controllerChat.responseNoReason.trim();
-
-                                                    this.controllerChat.messageLoadingHide(messageIndex);
-                                                }
-
-                                                this.controllerChat.autoscroll();
-                                            }
-                                        } else if (dataTrimObject.type === "response.completed") {
-                                            const response = dataTrimObject.response;
-
-                                            if (response) {
-                                                const responseCompleted = response.output[0].content[0].text;
-
-                                                if (
-                                                    helperSrc.jsonCheck(responseCompleted) &&
-                                                    (systemModeRequest === "tool-call" || systemModeRequest === "task-call")
-                                                ) {
-                                                    await controllerLlm.mcpResponse(this, responseCompleted, userPrompt, messageIndex);
-                                                } else {
-                                                    const messageListState = this.controllerChat.variableObject.messageList.state.slice();
-
-                                                    let message = {
-                                                        ...messageListState[messageIndex],
-                                                        assistantReason: this.controllerChat.responseReason.trim()
-                                                    };
-
-                                                    if (
-                                                        (!prompt || isModeContext) &&
-                                                        systemModeRequest !== "tool-call" &&
-                                                        systemModeRequest !== "task-call"
-                                                    ) {
-                                                        message = {
-                                                            ...message,
-                                                            assistantNoReason: this.controllerChat.responseNoReason.trim()
-                                                        };
-                                                    }
-
-                                                    messageListState[messageIndex] = message;
-
-                                                    this.controllerChat.variableObject.messageList.state = messageListState;
-
-                                                    this.controllerChat.messageStreamReset();
-
-                                                    this.controllerChat.autoscroll();
-                                                }
-                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    })
-                    .catch((error: Error) => {
-                        helperSrc.writeLog("LlmLlamaCpp.ts - apiResponse() - fetch() - catch()", typeof error === "string" ? error : error.message);
+                    }
+                })
+                .catch((error: Error) => {
+                    helperSrc.writeLog("LlmLlamaCpp.ts - apiResponse() - fetch() - catch()", typeof error === "string" ? error : error.message);
 
-                        this.controllerChat.responseReset("finish");
+                    this.controllerChat.responseReset("finish");
 
-                        this.controllerChat.messageStreamReset();
+                    this.controllerChat.messageStreamReset();
 
-                        if (this.controllerChat.variableObject.isMessageSendAvailable.state) {
-                            this.controllerChat.messageLoadingHide(messageIndex);
-                        }
+                    if (this.controllerChat.variableObject.isMessageSendAvailable.state) {
+                        this.controllerChat.messageLoadingHide(messageIndex);
+                    }
 
-                        if (error.toString().toLowerCase() === "request cancelled") {
-                            const messageListState = this.controllerChat.variableObject.messageList.state.slice();
+                    if (error.toString().toLowerCase() === "request cancelled") {
+                        const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 
-                            messageListState[messageIndex] = {
-                                ...messageListState[messageIndex],
-                                assistantNoReason: "Stopped by user."
-                            };
+                        messageListState[messageIndex] = {
+                            ...messageListState[messageIndex],
+                            assistantNoReason: "Stopped by user."
+                        };
 
-                            this.controllerChat.variableObject.messageList.state = messageListState;
+                        this.controllerChat.variableObject.messageList.state = messageListState;
 
-                            return;
-                        }
-                    });
-            }
+                        return;
+                    }
+                });
 
             this.controllerChat.hookObject.elementInputMessageSend.value = "";
         }

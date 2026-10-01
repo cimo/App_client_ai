@@ -9,50 +9,10 @@ import type Chat from "./Chat";
 
 export default class LlmOpenAi {
     // Variable
-    private modelAvailableList: string[] = ["gpt-6-astra", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"];
-
+    modelAvailableList: string[] = ["gpt-5.6-sol", "gpt-6-astra", "gpt-5.6-terra", "gpt-5.6-luna"];
     controllerChat: Chat;
 
     // Method
-    apiModel = async (isShowDropdown: boolean): Promise<void> => {
-        const llm = this.controllerChat.selectedLlm();
-
-        if (llm) {
-            return fetch(`${llm.url}/models`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${llm.apiKey}`
-                },
-                danger: {
-                    acceptInvalidCerts: true,
-                    acceptInvalidHostnames: true
-                }
-            })
-                .then(async (resultApi) => {
-                    const json = (await resultApi.json()) as modelLlmOpenAi.IapiModelBody;
-
-                    const modelList: string[] = [];
-
-                    for (const availableModel of this.modelAvailableList) {
-                        for (const model of json.data) {
-                            if (model.owned_by === "system" && model.id === availableModel) {
-                                modelList.push(model.id);
-
-                                break;
-                            }
-                        }
-                    }
-
-                    controllerLlm.updateModel(this, modelList, isShowDropdown);
-                })
-                .catch((error: Error) => {
-                    helperSrc.writeLog("LlmOpenAi.ts - apiModel() - fetch() - catch()", error.message);
-
-                    this.controllerChat.llmServiceError();
-                });
-        }
-    };
-
     apiResponseDocument = async (documentObject: modelLlm.IdataDocument): Promise<void> => {
         const contentList: string[] = [];
 
@@ -91,7 +51,11 @@ export default class LlmOpenAi {
 
             let messageIndex = -1;
 
-            const { resultUserPrompt: userPrompt, resultSystemPrompt: systemPrompt } = await controllerLlm.inputPrompt(this, prompt, mode);
+            const { resultUserPrompt: userPrompt, resultSystemPrompt: systemPrompt } = await controllerLlm.inputPrompt(
+                this.controllerChat,
+                prompt,
+                mode
+            );
 
             messageIndex = this.controllerChat.variableObject.messageList.state.length - 1;
 
@@ -241,7 +205,14 @@ export default class LlmOpenAi {
                                                 helperSrc.jsonCheck(responseCompleted) &&
                                                 (systemModeRequest === "tool-call" || systemModeRequest === "task-call")
                                             ) {
-                                                await controllerLlm.mcpResponse(this, responseCompleted, userPrompt, messageIndex);
+                                                await controllerLlm.mcpResponse(
+                                                    this.controllerChat,
+                                                    this.apiResponse,
+                                                    this.apiResponseDocument,
+                                                    responseCompleted,
+                                                    userPrompt,
+                                                    messageIndex
+                                                );
                                             } else {
                                                 const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 
@@ -303,6 +274,14 @@ export default class LlmOpenAi {
 
             this.controllerChat.hookObject.elementInputMessageSend.value = "";
         }
+    };
+
+    apiCliLogin = async (): Promise<void> => {
+        this.controllerChat.controllerToast.show("warning", ["Not yet available."]);
+    };
+
+    apiCliResponse = async (): Promise<void> => {
+        this.controllerChat.controllerToast.show("warning", ["Not yet available."]);
     };
 
     constructor(controllerChat: Chat) {

@@ -5,8 +5,11 @@ import * as modelMcp from "./Mcp";
 import type Chat from "../controller/Chat.js";
 
 export type TllmInstance = {
+    modelAvailableList: string[];
     apiModel: (isShowDropdown: boolean) => Promise<void>;
     apiResponse: () => Promise<void>;
+    apiCliLogin: (code?: string) => Promise<void>;
+    apiCliResponse: () => Promise<void>;
 };
 
 export type TllmConstructor = new (chat: Chat) => TllmInstance;
@@ -24,6 +27,7 @@ export interface IdataMessage {
     documentParserList: modelMcp.Idocument[];
     documentParserTabIndex: number;
     playwright: Iplaywright;
+    llmAuthenticationUrl: string;
 }
 
 export interface Ifile {
@@ -44,6 +48,8 @@ export interface Ivariable {
     messageList: IvariableBind<IdataMessage[]>;
     systemMode: IvariableBind<string>;
     llmInstance: IvariableBind<TllmInstance | null>;
+    isLoginLlm: IvariableBind<boolean>;
+    isOfflineAi: IvariableBind<boolean>;
     isOpenDropdownModelList: IvariableBind<boolean>;
     modelList: IvariableBind<string[]>;
     modelSelected: IvariableBind<string>;
@@ -56,6 +62,8 @@ export interface Ivariable {
     playwrightVideoSrc: IvariableBind<string>;
     playwrightVideoName: IvariableBind<string>;
     setting: IvariableBind<modelMcp.Isetting>;
+    settingLlmServiceId: IvariableBind<number>;
+    settingLlmUsageId: IvariableBind<number>;
 }
 
 export interface Imethod {
@@ -64,6 +72,9 @@ export interface Imethod {
     onClickCitationTab: (messageIndex: number, tabIndex: number) => void;
     onClickDocumentParserTab: (messageIndex: number, tabIndex: number) => void;
     onClickPlaywrightVideoShow: (fileName: string) => void;
+    onClickButtonLlmLogin: () => void;
+    onClickLlmLoginCopyUrl: (url: string) => void;
+    onClickLlmLoginOpenUrl: (url: string) => void;
     onErrorPlaywrightVideoFail: () => void;
     markdownHtml: (value: string) => string;
 }

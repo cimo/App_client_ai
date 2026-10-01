@@ -873,17 +873,33 @@ export default class MenuItem implements Icontroller {
 
         const llmServiceId = parseInt(this.hookObject.elementSelectSettingLlmServiceId.value);
 
+        let llmUsageId = -1;
+
+        if (llmServiceId !== 1) {
+            llmUsageId = parseInt(this.hookObject.elementSelectSettingLlmUsageId.value);
+        }
+
         const settingCopy: modelMcp.Isetting = {
             id: this.variableObject.setting.state.id,
-            llmList: []
+            llm: {
+                serviceList: [],
+                usageList: []
+            }
         };
 
-        for (const llm of this.variableObject.setting.state.llmList) {
-            settingCopy.llmList.push({
-                ...llm,
-                url: llm.id === llmServiceId ? this.hookObject.elementInputSettingLlmUrl.value : llm.url,
-                apiKey: llm.id === llmServiceId ? this.hookObject.elementInputSettingLlmApiKey.value : llm.apiKey,
-                selected: llm.id === llmServiceId ? true : false
+        for (const service of this.variableObject.setting.state.llm.serviceList) {
+            settingCopy.llm.serviceList.push({
+                ...service,
+                url: service.id === llmServiceId && llmUsageId === 1 ? this.hookObject.elementInputSettingLlmUrl.value : service.url,
+                apiKey: service.id === llmServiceId && llmUsageId === 1 ? this.hookObject.elementInputSettingLlmApiKey.value : service.apiKey,
+                selected: service.id === llmServiceId ? true : false
+            });
+        }
+
+        for (const usage of this.variableObject.setting.state.llm.usageList) {
+            settingCopy.llm.usageList.push({
+                ...usage,
+                selected: llmUsageId === -1 ? usage.selected : usage.id === llmUsageId
             });
         }
 
@@ -980,6 +996,10 @@ export default class MenuItem implements Icontroller {
         this.variableObject.settingLlmServiceId.state = parseInt(this.hookObject.elementSelectSettingLlmServiceId.value);
     };
 
+    private onChangeSettingLlmUsageId = (): void => {
+        this.variableObject.settingLlmUsageId.state = parseInt(this.hookObject.elementSelectSettingLlmUsageId.value);
+    };
+
     private menuReset = (): void => {
         this.variableObject.isMenuItemWorkspace.state = false;
         this.variableObject.isMenuItemTool.state = false;
@@ -1051,6 +1071,7 @@ export default class MenuItem implements Icontroller {
                 isUserUpdate: false,
                 setting: variableLink<modelMcp.Isetting>("Mcp"),
                 settingLlmServiceId: 1,
+                settingLlmUsageId: 1,
                 isSettingSave: false,
                 systemMode: variableLink<string>("Chat"),
                 pageNumber: variableLink<number>("Pagination")
@@ -1105,7 +1126,8 @@ export default class MenuItem implements Icontroller {
             onClickToggleSelectAll: this.onClickToggleSelectAll,
             onInputWorkspaceFolderName: this.onInputWorkspaceFolderName,
             onInputWorkspaceRename: this.onInputWorkspaceRename,
-            onChangeSettingLlmServiceId: this.onChangeSettingLlmServiceId
+            onChangeSettingLlmServiceId: this.onChangeSettingLlmServiceId,
+            onChangeSettingLlmUsageId: this.onChangeSettingLlmUsageId
         };
     }
 

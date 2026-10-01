@@ -1,58 +1,91 @@
 import { fetch } from "@tauri-apps/plugin-http";
 
 // Source
+import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
 import * as controllerLlm from "../controller/Llm";
+import * as modelHelperSrc from "../model/HelperSrc";
 import * as modelLlmAnthropic from "../model/LlmAnthropic";
 import * as modelLlm from "../model/Llm";
+import * as modelChat from "../model/Chat";
 import type Chat from "./Chat";
 
 export default class LlmAnthropic {
     // Variable
     private anthropicVersion = "2023-06-01";
-    private modelAvailableList: string[] = ["claude-fable-5-1", "claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5-20251001"];
 
+    modelAvailableList: string[] = ["claude-opus-5", "claude-fable-5-1", "claude-sonnet-5", "claude-haiku-4-5-20251001"];
     controllerChat: Chat;
 
     // Method
-    apiModel = async (isShowDropdown: boolean): Promise<void> => {
-        const llm = this.controllerChat.selectedLlm();
+    private apiResponseJson = async (resultApi: Response): Promise<modelHelperSrc.IapiResponse> => {
+        return helperSrc.apiResponseJson(resultApi, session.deleteAiSession, "Ai session expired, login again.");
+    };
 
-        if (llm) {
-            return fetch(`${llm.url}/models`, {
-                method: "GET",
-                headers: {
-                    "anthropic-dangerous-direct-browser-access": "true",
-                    "anthropic-version": this.anthropicVersion,
-                    "X-Api-Key": llm.apiKey
-                },
-                danger: {
-                    acceptInvalidCerts: true,
-                    acceptInvalidHostnames: true
-                }
-            })
-                .then(async (resultApi) => {
-                    const json = (await resultApi.json()) as modelLlmAnthropic.IapiModelBody;
+    private responseInitialize = async (mode?: string, prompt?: string): Promise<modelLlmAnthropic.IdataInput> => {
+        this.controllerChat.responseReset();
 
-                    const modelList: string[] = [];
+        this.controllerChat.messageSentCount++;
 
-                    for (const availableModel of this.modelAvailableList) {
-                        for (const model of json.data) {
-                            if (model.type === "model" && model.id === availableModel) {
-                                modelList.push(model.id);
+        const systemModeRequest = this.controllerChat.variableObject.systemMode.state;
 
-                                break;
-                            }
-                        }
-                    }
+        let messageIndex = -1;
 
-                    controllerLlm.updateModel(this, modelList, isShowDropdown);
-                })
-                .catch((error: Error) => {
-                    helperSrc.writeLog("LlmAnthropic.ts - apiModel() - fetch() - catch()", error.message);
+        const { resultUserPrompt: userPrompt, resultSystemPrompt: systemPrompt } = await controllerLlm.inputPrompt(this.controllerChat, prompt, mode);
 
-                    this.controllerChat.llmServiceError();
-                });
+        messageIndex = this.controllerChat.variableObject.messageList.state.length - 1;
+
+        this.controllerChat.isAutoScrollEnabled = true;
+
+        this.controllerChat.autoscroll();
+
+        return {
+            systemModeRequest,
+            messageIndex,
+            userPrompt,
+            systemPrompt
+        };
+    };
+
+    private responseComplete = async (
+        noReason: string,
+        input: modelLlmAnthropic.IdataInput,
+        isModeContext: boolean,
+        prompt?: string
+    ): Promise<void> => {
+        const responseCompleted = noReason.trim();
+
+        if (helperSrc.jsonCheck(responseCompleted) && (input.systemModeRequest === "tool-call" || input.systemModeRequest === "task-call")) {
+            await controllerLlm.mcpResponse(
+                this.controllerChat,
+                this.apiResponse,
+                this.apiResponseDocument,
+                responseCompleted,
+                input.userPrompt,
+                input.messageIndex
+            );
+        } else {
+            const messageListState = this.controllerChat.variableObject.messageList.state.slice();
+
+            let message = {
+                ...messageListState[input.messageIndex],
+                assistantReason: this.controllerChat.responseReason.trim()
+            };
+
+            if ((!prompt || isModeContext) && input.systemModeRequest !== "tool-call" && input.systemModeRequest !== "task-call") {
+                message = {
+                    ...message,
+                    assistantNoReason: responseCompleted
+                };
+            }
+
+            messageListState[input.messageIndex] = message;
+
+            this.controllerChat.variableObject.messageList.state = messageListState;
+
+            this.controllerChat.messageStreamReset();
+
+            this.controllerChat.autoscroll();
         }
     };
 
@@ -86,33 +119,19 @@ export default class LlmAnthropic {
         ) {
             this.controllerChat.abortControllerLlmResponse = new AbortController();
 
-            this.controllerChat.responseReset();
-
-            this.controllerChat.messageSentCount++;
-
-            const systemModeRequest = this.controllerChat.variableObject.systemMode.state;
-
-            let messageIndex = -1;
-
-            const { resultUserPrompt: userPrompt, resultSystemPrompt: systemPrompt } = await controllerLlm.inputPrompt(this, prompt, mode);
-
-            messageIndex = this.controllerChat.variableObject.messageList.state.length - 1;
-
-            this.controllerChat.isAutoScrollEnabled = true;
-
-            this.controllerChat.autoscroll();
+            const input = await this.responseInitialize(mode, prompt);
 
             const systemList: modelLlmAnthropic.IdataSystem[] = [];
             const messageList: modelLlmAnthropic.IdataMessage[] = [];
 
             systemList.push({
                 type: "text",
-                text: systemPrompt
+                text: input.systemPrompt
             });
 
             messageList.push({
                 role: "user",
-                content: [{ type: "text", text: !prompt ? userPrompt : prompt }]
+                content: [{ type: "text", text: !prompt ? input.userPrompt : prompt }]
             });
 
             const body: modelLlmAnthropic.IapiLlmBody = {
@@ -160,8 +179,8 @@ export default class LlmAnthropic {
                                 if (error) {
                                     const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 
-                                    messageListState[messageIndex] = {
-                                        ...messageListState[messageIndex],
+                                    messageListState[input.messageIndex] = {
+                                        ...messageListState[input.messageIndex],
                                         assistantNoReason: error.message
                                     };
 
@@ -176,7 +195,7 @@ export default class LlmAnthropic {
                             this.controllerChat.responseReset("finish");
 
                             if (this.controllerChat.variableObject.isMessageSendAvailable.state) {
-                                this.controllerChat.messageLoadingHide(messageIndex);
+                                this.controllerChat.messageLoadingHide(input.messageIndex);
                             }
                         } else if (contentType.includes("text/event-stream") && resultApi.body) {
                             const reader = resultApi.body.getReader();
@@ -190,7 +209,7 @@ export default class LlmAnthropic {
                                     this.controllerChat.responseReset("finish");
 
                                     if (this.controllerChat.variableObject.isMessageSendAvailable.state) {
-                                        this.controllerChat.messageLoadingHide(messageIndex);
+                                        this.controllerChat.messageLoadingHide(input.messageIndex);
                                     }
 
                                     break;
@@ -221,8 +240,8 @@ export default class LlmAnthropic {
                                                     this.controllerChat.hookObject.elementMessageStreamReason.textContent =
                                                         this.controllerChat.responseReason.trim();
 
-                                                    if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
-                                                        this.controllerChat.messageLoadingHide(messageIndex);
+                                                    if (input.systemModeRequest !== "tool-call" && input.systemModeRequest !== "task-call") {
+                                                        this.controllerChat.messageLoadingHide(input.messageIndex);
                                                     }
 
                                                     this.controllerChat.autoscroll();
@@ -230,52 +249,19 @@ export default class LlmAnthropic {
                                                     if (!prompt || isModeContext) {
                                                         this.controllerChat.responseNoReason += delta.text;
 
-                                                        if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
+                                                        if (input.systemModeRequest !== "tool-call" && input.systemModeRequest !== "task-call") {
                                                             this.controllerChat.hookObject.elementMessageStreamNoReason.classList.remove("none");
                                                             this.controllerChat.hookObject.elementMessageStreamNoReason.textContent =
                                                                 this.controllerChat.responseNoReason.trim();
 
-                                                            this.controllerChat.messageLoadingHide(messageIndex);
+                                                            this.controllerChat.messageLoadingHide(input.messageIndex);
                                                         }
 
                                                         this.controllerChat.autoscroll();
                                                     }
                                                 }
                                             } else if (dataTrimObject.type === "message_stop") {
-                                                const responseCompleted = this.controllerChat.responseNoReason.trim();
-
-                                                if (
-                                                    helperSrc.jsonCheck(responseCompleted) &&
-                                                    (systemModeRequest === "tool-call" || systemModeRequest === "task-call")
-                                                ) {
-                                                    await controllerLlm.mcpResponse(this, responseCompleted, userPrompt, messageIndex);
-                                                } else {
-                                                    const messageListState = this.controllerChat.variableObject.messageList.state.slice();
-
-                                                    let message = {
-                                                        ...messageListState[messageIndex],
-                                                        assistantReason: this.controllerChat.responseReason.trim()
-                                                    };
-
-                                                    if (
-                                                        (!prompt || isModeContext) &&
-                                                        systemModeRequest !== "tool-call" &&
-                                                        systemModeRequest !== "task-call"
-                                                    ) {
-                                                        message = {
-                                                            ...message,
-                                                            assistantNoReason: this.controllerChat.responseNoReason.trim()
-                                                        };
-                                                    }
-
-                                                    messageListState[messageIndex] = message;
-
-                                                    this.controllerChat.variableObject.messageList.state = messageListState;
-
-                                                    this.controllerChat.messageStreamReset();
-
-                                                    this.controllerChat.autoscroll();
-                                                }
+                                                this.responseComplete(this.controllerChat.responseNoReason, input, isModeContext, prompt);
                                             }
                                         }
                                     }
@@ -291,14 +277,14 @@ export default class LlmAnthropic {
                         this.controllerChat.messageStreamReset();
 
                         if (this.controllerChat.variableObject.isMessageSendAvailable.state) {
-                            this.controllerChat.messageLoadingHide(messageIndex);
+                            this.controllerChat.messageLoadingHide(input.messageIndex);
                         }
 
                         if (error.toString().toLowerCase() === "request cancelled") {
                             const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 
-                            messageListState[messageIndex] = {
-                                ...messageListState[messageIndex],
+                            messageListState[input.messageIndex] = {
+                                ...messageListState[input.messageIndex],
                                 assistantNoReason: "Stopped by user."
                             };
 
@@ -308,6 +294,168 @@ export default class LlmAnthropic {
                         }
                     });
             }
+
+            this.controllerChat.hookObject.elementInputMessageSend.value = "";
+        }
+    };
+
+    apiCliLogin = async (code?: string): Promise<void | Response> => {
+        this.controllerChat.variableObject.messageList.state = [
+            ...this.controllerChat.variableObject.messageList.state,
+            {
+                isLoading: true,
+                time: helperSrc.localeFormat(new Date()) as string,
+                user: "",
+                assistantReason: this.controllerChat.responseReason,
+                assistantNoReason: this.controllerChat.responseNoReason,
+                mcpToolBody: this.controllerChat.responseMcpTool,
+                ragCitationList: undefined,
+                ragCitationTabIndex: 0,
+                securityScanner: "",
+                documentParserList: [],
+                documentParserTabIndex: 0,
+                playwright: {} as modelChat.Iplaywright,
+                llmAuthenticationUrl: ""
+            }
+        ];
+
+        const messageIndex = this.controllerChat.variableObject.messageList.state.length - 1;
+        const messageListState = this.controllerChat.variableObject.messageList.state.slice();
+
+        return fetch(`${helperSrc.URL_AI}/api/anthropic-cli`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "ai-cookie": session.data.aiCookie,
+                "mcp-session-id": session.data.mcpSessionId
+            },
+            body: JSON.stringify({ code }),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.controllerChat.variableObject.isOfflineAi.state = false;
+
+                const json = await this.apiResponseJson(resultApi);
+
+                if (json.response.state === "ko") {
+                    messageListState[messageIndex] = {
+                        ...messageListState[messageIndex],
+                        assistantNoReason: typeof json.response.message !== "string" ? json.response.message.join("\n") : json.response.message
+                    };
+                } else {
+                    messageListState[messageIndex] = {
+                        ...messageListState[messageIndex],
+                        assistantNoReason: typeof json.response.message !== "string" ? json.response.message.join("\n") : json.response.message,
+                        llmAuthenticationUrl: json.response.data as string
+                    };
+
+                    if (code) {
+                        this.controllerChat.variableObject.isLoginLlm.state = true;
+                    }
+                }
+
+                this.controllerChat.variableObject.messageList.state = messageListState;
+
+                this.controllerChat.responseReset("finish");
+                this.controllerChat.messageStreamReset();
+                this.controllerChat.autoscroll();
+                this.controllerChat.messageLoadingHide(messageIndex);
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("LlmAnthropic.ts - apiCliLogin() - fetch() - catch()", error.message);
+
+                this.controllerChat.variableObject.isOfflineAi.state = true;
+            });
+    };
+
+    apiCliResponse = async (mode?: string, prompt?: string): Promise<void> => {
+        const isModeContext = mode === "rag" || mode === "document";
+
+        if (!this.controllerChat.variableObject.isMessageSendAvailable.state && !isModeContext) {
+            this.controllerChat.controllerToast.show("warning", ["Wait for the current response to complete."]);
+
+            return;
+        }
+
+        if (prompt || this.controllerChat.hookObject.elementInputMessageSend.value) {
+            this.controllerChat.abortControllerLlmResponse = new AbortController();
+
+            const input = await this.responseInitialize();
+
+            const body: modelLlmAnthropic.IapiCliBody = {
+                model: this.controllerChat.variableObject.modelSelected.state,
+                systemPrompt: input.systemPrompt,
+                userPrompt: !prompt ? input.userPrompt : prompt
+            };
+
+            fetch(`${helperSrc.URL_AI}/api/anthropic-cli`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "ai-cookie": session.data.aiCookie,
+                    "mcp-session-id": session.data.mcpSessionId
+                },
+                body: JSON.stringify(body),
+                signal: this.controllerChat.abortControllerLlmResponse.signal,
+                danger: {
+                    acceptInvalidCerts: true,
+                    acceptInvalidHostnames: true
+                }
+            })
+                .then(async (resultApi) => {
+                    const json = await this.apiResponseJson(resultApi);
+
+                    if (json.response.state === "ko") {
+                        const messageIndex = this.controllerChat.variableObject.messageList.state.length - 1;
+                        const messageListState = this.controllerChat.variableObject.messageList.state.slice();
+
+                        messageListState[messageIndex] = {
+                            ...messageListState[messageIndex],
+                            assistantNoReason: typeof json.response.message !== "string" ? json.response.message.join("\n") : json.response.message
+                        };
+
+                        this.controllerChat.variableObject.messageList.state = messageListState;
+
+                        this.controllerChat.autoscroll();
+                    } else {
+                        this.controllerChat.responseNoReason += json.response.data as string;
+
+                        this.responseComplete(this.controllerChat.responseNoReason, input, isModeContext, prompt);
+                    }
+
+                    this.controllerChat.responseReset("finish");
+
+                    if (this.controllerChat.variableObject.isMessageSendAvailable.state) {
+                        this.controllerChat.messageLoadingHide(input.messageIndex);
+                    }
+                })
+                .catch((error: Error) => {
+                    helperSrc.writeLog("LlmAnthropic.ts - apiCli() - fetch() - catch()", typeof error === "string" ? error : error.message);
+
+                    this.controllerChat.responseReset("finish");
+
+                    this.controllerChat.messageStreamReset();
+
+                    if (this.controllerChat.variableObject.isMessageSendAvailable.state) {
+                        this.controllerChat.messageLoadingHide(input.messageIndex);
+                    }
+
+                    if (error.toString().toLowerCase() === "request cancelled") {
+                        const messageListState = this.controllerChat.variableObject.messageList.state.slice();
+
+                        messageListState[input.messageIndex] = {
+                            ...messageListState[input.messageIndex],
+                            assistantNoReason: "Stopped by user."
+                        };
+
+                        this.controllerChat.variableObject.messageList.state = messageListState;
+
+                        return;
+                    }
+                });
 
             this.controllerChat.hookObject.elementInputMessageSend.value = "";
         }

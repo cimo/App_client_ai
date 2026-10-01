@@ -20,6 +20,7 @@ export const IS_DEBUG = IS_DEPLOY_DEV;
 
 // Custom
 export const URL_MS_AUTOMATE_TEST = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1044" : "https://localhost:1044";
+export const URL_AI = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1046" : "https://localhost:1046";
 export const URL_MCP = IS_DEPLOY_DEV === "true" ? "https://host.docker.internal:1047" : "https://localhost:1047";
 // Custom
 

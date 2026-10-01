@@ -4,6 +4,7 @@ import { fetch } from "@tauri-apps/plugin-http";
 // Source
 import * as session from "../Session";
 import * as helperSrc from "../HelperSrc";
+import * as controllerLlm from "../controller/Llm";
 import * as modelHelperSrc from "../model/HelperSrc.js";
 import * as modelAi from "../model/Ai";
 import * as modelMcp from "../model/Mcp";
@@ -24,7 +25,11 @@ export default class Ai implements Icontroller {
     // Method
     private onClickDropdownModel = async (): Promise<void> => {
         if (this.variableObject.llmInstance.state) {
-            await this.variableObject.llmInstance.state.apiModel(true);
+            if (this.variableObject.settingLlmServiceId.state === 1) {
+                await this.variableObject.llmInstance.state.apiModel(true);
+            } else {
+                controllerLlm.updateModel(this.controllerChat, this.variableObject.llmInstance.state.modelAvailableList, true);
+            }
         }
     };
 
@@ -49,21 +54,10 @@ export default class Ai implements Icontroller {
     };
 
     apiLogin = async (): Promise<void> => {
-        if (!session.data.aiCookie && this.variableObject.setting.state.llmList[0].selected) {
-            const settingLlm = this.variableObject.setting.state.llmList[0];
-
-            let header: HeadersInit | undefined = {};
-
-            if (settingLlm.apiKey) {
-                header = {
-                    ...header,
-                    Authorization: `Bearer ${settingLlm.apiKey}`
-                };
-            }
-
-            return fetch(`${settingLlm.url}/login`, {
+        if (!session.data.aiCookie && (this.variableObject.settingLlmServiceId.state === 1 || this.variableObject.settingLlmUsageId.state === 2)) {
+            return fetch(`${helperSrc.URL_AI}/login`, {
                 method: "GET",
-                headers: header,
+                headers: {},
                 danger: {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
@@ -94,23 +88,13 @@ export default class Ai implements Icontroller {
 
     apiLogout = async (): Promise<void | Response> => {
         if (session.data.aiCookie) {
-            const settingLlm = this.variableObject.setting.state.llmList[0];
-
-            let header: HeadersInit | undefined = {
-                "Content-Type": "application/json",
-                "ai-cookie": session.data.aiCookie
-            };
-
-            if (settingLlm.apiKey) {
-                header = {
-                    ...header,
-                    Authorization: `Bearer ${settingLlm.apiKey}`
-                };
-            }
-
-            return fetch(`${settingLlm.url}/logout`, {
+            return fetch(`${helperSrc.URL_AI}/logout`, {
                 method: "GET",
-                headers: header,
+                headers: {
+                    "Content-Type": "application/json",
+                    "ai-cookie": session.data.aiCookie,
+                    "mcp-session-id": session.data.mcpSessionId
+                },
                 danger: {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
@@ -153,7 +137,9 @@ export default class Ai implements Icontroller {
                 modelList: [],
                 modelSelected: "",
                 setting: variableLink<modelMcp.Isetting>("Mcp"),
-                llmInstance: variableLink<modelChat.TllmInstance | null>("Chat")
+                llmInstance: variableLink<modelChat.TllmInstance | null>("Chat"),
+                settingLlmServiceId: variableLink<number>("MenuItem"),
+                settingLlmUsageId: variableLink<number>("MenuItem")
             },
             this.constructor.name
         );

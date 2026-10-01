@@ -79,7 +79,7 @@ export interface IapiUserUpdateBody {
 
 export interface IapiSettingUpdateBody {
     id: number;
-    llmList: IsettingLlm[];
+    llm: IsettingLlm;
 }
 
 export interface IapiLlmToolResponse {
@@ -192,7 +192,7 @@ export interface IitemDetail {
     category: string;
 }
 
-export interface IsettingLlm {
+export interface IsettingService {
     id: number;
     name: string;
     module: string;
@@ -201,9 +201,20 @@ export interface IsettingLlm {
     selected: boolean;
 }
 
+export interface IsettingUsage {
+    id: number;
+    name: string;
+    selected: boolean;
+}
+
+export interface IsettingLlm {
+    serviceList: IsettingService[];
+    usageList: IsettingUsage[];
+}
+
 export interface Isetting {
     id: number;
-    llmList: IsettingLlm[];
+    llm: IsettingLlm;
 }
 
 export interface Ivariable {
@@ -226,6 +237,7 @@ export interface Ivariable {
     isRagRunning: IvariableBind<boolean>;
     agentData: IvariableBind<Iagent>;
     settingLlmServiceId: IvariableBind<number>;
+    settingLlmUsageId: IvariableBind<number>;
     systemMode: IvariableBind<string>;
     messageList: IvariableBind<modelChat.IdataMessage[]>;
 }

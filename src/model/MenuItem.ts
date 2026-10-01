@@ -48,6 +48,7 @@ export interface Ivariable {
     isUserUpdate: IvariableBind<boolean>;
     setting: IvariableBind<modelMcp.Isetting>;
     settingLlmServiceId: IvariableBind<number>;
+    settingLlmUsageId: IvariableBind<number>;
     isSettingSave: IvariableBind<boolean>;
     systemMode: IvariableBind<string>;
     pageNumber: IvariableBind<number>;
@@ -101,6 +102,7 @@ export interface Imethod {
     onInputWorkspaceFolderName: (event: KeyboardEvent) => void;
     onInputWorkspaceRename: (event: KeyboardEvent) => void;
     onChangeSettingLlmServiceId: () => void;
+    onChangeSettingLlmUsageId: () => void;
 }
 
 export interface IelementHook extends Record<string, Element | Element[]> {
@@ -112,6 +114,7 @@ export interface IelementHook extends Record<string, Element | Element[]> {
     elementInputUserSurname: HTMLInputElement;
     elementInputUserPassword: HTMLInputElement;
     elementSelectSettingLlmServiceId: HTMLSelectElement;
+    elementSelectSettingLlmUsageId: HTMLSelectElement;
     elementInputSettingLlmUrl: HTMLInputElement;
     elementInputSettingLlmApiKey: HTMLInputElement;
 }

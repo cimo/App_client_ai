@@ -66,7 +66,8 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                 value.ragCitationList ||
                                                 value.securityScanner ||
                                                 value.documentParserList.length > 0 ||
-                                                value.playwright.action) &&
+                                                value.playwright.action ||
+                                                value.llmAuthenticationUrl) &&
                                             typeof value.assistantNoReason === "string"
                                         ) {
                                             if (value.ragCitationList) {
@@ -275,6 +276,31 @@ export const message = (variableObject: modelChat.Ivariable, methodObject: model
                                                         }}
                                                     </details>
                                                 );
+                                            } else if (value.llmAuthenticationUrl) {
+                                                resultList.push(
+                                                    <div class="login_wrapper">
+                                                        <pre>{value.assistantNoReason}</pre>
+                                                        <div class="url_wrapper">
+                                                            <p class="url_link">{value.llmAuthenticationUrl}</p>
+                                                            <button
+                                                                onClick={() => {
+                                                                    methodObject.onClickLlmLoginCopyUrl(value.llmAuthenticationUrl);
+                                                                }}
+                                                            >
+                                                                <i class="cls_icon">content_copy</i>
+                                                                <p>Copy</p>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    methodObject.onClickLlmLoginOpenUrl(value.llmAuthenticationUrl);
+                                                                }}
+                                                            >
+                                                                <i class="cls_icon">open_in_browser</i>
+                                                                <p>Open</p>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
                                             } else {
                                                 resultList.push(<pre>{value.assistantNoReason}</pre>);
                                             }
@@ -311,7 +337,28 @@ export const input = (variableObject: modelChat.Ivariable, methodObject: modelCh
             <div class="message_send_wrapper">
                 <textarea jsmvcfw-elementHookName="elementInputMessageSend" name="messageSend" rows="4"></textarea>
                 <div class="action_wrapper">
-                    <div class="left"></div>
+                    <div class="left">
+                        {() => {
+                            const resultList: IvirtualNode[] = [];
+
+                            if (
+                                !variableObject.isLoginLlm.state &&
+                                variableObject.settingLlmServiceId.state !== 1 &&
+                                variableObject.settingLlmUsageId.state === 2
+                            ) {
+                                resultList.push(
+                                    <button
+                                        onClick={() => {
+                                            methodObject.onClickButtonLlmLogin();
+                                        }}
+                                    >
+                                        <p>Login</p>
+                                    </button>
+                                );
+                            }
+                            return resultList;
+                        }}
+                    </div>
                     <div class="right">
                         <button
                             onClick={() => {
