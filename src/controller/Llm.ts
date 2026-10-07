@@ -11,7 +11,6 @@ import type Chat from "./Chat";
 const toolResponse = async (
     controllerChat: Chat,
     apiResponse: (mode?: string, prompt?: string) => void,
-    apiResponseDocument: (documentObject: modelLlm.IdataDocument) => Promise<void>,
     message: string,
     argument: string,
     userPrompt: string,
@@ -100,11 +99,13 @@ const toolResponse = async (
 
                     controllerChat.variableObject.systemMode.state = "chat";
 
-                    await apiResponseDocument({
-                        documentList: result.documentList,
-                        userPrompt,
-                        messageIndex
-                    });
+                    const contentList: string[] = [];
+
+                    for (let a = 0; a < result.documentList.length; a++) {
+                        contentList.push(`[${result.documentList[a].fileName}]\n${result.documentList[a].markdown}`);
+                    }
+
+                    apiResponse("document", `DOCUMENT:\n${contentList.join("\n\n")}\n\nText:\n${userPrompt}`);
 
                     controllerChat.variableObject.systemMode.state = "tool-call";
                 }
@@ -304,7 +305,10 @@ export const inputPrompt = async (controllerChat: Chat, prompt?: string, mode?: 
             "You MUST answer EXCLUSIVELY using the content of the provided CITATION, NODE and GRAPH without inventing or adding information from your side.",
             "NODE provides the entities and their descriptions, GRAPH provides the relations between them and CITATION provides the source text.",
             "You MAY use the connections between entities present in GRAPH when the question requires it, but you MUST NOT invent connections that are not explicitly present there.",
-            "For EACH topic answer INDEPENDENTLY and SEPARATELY and write a dedicated section with the topic name as title, followed by bullet points."
+            "For EACH topic answer INDEPENDENTLY and SEPARATELY and write a dedicated section with the topic name as title, followed by bullet points.",
+            "Numbers, dates and amounts MUST be copied character by character from CITATION, with the same digits, thousands and decimal separators and currency symbols, even when the language of the answer normally writes numbers in another format: for example if CITATION has 12,345 you MUST write 12,345 and NEVER 12.345 or 12 345.",
+            "When the question can refer to more than one value of CITATION (for example an amount and the tax on that amount), choose the value whose label in CITATION corresponds best to the words of the question; if it is still ambiguous, write every possible value together with its label as written in CITATION.",
+            "When the question asks for a calculation or a comparison (for example a sum, a difference, an average, a percentage, or which one is older, bigger or first), write it in ONE single section: first every value taken from CITATION with the file it comes from, then the operation or the comparison written with those values, then the result; the result is the only number that is not copied from CITATION, and you MUST compute it step by step and check it before writing it."
         ].join("\n");
     } else if (mode === "document") {
         resultSystemPrompt = [
@@ -315,7 +319,10 @@ export const inputPrompt = async (controllerChat: Chat, prompt?: string, mode?: 
             "You MUST NOT explain nothing.",
             "You MUST answer EXCLUSIVELY using the content of the provided DOCUMENT without inventing or adding information from your side.",
             "DOCUMENT is the content of the files requested by the user, written in markdown, where the name of each file is written between square brackets on the line before its content.",
-            "The content of a file is ONLY what follows its name and you MUST NOT mix the content of a file with the content of another one."
+            "The content of a file is ONLY what follows its name and you MUST NOT mix the content of a file with the content of another one.",
+            "Numbers and amounts MUST be copied character by character from DOCUMENT, with the same digits, thousands and decimal separators and currency symbols, even when the language of the answer normally writes numbers in another format: for example if DOCUMENT has 12,345 you MUST write 12,345 and NEVER 12.345 or 12 345.",
+            "When the request can refer to more than one value of DOCUMENT (for example an amount and the tax on that amount), choose the value whose label in DOCUMENT corresponds best to the words of the request; if it is still ambiguous, write every possible value together with its label as written in DOCUMENT.",
+            "When the request asks for a calculation (for example a sum, a difference, an average or a percentage), first write every value taken from DOCUMENT with the file it comes from, then the operation written with those values, then the result: the result is the only number that is not copied from DOCUMENT, and you MUST compute it step by step and check it before writing it."
         ].join("\n");
     }
 
@@ -369,7 +376,6 @@ export const inputPrompt = async (controllerChat: Chat, prompt?: string, mode?: 
 export const mcpResponse = async (
     controllerChat: Chat,
     apiResponse: (mode?: string, prompt?: string) => void,
-    apiResponseDocument: (documentObject: modelLlm.IdataDocument) => Promise<void>,
     responseCompleted: string,
     userPrompt: string,
     messageIndex: number
@@ -423,7 +429,6 @@ export const mcpResponse = async (
                     await toolResponse(
                         controllerChat,
                         apiResponse,
-                        apiResponseDocument,
                         message,
                         JSON.stringify(responseCompletedObject.argumentObject),
                         userPrompt,
@@ -432,7 +437,7 @@ export const mcpResponse = async (
                 }
             })
             .catch(async (error: Error) => {
-                await toolResponse(controllerChat, apiResponse, apiResponseDocument, error.message, "", userPrompt, messageIndex);
+                await toolResponse(controllerChat, apiResponse, error.message, "", userPrompt, messageIndex);
             });
     } else if ("list" in responseCompletedObject) {
         await fetch(`${helperSrc.URL_MCP}/api/task-call`, {
@@ -456,11 +461,11 @@ export const mcpResponse = async (
 
                     controllerChat.controllerMcp.showToastMessage("error", json.response.message);
                 } else {
-                    await toolResponse(controllerChat, apiResponse, apiResponseDocument, json.response.data as string, "", userPrompt, messageIndex);
+                    await toolResponse(controllerChat, apiResponse, json.response.data as string, "", userPrompt, messageIndex);
                 }
             })
             .catch(async (error: Error) => {
-                await toolResponse(controllerChat, apiResponse, apiResponseDocument, error.message, "", userPrompt, messageIndex);
+                await toolResponse(controllerChat, apiResponse, error.message, "", userPrompt, messageIndex);
             });
     }
 };

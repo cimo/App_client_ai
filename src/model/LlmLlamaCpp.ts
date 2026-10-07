@@ -3,6 +3,7 @@ export interface IapiLlmBody {
     model: string;
     input: IdataInput[];
     tools: unknown[];
+    isMemory: boolean;
     temperature?: number;
 }
 
@@ -28,21 +29,6 @@ export interface IapiLlmResponse {
         message: string;
     };
     delta: string;
-}
-
-export interface IapiTokenDetailBody {
-    model: string;
-    text: string;
-}
-
-export interface IdataTokenDetail {
-    count: number;
-    contextSize: number;
-}
-
-export interface IdataResponseText {
-    text: string;
-    message: string;
 }
 
 export interface IdataInput {

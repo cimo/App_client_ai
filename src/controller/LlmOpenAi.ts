@@ -4,7 +4,6 @@ import { fetch } from "@tauri-apps/plugin-http";
 import * as helperSrc from "../HelperSrc";
 import * as controllerLlm from "../controller/Llm";
 import * as modelLlmOpenAi from "../model/LlmOpenAi";
-import * as modelLlm from "../model/Llm";
 import type Chat from "./Chat";
 
 export default class LlmOpenAi {
@@ -13,16 +12,6 @@ export default class LlmOpenAi {
     controllerChat: Chat;
 
     // Method
-    apiResponseDocument = async (documentObject: modelLlm.IdataDocument): Promise<void> => {
-        const contentList: string[] = [];
-
-        for (let a = 0; a < documentObject.documentList.length; a++) {
-            contentList.push(`[${documentObject.documentList[a].fileName}]\n${documentObject.documentList[a].markdown}`);
-        }
-
-        this.apiResponse("document", `DOCUMENT:\n${contentList.join("\n\n")}\n\nText:\n${documentObject.userPrompt}`);
-    };
-
     apiResponse = async (mode?: string, prompt?: string): Promise<void> => {
         //const base64 = await invoke("test_screenshot");
         //this.variableObject.modelSelected.state = base64 as string;
@@ -208,7 +197,6 @@ export default class LlmOpenAi {
                                                 await controllerLlm.mcpResponse(
                                                     this.controllerChat,
                                                     this.apiResponse,
-                                                    this.apiResponseDocument,
                                                     responseCompleted,
                                                     userPrompt,
                                                     messageIndex

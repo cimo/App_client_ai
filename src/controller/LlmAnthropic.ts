@@ -6,7 +6,6 @@ import * as helperSrc from "../HelperSrc";
 import * as controllerLlm from "../controller/Llm";
 import * as modelHelperSrc from "../model/HelperSrc";
 import * as modelLlmAnthropic from "../model/LlmAnthropic";
-import * as modelLlm from "../model/Llm";
 import * as modelChat from "../model/Chat";
 import type Chat from "./Chat";
 
@@ -56,14 +55,7 @@ export default class LlmAnthropic {
         const responseCompleted = noReason.trim();
 
         if (helperSrc.jsonCheck(responseCompleted) && (input.systemModeRequest === "tool-call" || input.systemModeRequest === "task-call")) {
-            await controllerLlm.mcpResponse(
-                this.controllerChat,
-                this.apiResponse,
-                this.apiResponseDocument,
-                responseCompleted,
-                input.userPrompt,
-                input.messageIndex
-            );
+            await controllerLlm.mcpResponse(this.controllerChat, this.apiResponse, responseCompleted, input.userPrompt, input.messageIndex);
         } else {
             const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 
@@ -87,16 +79,6 @@ export default class LlmAnthropic {
 
             this.controllerChat.autoscroll();
         }
-    };
-
-    apiResponseDocument = async (documentObject: modelLlm.IdataDocument): Promise<void> => {
-        const contentList: string[] = [];
-
-        for (let a = 0; a < documentObject.documentList.length; a++) {
-            contentList.push(`[${documentObject.documentList[a].fileName}]\n${documentObject.documentList[a].markdown}`);
-        }
-
-        this.apiResponse("document", `DOCUMENT:\n${contentList.join("\n\n")}\n\nText:\n${documentObject.userPrompt}`);
     };
 
     apiResponse = async (mode?: string, prompt?: string): Promise<void> => {

@@ -17,11 +17,6 @@ export interface IapiWorkspaceReadBody {
     fileName: string;
 }
 
-export interface IapiWorkspaceParseBody {
-    fileName: string;
-    text: string;
-}
-
 export interface IapiWorkspaceDeleteBody {
     pathList: string[];
 }
