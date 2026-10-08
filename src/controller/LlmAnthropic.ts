@@ -49,13 +49,14 @@ export default class LlmAnthropic {
     private responseComplete = async (
         noReason: string,
         input: modelLlmAnthropic.IdataInput,
+        apiResponse: (mode?: string, prompt?: string) => void,
         isModeContext: boolean,
         prompt?: string
     ): Promise<void> => {
         const responseCompleted = noReason.trim();
 
         if (helperSrc.jsonCheck(responseCompleted) && (input.systemModeRequest === "tool-call" || input.systemModeRequest === "task-call")) {
-            await controllerLlm.mcpResponse(this.controllerChat, this.apiResponse, responseCompleted, input.userPrompt, input.messageIndex);
+            await controllerLlm.mcpResponse(this.controllerChat, apiResponse, responseCompleted, input.userPrompt, input.messageIndex);
         } else {
             const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 
@@ -243,7 +244,13 @@ export default class LlmAnthropic {
                                                     }
                                                 }
                                             } else if (dataTrimObject.type === "message_stop") {
-                                                this.responseComplete(this.controllerChat.responseNoReason, input, isModeContext, prompt);
+                                                this.responseComplete(
+                                                    this.controllerChat.responseNoReason,
+                                                    input,
+                                                    this.apiResponse,
+                                                    isModeContext,
+                                                    prompt
+                                                );
                                             }
                                         }
                                     }
@@ -365,7 +372,7 @@ export default class LlmAnthropic {
         if (prompt || this.controllerChat.hookObject.elementInputMessageSend.value) {
             this.controllerChat.abortControllerLlmResponse = new AbortController();
 
-            const input = await this.responseInitialize();
+            const input = await this.responseInitialize(mode, prompt);
 
             const body: modelLlmAnthropic.IapiCliBody = {
                 model: this.controllerChat.variableObject.modelSelected.state,
@@ -405,7 +412,7 @@ export default class LlmAnthropic {
                     } else {
                         this.controllerChat.responseNoReason += json.response.data as string;
 
-                        this.responseComplete(this.controllerChat.responseNoReason, input, isModeContext, prompt);
+                        this.responseComplete(this.controllerChat.responseNoReason, input, this.apiCliResponse, isModeContext, prompt);
                     }
 
                     this.controllerChat.responseReset("finish");
