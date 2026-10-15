@@ -18,6 +18,7 @@ export default class Mcp implements Icontroller {
     private methodObject: modelMcp.Imethod;
     private viewNodeEmpty: IvirtualNode;
     private controllerToast: Toast;
+    private abortControllerWorkspaceUpload: AbortController | undefined;
 
     // Method
     private showFileFailedMessage = async (actionOperationList: modelHelperSrc.IactionOperation[]): Promise<void> => {
@@ -454,6 +455,10 @@ export default class Mcp implements Icontroller {
         if (pathFileList) {
             const actionOperationList: modelHelperSrc.IactionOperation[] = [];
 
+            const abortController = new AbortController();
+
+            this.abortControllerWorkspaceUpload = abortController;
+
             let isStop = false;
 
             for (let a = 0; a < pathFileList.length; a++) {
@@ -469,6 +474,7 @@ export default class Mcp implements Icontroller {
 
                 await fetch(`${helperSrc.URL_MCP}/api/workspace-upload`, {
                     method: "POST",
+                    signal: abortController.signal,
                     headers: {
                         "mcp-session-id": session.data.mcpSessionId,
                         Cookie: session.data.mcpCookie,
@@ -495,9 +501,11 @@ export default class Mcp implements Icontroller {
                         await this.showFileFailedMessage(actionOperationList);
                     })
                     .catch((error: Error) => {
-                        helperSrc.writeLog("Mcp.ts - apiWorkspaceUpload() - fetch() - catch()", error.message);
+                        if (!abortController.signal.aborted) {
+                            helperSrc.writeLog("Mcp.ts - apiWorkspaceUpload() - fetch() - catch()", error.message);
 
-                        this.variableObject.isOfflineMcp.state = true;
+                            this.variableObject.isOfflineMcp.state = true;
+                        }
 
                         isStop = true;
                     });
@@ -506,6 +514,14 @@ export default class Mcp implements Icontroller {
                     break;
                 }
             }
+
+            this.abortControllerWorkspaceUpload = undefined;
+        }
+    };
+
+    apiWorkspaceUploadCancel = (): void => {
+        if (this.abortControllerWorkspaceUpload) {
+            this.abortControllerWorkspaceUpload.abort();
         }
     };
 
@@ -1347,6 +1363,7 @@ export default class Mcp implements Icontroller {
         this.viewNodeEmpty = { tag: "div", propertyObject: {}, childrenList: [] };
 
         this.controllerToast = {} as Toast;
+        this.abortControllerWorkspaceUpload = undefined;
     }
 
     hookObject = {} as modelMcp.IelementHook;

@@ -92,7 +92,9 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                         onClick={() => {
                                                             methodObject.onClickWorkspaceUpload();
                                                         }}
-                                                        disabled={() => methodObject.checkProcessOngoing("workspace")}
+                                                        disabled={() =>
+                                                            methodObject.checkProcessOngoing("workspace") && !variableObject.isUploadRunning.state
+                                                        }
                                                     >
                                                         {() => {
                                                             const resultList: IvirtualNode[] = [];
@@ -105,7 +107,12 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                                     </>
                                                                 );
                                                             } else {
-                                                                resultList.push(<i class="cls_icon">update</i>);
+                                                                resultList.push(
+                                                                    <>
+                                                                        <i class="cls_icon">cancel</i>
+                                                                        <p>Cancel</p>
+                                                                    </>
+                                                                );
                                                             }
 
                                                             return resultList;

@@ -445,6 +445,12 @@ export default class MenuItem implements Icontroller {
     };
 
     private onClickWorkspaceUpload = async (): Promise<void> => {
+        if (this.variableObject.isUploadRunning.state) {
+            this.controllerMcp.apiWorkspaceUploadCancel();
+
+            return;
+        }
+
         this.variableObject.isUploadRunning.state = true;
 
         await this.controllerMcp.apiWorkspaceUpload(this.variableObject.workspaceCurrentFolderList.state);
