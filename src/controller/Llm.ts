@@ -387,8 +387,8 @@ export const mcpResponse = async (
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie,
+                "mcp-session-id": session.data.mcpSessionId
             },
             body: JSON.stringify({
                 jsonrpc: "2.0",
@@ -445,7 +445,7 @@ export const mcpResponse = async (
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(responseCompletedObject),
             danger: {

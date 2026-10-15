@@ -315,7 +315,7 @@ export default class LlmAnthropic {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "ai-cookie": session.data.aiCookie,
+                Cookie: session.data.aiCookie,
                 "mcp-session-id": session.data.mcpSessionId
             },
             body: JSON.stringify({ code }),
@@ -384,7 +384,7 @@ export default class LlmAnthropic {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "ai-cookie": session.data.aiCookie,
+                    Cookie: session.data.aiCookie,
                     "mcp-session-id": session.data.mcpSessionId
                 },
                 body: JSON.stringify(body),

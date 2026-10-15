@@ -15,7 +15,7 @@ export default class LlmLlamaCpp {
     private apiFetchSession = async (route: string, method: string, body?: string, signal?: AbortSignal): Promise<Response> => {
         const apiFetch = (): Promise<Response> => {
             let header: HeadersInit | undefined = {
-                "ai-cookie": session.data.aiCookie
+                Cookie: session.data.aiCookie
             };
 
             if (body) {

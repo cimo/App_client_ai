@@ -20,9 +20,11 @@ export const syncFromStorage = (): void => {
 };
 
 export const writeAiSession = (cookie: string): void => {
-    data.aiCookie = cookie;
+    const cookieNameValue = cookie.split(";")[0];
 
-    writeStorage("ai-cookie", cookie);
+    data.aiCookie = cookieNameValue;
+
+    writeStorage("ai-cookie", cookieNameValue);
 };
 
 export const deleteAiSession = (): void => {
@@ -32,12 +34,14 @@ export const deleteAiSession = (): void => {
 };
 
 export const writeMcpSession = (id: string, cookie: string, mcpBearerToken: string): void => {
+    const cookieNameValue = cookie.split(";")[0];
+
     data.mcpSessionId = id;
-    data.mcpCookie = cookie;
+    data.mcpCookie = cookieNameValue;
     data.mcpBearerToken = mcpBearerToken;
 
     writeStorage("mcp-session-id", id);
-    writeStorage("mcp-cookie", cookie);
+    writeStorage("mcp-cookie", cookieNameValue);
     writeStorage("mcp-bearer-token", mcpBearerToken);
 };
 

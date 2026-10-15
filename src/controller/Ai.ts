@@ -57,7 +57,10 @@ export default class Ai implements Icontroller {
         if (!session.data.aiCookie && (this.variableObject.settingLlmServiceId.state === 1 || this.variableObject.settingLlmUsageId.state === 2)) {
             return fetch(`${helperSrc.URL_AI}/login`, {
                 method: "GET",
-                headers: {},
+                headers: {
+                    Cookie: session.data.mcpCookie,
+                    "mcp-session-id": session.data.mcpSessionId
+                },
                 danger: {
                     acceptInvalidCerts: true,
                     acceptInvalidHostnames: true
@@ -66,16 +69,12 @@ export default class Ai implements Icontroller {
                 .then(async (resultApi) => {
                     this.variableObject.isOfflineAi.state = false;
 
-                    const cookie = resultApi.headers.get("set-cookie");
+                    const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
 
-                    if (cookie) {
-                        const json = (await resultApi.json()) as modelHelperSrc.IapiResponse;
-
-                        if (json.response.state === "ko") {
-                            this.controllerMcp.showToastMessage("error", json.response.message);
-                        } else {
-                            session.writeAiSession(cookie);
-                        }
+                    if (json.response.state === "ko") {
+                        this.controllerMcp.showToastMessage("error", json.response.message);
+                    } else {
+                        session.writeAiSession(resultApi.headers.get("set-cookie") as string);
                     }
                 })
                 .catch((error: Error) => {
@@ -92,7 +91,7 @@ export default class Ai implements Icontroller {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    "ai-cookie": session.data.aiCookie,
+                    Cookie: session.data.aiCookie,
                     "mcp-session-id": session.data.mcpSessionId
                 },
                 danger: {

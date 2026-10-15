@@ -59,8 +59,8 @@ export default class Mcp implements Icontroller {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "mcp-session-id": session.data.mcpSessionId,
-                        "mcp-cookie": session.data.mcpCookie
+                        Cookie: session.data.mcpCookie,
+                        "mcp-session-id": session.data.mcpSessionId
                     },
                     body: JSON.stringify(body),
                     danger: {
@@ -233,32 +233,28 @@ export default class Mcp implements Icontroller {
 
                 this.variableObject.isOfflineMcp.state = false;
 
-                const cookie = resultApi.headers.get("set-cookie");
+                const json = await this.apiResponseJson(resultApi);
 
-                if (cookie) {
-                    const json = await this.apiResponseJson(resultApi);
+                if (json.response.state === "ko") {
+                    this.variableObject.isLogin.state = false;
 
-                    if (json.response.state === "ko") {
-                        this.variableObject.isLogin.state = false;
+                    this.showToastMessage("error", json.response.message);
+                } else {
+                    let mcpSessionId = "";
 
-                        this.showToastMessage("error", json.response.message);
-                    } else {
-                        let mcpSessionId = "";
+                    if (mode === "basic") {
+                        mcpSessionId = json.response.data as string;
 
-                        if (mode === "basic") {
-                            mcpSessionId = json.response.data as string;
-
-                            this.variableObject.isLogin.state = true;
-                        } else if (mode === "ad") {
-                            this.variableObject.adUrl.state = json.response.data as string;
-                        }
-
-                        this.variableObject.loginMode.state = mode;
-
-                        session.writeMcpSession(mcpSessionId, cookie, session.data.mcpBearerToken);
-
-                        isResult = true;
+                        this.variableObject.isLogin.state = true;
+                    } else if (mode === "ad") {
+                        this.variableObject.adUrl.state = json.response.data as string;
                     }
+
+                    this.variableObject.loginMode.state = mode;
+
+                    session.writeMcpSession(mcpSessionId, resultApi.headers.get("set-cookie") as string, session.data.mcpBearerToken);
+
+                    isResult = true;
                 }
 
                 return isResult;
@@ -276,7 +272,7 @@ export default class Mcp implements Icontroller {
         return fetch(`${helperSrc.URL_MCP}/ad-verify`, {
             method: "GET",
             headers: {
-                "mcp-cookie": session.data.mcpCookie,
+                Cookie: session.data.mcpCookie,
                 "mcp-bearer-token": session.data.mcpBearerToken
             },
             danger: {
@@ -319,7 +315,7 @@ export default class Mcp implements Icontroller {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie,
+                Cookie: session.data.mcpCookie,
                 "mcp-bearer-token": session.data.mcpBearerToken
             },
             danger: {
@@ -350,7 +346,7 @@ export default class Mcp implements Icontroller {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -382,7 +378,7 @@ export default class Mcp implements Icontroller {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -417,7 +413,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -475,7 +471,7 @@ export default class Mcp implements Icontroller {
                     method: "POST",
                     headers: {
                         "mcp-session-id": session.data.mcpSessionId,
-                        "mcp-cookie": session.data.mcpCookie,
+                        Cookie: session.data.mcpCookie,
                         fileNameEncode: encodeURIComponent(fileDetail.name),
                         folderJoin: currentFolderList.join("/")
                     },
@@ -521,7 +517,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -561,7 +557,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -601,7 +597,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -641,7 +637,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -681,7 +677,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -799,7 +795,7 @@ export default class Mcp implements Icontroller {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -853,7 +849,7 @@ export default class Mcp implements Icontroller {
                     method: "POST",
                     headers: {
                         "mcp-session-id": session.data.mcpSessionId,
-                        "mcp-cookie": session.data.mcpCookie,
+                        Cookie: session.data.mcpCookie,
                         fileNameEncode: encodeURIComponent(fileDetail.name)
                     },
                     body: formData,
@@ -888,7 +884,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -928,7 +924,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -965,7 +961,7 @@ export default class Mcp implements Icontroller {
             method: "GET",
             headers: {
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -1020,7 +1016,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -1069,7 +1065,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -1113,7 +1109,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -1161,7 +1157,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -1190,7 +1186,6 @@ export default class Mcp implements Icontroller {
 
     apiUserUpdate = async (user: modelMcp.Iuser): Promise<boolean> => {
         const body: modelMcp.IapiUserUpdateBody = {
-            id: user.id,
             name: user.name,
             surname: user.surname,
             password: user.password || ""
@@ -1201,7 +1196,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {
@@ -1241,7 +1236,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             danger: {
                 acceptInvalidCerts: true,
@@ -1295,7 +1290,7 @@ export default class Mcp implements Icontroller {
             headers: {
                 "Content-Type": "application/json",
                 "mcp-session-id": session.data.mcpSessionId,
-                "mcp-cookie": session.data.mcpCookie
+                Cookie: session.data.mcpCookie
             },
             body: JSON.stringify(body),
             danger: {

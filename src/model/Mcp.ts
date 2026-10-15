@@ -66,7 +66,6 @@ export interface IapiAgentDeleteBody {
 }
 
 export interface IapiUserUpdateBody {
-    id: number;
     name: string;
     surname: string;
     password: string;
