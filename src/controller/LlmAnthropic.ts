@@ -114,7 +114,7 @@ export default class LlmAnthropic {
             const llm = this.controllerChat.selectedLlm();
 
             if (llm) {
-                fetch(`${llm.url}/messages`, {
+                fetch(`${llm.url.replace(/\/+$/, "")}/messages`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

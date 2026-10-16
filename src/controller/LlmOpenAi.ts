@@ -250,7 +250,7 @@ export default class LlmOpenAi {
             const llm = this.controllerChat.selectedLlm();
 
             if (llm) {
-                fetch(`${llm.url}/responses`, {
+                fetch(`${llm.url.replace(/\/+$/, "")}/responses`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
