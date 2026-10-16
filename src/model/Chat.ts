@@ -5,7 +5,7 @@ import * as modelMcp from "./Mcp";
 import type Chat from "../controller/Chat.js";
 
 export type TllmInstance = {
-    modelAvailableList: string[];
+    modelList: () => string[];
     apiModel: (isShowDropdown: boolean) => Promise<void>;
     apiResponse: () => Promise<void>;
     apiCliLogin: (code?: string) => Promise<void>;
@@ -62,6 +62,7 @@ export interface Ivariable {
     playwrightVideoSrc: IvariableBind<string>;
     playwrightVideoName: IvariableBind<string>;
     setting: IvariableBind<modelMcp.Isetting>;
+    isSettingUpdate: IvariableBind<boolean>;
     settingLlmServiceId: IvariableBind<number>;
     settingLlmUsageId: IvariableBind<number>;
 }

@@ -870,10 +870,6 @@ export default class MenuItem implements Icontroller {
         this.variableObject.isUserUpdate.state = false;
     };
 
-    private onClickUserCancel = (): void => {
-        this.variableObject.isMenuItemUser.state = false;
-    };
-
     private onClickSettingSave = async (): Promise<void> => {
         this.variableObject.isSettingSave.state = true;
 
@@ -912,14 +908,10 @@ export default class MenuItem implements Icontroller {
         const isUpdate = await this.controllerMcp.apiSettingUpdate(settingCopy);
 
         if (isUpdate) {
-            await this.controllerMcp.apiSettingQuery();
+            await this.controllerMcp.apiSettingQuery(true);
         }
 
         this.variableObject.isSettingSave.state = false;
-    };
-
-    private onClickSettingCancel = (): void => {
-        this.variableObject.isMenuItemSetting.state = false;
     };
 
     private onClickMenuSetting = async (): Promise<void> => {
@@ -928,6 +920,8 @@ export default class MenuItem implements Icontroller {
         }
 
         if (this.variableObject.isMenuItemSetting.state) {
+            await this.controllerMcp.apiSettingQuery(false);
+
             this.variableObject.isMenuItemSetting.state = false;
 
             return;
@@ -935,7 +929,7 @@ export default class MenuItem implements Icontroller {
 
         this.isMenuItemLoading = true;
 
-        await this.controllerMcp.apiSettingQuery();
+        await this.controllerMcp.apiSettingQuery(false);
 
         this.variableObject.isMenuItemWorkspace.state = false;
         this.variableObject.isMenuItemTool.state = false;
@@ -1125,9 +1119,7 @@ export default class MenuItem implements Icontroller {
             onClickAgentOpen: this.onClickAgentOpen,
             onClickMenuUser: this.onClickMenuUser,
             onClickUserUpdate: this.onClickUserUpdate,
-            onClickUserCancel: this.onClickUserCancel,
             onClickSettingSave: this.onClickSettingSave,
-            onClickSettingCancel: this.onClickSettingCancel,
             onClickMenuSetting: this.onClickMenuSetting,
             onClickToggleSelectAll: this.onClickToggleSelectAll,
             onInputWorkspaceFolderName: this.onInputWorkspaceFolderName,

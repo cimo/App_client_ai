@@ -96,11 +96,7 @@ export default class LlmLlamaCpp {
 
             let messageIndex = -1;
 
-            const { resultUserPrompt: userPrompt, resultSystemPrompt: systemPrompt } = await controllerLlm.inputPrompt(
-                this.controllerChat,
-                prompt,
-                mode
-            );
+            const { userPrompt: userPrompt, systemPrompt: systemPrompt } = await controllerLlm.inputPrompt(this.controllerChat, prompt, mode);
 
             messageIndex = this.controllerChat.variableObject.messageList.state.length - 1;
 

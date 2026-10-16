@@ -44,10 +44,3 @@ export interface IdataSystem {
     text: string;
     type: string;
 }
-
-export interface IdataInput {
-    systemModeRequest: string;
-    messageIndex: number;
-    userPrompt: string;
-    systemPrompt: string;
-}

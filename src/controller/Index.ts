@@ -31,11 +31,12 @@ export default class Index implements Icontroller {
 
     private isClosing: boolean;
     private intervalAd: ReturnType<typeof setInterval> | undefined;
+    private iterationCount = 60;
 
     // Method
     private mcpApi = async (): Promise<void> => {
         await this.controllerMcp.apiUserQuery();
-        await this.controllerMcp.apiSettingQuery();
+        await this.controllerMcp.apiSettingQuery(true);
 
         await this.controllerMcp.apiTool();
         await this.controllerMcp.apiTask();
@@ -49,7 +50,9 @@ export default class Index implements Icontroller {
             if (this.variableObject.settingLlmServiceId.state === 1) {
                 await this.variableObject.llmInstance.state.apiModel(false);
             } else {
-                controllerLlm.updateModel(this.controllerChat, this.variableObject.llmInstance.state.modelAvailableList, false);
+                const modelList = this.variableObject.llmInstance.state.modelList();
+
+                controllerLlm.updateModel(this.controllerChat, modelList, false);
             }
         }
     };
@@ -100,7 +103,7 @@ export default class Index implements Icontroller {
 
                     const state = await this.controllerMcp.apiAdVerify();
 
-                    if (state !== "ongoing" || intervalCount >= 30) {
+                    if (state !== "ongoing" || intervalCount >= this.iterationCount) {
                         clearInterval(this.intervalAd);
                         this.intervalAd = undefined;
 

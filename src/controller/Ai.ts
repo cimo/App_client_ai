@@ -28,7 +28,9 @@ export default class Ai implements Icontroller {
             if (this.variableObject.settingLlmServiceId.state === 1) {
                 await this.variableObject.llmInstance.state.apiModel(true);
             } else {
-                controllerLlm.updateModel(this.controllerChat, this.variableObject.llmInstance.state.modelAvailableList, true);
+                const modelList = this.variableObject.llmInstance.state.modelList();
+
+                controllerLlm.updateModel(this.controllerChat, modelList, true);
             }
         }
     };

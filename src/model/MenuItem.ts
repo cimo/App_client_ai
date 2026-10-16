@@ -94,9 +94,7 @@ export interface Imethod {
     onClickAgentOpen: (id: number) => void;
     onClickMenuUser: () => void;
     onClickUserUpdate: () => void;
-    onClickUserCancel: () => void;
     onClickSettingSave: () => void;
-    onClickSettingCancel: () => void;
     onClickMenuSetting: () => Promise<void>;
     onClickToggleSelectAll: (mode: string) => void;
     onInputWorkspaceFolderName: (event: KeyboardEvent) => void;

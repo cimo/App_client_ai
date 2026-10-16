@@ -256,7 +256,7 @@ export const updateModel = (controllerChat: Chat, modelList: string[], isShowDro
     }
 };
 
-export const inputPrompt = async (controllerChat: Chat, prompt?: string, mode?: string): Promise<modelLlm.IdataInputPrompt> => {
+export const inputPrompt = async (controllerChat: Chat, prompt?: string, mode?: string): Promise<modelLlm.IdataInput> => {
     controllerChat.variableObject.isMessageSendAvailable.state = false;
 
     const isModeContext = mode === "rag" || mode === "document";
@@ -370,7 +370,32 @@ export const inputPrompt = async (controllerChat: Chat, prompt?: string, mode?: 
         }
     }
 
-    return { resultUserPrompt, resultSystemPrompt };
+    return { systemModeRequest: "", messageIndex: -1, userPrompt: resultUserPrompt, systemPrompt: resultSystemPrompt };
+};
+
+export const responseInitialize = async (controllerChat: Chat, mode?: string, prompt?: string): Promise<modelLlm.IdataInput> => {
+    controllerChat.responseReset();
+
+    controllerChat.messageSentCount++;
+
+    const systemModeRequest = controllerChat.variableObject.systemMode.state;
+
+    let messageIndex = -1;
+
+    const { userPrompt: userPrompt, systemPrompt: systemPrompt } = await inputPrompt(controllerChat, prompt, mode);
+
+    messageIndex = controllerChat.variableObject.messageList.state.length - 1;
+
+    controllerChat.isAutoScrollEnabled = true;
+
+    controllerChat.autoscroll();
+
+    return {
+        systemModeRequest,
+        messageIndex,
+        userPrompt,
+        systemPrompt
+    };
 };
 
 export const mcpResponse = async (

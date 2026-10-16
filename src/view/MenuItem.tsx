@@ -1085,13 +1085,6 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                             return resultList;
                                         }}
                                     </button>
-                                    <button
-                                        onClick={() => {
-                                            methodObject.onClickUserCancel();
-                                        }}
-                                    >
-                                        <p>Cancel</p>
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1219,13 +1212,6 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
 
                                             return resultList;
                                         }}
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            methodObject.onClickSettingCancel();
-                                        }}
-                                    >
-                                        <p>Cancel</p>
                                     </button>
                                 </div>
                             </div>

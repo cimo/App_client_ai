@@ -1246,7 +1246,7 @@ export default class Mcp implements Icontroller {
             });
     };
 
-    apiSettingQuery = async (): Promise<void> => {
+    apiSettingQuery = async (isUpdate: boolean): Promise<void> => {
         return fetch(`${helperSrc.URL_MCP}/api/setting-query`, {
             method: "GET",
             headers: {
@@ -1287,6 +1287,8 @@ export default class Mcp implements Icontroller {
                         }
                     }
                 }
+
+                this.variableObject.isSettingUpdate.state = isUpdate;
             })
             .catch((error: Error) => {
                 helperSrc.writeLog("Mcp.ts - apiSettingQuery() - fetch() - catch()", error.message);
@@ -1375,6 +1377,7 @@ export default class Mcp implements Icontroller {
                 loginMode: "",
                 isOfflineMcp: false,
                 isLogin: false,
+                isSettingUpdate: false,
                 toolList: [],
                 toolSelected: {} as modelMcp.Itool,
                 taskList: [],

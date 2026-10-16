@@ -364,7 +364,12 @@ export const input = (variableObject: modelChat.Ivariable, methodObject: modelCh
                             onClick={() => {
                                 methodObject.onClickButtonMessageSend();
                             }}
-                            disabled={() => variableObject.modelSelected.state === ""}
+                            disabled={() =>
+                                variableObject.modelSelected.state === "" ||
+                                (!variableObject.isLoginLlm.state &&
+                                    variableObject.settingLlmUsageId.state === 2 &&
+                                    variableObject.settingLlmServiceId.state === 3)
+                            }
                         >
                             <i class="cls_icon">{() => (variableObject.isMessageSendAvailable.state ? "play_arrow" : "stop")}</i>
                         </button>

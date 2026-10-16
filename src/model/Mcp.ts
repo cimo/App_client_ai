@@ -216,6 +216,7 @@ export interface Ivariable {
     loginMode: IvariableBind<string>;
     isOfflineMcp: IvariableBind<boolean>;
     isLogin: IvariableBind<boolean>;
+    isSettingUpdate: IvariableBind<boolean>;
     toolList: IvariableBind<Itool[]>;
     toolSelected: IvariableBind<Itool>;
     taskList: IvariableBind<Itask[]>;

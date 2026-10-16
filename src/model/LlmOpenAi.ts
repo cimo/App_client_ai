@@ -18,6 +18,13 @@ export interface IapiLlmBody {
     temperature?: number;
 }
 
+export interface IapiCliBody {
+    isCheck?: string;
+    model?: string;
+    systemPrompt?: string;
+    userPrompt?: string;
+}
+
 export interface IapiLlmResponse {
     type: string;
     response: {

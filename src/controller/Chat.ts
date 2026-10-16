@@ -54,7 +54,7 @@ export default class Chat implements Icontroller {
     };
 
     private currentLlmInstance = async (): Promise<void> => {
-        if (Object.keys(this.variableObject.setting.state).length > 0) {
+        if (Object.keys(this.variableObject.setting.state).length > 0 && this.variableObject.isSettingUpdate.state) {
             for (let a = 0; a < this.variableObject.setting.state.llm.serviceList.length; a++) {
                 if (this.variableObject.setting.state.llm.serviceList[a].selected) {
                     this.variableObject.llmInstance.state = await this.importController(this.variableObject.setting.state.llm.serviceList[a].module);
@@ -75,7 +75,7 @@ export default class Chat implements Icontroller {
             if (this.variableObject.settingLlmUsageId.state === 1 || this.variableObject.settingLlmServiceId.state === 1) {
                 await this.variableObject.llmInstance.state.apiResponse();
             } else if (this.variableObject.settingLlmUsageId.state === 2) {
-                if (!this.variableObject.isLoginLlm.state) {
+                if (!this.variableObject.isLoginLlm.state && this.variableObject.settingLlmServiceId.state === 2) {
                     this.variableObject.llmInstance.state.apiCliLogin(this.hookObject.elementInputMessageSend.value);
 
                     this.hookObject.elementInputMessageSend.value = "";
@@ -308,6 +308,7 @@ export default class Chat implements Icontroller {
                 playwrightVideoSrc: variableLink<string>("Mcp"),
                 playwrightVideoName: variableLink<string>("Mcp"),
                 setting: variableLink<modelMcp.Isetting>("Mcp"),
+                isSettingUpdate: variableLink<boolean>("Mcp"),
                 settingLlmServiceId: variableLink<number>("MenuItem"),
                 settingLlmUsageId: variableLink<number>("MenuItem")
             },
