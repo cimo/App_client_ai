@@ -88,21 +88,7 @@ export default class LlmLlamaCpp {
         ) {
             this.controllerChat.abortControllerLlmResponse = new AbortController();
 
-            this.controllerChat.responseReset();
-
-            this.controllerChat.messageSentCount++;
-
-            const systemModeRequest = this.controllerChat.variableObject.systemMode.state;
-
-            let messageIndex = -1;
-
-            const { userPrompt: userPrompt, systemPrompt: systemPrompt } = await controllerLlm.inputPrompt(this.controllerChat, prompt, mode);
-
-            messageIndex = this.controllerChat.variableObject.messageList.state.length - 1;
-
-            this.controllerChat.isAutoScrollEnabled = true;
-
-            this.controllerChat.autoscroll();
+            const input = await controllerLlm.responseInitialize(this.controllerChat, mode, prompt);
 
             const inputList: modelLlmLlamaCpp.IdataInput[] = [];
 
@@ -112,13 +98,13 @@ export default class LlmLlamaCpp {
                     content: [
                         {
                             type: "input_text",
-                            text: systemPrompt
+                            text: input.systemPrompt
                         }
                     ]
                 },
                 {
                     role: "user",
-                    content: [{ type: "input_text", text: !prompt ? userPrompt : prompt }]
+                    content: [{ type: "input_text", text: !prompt ? input.userPrompt : prompt }]
                 }
             );
 
@@ -127,10 +113,10 @@ export default class LlmLlamaCpp {
                 model: this.controllerChat.variableObject.modelSelected.state,
                 input: inputList,
                 tools: [],
-                isMemory: systemModeRequest === "chat"
+                isMemory: input.systemModeRequest === "chat"
             };
 
-            if (!(!isModeContext && systemModeRequest === "chat")) {
+            if (!(!isModeContext && input.systemModeRequest === "chat")) {
                 body.temperature = 0;
             }
 
@@ -149,7 +135,7 @@ export default class LlmLlamaCpp {
 
                         this.controllerChat.messageStreamReset();
 
-                        this.controllerChat.messageLoadingHide(messageIndex);
+                        this.controllerChat.messageLoadingHide(input.messageIndex);
 
                         return;
                     }
@@ -165,7 +151,7 @@ export default class LlmLlamaCpp {
                             this.controllerChat.responseReset("finish");
 
                             if (this.controllerChat.variableObject.isMessageSendAvailable.state) {
-                                this.controllerChat.messageLoadingHide(messageIndex);
+                                this.controllerChat.messageLoadingHide(input.messageIndex);
                             }
 
                             break;
@@ -192,8 +178,8 @@ export default class LlmLlamaCpp {
                                         if (error) {
                                             const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 
-                                            messageListState[messageIndex] = {
-                                                ...messageListState[messageIndex],
+                                            messageListState[input.messageIndex] = {
+                                                ...messageListState[input.messageIndex],
                                                 assistantNoReason: error.message
                                             };
 
@@ -213,8 +199,8 @@ export default class LlmLlamaCpp {
                                             this.controllerChat.hookObject.elementMessageStreamReason.textContent =
                                                 this.controllerChat.responseReason.trim();
 
-                                            if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
-                                                this.controllerChat.messageLoadingHide(messageIndex);
+                                            if (input.systemModeRequest !== "tool-call" && input.systemModeRequest !== "task-call") {
+                                                this.controllerChat.messageLoadingHide(input.messageIndex);
                                             }
 
                                             this.controllerChat.autoscroll();
@@ -225,12 +211,12 @@ export default class LlmLlamaCpp {
                                         if (delta && (!prompt || isModeContext)) {
                                             this.controllerChat.responseNoReason += delta;
 
-                                            if (systemModeRequest !== "tool-call" && systemModeRequest !== "task-call") {
+                                            if (input.systemModeRequest !== "tool-call" && input.systemModeRequest !== "task-call") {
                                                 this.controllerChat.hookObject.elementMessageStreamNoReason.classList.remove("none");
                                                 this.controllerChat.hookObject.elementMessageStreamNoReason.textContent =
                                                     this.controllerChat.responseNoReason.trim();
 
-                                                this.controllerChat.messageLoadingHide(messageIndex);
+                                                this.controllerChat.messageLoadingHide(input.messageIndex);
                                             }
 
                                             this.controllerChat.autoscroll();
@@ -243,27 +229,27 @@ export default class LlmLlamaCpp {
 
                                             if (
                                                 helperSrc.jsonCheck(responseCompleted) &&
-                                                (systemModeRequest === "tool-call" || systemModeRequest === "task-call")
+                                                (input.systemModeRequest === "tool-call" || input.systemModeRequest === "task-call")
                                             ) {
                                                 await controllerLlm.mcpResponse(
                                                     this.controllerChat,
                                                     this.apiResponse,
                                                     responseCompleted,
-                                                    userPrompt,
-                                                    messageIndex
+                                                    input.userPrompt,
+                                                    input.messageIndex
                                                 );
                                             } else {
                                                 const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 
                                                 let message = {
-                                                    ...messageListState[messageIndex],
+                                                    ...messageListState[input.messageIndex],
                                                     assistantReason: this.controllerChat.responseReason.trim()
                                                 };
 
                                                 if (
                                                     (!prompt || isModeContext) &&
-                                                    systemModeRequest !== "tool-call" &&
-                                                    systemModeRequest !== "task-call"
+                                                    input.systemModeRequest !== "tool-call" &&
+                                                    input.systemModeRequest !== "task-call"
                                                 ) {
                                                     message = {
                                                         ...message,
@@ -271,7 +257,7 @@ export default class LlmLlamaCpp {
                                                     };
                                                 }
 
-                                                messageListState[messageIndex] = message;
+                                                messageListState[input.messageIndex] = message;
 
                                                 this.controllerChat.variableObject.messageList.state = messageListState;
 
@@ -294,14 +280,14 @@ export default class LlmLlamaCpp {
                     this.controllerChat.messageStreamReset();
 
                     if (this.controllerChat.variableObject.isMessageSendAvailable.state) {
-                        this.controllerChat.messageLoadingHide(messageIndex);
+                        this.controllerChat.messageLoadingHide(input.messageIndex);
                     }
 
                     if (error.toString().toLowerCase() === "request cancelled") {
                         const messageListState = this.controllerChat.variableObject.messageList.state.slice();
 
-                        messageListState[messageIndex] = {
-                            ...messageListState[messageIndex],
+                        messageListState[input.messageIndex] = {
+                            ...messageListState[input.messageIndex],
                             assistantNoReason: "Stopped by user."
                         };
 

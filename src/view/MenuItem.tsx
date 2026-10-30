@@ -260,237 +260,472 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     }}
                                                 </div>
                                             </div>
-                                            <div class="breadcrumb_wrapper">
-                                                {() => {
-                                                    const resultList: IvirtualNode[] = [];
-
-                                                    if (variableObject.isWorkspaceFolderMoveSelecting.state) {
-                                                        resultList.push(
-                                                            <button
-                                                                onClick={() => {
-                                                                    methodObject.onClickWorkspaceFolderHere();
-                                                                }}
-                                                                disabled={() => methodObject.checkProcessOngoing("workspace")}
-                                                            >
-                                                                <p>Here</p>
-                                                            </button>
-                                                        );
-                                                    }
-
-                                                    return resultList;
-                                                }}
-                                                <p>
-                                                    Current path: ./{variableObject.workspaceCurrentFolderList.state.join("/")}
-                                                    {variableObject.workspaceCurrentFolderList.state.length > 0 ? "/" : ""}
-                                                </p>
-                                            </div>
-                                            <div class="table_flex">
-                                                <div class="row header">
-                                                    <div class="cell id">
-                                                        <p>ID</p>
-                                                    </div>
-                                                    <div class="cell select">
+                                            <div class="data_wrapper">
+                                                <div class="table_wrapper">
+                                                    <div class="breadcrumb_wrapper">
                                                         {() => {
                                                             const resultList: IvirtualNode[] = [];
 
-                                                            if (variableObject.workspaceItemList.state.length > 0) {
+                                                            if (variableObject.isWorkspaceFolderMoveSelecting.state) {
                                                                 resultList.push(
                                                                     <button
                                                                         onClick={() => {
-                                                                            methodObject.onClickToggleSelectAll("workspace");
+                                                                            methodObject.onClickWorkspaceFolderHere();
                                                                         }}
                                                                         disabled={() => methodObject.checkProcessOngoing("workspace")}
                                                                     >
-                                                                        <i class="cls_icon">
-                                                                            {() =>
-                                                                                methodObject.selectAllCheck("workspace")
-                                                                                    ? "check_box_outline_blank"
-                                                                                    : "check_box"
-                                                                            }
-                                                                        </i>
+                                                                        <p>Here</p>
                                                                     </button>
                                                                 );
                                                             }
 
                                                             return resultList;
                                                         }}
+                                                        <p>
+                                                            Current path: ./{variableObject.workspaceCurrentFolderList.state.join("/")}
+                                                            {variableObject.workspaceCurrentFolderList.state.length > 0 ? "/" : ""}
+                                                        </p>
                                                     </div>
-                                                    <div class="cell delete"></div>
-                                                    <div class="cell name">
-                                                        <p>Name</p>
-                                                    </div>
-                                                    <div class="cell date">
-                                                        <p>Date modified</p>
-                                                    </div>
-                                                    <div class="cell size">
-                                                        <p>Size</p>
-                                                    </div>
-                                                    <div class="cell button"></div>
-                                                </div>
-                                                {() => {
-                                                    const resultList: IvirtualNode[] = [];
-
-                                                    if (!methodObject.checkProcessOngoing("workspace")) {
-                                                        resultList.push(
-                                                            <div class="body">
+                                                    <div class="table_flex">
+                                                        <div class="row header">
+                                                            <div class="cell id">
+                                                                <p>ID</p>
+                                                            </div>
+                                                            <div class="cell select">
                                                                 {() => {
                                                                     const resultList: IvirtualNode[] = [];
 
-                                                                    for (const [key, value] of Object.entries(
-                                                                        variableObject.workspaceItemList.state
-                                                                    )) {
+                                                                    if (variableObject.workspaceItemList.state.length > 0) {
                                                                         resultList.push(
-                                                                            <div key={key} class="row">
-                                                                                <div class="cell id">
-                                                                                    <p>{methodObject.itemId(key)}</p>
-                                                                                </div>
-                                                                                <div class="cell select">
-                                                                                    {() => {
-                                                                                        const resultList: IvirtualNode[] = [];
-
-                                                                                        if (value.name && !methodObject.checkRenameSelected(value)) {
-                                                                                            resultList.push(
-                                                                                                <input
-                                                                                                    type="checkbox"
-                                                                                                    checked={() =>
-                                                                                                        methodObject.checkItemSelected(value)
-                                                                                                    }
-                                                                                                    onChange={() => {
-                                                                                                        methodObject.onClickCheckbox(
-                                                                                                            "workspace",
-                                                                                                            value
-                                                                                                        );
-                                                                                                    }}
-                                                                                                />
-                                                                                            );
-                                                                                        }
-
-                                                                                        return resultList;
-                                                                                    }}
-                                                                                </div>
-                                                                                <div class="cell delete">
-                                                                                    {() => {
-                                                                                        const resultList: IvirtualNode[] = [];
-
-                                                                                        if (value.name && !methodObject.checkRenameSelected(value)) {
-                                                                                            resultList.push(
-                                                                                                <i
-                                                                                                    class="cls_icon"
-                                                                                                    onClick={() => {
-                                                                                                        methodObject.onClickWorkspaceDeleteItem(
-                                                                                                            value
-                                                                                                        );
-                                                                                                    }}
-                                                                                                >
-                                                                                                    delete
-                                                                                                </i>
-                                                                                            );
-                                                                                        }
-
-                                                                                        return resultList;
-                                                                                    }}
-                                                                                </div>
-                                                                                <div class="cell name">
-                                                                                    <img
-                                                                                        class="icon"
-                                                                                        src={`/asset/image/icon_file/${value.extension ? value.extension : value.category}.svg`}
-                                                                                    />
-                                                                                    {() => {
-                                                                                        const resultList: IvirtualNode[] = [];
-
-                                                                                        if (!value.name) {
-                                                                                            resultList.push(
-                                                                                                <input
-                                                                                                    class="input_folder_name"
-                                                                                                    type="text"
-                                                                                                    jsmvcfw-elementHookName="elementInputWorkspaceFolderName"
-                                                                                                    onKeyUp={(event: KeyboardEvent) => {
-                                                                                                        methodObject.onInputWorkspaceFolderName(
-                                                                                                            event
-                                                                                                        );
-                                                                                                    }}
-                                                                                                    autofocus
-                                                                                                ></input>
-                                                                                            );
-                                                                                        } else if (methodObject.checkRenameSelected(value)) {
-                                                                                            resultList.push(
-                                                                                                <input
-                                                                                                    class="input_rename"
-                                                                                                    type="text"
-                                                                                                    value={() =>
-                                                                                                        value.baseName ? value.baseName : value.name
-                                                                                                    }
-                                                                                                    jsmvcfw-elementHookName="elementInputWorkspaceRename"
-                                                                                                    onKeyUp={(event: KeyboardEvent) => {
-                                                                                                        methodObject.onInputWorkspaceRename(event);
-                                                                                                    }}
-                                                                                                    autofocus
-                                                                                                ></input>
-                                                                                            );
-                                                                                        } else {
-                                                                                            resultList.push(
-                                                                                                <p
-                                                                                                    onClick={(event: Event) =>
-                                                                                                        methodObject.onClickWorkspaceRename(
-                                                                                                            event,
-                                                                                                            value
-                                                                                                        )
-                                                                                                    }
-                                                                                                >
-                                                                                                    {value.name}
-                                                                                                </p>
-                                                                                            );
-                                                                                        }
-
-                                                                                        return resultList;
-                                                                                    }}
-                                                                                </div>
-                                                                                <div class="cell date">
-                                                                                    <p>{helperSrc.localeFormat(new Date(value.dateModified))}</p>
-                                                                                </div>
-                                                                                <div class="cell size">
-                                                                                    <p>{value.size}</p>
-                                                                                </div>
-                                                                                <div class="cell button">
-                                                                                    {() => {
-                                                                                        const resultList: IvirtualNode[] = [];
-
-                                                                                        if (value.name && !methodObject.checkRenameSelected(value)) {
-                                                                                            resultList.push(
-                                                                                                <button
-                                                                                                    onClick={() =>
-                                                                                                        methodObject.onClickWorkspaceOpen(
-                                                                                                            value.name,
-                                                                                                            value.category
-                                                                                                        )
-                                                                                                    }
-                                                                                                    disabled={() =>
-                                                                                                        variableObject.documentOpenList.state.includes(
-                                                                                                            value.name
-                                                                                                        )
-                                                                                                    }
-                                                                                                >
-                                                                                                    <p>Open</p>
-                                                                                                </button>
-                                                                                            );
-                                                                                        }
-
-                                                                                        return resultList;
-                                                                                    }}
-                                                                                </div>
-                                                                            </div>
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    methodObject.onClickToggleSelectAll("workspace");
+                                                                                }}
+                                                                                disabled={() => methodObject.checkProcessOngoing("workspace")}
+                                                                            >
+                                                                                <i class="cls_icon">
+                                                                                    {() =>
+                                                                                        methodObject.selectAllCheck("workspace")
+                                                                                            ? "check_box_outline_blank"
+                                                                                            : "check_box"
+                                                                                    }
+                                                                                </i>
+                                                                            </button>
                                                                         );
                                                                     }
 
                                                                     return resultList;
                                                                 }}
                                                             </div>
-                                                        );
-                                                    } else {
+                                                            <div class="cell delete"></div>
+                                                            <div class="cell name">
+                                                                <p>Name</p>
+                                                            </div>
+                                                            <div class="cell date">
+                                                                <p>Date modified</p>
+                                                            </div>
+                                                            <div class="cell size">
+                                                                <p>Size</p>
+                                                            </div>
+                                                            <div class="cell button"></div>
+                                                        </div>
+                                                        {() => {
+                                                            const resultList: IvirtualNode[] = [];
+
+                                                            if (!methodObject.checkProcessOngoing("workspace")) {
+                                                                resultList.push(
+                                                                    <div class="body">
+                                                                        {() => {
+                                                                            const resultList: IvirtualNode[] = [];
+
+                                                                            for (const [key, value] of Object.entries(
+                                                                                variableObject.workspaceItemList.state
+                                                                            )) {
+                                                                                resultList.push(
+                                                                                    <div key={key} class="row">
+                                                                                        <div class="cell id">
+                                                                                            <p>{methodObject.itemId(key)}</p>
+                                                                                        </div>
+                                                                                        <div class="cell select">
+                                                                                            {() => {
+                                                                                                const resultList: IvirtualNode[] = [];
+
+                                                                                                if (
+                                                                                                    value.name &&
+                                                                                                    !methodObject.checkRenameSelected(value)
+                                                                                                ) {
+                                                                                                    resultList.push(
+                                                                                                        <input
+                                                                                                            type="checkbox"
+                                                                                                            checked={() =>
+                                                                                                                methodObject.checkItemSelected(value)
+                                                                                                            }
+                                                                                                            onChange={() => {
+                                                                                                                methodObject.onClickCheckbox(
+                                                                                                                    "workspace",
+                                                                                                                    value
+                                                                                                                );
+                                                                                                            }}
+                                                                                                        />
+                                                                                                    );
+                                                                                                }
+
+                                                                                                return resultList;
+                                                                                            }}
+                                                                                        </div>
+                                                                                        <div class="cell delete">
+                                                                                            {() => {
+                                                                                                const resultList: IvirtualNode[] = [];
+
+                                                                                                if (
+                                                                                                    value.name &&
+                                                                                                    !methodObject.checkRenameSelected(value)
+                                                                                                ) {
+                                                                                                    resultList.push(
+                                                                                                        <i
+                                                                                                            class="cls_icon"
+                                                                                                            onClick={() => {
+                                                                                                                methodObject.onClickWorkspaceDeleteItem(
+                                                                                                                    value
+                                                                                                                );
+                                                                                                            }}
+                                                                                                        >
+                                                                                                            delete
+                                                                                                        </i>
+                                                                                                    );
+                                                                                                }
+
+                                                                                                return resultList;
+                                                                                            }}
+                                                                                        </div>
+                                                                                        <div class="cell name">
+                                                                                            <img
+                                                                                                class="icon"
+                                                                                                src={`/asset/image/icon_file/${value.extension ? value.extension : value.category}.svg`}
+                                                                                            />
+                                                                                            {() => {
+                                                                                                const resultList: IvirtualNode[] = [];
+
+                                                                                                if (!value.name) {
+                                                                                                    resultList.push(
+                                                                                                        <input
+                                                                                                            class="input_folder_name"
+                                                                                                            type="text"
+                                                                                                            jsmvcfw-elementHookName="elementInputWorkspaceFolderName"
+                                                                                                            onKeyUp={(event: KeyboardEvent) => {
+                                                                                                                methodObject.onInputWorkspaceFolderName(
+                                                                                                                    event
+                                                                                                                );
+                                                                                                            }}
+                                                                                                            autofocus
+                                                                                                        ></input>
+                                                                                                    );
+                                                                                                } else if (methodObject.checkRenameSelected(value)) {
+                                                                                                    resultList.push(
+                                                                                                        <input
+                                                                                                            class="input_rename"
+                                                                                                            type="text"
+                                                                                                            value={() =>
+                                                                                                                value.baseName
+                                                                                                                    ? value.baseName
+                                                                                                                    : value.name
+                                                                                                            }
+                                                                                                            jsmvcfw-elementHookName="elementInputWorkspaceRename"
+                                                                                                            onKeyUp={(event: KeyboardEvent) => {
+                                                                                                                methodObject.onInputWorkspaceRename(
+                                                                                                                    event
+                                                                                                                );
+                                                                                                            }}
+                                                                                                            autofocus
+                                                                                                        ></input>
+                                                                                                    );
+                                                                                                } else {
+                                                                                                    resultList.push(
+                                                                                                        <p
+                                                                                                            onClick={(event: Event) =>
+                                                                                                                methodObject.onClickWorkspaceRename(
+                                                                                                                    event,
+                                                                                                                    value
+                                                                                                                )
+                                                                                                            }
+                                                                                                        >
+                                                                                                            {value.name}
+                                                                                                        </p>
+                                                                                                    );
+                                                                                                }
+
+                                                                                                return resultList;
+                                                                                            }}
+                                                                                        </div>
+                                                                                        <div class="cell date">
+                                                                                            <p>
+                                                                                                {helperSrc.localeFormat(new Date(value.dateModified))}
+                                                                                            </p>
+                                                                                        </div>
+                                                                                        <div class="cell size">
+                                                                                            <p>{value.size}</p>
+                                                                                        </div>
+                                                                                        <div class="cell button">
+                                                                                            {() => {
+                                                                                                const resultList: IvirtualNode[] = [];
+
+                                                                                                if (
+                                                                                                    value.name &&
+                                                                                                    !methodObject.checkRenameSelected(value)
+                                                                                                ) {
+                                                                                                    resultList.push(
+                                                                                                        <>
+                                                                                                            <button
+                                                                                                                onClick={() =>
+                                                                                                                    methodObject.onClickWorkspaceOpen(
+                                                                                                                        value.name,
+                                                                                                                        value.category
+                                                                                                                    )
+                                                                                                                }
+                                                                                                                disabled={() =>
+                                                                                                                    variableObject.documentOpenList.state.includes(
+                                                                                                                        value.name
+                                                                                                                    )
+                                                                                                                }
+                                                                                                            >
+                                                                                                                <p>Open</p>
+                                                                                                            </button>
+                                                                                                            {() => {
+                                                                                                                const resultList: IvirtualNode[] = [];
+
+                                                                                                                if (value.category !== "folder") {
+                                                                                                                    resultList.push(
+                                                                                                                        <button
+                                                                                                                            onClick={() =>
+                                                                                                                                methodObject.onClickWorkspaceInfo(
+                                                                                                                                    value
+                                                                                                                                )
+                                                                                                                            }
+                                                                                                                        >
+                                                                                                                            <i class="cls_icon">
+                                                                                                                                info
+                                                                                                                            </i>
+                                                                                                                        </button>
+                                                                                                                    );
+                                                                                                                }
+
+                                                                                                                return resultList;
+                                                                                                            }}
+                                                                                                        </>
+                                                                                                    );
+                                                                                                }
+
+                                                                                                return resultList;
+                                                                                            }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                );
+                                                                            }
+
+                                                                            return resultList;
+                                                                        }}
+                                                                    </div>
+                                                                );
+                                                            } else {
+                                                                resultList.push(
+                                                                    <div class="body_loading">
+                                                                        <i class="cls_icon">update</i>
+                                                                        <p>Loading...</p>
+                                                                    </div>
+                                                                );
+                                                            }
+
+                                                            return resultList;
+                                                        }}
+                                                    </div>
+                                                    {() => {
+                                                        const resultList: IvirtualNode[] = [];
+
+                                                        if (!methodObject.checkProcessOngoing("workspace")) {
+                                                            resultList.push(<aside jsmvcfw-controllerName="Pagination" jsmvcfw-parentView="right" />);
+                                                        }
+
+                                                        return resultList;
+                                                    }}
+                                                </div>
+                                                {() => {
+                                                    const resultList: IvirtualNode[] = [];
+
+                                                    if (Object.keys(variableObject.workspaceInfoItem.state).length > 0) {
                                                         resultList.push(
-                                                            <div class="body_loading">
-                                                                <i class="cls_icon">update</i>
-                                                                <p>Loading...</p>
+                                                            <div class="info_wrapper">
+                                                                <div class="close_button_wrapper button_wrapper">
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            methodObject.onClickWorkspaceInfoClose();
+                                                                        }}
+                                                                    >
+                                                                        <i class="cls_icon">close</i>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="info_tab_wrapper">
+                                                                    <div
+                                                                        class={() =>
+                                                                            variableObject.workspaceInfoTab.state === "detail" ? "active" : ""
+                                                                        }
+                                                                        onClick={() => {
+                                                                            methodObject.onClickWorkspaceInfoTab("detail");
+                                                                        }}
+                                                                    >
+                                                                        Detail
+                                                                    </div>
+                                                                    <div
+                                                                        class={() =>
+                                                                            variableObject.workspaceInfoTab.state === "metadata" ? "active" : ""
+                                                                        }
+                                                                        onClick={() => {
+                                                                            methodObject.onClickWorkspaceInfoTab("metadata");
+                                                                        }}
+                                                                    >
+                                                                        Metadata
+                                                                    </div>
+                                                                    <div
+                                                                        class={() =>
+                                                                            variableObject.workspaceInfoTab.state === "note" ? "active" : ""
+                                                                        }
+                                                                        onClick={() => {
+                                                                            methodObject.onClickWorkspaceInfoTab("note");
+                                                                        }}
+                                                                    >
+                                                                        Note
+                                                                    </div>
+                                                                </div>
+                                                                <div class="info_data_wrapper">
+                                                                    {() => {
+                                                                        const resultList: IvirtualNode[] = [];
+
+                                                                        if (variableObject.workspaceInfoTab.state === "detail") {
+                                                                            resultList.push(
+                                                                                <div class="info_detail_wrapper">
+                                                                                    <div class="form_wrapper">
+                                                                                        <div class="field">
+                                                                                            <p class="label">Document type:</p>
+                                                                                            <input
+                                                                                                value={() =>
+                                                                                                    variableObject.workspaceInfoItem.state
+                                                                                                        .documentType
+                                                                                                }
+                                                                                                jsmvcfw-elementHookName="elementInputWorkspaceInfoDocumentType"
+                                                                                                type="text"
+                                                                                            ></input>
+                                                                                        </div>
+                                                                                        <div class="field">
+                                                                                            <p class="label">Tag:</p>
+                                                                                            <input
+                                                                                                value={() =>
+                                                                                                    variableObject.workspaceInfoItem.state.tag
+                                                                                                }
+                                                                                                jsmvcfw-elementHookName="elementInputWorkspaceInfoTag"
+                                                                                                type="text"
+                                                                                            ></input>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            );
+                                                                        } else if (variableObject.workspaceInfoTab.state === "metadata") {
+                                                                            resultList.push(
+                                                                                <div class="info_metadata_wrapper">
+                                                                                    <div class="form_wrapper">
+                                                                                        <div class="field">
+                                                                                            <p class="label">Date modified:</p>
+                                                                                            <input
+                                                                                                value={() =>
+                                                                                                    variableObject.workspaceInfoItem.state.detail
+                                                                                                        .dateModified
+                                                                                                }
+                                                                                                type="text"
+                                                                                                readonly
+                                                                                            ></input>
+                                                                                        </div>
+                                                                                        <div class="field">
+                                                                                            <p class="label">Name:</p>
+                                                                                            <input
+                                                                                                value={() =>
+                                                                                                    variableObject.workspaceInfoItem.state.detail.name
+                                                                                                }
+                                                                                                type="text"
+                                                                                                readonly
+                                                                                            ></input>
+                                                                                        </div>
+                                                                                        <div class="field">
+                                                                                            <p class="label">Size:</p>
+                                                                                            <input
+                                                                                                value={() =>
+                                                                                                    variableObject.workspaceInfoItem.state.detail.size
+                                                                                                }
+                                                                                                type="text"
+                                                                                                readonly
+                                                                                            ></input>
+                                                                                        </div>
+                                                                                        <div class="field">
+                                                                                            <p class="label">Mime type:</p>
+                                                                                            <input
+                                                                                                value={() =>
+                                                                                                    variableObject.workspaceInfoItem.state.detail
+                                                                                                        .mimeType
+                                                                                                }
+                                                                                                type="text"
+                                                                                                readonly
+                                                                                            ></input>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            );
+                                                                        } else if (variableObject.workspaceInfoTab.state === "note") {
+                                                                            resultList.push(
+                                                                                <div class="info_note_wrapper">
+                                                                                    <div class="form_wrapper">
+                                                                                        <div class="field">
+                                                                                            <textarea
+                                                                                                jsmvcfw-elementHookName="elementInputWorkspaceInfoNote"
+                                                                                                rows="4"
+                                                                                            >
+                                                                                                {variableObject.workspaceInfoItem.state.note}
+                                                                                            </textarea>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            );
+                                                                        }
+
+                                                                        return resultList;
+                                                                    }}
+                                                                </div>
+                                                                <div class="save_button_wrapper button_wrapper">
+                                                                    {() => {
+                                                                        const resultList: IvirtualNode[] = [];
+
+                                                                        if (variableObject.workspaceInfoTab.state !== "metadata") {
+                                                                            resultList.push(
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        methodObject.onClickWorkspaceInfoSave();
+                                                                                    }}
+                                                                                    disabled={() => variableObject.isWorkspaceInfoSave.state}
+                                                                                >
+                                                                                    {() => {
+                                                                                        const resultList: IvirtualNode[] = [];
+
+                                                                                        if (!variableObject.isWorkspaceInfoSave.state) {
+                                                                                            resultList.push(<p>Save</p>);
+                                                                                        } else {
+                                                                                            resultList.push(<i class="cls_icon">update</i>);
+                                                                                        }
+
+                                                                                        return resultList;
+                                                                                    }}
+                                                                                </button>
+                                                                            );
+                                                                        }
+
+                                                                        return resultList;
+                                                                    }}
+                                                                </div>
                                                             </div>
                                                         );
                                                     }
@@ -498,15 +733,6 @@ export const right = (variableObject: modelMenuItem.Ivariable, methodObject: mod
                                                     return resultList;
                                                 }}
                                             </div>
-                                            {() => {
-                                                const resultList: IvirtualNode[] = [];
-
-                                                if (!methodObject.checkProcessOngoing("workspace")) {
-                                                    resultList.push(<aside jsmvcfw-controllerName="Pagination" jsmvcfw-parentView="right" />);
-                                                }
-
-                                                return resultList;
-                                            }}
                                         </>
                                     );
                                 } else {

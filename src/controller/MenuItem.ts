@@ -243,6 +243,15 @@ export default class MenuItem implements Icontroller {
         }
     };
 
+    private workspaceInfoItemUpdate = (): void => {
+        if (this.variableObject.workspaceInfoTab.state === "detail") {
+            this.variableObject.workspaceInfoItem.state.documentType = this.hookObject.elementInputWorkspaceInfoDocumentType.value;
+            this.variableObject.workspaceInfoItem.state.tag = this.hookObject.elementInputWorkspaceInfoTag.value;
+        } else if (this.variableObject.workspaceInfoTab.state === "note") {
+            this.variableObject.workspaceInfoItem.state.note = this.hookObject.elementInputWorkspaceInfoNote.value;
+        }
+    };
+
     private windowOpenDocument = async (title: string): Promise<void> => {
         await this.controllerMcp.apiUserQuery();
 
@@ -541,6 +550,42 @@ export default class MenuItem implements Icontroller {
         } else {
             await this.windowOpenDocument(fileName);
         }
+    };
+
+    private onClickWorkspaceInfoSave = async (): Promise<void> => {
+        this.variableObject.isWorkspaceInfoSave.state = true;
+
+        this.workspaceInfoItemUpdate();
+
+        const isUpdate = await this.controllerMcp.apiWorkspaceInfoUpdate(this.variableObject.workspaceInfoItem.state);
+
+        if (isUpdate) {
+            const itemDetail = this.variableObject.workspaceInfoItem.state.detail;
+
+            const itemInfo = await this.controllerMcp.apiWorkspaceInfoQuery(itemDetail.name);
+
+            this.variableObject.workspaceInfoItem.state = { ...itemInfo, detail: itemDetail } as modelMcp.IitemInfo;
+        }
+
+        this.variableObject.isWorkspaceInfoSave.state = false;
+    };
+
+    private onClickWorkspaceInfo = async (itemDetail: modelMcp.IitemDetail): Promise<void> => {
+        const itemInfo = await this.controllerMcp.apiWorkspaceInfoQuery(itemDetail.name);
+
+        this.variableObject.workspaceInfoItem.state = { ...itemInfo, detail: itemDetail } as modelMcp.IitemInfo;
+        this.variableObject.workspaceInfoTab.state = "detail";
+    };
+
+    private onClickWorkspaceInfoClose = (): void => {
+        this.variableObject.workspaceInfoItem.state = {} as modelMcp.IitemInfo;
+        this.variableObject.workspaceInfoTab.state = "";
+    };
+
+    private onClickWorkspaceInfoTab = (tab: string): void => {
+        this.workspaceInfoItemUpdate();
+
+        this.variableObject.workspaceInfoTab.state = tab;
     };
 
     private onClickRagStart = (): void => {
@@ -1046,12 +1091,15 @@ export default class MenuItem implements Icontroller {
                 workspaceSelectList: [],
                 workspaceCurrentFolderList: [],
                 workspaceRenameSelected: "",
+                workspaceInfoItem: {} as modelMcp.IitemInfo,
+                workspaceInfoTab: "",
                 isUploadRunning: false,
                 isDeleteRunning: false,
                 isWorkspaceFolderStillCreate: false,
                 isWorkspaceFolderCreateRunning: false,
                 isWorkspaceFolderMoveSelecting: false,
                 isWorkspaceFolderMoveRunning: false,
+                isWorkspaceInfoSave: false,
                 isRagRunning: false,
                 isRagGraphOpen: false,
                 isRagGraphHtmlLoading: false,
@@ -1096,6 +1144,10 @@ export default class MenuItem implements Icontroller {
             onClickWorkspaceFolderMoveTo: this.onClickWorkspaceFolderMoveTo,
             onClickWorkspaceFolderHere: this.onClickWorkspaceFolderHere,
             onClickWorkspaceOpen: this.onClickWorkspaceOpen,
+            onClickWorkspaceInfo: this.onClickWorkspaceInfo,
+            onClickWorkspaceInfoClose: this.onClickWorkspaceInfoClose,
+            onClickWorkspaceInfoTab: this.onClickWorkspaceInfoTab,
+            onClickWorkspaceInfoSave: this.onClickWorkspaceInfoSave,
             onClickRagStart: this.onClickRagStart,
             onClickRagGraph: this.onClickRagGraph,
             onClickRagGraphBack: this.onClickRagGraphBack,

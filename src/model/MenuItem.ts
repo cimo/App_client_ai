@@ -23,12 +23,15 @@ export interface Ivariable {
     workspaceSelectList: IvariableBind<string[]>;
     workspaceCurrentFolderList: IvariableBind<string[]>;
     workspaceRenameSelected: IvariableBind<string>;
+    workspaceInfoItem: IvariableBind<modelMcp.IitemInfo>;
+    workspaceInfoTab: IvariableBind<string>;
     isUploadRunning: IvariableBind<boolean>;
     isDeleteRunning: IvariableBind<boolean>;
     isWorkspaceFolderStillCreate: IvariableBind<boolean>;
     isWorkspaceFolderCreateRunning: IvariableBind<boolean>;
     isWorkspaceFolderMoveSelecting: IvariableBind<boolean>;
     isWorkspaceFolderMoveRunning: IvariableBind<boolean>;
+    isWorkspaceInfoSave: IvariableBind<boolean>;
     isRagRunning: IvariableBind<boolean>;
     isRagGraphOpen: IvariableBind<boolean>;
     isRagGraphHtmlLoading: IvariableBind<boolean>;
@@ -71,6 +74,10 @@ export interface Imethod {
     onClickWorkspaceFolderMoveTo: () => void;
     onClickWorkspaceFolderHere: () => void;
     onClickWorkspaceOpen: (fileName: string, category: string) => void;
+    onClickWorkspaceInfo: (itemDetail: modelMcp.IitemDetail) => void;
+    onClickWorkspaceInfoClose: () => void;
+    onClickWorkspaceInfoTab: (tab: string) => void;
+    onClickWorkspaceInfoSave: () => void;
     onClickRagStart: () => void;
     onClickRagGraph: () => void;
     onClickRagGraphBack: () => void;
@@ -106,6 +113,9 @@ export interface Imethod {
 export interface IelementHook extends Record<string, Element | Element[]> {
     elementInputWorkspaceFolderName: HTMLInputElement;
     elementInputWorkspaceRename: HTMLInputElement;
+    elementInputWorkspaceInfoDocumentType: HTMLInputElement;
+    elementInputWorkspaceInfoTag: HTMLInputElement;
+    elementInputWorkspaceInfoNote: HTMLInputElement;
     elementInputAgentName: HTMLInputElement;
     elementInputAgentDescription: HTMLInputElement;
     elementInputUserName: HTMLInputElement;

@@ -124,6 +124,16 @@ export default class LlmOpenAi {
 
             isIntervalRunning = true;
 
+            if (
+                this.controllerChat.variableObject.settingLlmUsageId.state !== 2 ||
+                this.controllerChat.variableObject.settingLlmServiceId.state !== 3
+            ) {
+                clearInterval(this.intervalCliLogin);
+                this.intervalCliLogin = undefined;
+
+                return;
+            }
+
             this.apiFetchCliLogin(true)
                 .then(async (resultApi) => {
                     this.controllerChat.variableObject.isOfflineAi.state = false;

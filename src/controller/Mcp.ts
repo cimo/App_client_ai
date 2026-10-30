@@ -725,6 +725,93 @@ export default class Mcp implements Icontroller {
             });
     };
 
+    apiWorkspaceInfoQuery = async (name: string): Promise<modelMcp.IitemInfo> => {
+        const body: modelMcp.IapiWorkspaceInfoQueryBody = { name };
+
+        return fetch(`${helperSrc.URL_MCP}/api/workspace-info-query`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                Cookie: session.data.mcpCookie
+            },
+            body: JSON.stringify(body),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = await this.apiResponseJson(resultApi);
+
+                let itemInfo = {} as modelMcp.IitemInfo;
+
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+                } else {
+                    itemInfo = json.response.data as modelMcp.IitemInfo;
+                }
+
+                return itemInfo;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiWorkspaceInfoQuery() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+
+                return {} as modelMcp.IitemInfo;
+            });
+    };
+
+    apiWorkspaceInfoUpdate = async (itemInfo: modelMcp.IitemInfo): Promise<boolean> => {
+        const body: modelMcp.IapiWorkspaceInfoUpdateBody = {
+            id: itemInfo.id,
+            documentType: itemInfo.documentType,
+            tag: itemInfo.tag,
+            note: itemInfo.note
+        };
+
+        return fetch(`${helperSrc.URL_MCP}/api/workspace-info-update`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "mcp-session-id": session.data.mcpSessionId,
+                Cookie: session.data.mcpCookie
+            },
+            body: JSON.stringify(body),
+            danger: {
+                acceptInvalidCerts: true,
+                acceptInvalidHostnames: true
+            }
+        })
+            .then(async (resultApi) => {
+                let isResult = false;
+
+                this.variableObject.isOfflineMcp.state = false;
+
+                const json = await this.apiResponseJson(resultApi);
+
+                if (json.response.state === "ko") {
+                    this.showToastMessage("error", json.response.message);
+                } else {
+                    this.showToastMessage("success", json.response.message);
+
+                    isResult = true;
+                }
+
+                return isResult;
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog("Mcp.ts - apiWorkspaceInfoUpdate() - fetch() - catch()", error.message);
+
+                this.variableObject.isOfflineMcp.state = true;
+
+                return false;
+            });
+    };
+
     apiRagStart = (): void => {
         this.variableObject.isRagRunning.state = true;
 

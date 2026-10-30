@@ -36,6 +36,17 @@ export interface IapiWorkspaceFolderMoveBody {
     folderJoin: string;
 }
 
+export interface IapiWorkspaceInfoQueryBody {
+    name: string;
+}
+
+export interface IapiWorkspaceInfoUpdateBody {
+    id: number;
+    documentType: string;
+    tag: string;
+    note: string;
+}
+
 export interface IapiRagCheckBody {
     pathFile: string;
 }
@@ -184,6 +195,15 @@ export interface IitemDetail {
     dateModified: string;
     extension: string;
     category: string;
+    mimeType: string;
+}
+
+export interface IitemInfo {
+    id: number;
+    documentType: string;
+    tag: string;
+    note: string;
+    detail: IitemDetail;
 }
 
 export interface IsettingService {
