@@ -113,7 +113,7 @@ export default class LlmLlamaCpp {
                 model: this.controllerChat.variableObject.modelSelected.state,
                 input: inputList,
                 tools: [],
-                isMemory: input.systemModeRequest === "chat"
+                isMapReduce: input.systemModeRequest === "chat"
             };
 
             if (!(!isModeContext && input.systemModeRequest === "chat")) {

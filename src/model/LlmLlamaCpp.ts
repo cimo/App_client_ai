@@ -3,7 +3,7 @@ export interface IapiLlmBody {
     model: string;
     input: IdataInput[];
     tools: unknown[];
-    isMemory: boolean;
+    isMapReduce: boolean;
     temperature?: number;
 }
 
